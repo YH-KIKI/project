@@ -1,0 +1,88 @@
+/* src/Main/MainLayout.css (좌표 수정 완료 버전) */
+
+/* 가장 바깥 배경 도화지 */
+.page-background {
+  min-height: 100vh;
+  /* 배경 이미지 (기존 깨끗한 배경 이미지 파일 경로) */
+  background-image: url('../images/Main.png'); 
+  background-size: cover;
+  background-position: center top;
+  background-repeat: no-repeat;
+  
+  display: flex;
+  justify-content: center;
+  max-width: 1920px;
+  margin: 0 auto;
+  padding: 40px 20px 200px 20px; /* 바닥 공간 확보 */
+  box-sizing: border-box;
+  font-family: 'Pretendard', sans-serif;
+  
+  /* ★ 삭제됨: 이미지를 배경에 띄우던 .deco-left, .deco-right 설정 삭제 (와이어프레임에 없음) */
+}
+
+
+/* --- [가운데 앱 카드 영역 (빨간색 영역)] --- */
+.app-wrapper {
+  display: flex; /* 내부에 사이드바와 메인콘텐츠를 가로로 배치 */
+  width: 100%;
+  max-width: 850px; /* 메인 영역 크기 */
+  background-color: #ffffff;
+  border-radius: 30px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+  overflow: hidden; 
+  margin-top: 50px;
+}
+
+.main-content {
+  flex: 1; 
+  padding: 30px;
+  background-color: #fffdfa; 
+  overflow-y: auto; 
+}
+
+
+/* --- [★ 추가됨: AI 피드백 영역 (우측 하단 로봇 배치) ★] --- */
+.ai-feedback {
+  background-color: #f7f3e8; /* 와이어프레임 따뜻한 베이지색 배경 */
+  padding: 20px 20px 20px 100px; /* 로봇 위치 확보 */
+  border-radius: 15px;
+  margin-top: 24px;
+  position: relative; /* 로봇 배치를 위한 기준점 */
+  box-sizing: border-box;
+}
+
+/* ★ 와이어프레임 위치 2-2: 웃는 로봇 이미지 배치 ★ */
+.ai-feedback img {
+  width: 70px; /* 이미지 크기 조절 */
+  height: auto;
+  position: absolute;
+  top: 20px;    /* 위쪽 위치 */
+  left: 20px;   /* 왼쪽 위치 */
+}
+
+.ai-feedback p {
+  margin: 0;
+  font-size: 13px;
+  color: #666;
+  line-height: 1.5;
+  background-color: white; /* 말풍선 느낌 */
+  padding: 10px 16px;
+  border-radius: 12px;
+  display: inline-block;
+}
+
+
+/* --- [📱 반응형 웹: 모바일 화면 설정] --- */
+@media (max-width: 1100px) {
+  
+  .page-background {
+    padding: 0; 
+  }
+
+  .app-wrapper {
+    border-radius: 0;
+    max-width: 100%;
+    margin-top: 0;
+    min-height: 100vh;
+  }
+}
