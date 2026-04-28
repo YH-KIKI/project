@@ -1,66 +1,141 @@
-/* src/Main/Sidebar.css (좌표 수정 완료 버전) */
+/* src/Main/Sidebar.css */
 
+/* --- [사이드바 뼈대 (투명 배경)] --- */
 .sidebar {
   width: 220px;
   height: 100%;
-  background-color: #fffaf0; /* 연한 베이지색 */
+  
+  /* 전체 배경색과 우측 테두리를 지워서 투명하게 만듭니다 */
+  background-color: transparent; 
+  border-right: none; 
+  
   padding: 30px 15px;
   display: flex;
-  flex-direction: column; /* 세로 정렬 */
-  height: 100%;
+  flex-direction: column; 
   box-sizing: border-box;
-  
-  /* ★ 중요: 내부 이미지 배치를 위한 기준점 ★ */
   position: relative; 
+  z-index: 1; /* 자식 요소들과 가상 요소의 z-index 기준점 */
 }
 
-/* --- [메뉴] --- */
+/* --- [🌟 핵심: 고양이 아래부터 이어지는 안쪽 테두리 박스 🌟] --- */
+.sidebar::before {
+  content: "";
+  position: absolute;
+  
+  /* 박스의 위치 셋팅 */
+  top: 15px;    /* 고양이 밥그릇 바로 아래 위치 */
+  bottom: -320px;  /* 하단 여백 */
+  left: 15px;
+  right: 15px;
+  
+  /* 회원님이 찾아내신 바로 그 색상과 테두리! */
+  background-color: #FFF9F4; /* 안쪽 박스의 따뜻한 베이지 배경 */
+  border: 1px solid #E6D8C8; /* 선명한 안쪽 테두리 */
+  border-radius: 24px;       /* 시안처럼 둥글게 깎아줌 */
+  
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.02); /* 아주 은은한 입체감 */
+  z-index: -1; /* 메뉴 글씨나 로봇보다 뒤에 깔리게 설정 */
+}
+
+/* --- [메뉴 영역] --- */
 .sidebar-menu {
-  flex: 1; /* 메뉴가 남은 공간을 차지해서 하단 푸터를 아래로 밈 */
-  padding-top: 100px; /* 상단 고양이 위치 확보 */
-  padding-bottom: 80px; /* 하단 로봇 위치 확보 */
+  flex: 1; 
+  padding-top: 130px; /* 안쪽 박스 안에서 메뉴가 시작되도록 여백 조정 */
+  padding-bottom: 80px; 
 }
 
 .sidebar-menu ul {
-  list-style: none; padding: 0; margin: 0; gap: 6px; display: flex; flex-direction: column;
+  list-style: none; 
+  padding: 0; 
+  margin: 0; 
+  gap: 6px; 
+  display: flex; 
+  flex-direction: column;
 }
 
 .menu-item {
-  display: flex; align-items: center; padding: 12px 16px; border-radius: 10px; color: #666; font-weight: 500; cursor: pointer; transition: all 0.2s ease; font-size: 14px;
+  display: flex; 
+  align-items: center; 
+  padding: 12px 16px; 
+  border-radius: 10px; 
+  color: #666; 
+  font-weight: 500; 
+  cursor: pointer; 
+  transition: all 0.2s ease; 
+  font-size: 14px;
 }
-.menu-item:hover { background-color: #ffeeef; }
-.menu-item.active { background-color: #ff8fa3; color: white; font-weight: 700; box-shadow: 0 4px 10px rgba(255, 143, 163, 0.3); }
-.menu-icon { margin-right: 10px; font-size: 16px; }
 
-/* --- [하단] --- */
-.sidebar-footer { display: flex; flex-direction: column; align-items: center; margin-top: 20px;}
-.cheer-balloon-sm { background-color: #ffffff; padding: 8px 12px; border-radius: 10px; font-size: 11px; color: #333; text-align: center; line-height: 1.4; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05); }
+.menu-item:hover { 
+  background-color: #ffeeef; 
+}
 
+.menu-item.active { 
+  background-color: #ff8fa3; 
+  color: white; 
+  font-weight: 700; 
+  box-shadow: 0 4px 10px rgba(255, 143, 163, 0.3); 
+}
 
-/* --- [★ 추가됨: 와이어프레임 좌표 수정 ★] --- */
+.menu-icon { 
+  margin-right: 10px; 
+  font-size: 16px; 
+}
 
-/* ★ 와이어프레임 위치 1-1: 메뉴 상단 밥 먹는 고양이 이미지 ★ */
+/* --- [하단 응원 말풍선] --- */
+.sidebar-footer { 
+  display: flex; 
+  flex-direction: column; 
+  align-items: center; 
+  margin-top: auto; 
+  position: relative;
+  padding-bottom: 70px; /* 로봇이 들어갈 공간 */
+}
+
+.cheer-balloon-sm { 
+  background-color: #ffffff; 
+  padding: 12px 14px; 
+  border-radius: 12px; 
+  font-size: 11px; 
+  color: #555; 
+  text-align: center; 
+  line-height: 1.5; 
+  font-weight: 500;
+  
+  /* 시안과 동일한 얇은 분홍/회색 테두리와 은은한 그림자 */
+  border: 1px solid #E8D0D0; 
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.03); 
+  z-index: 2; /* 로봇보다 앞으로 오게 배치 */
+}
+
+/* --- [이미지 절대 좌표 설정] --- */
+
+/* 1. 메뉴 상단 밥 먹는 고양이 이미지 */
 .sidebar-cat-eating {
-  width: 80px; /* 이미지 크기 조절 */
+  width: 80px; 
   height: auto;
   position: absolute;
-  top: 20px; /* 위쪽 위치 */
-  left: 50%;   /* 가로 중앙 정렬 */
-  transform: translateX(-50%); /* 정확한 중앙 정렬 */
+  top: 30px; /* 안쪽 테두리 박스 위에 살짝 걸치도록 위치 조정 */
+  left: 50%;   
+  transform: translateX(-50%); 
+  z-index: 2; /* 안쪽 박스보다 위로 올라오게 설정 */
 }
+
 .sidebar-cat-eating img {
   width: 100%;
   height: 100%;
 }
 
-/* ★ 와이어프레임 위치 2-1: 메뉴 하단 윙크 로봇 이미지 ★ */
+/* 2. 메뉴 하단 윙크 로봇 이미지 */
 .sidebar-robot-wink {
-  width: 70px; /* 이미지 크기 조절 */
+  width: 65px; 
   height: auto;
   position: absolute;
-  bottom: 80px; /* 아래쪽 위치 */
-  left: 20px;   /* 왼쪽 위치 */
+  bottom: 0px; 
+  left: 50%;   
+  transform: translateX(-50%); 
+  z-index: 1; /* 말풍선 뒤로 살짝 숨게 배치 */
 }
+
 .sidebar-robot-wink img {
   width: 100%;
   height: 100%;

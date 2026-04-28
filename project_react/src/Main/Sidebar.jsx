@@ -50,7 +50,9 @@ const Sidebar = ({ userName }) => {
       {/* 기존 하단 응원 영역 */}
       <div className="sidebar-footer">
         <div className="cheer-balloon-sm">
-          오늘도 건강하게! 💚
+          오늘도<br/>
+          건강한 한 끼<br/>
+          함께해요! 💚
         </div>
       </div>
       
