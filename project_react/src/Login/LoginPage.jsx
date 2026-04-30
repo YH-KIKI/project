@@ -25,7 +25,6 @@ const LoginPage = () => {
 
     const fetchUserInfo = async () => {
     const token = localStorage.getItem('login_token'); // 저장된 토큰 꺼내기
-
     try {
       const response = await axios.get('http://localhost:8080/api/user/info', {
         headers: {
@@ -54,7 +53,7 @@ const LoginPage = () => {
         //data: 서버가 진짜로 보내준 핵심 내용물 (JSON)
         //config: 요청 설정 정보
         const response = await axios.post('http://localhost:8080/api/login', {
-          // username: username,
+          username: username,
           userid: userid,
           password: password
         });

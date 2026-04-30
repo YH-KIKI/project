@@ -39,5 +39,10 @@ public class UserService {
     	user.setPassword(encodedPassword);
     	userDAO.insertUser(user);
     }
+
+	public String findUsernameByUserid(String userid) {
+		String username = userDAO.findUsernameByUserid(userid);
+		return username;
+	}
     
 }
