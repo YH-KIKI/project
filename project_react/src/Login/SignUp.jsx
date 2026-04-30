@@ -32,12 +32,15 @@ const LoginPage = () => {
           
           <div style={{ margin: '20px 0' }}>
             <input type="text" placeholder="아이디" style={{ padding: '10px', width: '200px', marginBottom: '10px' }} /><br/>
-            <input type="password" placeholder="비밀번호" style={{ padding: '10px', width: '200px' }} />
+            <input type="password" placeholder="비밀번호" style={{ padding: '10px', width: '200px' }} /><br/>
+            <input type="password" placeholder="비밀번호확인" style={{ padding: '10px', width: '200px' }} /><br/>
+            <input type="password" placeholder="닉네임" style={{ padding: '10px', width: '200px' }} /><br/>
+            <input type="password" placeholder="이메일" style={{ padding: '10px', width: '200px' }} /><br/>
           </div>
           
           <button style={{ 
             padding: '10px 30px', 
-            backgroundColor: '#d1b8a0', 
+            backgroundColor: 'red', 
             color: 'white', 
             border: 'none', 
             borderRadius: '5px',
@@ -48,7 +51,7 @@ const LoginPage = () => {
           <hr></hr>
           {/*회원가입 링크*/}
           <div style={{ marginTop: '20px', fontSize: '14px', color: '#5d4037' }}>
-            <span>아직 회원이 아니신가요? </span>
+            <span>아미 회원이신가요? </span>
             <a 
               href="/register" 
               style={{ 
@@ -60,11 +63,11 @@ const LoginPage = () => {
               onClick={(e) => {
                 e.preventDefault();
                 // 회원가입 페이지로 이동
-                navigate('/register');
-                alert('회원가입 페이지로 이동합니다.');
+                navigate('/login');
+                alert('로그인 페이지로 이동합니다.');
               }}
             >
-              회원가입
+              로그인
             </a>
           </div>
         </div>

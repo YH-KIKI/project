@@ -32,15 +32,12 @@ const LoginPage = () => {
           
           <div style={{ margin: '20px 20px' }}>
             <input type="text" placeholder="아이디" style={{ padding: '10px', width: '200px', marginBottom: '10px' }} /><br/>
-            <input type="password" placeholder="비밀번호" style={{ padding: '10px', width: '200px' }} /><br/>
-            <input type="password" placeholder="비밀번호확인" style={{ padding: '10px', width: '200px' }} /><br/>
-            <input type="password" placeholder="닉네임" style={{ padding: '10px', width: '200px' }} /><br/>
-            <input type="password" placeholder="이메일" style={{ padding: '10px', width: '200px' }} /><br/>
+            <input type="password" placeholder="비밀번호" style={{ padding: '10px', width: '200px' }} />
           </div>
           
           <button style={{ 
             padding: '10px 30px', 
-            backgroundColor: 'red', 
+            backgroundColor: '#d1b8a0', 
             color: 'white', 
             border: 'none', 
             borderRadius: '5px',
