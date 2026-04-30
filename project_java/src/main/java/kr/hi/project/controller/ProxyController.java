@@ -21,6 +21,11 @@ public class ProxyController {
 	private final WebClient webClient;
 	@PostMapping("/api/detect/proxy")
 	public String service(@RequestParam("message") String message, @RequestParam("file") MultipartFile file) {
+	
+	System.out.println("2. [Spring Boot] 리액트에서 넘어온 데이터 확인 👇");
+	System.out.println(" - 메시지: " + message);
+	System.out.println(" - 파일명: " + file.getOriginalFilename());
+	
     MultipartBodyBuilder bodyBuilder = new MultipartBodyBuilder();
     bodyBuilder.part("message", message);
     bodyBuilder.part("file", file.getResource());
@@ -30,6 +35,9 @@ public class ProxyController {
       .retrieve()
       .bodyToMono(String.class)
       .block();
-      return result;
+
+    System.out.println("5. [Spring Boot] 파이썬에서 돌아온 결과 확인 👇");
+	System.out.println(" - 결과: " + result);
+    return result;
   }
 }

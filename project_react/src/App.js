@@ -1,17 +1,9 @@
-import {useEffect, useState} from "react";
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { useEffect, useState } from "react";
 import axios from "axios"; 
 import './App.css';
 import MainLayout from "./Main/MainLayout";
-import LoginPage from "./Login/LoginPage";
-import SignUp from "./Login/SignUp"
 
 function App() {
-
-    useEffect(() => {
-        console.log("프로젝트 시작!");
-    }, []);
-
     const [message, setMessage] = useState(''); // 사용자가 입력할 메시지 상태
     const [file, setFile] = useState(null); // 사용자가 선택할 파일 상태
     const [str, setStr] = useState(''); // 백엔드 응답 결과 상태
@@ -73,56 +65,30 @@ function App() {
         }
     };
 
-    useEffect(() => {
-	    const test = async () =>{
-		    const response = await fetch('/api/test');
-
-		    if(response.ok){
-			    const result = await response.text();
-			    setStr(result);
-		    }
-	    }
-	    
-	    test(str);
-    }, []);
     return (
-        <Router>
-            <div className="App">
-                <Routes>
-            {/*메인 주소*/}
-                <Route path="/" element={
-                    <>
-                    <MainLayout/>
-                        <h1>풀스택 API 연동 테스트</h1>
-                        <div style={{ marginBottom: '20px' }}>
-                            <label>메시지 입력: </label>
-                            <input 
-                                type="text" 
-                                value={message} 
-                                onChange={(e) => setMessage(e.target.value)} 
-                                placeholder="파이썬으로 보낼 메시지"
-                            />
-                        </div>
-                        <div style={{ marginBottom: '20px' }}>
-                            <label>파일 선택: </label>
-                            <input type="file" onChange={handleFileChange} />
-                        </div>
-                        <button onClick={sendData} style={{ padding: '10px 20px', cursor: 'pointer' }}>
-                            서버로 전송하기
-                        </button>
-                        <div style={{ marginTop: '30px' }}>
-                            {str && <pre>✅ 파이썬 서버에서 돌아온 최종 결과: {str}</pre>}
-                        </div>
-                    </>
-                    }/>
-
-                    {/*로그인 주소(/login)*/}
-                    <Route path="/login" element={<LoginPage />} />
-                    {/*회원가입 주소(/signup)*/}
-                    <Route path="/signup" element={<SignUp />} />
-                </Routes>
+        <div className="App">
+            <MainLayout/>
+            <h1>풀스택 API 연동 테스트</h1>
+            <div style={{ marginBottom: '20px' }}>
+                <label>메시지 입력: </label>
+                <input 
+                    type="text" 
+                    value={message} 
+                    onChange={(e) => setMessage(e.target.value)} 
+                    placeholder="파이썬으로 보낼 메시지"
+                />
             </div>
-        </Router>
+            <div style={{ marginBottom: '20px' }}>
+                <label>파일 선택: </label>
+                <input type="file" onChange={handleFileChange} />
+            </div>
+            <button onClick={sendData} style={{ padding: '10px 20px', cursor: 'pointer' }}>
+                서버로 전송하기
+            </button>
+            <div style={{ marginTop: '30px' }}>
+                {str && <pre>✅ 파이썬 서버에서 돌아온 최종 결과: {str}</pre>}
+            </div>
+        </div>
     );
 }
 

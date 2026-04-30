@@ -1,0 +1,375 @@
+/* MainLayout.css */
+
+/* 가장 바깥 배경 도화지 (전체 화면) */
+.page-background {
+  min-height: 100vh;
+  /* ★ 핵심: 기존 깨끗한 배경 이미지 파일 경로 ★ */
+  background-image: url('../images/Main.png'); 
+  background-size: cover;
+  background-position: center top;
+  background-repeat: no-repeat;
+  
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  max-width: 1920px;
+  margin: 0 auto;
+  padding: 0 20px;
+  box-sizing: border-box;
+  font-family: 'Pretendard', sans-serif;
+}
+
+/* --- [가운데 앱 실제 콘텐츠 영역 (디자인의 빨간 박스 부분)] --- */
+.app-wrapper {
+  display: flex; /* 내부에 사이드바와 메인콘텐츠를 가로로 배치 */
+  width: 100%;
+  max-width: 850px; /* ★ 중요: 가운데 비어있는 공간의 최대 크기를 제한 ★ */
+  
+  /* 앱 전체에 하얀색 배경을 깔아주고 둥근 모서리와 그림자를 줘서 종이처럼 떠보이게 함 */
+  min-height: 100vh;
+  background-color: #ffffff;
+  border-radius: 30px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08); /* 은은한 그림자 */
+  overflow: hidden; 
+  margin-top: 0;
+}
+
+.main-content {
+  flex: 1; 
+  padding: 80px 30px 30px 30px;
+  background-color: #FFF6EE; /* 기존 #fffdfa 에서 변경 */
+  overflow-y: auto; 
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.top-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px; /* 아래에 있는 배너와의 간격 */
+}
+
+.header-title {
+  font-size: 22px;
+  font-weight: 800;
+  color: #333333;
+  margin: 0;
+}
+
+.header-icons {
+  display: flex;
+  align-items: center;
+  gap: 16px; /* 아이콘 사이 간격 */
+}
+
+.icon-btn {
+  background: none;
+  border: none;
+  font-size: 22px;
+  cursor: pointer;
+  padding: 0;
+  /* 종 모양을 시안처럼 테두리만 있는 느낌으로 표현하려면 나중에 svg 아이콘으로 교체하시면 좋습니다 */
+}
+
+.profile-icon {
+  width: 40px;
+  height: 40px;
+  background-color: #ffe6eb; /* 시안과 유사한 연한 핑크색 배경 */
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 20px;
+  cursor: pointer;
+}
+
+/* --- [🌟 테두리 스타일 공통 적용 (border-card)] --- 🌟 */
+.border-card {
+  background-color: #ffffff;
+  border-radius: 15px;
+  
+  /* 테두리를 너무 밝은 회색(#e0e0e0)에서, 살짝 따뜻하고 선명한 색으로 변경 */
+  border: 1px solid #E5D5C5; 
+  
+  /* 그림자를 조금 더 넓고 선명하게 퍼뜨려서 입체감 부여 */
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.06); 
+  
+  padding: 20px;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #555;
+  font-size: 14px;
+}
+
+/* --- [각 그리드 컨테이너 설정] --- */
+
+/* 1. 상단 데이터 요약 카드 (4개, 동일 너비) */
+.summary-cards-container {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr); /* ★ 4개의 동일한 카드 ★ */
+  gap: 15px;
+}
+
+.summary-card {
+  flex-direction: column; /* 글자들을 세로로 예쁘게 정렬 */
+  gap: 8px; /* 위아래 간격 */
+  padding: 24px 20px; 
+}
+
+.card-title {
+  font-size: 13px;
+  color: #666;
+  font-weight: 500;
+}
+
+.card-value {
+  margin: 0;
+  font-size: 26px;
+  font-weight: 700;
+  color: #333;
+}
+
+.card-value small {
+  font-size: 14px;
+  font-weight: 500;
+  color: #555;
+}
+
+.card-value.text-green {
+  color: #4caf50; /* Good! 글자를 위한 초록색 */
+}
+
+.card-sub {
+  font-size: 11px;
+  color: #999;
+}
+
+/* 2. 식단 기록 그리드 (4칸으로 수정) */
+.meal-records-container {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr); /* ★ 3에서 4로 수정됨 ★ */
+  gap: 15px;
+}
+
+/* --- [🌟 여기서부터 새롭게 추가해주세요: 2번 식단 기록 영역 스타일 🌟] --- */
+
+/* 섹션 제목 영역 */
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  margin-bottom: -10px; /* 아래 카드와의 간격 조절 */
+  margin-top: 10px;
+}
+
+.section-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: #333;
+  margin: 0;
+}
+
+.section-more {
+  font-size: 12px;
+  color: #999;
+  cursor: pointer;
+}
+
+/* 개별 식단 카드 내부 스타일 */
+.meal-card {
+  flex-direction: column;
+  align-items: flex-start; /* 왼쪽 정렬 */
+  padding: 16px;
+  gap: 10px;
+}
+
+.meal-header {
+  font-size: 13px;
+  font-weight: 600;
+  color: #555;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* 이미지 대신 들어갈 회색 박스 (나중에 img 태그로 교체) */
+.meal-image-placeholder {
+  width: 100%;
+  aspect-ratio: 1 / 1; /* 정사각형 비율 */
+  background-color: #f0f0f0;
+  border-radius: 10px;
+}
+
+.meal-desc {
+  font-size: 11px;
+  color: #666;
+  margin: 0;
+  line-height: 1.4;
+  word-break: keep-all;
+}
+
+.meal-kcal {
+  font-size: 14px;
+  font-weight: 700;
+  color: #333;
+  margin: 0;
+  margin-top: auto; /* 칼로리를 맨 아래로 밀어줌 */
+}
+
+/* 4번째 '식단 기록 추가하기' 카드 전용 스타일 */
+.add-meal-card {
+  flex-direction: column;
+  background-color: #fffaf0; /* 연한 분홍/베이지 배경 */
+  border: 1px dashed #ffb6c1; /* 점선 테두리 */
+  color: #ff8fa3;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  text-align: center;
+  gap: 12px;
+  box-shadow: none; /* 그림자 제거 */
+}
+
+.add-icon {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background-color: #ff8fa3;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+}
+
+/* 3. 주요 기능 그리드 (5개, 동일 너비) */
+.quick-features-container {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr); /* ★ 5개의 동일한 아이콘 박스 ★ */
+  gap: 12px;
+}
+.feature-item {
+  height: auto; /* 고정 높이 제거, 내용물에 맞게 자동 조절 */
+  padding: 16px 10px;
+  flex-direction: column; /* 세로 정렬 */
+  gap: 12px;
+  cursor: pointer;
+  transition: transform 0.2s ease; /* 마우스 올렸을 때 애니메이션 */
+}
+
+.feature-item:hover {
+  transform: translateY(-3px); /* 마우스 올리면 살짝 위로 올라가는 효과 */
+}
+
+.feature-icon {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%; /* 완전한 동그라미 */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 20px;
+}
+
+/* 와이어프레임과 유사한 연한 파스텔 배경색들 */
+.bg-blue { background-color: #e8f0fe; }
+.bg-orange { background-color: #ffece6; }
+.bg-yellow { background-color: #fff4e6; }
+.bg-lightblue { background-color: #e6f4ea; }
+.bg-purple { background-color: #f3e5f5; }
+
+.feature-text {
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.feature-title {
+  font-size: 12px;
+  font-weight: 700;
+  color: #333;
+  margin: 0;
+}
+
+.feature-desc {
+  font-size: 10px;
+  color: #999;
+  margin: 0;
+  word-break: keep-all; /* 단어 단위로 줄바꿈 (깔끔하게 보이도록) */
+}
+
+/* 4. AI 피드백 카드 (1개, 전체 너비) */
+.ai-feedback-container {
+  width: 100%; 
+  padding: 20px 24px;
+  background-color: #eaf5ec; /* 시안과 유사한 연한 초록색 배경 */
+  border: 1px solid #d4ead8; /* 테두리도 자연스럽게 연한 초록색으로 맞춤 */
+  display: flex;
+  align-items: center;
+  justify-content: flex-start; /* 왼쪽부터 차례대로 정렬 */
+  gap: 16px; /* 아이콘과 글자 사이 간격 */
+}
+
+/* --- [🌟 여기서부터 새롭게 추가해주세요: 4번 AI 한마디 영역 스타일 🌟] --- */
+
+.ai-icon-wrapper {
+  width: 48px;
+  height: 48px;
+  background-color: #ffffff; /* 아이콘 뒤에 하얀 동그라미 배경 */
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 24px; /* 임시 이모지 크기 */
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05); /* 살짝 떠 있는 느낌의 그림자 */
+  flex-shrink: 0; /* 화면이 줄어들어도 아이콘이 찌그러지지 않게 방지 */
+}
+
+.ai-text-content {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  text-align: left;
+}
+
+.ai-title {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 700;
+  color: #4caf50; /* 제목은 조금 더 진한 초록색 */
+}
+
+.ai-message {
+  margin: 0;
+  font-size: 14px;
+  color: #333;
+  line-height: 1.5;
+}
+
+.ai-message strong {
+  font-weight: 600; /* 첫째 줄 글씨 강조 */
+}
+
+/* 모바일 화면(가로 768px 이하)일 때 적용되는 규칙 */
+@media (max-width: 768px) {
+  .page-background {
+    background-image: none; /* 배경 이미지 숨기기 */
+    background-color: #fdf5e6; /* 배경이 없어졌을 때를 대비한 기본 연한 색상 */
+    padding: 0; /* 좌우 여백 제거하여 꽉 차게 */
+  }
+  
+  .app-wrapper {
+    max-width: 100%; /* 가로 전체 차지 */
+    border-radius: 0; /* 모바일에서는 둥근 모서리 제거 */
+    box-shadow: none; /* 모바일에서는 그림자 제거 */
+  }
+
+  .sidebar {
+    display: none; /* 모바일에서는 사이드바 숨김 (필요시 햄버거 메뉴로 대체) */
+  }
+}

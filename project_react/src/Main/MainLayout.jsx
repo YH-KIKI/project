@@ -4,16 +4,8 @@ import Sidebar from './Sidebar'; // 왼쪽 메뉴 바
 import GreetingBanner from './GreetingBanner'; // 상단 인사 배너
 import './MainLayout.css'; // 이 파일 전용 CSS
 import robotFeedbackImg from '../images/로봇2.png';
-import { useNavigate } from 'react-router-dom';
 
 const MainLayout = () => {
-
-  const navigate = useNavigate(); //이동 함수 생성
-
-  const handleLoginClick = () => {
-    navigate('/login'); //로그인 페이지 경로로 이동
-  };
-
   return (
     // [page-background]: 화면 전체를 덮는 가장 큰 도화지입니다.
     // 여기에 우리가 다운로드한 '데코레이션 배경 이미지'를 깔아줄 것입니다.
@@ -31,16 +23,6 @@ const MainLayout = () => {
           <header className="top-header">
             <h2 className="header-title">냠냠플래닛</h2>
             <div className="header-icons">
-              <button style={{ 
-                padding: '10px 30px', 
-                backgroundColor: '#d1b8a0', 
-                color: 'white', 
-                border: 'none', 
-                borderRadius: '5px',
-                cursor: 'pointer'
-              }}onClick={handleLoginClick}>
-                로그인/로그아웃
-              </button>
               <button className="icon-btn">🔔</button>
               <div className="profile-icon">👩‍🍳</div>
             </div>
