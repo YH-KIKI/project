@@ -19,7 +19,32 @@ repositories {
 
 dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-webflux'
+	implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
 	implementation 'org.springframework.boot:spring-boot-starter-webmvc'
+	implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
+	implementation 'nz.net.ultraq.thymeleaf:thymeleaf-layout-dialect'
+	
+	
+	// Spring Security (암호화 도구 포함)
+    implementation 'org.springframework.boot:spring-boot-starter-security'
+	
+	// MySQL Connector
+    implementation 'mysql:mysql-connector-java:8.0.16'
+    
+    // MyBatis Spring Boot Starter
+    implementation 'org.mybatis.spring.boot:mybatis-spring-boot-starter:4.0.1'
+    
+    // Spring Boot Starter JDBC
+    implementation 'org.springframework.boot:spring-boot-starter-jdbc'
+    
+    // Spring Boot Configuration Processor (Annotation Processor)
+    annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor'
+    
+    // JWT 관련 라이브러리 (토큰 만들 때 필수!)"토큰 기반 로그인"을 하려면 JWT를 생성하고 읽어줄 라이브러리가 반드시 있어야 합니다
+    implementation 'io.jsonwebtoken:jjwt-api:0.11.5'
+    runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.11.5'
+    runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.11.5'
+    
 	compileOnly 'org.projectlombok:lombok'
 	annotationProcessor 'org.projectlombok:lombok'
 	testImplementation 'org.springframework.boot:spring-boot-starter-webflux-test'

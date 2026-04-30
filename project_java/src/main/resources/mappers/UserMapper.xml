@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.hi.project.dao.UserDao">
+
+	<select id="findByUserid" parameterType="String" resultType="map">
+        SELECT * FROM user
+        WHERE user_id = #{userid}
+    </select>
+    
+    <insert id="insertUser" parameterType="kr.hi.project.domain.UserDTO">
+        INSERT INTO user (user_name, user_id,user_password, user_email)
+        VALUES (#{username}, #{userid}, #{password}, #{email})
+    </insert>
+
+</mapper>

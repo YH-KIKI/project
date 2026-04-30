@@ -1,7 +1,10 @@
 import { useEffect, useState } from "react";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import axios from "axios"; 
 import './App.css';
 import MainLayout from "./Main/MainLayout";
+import LoginPage from "./Login/LoginPage";
+import SignUp from "./Login/SignUp"
 
 function App() {
     const [message, setMessage] = useState(''); // 사용자가 입력할 메시지 상태
@@ -66,29 +69,43 @@ function App() {
     };
 
     return (
-        <div className="App">
-            <MainLayout/>
-            <h1>풀스택 API 연동 테스트</h1>
-            <div style={{ marginBottom: '20px' }}>
-                <label>메시지 입력: </label>
-                <input 
-                    type="text" 
-                    value={message} 
-                    onChange={(e) => setMessage(e.target.value)} 
-                    placeholder="파이썬으로 보낼 메시지"
-                />
+        <Router>
+            <div className="App">
+                <Routes>
+            {/*메인 주소*/}
+                <Route path="/" element={
+                    <>
+                    <MainLayout/>
+                        <h1>풀스택 API 연동 테스트</h1>
+                        <div style={{ marginBottom: '20px' }}>
+                            <label>메시지 입력: </label>
+                            <input 
+                                type="text" 
+                                value={message} 
+                                onChange={(e) => setMessage(e.target.value)} 
+                                placeholder="파이썬으로 보낼 메시지"
+                            />
+                        </div>
+                        <div style={{ marginBottom: '20px' }}>
+                            <label>파일 선택: </label>
+                            <input type="file" onChange={handleFileChange} />
+                        </div>
+                        <button onClick={sendData} style={{ padding: '10px 20px', cursor: 'pointer' }}>
+                            서버로 전송하기
+                        </button>
+                        <div style={{ marginTop: '30px' }}>
+                            {str && <pre>✅ 파이썬 서버에서 돌아온 최종 결과: {str}</pre>}
+                        </div>
+                    </>
+                    }/>
+
+                    {/*로그인 주소(/login)*/}
+                    <Route path="/login" element={<LoginPage />} />
+                    {/*회원가입 주소(/signup)*/}
+                    <Route path="/signup" element={<SignUp />} />
+                </Routes>
             </div>
-            <div style={{ marginBottom: '20px' }}>
-                <label>파일 선택: </label>
-                <input type="file" onChange={handleFileChange} />
-            </div>
-            <button onClick={sendData} style={{ padding: '10px 20px', cursor: 'pointer' }}>
-                서버로 전송하기
-            </button>
-            <div style={{ marginTop: '30px' }}>
-                {str && <pre>✅ 파이썬 서버에서 돌아온 최종 결과: {str}</pre>}
-            </div>
-        </div>
+        </Router>
     );
 }
 
