@@ -12,4 +12,6 @@ public interface UserDao {
     Map<String, String> findByUserid(@Param("userid") String userid);
 
 	void insertUser(UserDTO user);
+
+	String findUsernameByUserid(String userid);
 }

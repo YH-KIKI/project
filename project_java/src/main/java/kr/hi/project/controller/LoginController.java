@@ -33,7 +33,6 @@ public class LoginController {
 		if(user != null) {
 			// 성공하면 토큰 생성
 			String token = jwtService.createToken(userid);
-			System.out.println(token);
 			
 			Map<String, String> response = new HashMap<>();
 			response.put("token", token);
@@ -46,13 +45,15 @@ public class LoginController {
 	@GetMapping("/api/user/info")
 	public Map<String, String> getUserInfo(@RequestHeader("Authorization") String authHeader) {
 	    String token = authHeader.replace("Bearer ", "");
-	    
+	    System.out.println(token);
 	    //토큰을 해석해서 아이디 가져오기
 	    String userid = jwtService.getUsernameFromToken(token);
-	    
+	    //username 가져오기
+	    String username = userService.findUsernameByUserid(userid);
 	    //응답 보내기
 	    Map<String, String> response = new HashMap<>();
 	    response.put("userid", userid);
+	    response.put("username", username);
 	    response.put("message", "당신은 인증된 사용자입니다!");
 	    return response;
 	}
