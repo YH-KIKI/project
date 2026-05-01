@@ -2,6 +2,7 @@
 
 import React from 'react';
 import './Sidebar.css';
+import { useNavigate } from 'react-router-dom';
 
 // 🌟 추가됨: src/images/ 폴더 안에 있는 메뉴 고양이와 로봇 이미지를 불러옵니다.
 import catChefSidebarImg from '../images/냠냠이1.png';
@@ -10,14 +11,16 @@ import robotWinkSidebarImg from '../images/로봇1.png';
 const Sidebar = ({ userName }) => {
   // 메뉴 데이터를 배열로 관리합니다. (텍스트 깨짐 해결 예시)
   const menuItems = [
-    { name: '대시보드', icon: '🏠', active: true },
+    { name: '대시보드', icon: '🏠', active: true, path: '/' },
     { name: '식단 기록', icon: '📝', active: false },
     { name: 'AI 분석', icon: '✨', active: false },
     { name: '식단 추천', icon: '🥗', active: false },
     { name: '목표 관리', icon: '❤️', active: false },
     { name: '통계', icon: '📊', active: false },
-    { name: '마이페이지', icon: '👤', active: false },
+    { name: '마이페이지', icon: '👤', active: false, path: '/mypage'  },
   ];
+
+  const navigate = useNavigate();
 
   return (
     <aside className="sidebar">
@@ -34,6 +37,7 @@ const Sidebar = ({ userName }) => {
             <li 
               key={index} 
               className={`menu-item ${menu.active ? 'active' : ''}`}
+              onClick={() => navigate(menu.path)}
             >
               <span className="menu-icon">{menu.icon}</span>
               <span className="menu-name">{menu.name}</span>

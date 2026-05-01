@@ -5,6 +5,8 @@ import './App.css';
 import MainLayout from "./Main/MainLayout";
 import LoginPage from "./Login/LoginPage";
 import SignUp from "./Login/SignUp"
+import Mypage from "./Mypage/Mypage"
+import Information from "./Mypage/Information"
 
 function App() {
     const [message, setMessage] = useState(''); // 사용자가 입력할 메시지 상태
@@ -103,6 +105,10 @@ function App() {
                     <Route path="/login" element={<LoginPage />} />
                     {/*회원가입 주소(/signup)*/}
                     <Route path="/signup" element={<SignUp />} />
+                    {/*마이페이지 주소(/mypage)*/}
+                    <Route path="/mypage" element={<Mypage />} />
+                    {/*개인정보 주소(/information)*/}
+                    <Route path="/information" element={<Information />} />
                 </Routes>
             </div>
         </Router>

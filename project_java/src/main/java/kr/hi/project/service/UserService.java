@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 
 import kr.hi.project.dao.UserDao;
 import kr.hi.project.domain.UserDTO;
+import kr.hi.project.domain.UserPrivacyDTO;
 
 @Service
 public class UserService {
@@ -43,6 +44,25 @@ public class UserService {
 	public String findUsernameByUserid(String userid) {
 		String username = userDAO.findUsernameByUserid(userid);
 		return username;
+	}
+
+	public String findEmailByUserid(String userid) {
+		String email = userDAO.findEmailByUserid(userid);
+		return email;
+	}
+
+	public int findUsernumByUserid(String userid) {
+		int usernum = userDAO.findUsernumByUserid(userid);
+		return usernum;
+	}
+
+	public void informationUpdata(UserPrivacyDTO userPrivacyDTO) {
+		userDAO.informationUpdata(userPrivacyDTO);
+		
+	}
+
+	public UserPrivacyDTO getUserInfo(int usernum) {
+		return userDAO.getUserInfo(usernum);
 	}
     
 }
