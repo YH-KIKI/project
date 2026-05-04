@@ -28,9 +28,22 @@
 	</select>
 	
 	<select id="getUserInfo" resultType="kr.hi.project.domain.UserPrivacyDTO">
-	    SELECT *
-	    FROM user_privacy
-	    WHERE user_num = #{usernum}
+	    SELECT 
+	        u.user_num AS usernum,
+	        u.user_id AS userid,
+	        u.user_name AS username,
+	        u.user_email AS email,
+	
+	        p.up_gender AS gender,
+	        p.up_height AS height,
+	        p.up_weight AS weight,
+	        p.up_target_weight AS targetweight,
+	        p.up_age AS age,
+	        p.up_act AS act
+
+	    FROM user u
+	    JOIN user_privacy p ON u.user_num = p.user_num
+	    WHERE u.user_num = #{usernum}
 	</select>
 	
     <update id="informationUpdata" parameterType="kr.hi.project.domain.UserPrivacyDTO">
