@@ -1,21 +1,21 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import Sidebar from '../Main/Sidebar';
-import '../Main/MainLayout.css'; // 🌟 배경 이미지가 들어있는 CSS를 가져옵니다!
+import '../Main/MainLayout.css';
 import { useNavigate } from 'react-router-dom';
 
 const LoginPage = () => {
 
-	const [usernum, setUsernum] = useState('');
+	const [usernum, setUsernum] = useState('0');
 	const [userid, setUserid] = useState('');
   const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
   const [gender, setgender] = useState('');
-  const [height, setheight] = useState('');
-  const [weight, setweight] = useState('');
-  const [targetweight, settargetweight] = useState('');
-  const [age, setage] = useState('');
-  const [act, setact] = useState('');
+  const [height, setheight] = useState('0.0');
+  const [weight, setweight] = useState('0.0');
+  const [targetweight, settargetweight] = useState('0.0');
+  const [age, setage] = useState('0');
+  const [act, setact] = useState('0');
 
   const navigate = useNavigate(); // 페이지 이동 함수
 
@@ -29,6 +29,7 @@ const LoginPage = () => {
     }
 
     try {
+      const token = localStorage.getItem('login_token');
       await axios.post('http://localhost:8080/api/information_updata', {
 				Usernum: usernum,
 				Userid: userid,
@@ -40,6 +41,11 @@ const LoginPage = () => {
 				Targetweight: targetweight,
 				Age: age,
 				Act: act,
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
       });
       alert("회원가입 성공! 로그인 페이지로 이동합니다.");
       navigate('/login'); // 가입 성공하면 자동으로 로그인 페이지로 슝!
@@ -57,9 +63,17 @@ const LoginPage = () => {
 					Authorization: `Bearer ${token}`
 				}
 			});
-			setUserid(response.data.userid)
-			setUsername(response.data.username)
-			setEmail(response.data.email)
+      setUsernum(response.data.Usernum);
+			setUserid(response.data.Userid)
+			setUsername(response.data.Username)
+			setEmail(response.data.Email)
+      setgender(response.data.Gender)
+      setheight(response.data.Height)
+      setweight(response.data.Weight)
+      settargetweight(response.data.Targetweight)
+      setage(response.data.Age)
+      setact(response.data.Act)
+      console.log(response)
 		}catch(error){
 			alert("인증에 실패했습니다. 다시 로그인하세요")
 		}
@@ -108,39 +122,46 @@ const LoginPage = () => {
 
 						<div style={{ marginBottom: '20px' }}>
 							<label>성별: </label>
-							<input 
-								type="checkbox" 
-								checked={gender === '남성'} 
-								onChange={() => setgender('M')} 
-							/> 남성
-							<input 
-								type="checkbox" 
-								checked={gender === '여성'} 
-								onChange={() => setgender('F')} 
-							/> 여성
+              <input 
+                type="checkbox" 
+                checked={gender === 'M'} 
+                onChange={() => setgender('M')} 
+              /> 남성
+
+              <input 
+                type="checkbox" 
+                checked={gender === 'F'} 
+                onChange={() => setgender('F')} 
+              /> 여성
+
+              <input 
+                type="checkbox" 
+                checked={gender === '?'} 
+                onChange={() => setgender('?')} 
+              /> 비밀~
       			</div>
 
-            <input type="text" placeholder="키" 
+            <input type="text" placeholder="키" value={height}
             style={{ padding: '10px', width: '200px' }} 
             onChange={(e) => setheight(e.target.value)}
             /><br/>
 
-						<input type="text" placeholder="무게" 
+						<input type="text" placeholder="무게" value={weight}
             style={{ padding: '10px', width: '200px' }} 
             onChange={(e) => setweight(e.target.value)}
             /><br/>
 
-						<input type="text" placeholder="목표무게" 
+						<input type="text" placeholder="목표무게" value={targetweight}
             style={{ padding: '10px', width: '200px' }} 
             onChange={(e) => settargetweight(e.target.value)}
             /><br/>
 
-						<input type="text" placeholder="나이" 
+						<input type="text" placeholder="나이" value={age}
             style={{ padding: '10px', width: '200px' }} 
             onChange={(e) => setage(e.target.value)}
             /><br/>
 
-						<input type="text" placeholder="활동량" 
+						<input type="text" placeholder="활동량" value={act}
             style={{ padding: '10px', width: '200px' }} 
             onChange={(e) => setact(e.target.value)}
             /><br/>
