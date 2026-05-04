@@ -15,23 +15,25 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 @Configuration
 public class SecurityConfig {
 
-	@Bean
-	public PasswordEncoder passwordEncoder() {
-		// BCrypt라는 강력한 암호화 알고리즘을 사용하겠다는 선언입니다.
+    @Bean
+    public PasswordEncoder passwordEncoder() {
+        // BCrypt라는 강력한 암호화 알고리즘을 사용하겠다는 선언입니다.
         return new BCryptPasswordEncoder();
-	}
-	
-	@Bean
+    }
+    
+    @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
             .cors(cors -> cors.configurationSource(corsConfigurationSource())) // CORS 설정 적용
             .csrf(csrf -> csrf.disable()) // 테스트를 위해 CSRF 잠시 비활성화
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers("/api/signup", 
-                				 "/api/login", 
-                				 "/api/user/info",
-                				 "/api/information_updata",
-                				 "/api/information_select").permitAll() // 가입, 로그인은 누구나 가능
+                                 "/api/login", 
+                                 "/api/user/info",
+                                 "/api/information_updata",
+                                 "/api/information_select",
+                                 "/api/v1/diet/**"  // 🌟 이 부분이 방금 새로 추가된 곳입니다! (식단 API 허용)
+                                 ).permitAll() // 가입, 로그인은 누구나 가능
                 .anyRequest().authenticated() // 나머지는 로그인이 필요함
             );
         
