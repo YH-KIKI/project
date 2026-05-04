@@ -6,6 +6,7 @@ import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
 import kr.hi.project.domain.UserDTO;
+import kr.hi.project.domain.UserPrivacyDTO;
 
 @Mapper
 public interface UserDao {
@@ -14,4 +15,12 @@ public interface UserDao {
 	void insertUser(UserDTO user);
 
 	String findUsernameByUserid(String userid);
+
+	String findEmailByUserid(String userid);
+
+	int findUsernumByUserid(String userid);
+
+	void informationUpdata(UserPrivacyDTO userPrivacyDTO);
+
+	UserPrivacyDTO getUserInfo(int usernum);
 }

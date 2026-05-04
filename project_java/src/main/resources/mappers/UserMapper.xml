@@ -16,5 +16,35 @@
     	SELECT user_name FROM user
     	WHERE user_id = #{userid}
 	</select>
+	
+	<select id="findEmailByUserid" parameterType="string" resultType="string">
+    	SELECT user_email FROM user
+    	WHERE user_id = #{userid}
+	</select>
+	
+	<select id="findUsernumByUserid" parameterType="string" resultType="int">
+    	SELECT user_num FROM user
+    	WHERE user_id = #{userid}
+	</select>
+	
+	<select id="getUserInfo" resultType="kr.hi.project.domain.UserPrivacyDTO">
+	    SELECT *
+	    FROM user_privacy
+	    WHERE user_num = #{usernum}
+	</select>
+	
+    <update id="informationUpdata" parameterType="kr.hi.project.domain.UserPrivacyDTO">
+	    UPDATE user u
+	    JOIN user_privacy p ON u.user_num = p.user_num
+	    SET u.user_name = #{username},
+	    u.user_email = #{email},
+	    p.up_gender = #{gender},
+	    p.up_height = #{height},
+	    p.up_weight = #{weight},
+	    p.up_target_weight = #{targetweight},
+	    p.up_age = #{age},
+	    p.up_act = #{act}
+	    WHERE u.user_num = #{usernum}
+	</update>
 
 </mapper>
