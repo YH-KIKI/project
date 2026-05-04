@@ -5,7 +5,7 @@ import MainLayout from "./Main/MainLayout";
 import Dashboard from "./Main/Dashboard"; 
 import LoginPage from "./Login/LoginPage";
 import DietRecommendation from "./SidebarMenu/components/DietRecommendation"; 
-import MealRecordDetail from "./SidebarMenu/components/MealRecordDetai";
+import MealRecordDetail from "./SidebarMenu/components/MealRecordDetail";
 
 import SignUp from "./Login/SignUp"
 import Mypage from "./Mypage/Mypage"

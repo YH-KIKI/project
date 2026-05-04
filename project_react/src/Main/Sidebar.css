@@ -140,3 +140,61 @@
   width: 100%;
   height: 100%;
 }
+
+.menu-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.menu-item {
+  position: relative;
+}
+
+.menu-name {
+  flex: 1;
+}
+
+.menu-arrow {
+  margin-left: auto;
+  font-size: 12px;
+  color: inherit;
+  transition: transform 0.2s ease;
+}
+
+.menu-arrow.open {
+  transform: rotate(180deg);
+}
+
+.submenu {
+  list-style: none;
+  margin: 4px 0 6px 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center; /* 🔥 핵심 */
+  gap: 4px;
+}
+
+.submenu-item {
+  padding: 8px 10px;
+  border-radius: 8px;
+  font-size: 12px;
+  color: #9a8c8c;
+  font-weight: 500;
+  cursor: pointer;
+  text-align: left;
+  transition: all 0.2s ease;
+  width: 80%;             
+  text-align: center;    
+}
+
+.submenu-item:hover {
+  background-color: #fff0f2;
+  color: #ff8fa3;
+}
+
+.submenu-item.active {
+  background-color: #fff0f2;
+  color: #ff6f8a;
+  font-weight: 700;
+}
