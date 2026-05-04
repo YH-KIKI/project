@@ -1,5 +1,6 @@
 package kr.hi.project.service;
 
+import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -63,6 +64,10 @@ public class UserService {
 
 	public UserPrivacyDTO getUserInfo(int usernum) {
 		return userDAO.getUserInfo(usernum);
+	}
+
+	public List<String> findUserAllergies(int usernum) {
+	    return userDAO.findUserAllergies(usernum);
 	}
     
 }

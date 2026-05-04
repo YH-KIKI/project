@@ -1,5 +1,6 @@
 package kr.hi.project.dao;
 
+import java.util.List;
 import java.util.Map;
 
 import org.apache.ibatis.annotations.Mapper;
@@ -23,4 +24,6 @@ public interface UserDao {
 	void informationUpdata(UserPrivacyDTO userPrivacyDTO);
 
 	UserPrivacyDTO getUserInfo(int usernum);
+
+	List<String> findUserAllergies(int usernum);
 }

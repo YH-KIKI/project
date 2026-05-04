@@ -1,6 +1,7 @@
 package kr.hi.project.controller;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,10 +30,12 @@ public class UserInformation {
 	    String token = authHeader.replace("Bearer ", "");
 	    String userid = jwtService.getUsernameFromToken(token);
 
-	    UserPrivacyDTO dto = new UserPrivacyDTO();
-	    dto.setUserid(userid);
 	    int usernum = userService.findUsernumByUserid(userid);
-	    return userService.getUserInfo(usernum);
+
+	    UserPrivacyDTO dto = userService.getUserInfo(usernum);
+	    dto.setAllergies(userService.findUserAllergies(usernum));
+	    System.out.println(dto);
+	    return dto;
 	}
 
 	
@@ -41,6 +44,7 @@ public class UserInformation {
 	    userService.informationUpdata(UserPrivacyDTO);
 	    
 	    Map<String, String> response = new HashMap<>();
+	    
 	    response.put("message", "정보수정이 완료되었습니다!");
 		return response;
 		
