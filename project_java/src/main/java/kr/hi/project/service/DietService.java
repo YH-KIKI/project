@@ -1,7 +1,7 @@
 package kr.hi.project.service; // 🌟 패키지명 일치
 
 import kr.hi.project.dao.UserPrivacyDao;
-import kr.hi.project.dto.UserPrivacyDTO;
+import kr.hi.project.dto.DietUserDTO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -16,7 +16,7 @@ public class DietService {
 
     public List<Map<String, Object>> getDietRecommendations(Long userNum, String dietType) {
         
-        UserPrivacyDTO user = userPrivacyDao.findUserByNum(userNum);
+        DietUserDTO user = userPrivacyDao.findUserByNum(userNum);
         
         if (user == null) {
             throw new IllegalArgumentException("해당 유저를 찾을 수 없습니다: " + userNum);

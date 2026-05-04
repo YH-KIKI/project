@@ -12,10 +12,10 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 
 @Configuration
-@MapperScan ("project.dao")
+@MapperScan ("kr.hi.project.dao")
 public class MyBatisConfig {
 
-	@ConfigurationProperties(prefix = "spring.datasource")
+	@ConfigurationProperties(prefix = "spring.datasource.hikari")
     @Bean
     public DataSource dataSource() {
         return DataSourceBuilder.create().build();
@@ -29,7 +29,7 @@ public class MyBatisConfig {
             new PathMatchingResourcePatternResolver().getResources("classpath:mappers/*.xml")
         );
          // TypeAlias 적용
-        sessionFactory.setTypeAliasesPackage("project.model.vo");  // 여기에 패키지 경로 지정
+        sessionFactory.setTypeAliasesPackage("kr.hi.project");  // 여기에 패키지 경로 지정
         return sessionFactory.getObject();
     }
 }
