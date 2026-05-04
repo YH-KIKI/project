@@ -1,8 +1,10 @@
 // src/Main/Sidebar.jsx
 
 import React from 'react';
-import { Link } from 'react-router-dom'; // 🌟 Link 불러오기
 import './Sidebar.css';
+import { useNavigate, Link } from 'react-router-dom';
+
+// 🌟 추가됨: src/images/ 폴더 안에 있는 메뉴 고양이와 로봇 이미지를 불러옵니다.
 import catChefSidebarImg from '../images/냠냠이1.png';
 import robotWinkSidebarImg from '../images/로봇1.png';
 
@@ -17,6 +19,8 @@ const Sidebar = ({ userName }) => {
     { name: '통계', icon: '📊', active: false, path: '/stats' },
     { name: '마이페이지', icon: '👤', active: false, path: '/mypage' },
   ];
+
+  const navigate = useNavigate();
 
   return (
     <aside className="sidebar">
@@ -39,6 +43,7 @@ const Sidebar = ({ userName }) => {
             <li 
               key={index} 
               className={`menu-item ${menu.active ? 'active' : ''}`}
+              onClick={() => navigate(menu.path)}
             >
               {/* Link 태그로 감싸서 해당 path로 이동하게 만듭니다 */}
               <Link 
