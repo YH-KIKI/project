@@ -9,6 +9,9 @@ const Analyze = () => {
   const [isAnalyzing, setIsAnalyzing] = useState(false); // 로딩 상태
   const [aiResults, setAiResults] = useState([]);       // AI가 찾은 음식 후보들
   const [selectedFoods, setSelectedFoods] = useState([]); // 사용자가 클릭해서 선택한 음식들
+  const [showModal, setShowModal] = useState(false); // 입력 팝업 노출 여부
+  const [mealType, setMealType] = useState('아침');   // 아침, 점심, 저녁
+  const [foodDetails, setFoodDetails] = useState({}); // { '제육볶음': 200, '냉면': 450 } 형식
 
   // 1. 사진 선택 시 처리
   const handleFileChange = (e) => {
@@ -67,8 +70,18 @@ const Analyze = () => {
       alert("먹은 음식을 선택해주세요!");
       return;
     }
-    alert(`선택된 음식: ${selectedFoods.join(', ')}\nDB 저장을 시작합니다!`);
-    // 여기에 Spring Boot로 selectedFoods를 보내는 axios 코드를 넣으면 됩니다.
+  //   alert(`선택된 음식: ${selectedFoods.join(', ')}\nDB 저장을 시작합니다!`);
+  //   // 여기에 Spring Boot로 selectedFoods를 보내는 axios 코드를 넣으면 됩니다.
+  // };
+
+  // 선택된 음식들의 초기 중량을 0으로 설정하여 세팅
+  const initialDetails = {};
+    selectedFoods.forEach(food => {
+      initialDetails[food] = 0; 
+    });
+    setFoodDetails(initialDetails);
+    
+    setShowModal(true); // 입력 팝업 열기
   };
 
   return (
@@ -193,6 +206,68 @@ const Analyze = () => {
               >
                 {selectedFoods.length}개 선택됨 - 기록하기
               </button>
+            )}
+            {/* --- 중량 및 식사 종류 입력 모달 --- */}
+            {showModal && (
+              <div style={{
+                position: 'fixed', top: 0, left: 0, width: '100%', height: '100%',
+                backgroundColor: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000
+              }}>
+                <div style={{
+                  backgroundColor: '#fff', padding: '30px', borderRadius: '25px', width: '400px', textAlign: 'center'
+                }}>
+                  <h3 style={{ color: '#5d4037', marginBottom: '20px' }}>식단 상세 정보 입력</h3>
+                  
+                  {/* 식사 종류 선택 */}
+                  <div style={{ marginBottom: '20px', display: 'flex', justifyContent: 'center', gap: '10px' }}>
+                    {['아침', '점심', '저녁'].map(type => (
+                      <button 
+                        key={type}
+                        onClick={() => setMealType(type)}
+                        style={{
+                          padding: '8px 15px', borderRadius: '15px', border: '1px solid #eee',
+                          backgroundColor: mealType === type ? '#ff8a80' : '#fff',
+                          color: mealType === type ? '#fff' : '#888', cursor: 'pointer'
+                        }}
+                      >{type}</button>
+                    ))}
+                  </div>
+
+                  {/* 음식별 중량 입력 */}
+                  <div style={{ textAlign: 'left', marginBottom: '25px' }}>
+                    {selectedFoods.map(foodName => (
+                      <div key={foodName} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
+                        <span style={{ fontWeight: 'bold' }}>{foodName}</span>
+                        <div style={{ display: 'flex', alignItems: 'center' }}>
+                          <input 
+                            type="number" 
+                            placeholder="0"
+                            onChange={(e) => setFoodDetails({...foodDetails, [foodName]: e.target.value})}
+                            style={{ width: '80px', padding: '5px', borderRadius: '5px', border: '1px solid #ddd', textAlign: 'right', marginRight: '5px' }}
+                          /> <span>g</span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* 최종 저장 버튼 */}
+                  <div style={{ display: 'flex', gap: '10px' }}>
+                    <button 
+                      onClick={() => setShowModal(false)}
+                      style={{ flex: 1, padding: '12px', border: 'none', borderRadius: '15px', backgroundColor: '#eee', cursor: 'pointer' }}
+                    >취소</button>
+                    <button 
+                      onClick={() => {
+                        // 여기서 Spring Boot 서버로 (selectedFile, mealType, foodDetails)를 한꺼번에 보냅니다!
+                        console.log("최종 전송 데이터:", { mealType, foodDetails });
+                        alert("DB에 기록되었습니다!");
+                        setShowModal(false);
+                      }}
+                      style={{ flex: 1, padding: '12px', border: 'none', borderRadius: '15px', backgroundColor: '#c6465d', color: '#fff', fontWeight: 'bold', cursor: 'pointer' }}
+                    >최종 기록</button>
+                  </div>
+                </div>
+              </div>
             )}
           </div>
         </div>
