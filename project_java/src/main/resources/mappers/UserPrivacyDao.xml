@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!-- 🌟 변경됨: namespace를 새로 만든 dao 패키지 경로로 정확히 맞춥니다 -->
+<mapper namespace="kr.hi.project.dao.UserPrivacyDao">
+
+    <select id="findUserByNum" resultType="kr.hi.project.dto.DietUserDTO">
+        SELECT 
+            user_num, 
+            up_height as height,        
+       		up_weight as weight,         
+        	up_daily_kcal as targetCalorie
+        FROM 
+            user_privacy
+        WHERE 
+            user_num = #{userNum}
+    </select>
+
+</mapper>
