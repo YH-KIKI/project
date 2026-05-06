@@ -6,6 +6,7 @@ import Dashboard from "./Main/Dashboard";
 import LoginPage from "./Login/LoginPage";
 import DietRecommendation from "./SidebarMenu/components/DietRecommendation"; 
 import MealRecordDetail from "./SidebarMenu/components/MealRecordDetail";
+import FridgeRecommendation from "./SidebarMenu/components/FridgeRecommendation";
 
 import SignUp from "./Login/SignUp"
 import Mypage from "./Mypage/Mypage"
@@ -26,6 +27,8 @@ function App() {
                         <Route path="/recommend" element={<DietRecommendation />} />
                         {/* 식단 기록 관리 */}
                         <Route path="/record" element={<MealRecordDetail />} />
+                        {/* 냉장고 추천 기능 */}
+                        <Route path="/fridge-recommend" element={<FridgeRecommendation />} />
                     </Route>
 
                     {/* 배경과 사이드바가 필요 없는 단독 화면들 */}
