@@ -4,7 +4,7 @@ import Sidebar from '../Main/Sidebar';
 import '../Main/MainLayout.css';
 import { useNavigate } from 'react-router-dom';
 
-const LoginPage = () => {
+const Information = () => {
 
 	const [usernum, setUsernum] = useState('0');
 	const [userid, setUserid] = useState('');
@@ -16,6 +16,7 @@ const LoginPage = () => {
   const [targetweight, settargetweight] = useState('0.0');
   const [age, setage] = useState('0');
   const [act, setact] = useState('0');
+  const [allergies, setallergies] = useState([]);
 
   const navigate = useNavigate(); // 페이지 이동 함수
 
@@ -41,6 +42,7 @@ const LoginPage = () => {
 				Targetweight: targetweight,
 				Age: age,
 				Act: act,
+        Allergies: allergies
       },
       {
         headers: {
@@ -73,7 +75,7 @@ const LoginPage = () => {
       settargetweight(response.data.Targetweight)
       setage(response.data.Age)
       setact(response.data.Act)
-      console.log(response)
+      setallergies(response.data.Allergies)
 		}catch(error){
 			alert("인증에 실패했습니다. 다시 로그인하세요")
 		}
@@ -166,6 +168,69 @@ const LoginPage = () => {
             onChange={(e) => setact(e.target.value)}
             /><br/>
             
+            <div style={{ marginBottom: '20px' }}>
+							<label>알레르기: </label>
+              <input 
+                type="checkbox" 
+                checked={allergies.includes('우유류')} 
+                onChange={(e) => {
+                  if (e.target.checked) {
+                    setallergies([...allergies, '우유류']);
+                  } else {
+                    setallergies(allergies.filter(v => v !== '우유류'));
+                  }
+                }}
+              /> 우유류
+
+              <input 
+                type="checkbox" 
+                checked={allergies.includes('달걀류')}
+                onChange={(e) => {
+                  if (e.target.checked) {
+                    setallergies([...allergies, '달걀류']);
+                  } else {
+                    setallergies(allergies.filter(v => v !== '달걀류'));
+                  }
+                }}
+              /> 달걀류
+
+              <input 
+                type="checkbox" 
+                checked={allergies.includes('견과류')}
+                onChange={(e) => {
+                  if (e.target.checked) {
+                    setallergies([...allergies, '견과류']);
+                  } else {
+                    setallergies(allergies.filter(v => v !== '견과류'));
+                  }
+                }}
+              /> 견과류
+
+              <input 
+                type="checkbox" 
+                checked={allergies.includes('생선류')}
+                onChange={(e) => {
+                  if (e.target.checked) {
+                    setallergies([...allergies, '생선류']);
+                  } else {
+                    setallergies(allergies.filter(v => v !== '생선류'));
+                  }
+                }}
+              /> 생선류
+
+              <input 
+                type="checkbox" 
+                checked={allergies.includes('대두류')}
+                onChange={(e) => {
+                  if (e.target.checked) {
+                    setallergies([...allergies, '대두류']);
+                  } else {
+                    setallergies(allergies.filter(v => v !== '대두류'));
+                  }
+                }}
+              /> 대두류
+      			</div>
+
           </div>
           
           <button style={{ 
@@ -187,4 +252,4 @@ const LoginPage = () => {
   );
 };
 
-export default LoginPage;
+export default Information;

@@ -11,6 +11,7 @@ import FridgeRecommendation from "./SidebarMenu/components/FridgeRecommendation"
 import SignUp from "./Login/SignUp"
 import Mypage from "./Mypage/Mypage"
 import Information from "./Mypage/Information"
+import Analyze from "./ImageAnalyze/Analyze"
 
 function App() {
     return (
@@ -38,6 +39,8 @@ function App() {
                     <Route path="/mypage" element={<Mypage />} />
                     {/*개인정보 주소(/information)*/}
                     <Route path="/information" element={<Information />} />
+                    {/*음식사진인식 주소(/analyze)*/}
+                    <Route path="/analyze" element={<Analyze />} />
                 </Routes>
             </div>
         </Router>
