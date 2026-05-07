@@ -1,0 +1,344 @@
+/* 전체 컨테이너: 이중 여백 제거, 투명 배경, 양옆 24px 들여쓰기 */
+.stats-container {
+  padding: 0 24px; 
+  box-sizing: border-box; 
+  background-color: transparent; 
+  width: 100%;
+  font-family: 'Pretendard', sans-serif; 
+}
+
+/* 상단 타이틀 (22px 굵게) */
+.header-area {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+.header-area .title {
+  margin: 0;
+  font-size: 22px; 
+  font-weight: 800;
+  color: #333333;
+}
+
+/* 메인 카드 영역 (냠냠 감성 테마 적용) */
+.stats-card {
+  background-color: #FFFAF9; 
+  border: 2px solid #FFEDEA; 
+  border-radius: 30px; 
+  padding: 35px;
+  box-shadow: 0 10px 30px rgba(255, 182, 163, 0.5); 
+  width: 100%;
+  box-sizing: border-box; 
+  display: flex;
+  flex-direction: column;
+  gap: 35px; 
+}
+
+/* 탭 버튼 메뉴 */
+.stats-tab-menu {
+  display: flex;
+  background-color: #FFFFFF; 
+  border: 1px solid #FFEDEA;
+  border-radius: 16px;
+  padding: 6px;
+  gap: 8px;
+}
+.stats-tab-button {
+  flex: 1;
+  padding: 12px 0;
+  border: none;
+  background-color: transparent;
+  color: #888;
+  font-size: 15px;
+  font-weight: 700;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.stats-tab-button.active {
+  background-color: #ff8fa3; 
+  color: white;
+  box-shadow: 0 2px 8px rgba(255, 143, 163, 0.4);
+}
+
+/* 차트 섹션 제목 */
+.section-title {
+  font-size: 17px;
+  font-weight: 700;
+  color: #333;
+  margin: 0 0 16px 0;
+}
+.cumulative {
+  font-size: 14px;
+  font-weight: 600;
+  color: #888;
+  margin-left: 6px;
+}
+
+/* 📊 바 차트 (Y축 정렬 완벽 보정) */
+.bar-chart-container {
+  display: flex;
+  height: 240px; 
+  background-color: #FFFFFF;
+  border: 1px solid #FFEDEA;
+  border-radius: 20px;
+  padding: 30px 24px 20px 24px; 
+  gap: 15px;
+}
+
+.y-axis {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  color: #A3938C;
+  font-size: 12px;
+  font-weight: 600;
+  /* 막대기가 서 있는 바닥 선(border-bottom)과 Y축 숫자의 높이를 일치시킴 */
+  height: calc(100% - 24px); 
+  margin-top: -6px; 
+}
+
+.bars-area {
+  flex: 1;
+  display: flex;
+  justify-content: space-around;
+  align-items: flex-end;
+  height: 100%;
+  border-bottom: 2px solid #EAEAEA;
+  padding-bottom: 24px;
+  position: relative;
+}
+
+.bar-group {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  height: 100%;
+  justify-content: flex-end;
+  position: relative;
+  cursor: pointer;
+}
+
+.bar-wrapper {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  position: relative;
+}
+
+.bar-fill {
+  width: 100%;
+  max-width: 24px;
+  background-color: #D3B8F8;
+  border-radius: 4px 4px 0 0;
+  transition: all 0.2s;
+}
+
+.bar-group:hover .bar-fill {
+  background-color: #B588F2; 
+  transform: scaleY(1.02); 
+}
+
+.x-axis-label {
+  position: absolute;
+  bottom: -24px;
+  font-size: 13px;
+  color: #666;
+  font-weight: 600;
+}
+
+/* 말풍선 툴팁 */
+.bar-tooltip {
+  position: absolute;
+  top: -30px;
+  background-color: #332B27;
+  color: white;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 6px 10px;
+  border-radius: 8px;
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.2s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  white-space: nowrap;
+  z-index: 10;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+}
+.bar-tooltip::after {
+  content: '';
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  margin-left: -5px;
+  border-width: 5px;
+  border-style: solid;
+  border-color: #332B27 transparent transparent transparent;
+}
+.bar-group:hover .bar-tooltip {
+  opacity: 1;
+  visibility: visible;
+  top: -40px; 
+}
+
+/* --- [영양소 비율 섹션] --- */
+
+.nutrient-ratio-section {
+  display: flex;
+  flex-direction: column;
+}
+
+.ratio-content-wrapper {
+  display: flex;
+  gap: 20px;
+  align-items: stretch; 
+}
+
+.ratio-left-column {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.ratio-right-column {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* 🍩 도넛 차트 컨테이너 & 차트 구현 */
+.donut-chart-box {
+  flex: 1;
+  background-color: #FFFFFF;
+  border: 1px solid #FFEDEA;
+  border-radius: 20px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+  min-height: 200px;
+}
+
+.donut-chart {
+  position: relative;
+  width: 170px;
+  height: 170px;
+  border-radius: 50%;
+  background: conic-gradient(
+    #E2CDBA 0% 8%,   /* 나트륨 8% */
+    #F3A683 8% 26%,  /* 지방 18% */
+    #C4A4F7 26% 48%, /* 단백질 22% */
+    #7AB0F3 48% 100% /* 탄수화물 52% */
+  );
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.donut-hole {
+  position: absolute;
+  width: 90px;
+  height: 90px;
+  background-color: #FFFFFF;
+  border-radius: 50%;
+}
+
+/* 도넛 차트 내부 퍼센트 글씨 위치 완벽 고정 */
+.donut-label {
+  position: absolute;
+  font-size: 13px;
+  font-weight: 800;
+  color: #333;
+  transform: translate(-50%, -50%); 
+}
+
+/* 시계방향 핀포인트 고정 */
+.label-sodium { top: 12%; left: 60%; } 
+.label-fat { top: 30%; left: 83%; } 
+.label-protein { top: 78%; left: 78%; } 
+.label-carbs { top: 50%; left: 15%; } 
+
+/* 개별 영양소 카드 공통 스타일 */
+.nut-card {
+  background-color: #FFFFFF;
+  border-radius: 16px;
+  padding: 18px 20px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  border: 2px solid transparent; 
+}
+
+.nut-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 6px;
+}
+.nut-name {
+  font-size: 15px;
+  font-weight: 800;
+  color: #333;
+}
+.nut-icon {
+  font-size: 20px;
+}
+.nut-middle {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+.nut-value {
+  font-size: 13px;
+  font-weight: 600;
+  color: #555;
+}
+.nut-badge {
+  font-size: 13px;
+  font-weight: 800;
+}
+.badge-gray { color: #888; } 
+
+.nut-progress-bg {
+  width: 100%;
+  height: 6px;
+  background-color: #F0F0F0;
+  border-radius: 4px;
+  overflow: hidden;
+}
+.nut-progress-fill {
+  height: 100%;
+  border-radius: 4px;
+}
+
+.nut-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 8px;
+}
+.nut-percent {
+  font-size: 15px;
+  font-weight: 800;
+  color: #333;
+}
+
+/* 테마별 카드 테두리 및 게이지 색상 */
+.carbs-card { border-color: #A7E0B3; }
+.carbs-card .nut-progress-fill { background-color: #A7E0B3; }
+.carbs-card .nut-badge { color: #4CAF50; }
+
+.protein-card { border-color: #F5A9A9; }
+.protein-card .nut-progress-fill { background-color: #F5A9A9; }
+.protein-card .nut-badge { color: #E53935; }
+
+.fat-card { border-color: #F7D560; }
+.fat-card .nut-progress-fill { background-color: #F7D560; }
+.fat-card .nut-badge { color: #FBC02D; }
+
+.sodium-card { border-color: #E2CDBA; } 
+.sodium-card .nut-progress-fill { background-color: #E2CDBA; }

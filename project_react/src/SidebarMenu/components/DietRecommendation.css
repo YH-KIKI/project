@@ -1,11 +1,11 @@
-/* 전체 컨테이너: 이중 여백 제거, 투명 배경, 넓이 100% 꽉 채우기 */
+/* 전체 컨테이너: 이중 여백 제거, 투명 배경, 양옆 24px 들여쓰기 */
 .recommendation-container {
   background-color: transparent;
-  padding: 0 24px; /* 🌟 핵심: 위아래 0, 양옆 24px 여백 추가 */
-  box-sizing: border-box; /* 🌟 여백을 추가해도 전체 너비가 삐져나가지 않게 방어 */
+  padding: 0 24px;
+  box-sizing: border-box; 
   font-family: 'Pretendard', -apple-system, sans-serif;
   width: 100%;
-  max-width: none; /* 너비 제한 해제 */
+  max-width: none; 
 }
 
 /* 상단 타이틀 영역 */
@@ -15,15 +15,12 @@
   align-items: center;
   margin-bottom: 20px;
 }
-
-/* 🌟 폰트 통일 (MainLayout의 '냠냠플래닛'과 동일한 22px, 800) */
 .header-area .title {
   margin: 0;
   font-size: 22px;
   font-weight: 800;
   color: #333333;
 }
-
 .header-area .date {
   font-size: 14px;
   color: #888;
@@ -31,14 +28,15 @@
   cursor: pointer;
 }
 
-/* 새로 추가한 하얀색 카드 스타일 (AiAnalysis와 동일한 디자인) */
+/* 메인 카드 영역 (냠냠 감성 테마 적용) */
 .recommendation-card {
-  background-color: #FFFFFF;
+  background-color: #FFFAF9; 
+  border: 2px solid #FFEDEA; 
   border-radius: 30px;
   padding: 35px;
-  box-shadow: 0 8px 24px rgba(255, 182, 163, 0.15); /* 냠냠플래닛 감성 핑크 그림자 */
+  box-shadow: 0 10px 30px rgba(255, 182, 163, 0.5); 
   width: 100%;
-  box-sizing: border-box; /* 넓이가 삐져나가지 않게 방어 */
+  box-sizing: border-box; 
   display: flex;
   flex-direction: column;
   gap: 20px;
@@ -48,7 +46,8 @@
 .tab-menu {
   display: flex;
   gap: 8px;
-  background-color: #f8f9fa; 
+  background-color: #FFFFFF; 
+  border: 1px solid #FFEDEA;
   padding: 4px;
   border-radius: 12px;
 }
@@ -81,10 +80,10 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  border: 1px solid #f0f0f0;
+  border: 1px solid #FFEDEA;
   border-radius: 16px;
   padding: 16px;
-  background-color: #fafafa;
+  background-color: #FFFFFF;
   transition: transform 0.2s ease;
 }
 .diet-card:hover {
