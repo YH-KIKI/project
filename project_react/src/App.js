@@ -10,6 +10,7 @@ import MealRecordDetail from "./SidebarMenu/components/MealRecordDetai";
 import SignUp from "./Login/SignUp"
 import Mypage from "./Mypage/Mypage"
 import Information from "./Mypage/Information"
+import AiAnalysis from "./SidebarMenu/components/AiAnalysis";
 
 function App() {
     return (
@@ -26,6 +27,8 @@ function App() {
                         <Route path="/recommend" element={<DietRecommendation />} />
                         {/* 식단 기록 관리 */}
                         <Route path="/record" element={<MealRecordDetail />} />
+                        {/* AI 분석 페이지 */}
+                        <Route path="/analyze" element={<AiAnalysis />} />
                     </Route>
 
                     {/* 배경과 사이드바가 필요 없는 단독 화면들 */}
