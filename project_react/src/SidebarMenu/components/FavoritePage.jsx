@@ -176,7 +176,7 @@ const FavoritePage = () => {
         <>
           <div className="search-row">
             <input placeholder="즐겨찾기 음식 검색" />
-            <button>정렬</button>
+            <button>검색</button>
           </div>
           
           
