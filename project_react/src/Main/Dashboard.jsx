@@ -41,7 +41,8 @@ const Dashboard = () => {
   };
 
   return (
-    <>
+    /* 🌟 핵심 1: 이 전체를 감싸는 wrapper를 추가하여 간격을 벌립니다. */
+    <div className="dashboard-wrapper">
       <GreetingBanner userName="냠냠이" />
       
       {/* 1. 상단 데이터 요약 카드 그리드 */}
@@ -64,75 +65,79 @@ const Dashboard = () => {
       </div>
 
       {/* 2. 오늘의 식단 기록 */}
-      <div className="section-header">
-        <h2 className="section-title">오늘의 식단 기록</h2>
-        <span className="section-more">더보기 &gt;</span>
-      </div>
+      <div>
+        <div className="section-header">
+          <h2 className="section-title">오늘의 식단 기록</h2>
+          <span className="section-more">더보기 &gt;</span>
+        </div>
 
-      <div className="meal-records-container">
-        <div className="border-card meal-card">
-          <div className="meal-header"><span>☀️</span> 아침</div>
-          <div className="meal-image-placeholder"></div>
-          <p className="meal-desc">그릭요거트, 바나나, 아몬드, 삶은달걀</p>
-          <p className="meal-kcal">320 kcal</p>
-        </div>
-        <div className="border-card meal-card">
-          <div className="meal-header"><span>☀️</span> 점심</div>
-          <div className="meal-image-placeholder"></div>
-          <p className="meal-desc">현미밥, 닭가슴살, 샐러드, 김치</p>
-          <p className="meal-kcal">560 kcal</p>
-        </div>
-        <div className="border-card meal-card">
-          <div className="meal-header"><span>🌙</span> 저녁</div>
-          <div className="meal-image-placeholder"></div>
-          <p className="meal-desc">두부김치, 잡곡밥, 나물무침</p>
-          <p className="meal-kcal">470 kcal</p>
-        </div>
-        <div className="border-card add-meal-card">
-          <div className="add-icon">+</div>
-          <p>식단 기록<br/>추가하기</p>
+        <div className="meal-records-container">
+          <div className="border-card meal-card">
+            <div className="meal-header"><span>☀️</span> 아침</div>
+            <div className="meal-image-placeholder"></div>
+            <p className="meal-desc">그릭요거트, 바나나, 아몬드, 삶은달걀</p>
+            <p className="meal-kcal">320 kcal</p>
+          </div>
+          <div className="border-card meal-card">
+            <div className="meal-header"><span>☀️</span> 점심</div>
+            <div className="meal-image-placeholder"></div>
+            <p className="meal-desc">현미밥, 닭가슴살, 샐러드, 김치</p>
+            <p className="meal-kcal">560 kcal</p>
+          </div>
+          <div className="border-card meal-card">
+            <div className="meal-header"><span>🌙</span> 저녁</div>
+            <div className="meal-image-placeholder"></div>
+            <p className="meal-desc">두부김치, 잡곡밥, 나물무침</p>
+            <p className="meal-kcal">470 kcal</p>
+          </div>
+          <div className="border-card add-meal-card">
+            <div className="add-icon">+</div>
+            <p>식단 기록<br/>추가하기</p>
+          </div>
         </div>
       </div>
 
       {/* 3. 주요 기능 빠르게 */}
-      <div className="section-header">
-        <h2 className="section-title">주요 기능 빠르게</h2>
-      </div>
+      <div>
+        <div className="section-header">
+          <h2 className="section-title">주요 기능 빠르게</h2>
+        </div>
 
-      <div className="quick-features-container">
-        <div className="border-card feature-item">
-          <div className="feature-icon bg-blue">🩵</div>
-          <div className="feature-text">
-            <p className="feature-title">컨디션 로그</p>
-            <p className="feature-desc">오늘의 기분 기록</p>
+        <div className="quick-features-container">
+          <div className="border-card feature-item">
+            <div className="feature-icon bg-blue">🩵</div>
+            <div className="feature-text">
+              <p className="feature-title">컨디션 로그</p>
+              <p className="feature-desc">오늘의 기분 기록</p>
+            </div>
           </div>
-        </div>
-        <div className="border-card feature-item">
-          <div className="feature-icon bg-orange">⭐️</div>
-          <div className="feature-text">
-            <p className="feature-title">즐겨찾기</p>
-            <p className="feature-desc">좋아하는 식단</p>
+          <div className="border-card feature-item">
+            <div className="feature-icon bg-orange">⭐️</div>
+            <div className="feature-text">
+              <p className="feature-title">즐겨찾기</p>
+              <p className="feature-desc">좋아하는 식단</p>
+            </div>
           </div>
-        </div>
-        <div className="border-card feature-item">
-          <div className="feature-icon bg-yellow">🏅</div>
-          <div className="feature-text">
-            <p className="feature-title">배지 도감</p>
-            <p className="feature-desc">획득한 배지 보기</p>
+          <div className="border-card feature-item">
+            <div className="feature-icon bg-yellow">🏅</div>
+            <div className="feature-text">
+              <p className="feature-title">배지 도감</p>
+              <p className="feature-desc">획득한 배지 보기</p>
+            </div>
           </div>
-        </div>
-        <div className="border-card feature-item">
-          <div className="feature-icon bg-lightblue">🎯</div>
-          <div className="feature-text">
-            <p className="feature-title">AI 식단 추천</p>
-            <p className="feature-desc">맞춤 식단 받기</p>
+          <div className="border-card feature-item">
+            <div className="feature-icon bg-lightblue">🎯</div>
+            <div className="feature-text">
+              <p className="feature-title">AI 식단 추천</p>
+              <p className="feature-desc">맞춤 식단 받기</p>
+            </div>
           </div>
-        </div>
-        <div className="border-card feature-item">
-          <div className="feature-icon bg-purple">📷</div>
-          <div className="feature-text">
-            <p className="feature-title">사진 인식</p>
-            <p className="feature-desc">음식 분석하기</p>
+          <div className="border-card feature-item">
+            <div className="feature-icon bg-purple">📷</div>
+            <div className="feature-text">
+              <p className="feature-title">사진 인식</p>
+              <p className="feature-desc">음식 분석하기</p>
+            </div>
           </div>
         </div>
       </div>
@@ -151,23 +156,23 @@ const Dashboard = () => {
         </div>
       </div>
 
-      {/* 5. API 연동 테스트 UI (가장 하단에 배치) */}
-      <div className="border-card" style={{ marginTop: '20px', padding: '20px' }}>
-        <h3 style={{ marginTop: 0 }}>🛠️ 파이썬 API 연동 테스트</h3>
-        <div style={{ marginBottom: '10px' }}>
-            <label>메시지: </label>
-            <input type="text" value={message} onChange={(e) => setMessage(e.target.value)} placeholder="파이썬으로 보낼 메시지" style={{ padding: '5px' }}/>
+      {/* 🌟 핵심 2: API 연동 테스트 UI 레이아웃 세로 정렬로 완벽하게 복구 */}
+      <div className="border-card api-test-container">
+        <h3 style={{ margin: 0, color: '#333' }}>🛠️ 파이썬 API 연동 테스트</h3>
+        <div style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+            <label style={{ fontSize: '14px', fontWeight: 'bold' }}>메시지: </label>
+            <input type="text" value={message} onChange={(e) => setMessage(e.target.value)} placeholder="파이썬으로 보낼 메시지" style={{ padding: '10px', borderRadius: '8px', border: '1px solid #ddd' }}/>
         </div>
-        <div style={{ marginBottom: '10px' }}>
-            <label>파일: </label>
+        <div style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+            <label style={{ fontSize: '14px', fontWeight: 'bold' }}>파일: </label>
             <input type="file" onChange={handleFileChange} />
         </div>
-        <button onClick={sendData} style={{ padding: '8px 16px', cursor: 'pointer', backgroundColor: '#ff8fa3', color: 'white', border: 'none', borderRadius: '5px' }}>
+        <button onClick={sendData} style={{ padding: '12px 20px', cursor: 'pointer', backgroundColor: '#FF8E9C', color: 'white', border: 'none', borderRadius: '10px', fontWeight: 'bold' }}>
             서버로 전송하기
         </button>
-        {str && <pre style={{ marginTop: '15px', backgroundColor: '#f4f4f4', padding: '10px', borderRadius: '5px' }}>✅ 결과: {str}</pre>}
+        {str && <pre style={{ marginTop: '10px', backgroundColor: '#f4f4f4', padding: '12px', borderRadius: '8px', width: '100%', boxSizing: 'border-box', overflowX: 'auto', whiteSpace: 'pre-wrap' }}>✅ 결과: {str}</pre>}
       </div>
-    </>
+    </div>
   );
 };
 
