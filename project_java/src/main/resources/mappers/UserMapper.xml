@@ -59,5 +59,12 @@
 	    p.up_act = #{act}
 	    WHERE u.user_num = #{usernum}
 	</update>
+	
+	<select id="findUserAllergies" parameterType="int" resultType="String">
+	    SELECT a.al_name
+	    FROM user_allergy ua
+	    JOIN allergy a ON ua.al_num = a.al_num
+	    WHERE ua.user_num = #{usernum}
+	</select>
 
 </mapper>

@@ -1,84 +1,119 @@
 // src/Main/Sidebar.jsx
 
-import React from 'react';
+import React, {useState} from 'react';
 import './Sidebar.css';
 // 🌟 1. useNavigate 대신 현재 주소를 알려주는 useLocation을 가져옵니다.
 import { Link, useLocation } from 'react-router-dom'; 
+import { useNavigate, Link, useLocation } from 'react-router-dom';
 
 import catChefSidebarImg from '../images/냠냠이1.png';
 import robotWinkSidebarImg from '../images/로봇1.png';
 
 const Sidebar = ({ userName }) => {
-  const location = useLocation(); // 🌟 2. 현재 웹브라우저의 주소창 경로를 가져옵니다.
 
-  // active: false 부분은 지웠습니다. 아래 반복문에서 자동으로 계산할 거예요!
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  const [openMenu, setOpenMenu] = useState(null);
+
+  // 🌟 1. 각 메뉴마다 이동할 주소(path)를 추가해 줍니다.
   const menuItems = [
-    { name: '대시보드', icon: '🏠', path: '/' },
-    { name: '식단 기록', icon: '📝', path: '/record' },
-    { name: 'AI 분석', icon: '✨', path: '/analyze' }, // 👈 배열 안에 이미 완벽하게 있습니다!
-    { name: 'AI 식단 추천', icon: '🥗', path: '/recommend' }, 
-    { name: '목표 관리', icon: '❤️', path: '/goal' },
-    { name: '통계', icon: '📊', path: '/stats' },
-    { name: '마이페이지', icon: '👤', path: '/mypage' },
+    { name: '대시보드', icon: '🏠', active: true, path: '/' },  
+    { name: '식단 기록', icon: '📝', active: false, path: '/record' },
+    { name: 'AI 분석', icon: '✨', active: false, path: '/analyze' },
+    {
+      name: 'AI 식단 추천',
+      icon: '🥗',
+      children: [
+        { name: 'AI 추천 식단', path: '/recommend' },
+        { name: '냉장고 추천', path: '/fridge-recommend' },
+      ],
+    },
+    { name: '목표 관리', icon: '❤️', active: false, path: '/goal' },
+    { name: '통계', icon: '📊', active: false, path: '/stats' },
+    { name: '마이페이지', icon: '👤', active: false, path: '/mypage' },
   ];
 
+  const handleParentClick = (menuName) => {
+    setOpenMenu(openMenu === menuName ? null : menuName);
+  };
+
   return (
-    <aside className="sidebar">
-      
-      {/* 메뉴 상단 고양이 이미지 */}
-      <div className="sidebar-cat-eating">
-        <Link to="/">
-          <img 
-            src={catChefSidebarImg} 
-            alt="메뉴 고양이 밥먹는 모습" 
-            style={{ cursor: 'pointer' }} 
-          />
-        </Link>
-      </div>
-
-      <nav className="sidebar-menu">
-        <ul>
-          {menuItems.map((menu, index) => {
-            // 3. 현재 주소(location.pathname)가 메뉴의 주소(menu.path)와 같으면 true!
-            // 이렇게 하면 내가 누른 메뉴에만 자동으로 'active' 디자인이 적용됩니다.
-            const isActive = location.pathname === menu.path;
-
-            return (
-              <li 
-                key={index} 
-                className={`menu-item ${isActive ? 'active' : ''}`}
-              >
-                <Link 
-                  to={menu.path} 
-                  style={{ 
-                    textDecoration: 'none', 
-                    color: 'inherit', 
-                    display: 'flex', 
-                    alignItems: 'center', 
-                    width: '100%' 
-                  }}
-                >
-                  <span className="menu-icon">{menu.icon}</span>
-                  <span className="menu-name">{menu.name}</span>
-                </Link>
-              </li>
-            );
-          })}
-        </ul>
-      </nav>
-
-      {/* 메뉴 하단 로봇 이미지 & 응원 문구 */}
-      <div className="sidebar-robot-wink">
-        <img src={robotWinkSidebarImg} alt="메뉴 하단 윙크 로봇" />
-      </div>
-      <div className="sidebar-footer">
-        <div className="cheer-balloon-sm">
-          오늘도<br/>건강한 한 끼<br/>함께해요! 💚
+  <aside className="sidebar">
+        <div className="sidebar-cat-eating">
+          <Link to="/">
+            <img
+              src={catChefSidebarImg}
+              alt="메뉴 고양이 밥먹는 모습"
+              style={{ cursor: 'pointer' }}
+            />
+          </Link>
         </div>
-      </div>
-      
-    </aside>
-  );
-};
+
+        <nav className="sidebar-menu">
+          <ul>
+            {menuItems.map((menu) => {
+              const hasChildren = !!menu.children;
+              const isOpen = openMenu === menu.name;
+
+              const isActive =
+                menu.path === location.pathname ||
+                menu.children?.some((child) => child.path === location.pathname);
+
+              return (
+                <li key={menu.name} className="menu-group">
+                  <div
+                    className={`menu-item ${isActive ? 'active' : ''}`}
+                    onClick={() => {
+                      if (hasChildren) {
+                        handleParentClick(menu.name);
+                      } else {
+                        navigate(menu.path);
+                      }
+                    }}
+                  >
+                    <span className="menu-icon">{menu.icon}</span>
+                    <span className="menu-name">{menu.name}</span>
+
+                    {hasChildren && (
+                      <span className={`menu-arrow ${isOpen ? 'open' : ''}`}>
+                        ▾
+                      </span>
+                    )}
+                  </div>
+
+                  {hasChildren && isOpen && (
+                    <ul className="submenu">
+                      {menu.children.map((child) => (
+                        <li
+                          key={child.name}
+                          className={`submenu-item ${
+                            location.pathname === child.path ? 'active' : ''
+                          }`}
+                          onClick={() => navigate(child.path)}
+                        >
+                          {child.name}
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </li>
+              );
+            })}
+          </ul>
+        </nav>
+
+        <div className="sidebar-robot-wink">
+          <img src={robotWinkSidebarImg} alt="메뉴 하단 윙크 로봇" />
+        </div>
+
+        <div className="sidebar-footer">
+          <div className="cheer-balloon-sm">
+            오늘도<br />건강한 한 끼<br />함께해요! 💚
+          </div>
+        </div>
+      </aside>
+    );
+  };
 
 export default Sidebar;

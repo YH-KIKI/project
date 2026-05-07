@@ -1,5 +1,7 @@
 package kr.hi.project.domain;
 
+import java.util.List;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import lombok.Data;
@@ -35,4 +37,7 @@ public class UserPrivacyDTO {
 
     @JsonProperty("Act")
     private int Act;
+    
+    @JsonProperty("Allergies")
+    private List<String> Allergies;
 }

@@ -5,12 +5,14 @@ import MainLayout from "./Main/MainLayout";
 import Dashboard from "./Main/Dashboard"; 
 import LoginPage from "./Login/LoginPage";
 import DietRecommendation from "./SidebarMenu/components/DietRecommendation"; 
-import MealRecordDetail from "./SidebarMenu/components/MealRecordDetai";
+import MealRecordDetail from "./SidebarMenu/components/MealRecordDetail";
+import FridgeRecommendation from "./SidebarMenu/components/FridgeRecommendation";
 
 import SignUp from "./Login/SignUp"
 import Mypage from "./Mypage/Mypage"
 import Information from "./Mypage/Information"
 import AiAnalysis from "./SidebarMenu/components/AiAnalysis";
+import Analyze from "./ImageAnalyze/Analyze"
 
 function App() {
     return (
@@ -29,6 +31,8 @@ function App() {
                         <Route path="/record" element={<MealRecordDetail />} />
                         {/* AI 분석 페이지 */}
                         <Route path="/analyze" element={<AiAnalysis />} />
+                        {/* 냉장고 추천 기능 */}
+                        <Route path="/fridge-recommend" element={<FridgeRecommendation />} />
                     </Route>
 
                     {/* 배경과 사이드바가 필요 없는 단독 화면들 */}
@@ -38,6 +42,8 @@ function App() {
                     <Route path="/mypage" element={<Mypage />} />
                     {/*개인정보 주소(/information)*/}
                     <Route path="/information" element={<Information />} />
+                    {/*음식사진인식 주소(/analyze)*/}
+                    <Route path="/analyze" element={<Analyze />} />
                 </Routes>
             </div>
         </Router>

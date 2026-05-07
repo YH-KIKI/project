@@ -1,0 +1,532 @@
+.fridge-container {
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  font-family: 'Pretendard', -apple-system, sans-serif;
+  color: #2f2424;
+  text-align: left;
+  letter-spacing: -0.3px;
+}
+
+.fridge-container * {
+  box-sizing: border-box;
+}
+
+/* 상단 */
+.fridge-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 20px;
+}
+
+.user-label {
+  margin: 0 0 8px;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.fridge-title {
+  margin: 0;
+  font-size: 34px;
+  font-weight: 800;
+  line-height: 1.15;
+}
+
+.sub-text {
+  margin: 10px 0 0;
+  font-size: 15px;
+  font-weight: 500;
+  color: #5e5050;
+}
+
+.today {
+  font-size: 16px;
+  font-weight: 700;
+}
+
+/* 목표 섭취량 카드 */
+.goal-summary-card {
+  background: #fffdfc;
+  border: 1px solid #ead7d7;
+  border-radius: 22px;
+  padding: 24px 28px;
+  margin-bottom: 18px;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.035);
+}
+
+.goal-summary-card h3 {
+  margin: 0 0 24px;
+  font-size: 25px;
+  font-weight: 750;
+}
+
+.goal-layout {
+  display: grid;
+  grid-template-columns: 1fr 190px 1fr;
+  align-items: center;
+  gap: 34px;
+}
+
+.goal-side {
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+}
+
+.macro-item b {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  margin-bottom: 8px;
+  font-size: 18px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.macro-item p {
+  margin: 2px 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: #3f3434;
+  line-height: 1.35;
+  white-space: nowrap;
+}
+
+.macro-progress {
+  width: 100%;
+  height: 10px;
+  background: #e7e2e2;
+  border-radius: 999px;
+  overflow: hidden;
+  margin-top: 10px;
+}
+
+.macro-progress span {
+  display: block;
+  height: 100%;
+  border-radius: 999px;
+}
+
+.macro-progress .carb {
+  background: #f6b445;
+}
+
+.macro-progress .protein {
+  background: #ff5d84;
+}
+
+.macro-progress .fat {
+  background: #89b55d;
+}
+
+.macro-progress .sodium {
+  background: #6ea8d8;
+}
+
+.macro-item em {
+  display: block;
+  margin-top: 5px;
+  text-align: right;
+  font-size: 13px;
+  font-weight: 600;
+  font-style: normal;
+  color: #8b7c7c;
+}
+
+/* 가운데 칼로리 원 */
+.calorie-circle {
+  width: 185px;
+  height: 185px;
+  border-radius: 50%;
+  background: conic-gradient(
+    #ff8fa3 0deg 245deg,
+    #f2e6e6 245deg 360deg
+  );
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+
+  /* 그래프 두께 느낌 */
+  box-shadow: inset 0 0 0 10px #fff6f7;
+}
+
+
+.calorie-circle::before {
+  content: "";
+  position: absolute;
+
+  /* 안쪽 원을 작게 만들수록 그래프 두께가 두꺼워짐 */
+  width: 125px;
+  height: 125px;
+
+  border-radius: 50%;
+  background: #fffdfc;
+  box-shadow: inset 0 0 0 1px #f1dddd;
+}
+
+.circle-inner {
+  position: relative;
+  z-index: 1;
+  text-align: center;
+}
+
+.circle-inner strong {
+  font-size: 32px;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.circle-inner span {
+  margin-left: 3px;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.circle-inner p {
+  margin: 6px 0 0;
+  font-size: 12px;
+  font-weight: 500;
+  color: #6f6262;
+}
+
+
+/* 재료 입력 섹션 */
+.ingredient-section,
+.empty-recipe-section,
+.recipe-section {
+  background: #fffdfc;
+  border: 1px solid #ead7d7;
+  border-radius: 22px;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.035);
+}
+
+.ingredient-section {
+  padding: 24px;
+  margin-bottom: 18px;
+}
+
+.ingredient-section h3,
+.empty-recipe-section h3,
+.recipe-section h3 {
+  margin: 0;
+  font-size: 25px;
+  font-weight: 750;
+}
+
+.ingredient-section > p {
+  margin: 10px 0 18px;
+  color: #5f5555;
+  font-size: 15px;
+  font-weight: 500;
+}
+
+.step-box {
+  border: 1px dashed #ff9db0;
+  border-radius: 18px;
+  overflow: hidden;
+}
+
+.step-row {
+  display: grid;
+  grid-template-columns: 130px 1fr auto;
+  align-items: center;
+  gap: 14px;
+  padding: 16px;
+  border-bottom: 1px solid #f3dddd;
+}
+
+.step-row:last-child {
+  border-bottom: none;
+}
+
+.step-label {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.step-label span {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: #ff6686;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+}
+
+.step-label b {
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.step-row input {
+  height: 50px;
+  border: 1px solid #e4cfcf;
+  border-radius: 14px;
+  padding: 0 16px;
+  font-size: 15px;
+  font-weight: 400;
+  outline: none;
+}
+
+.step-row input:focus {
+  border-color: #ff8fa3;
+}
+
+.step-row > button,
+.recommend-action button {
+  border: none;
+  background: #ff6686;
+  color: white;
+  border-radius: 14px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.step-row > button {
+  width: 92px;
+  height: 50px;
+  font-size: 16px;
+}
+
+.ingredient-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  grid-column: 2 / 4;
+}
+
+.ingredient-tags button {
+  border: none;
+  background: #fff0f1;
+  color: #3c3030;
+  padding: 10px 20px;
+  border-radius: 999px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.recommend-action {
+  grid-column: 2 / 4;
+}
+
+.recommend-action button {
+  width: 100%;
+  height: 52px;
+  font-size: 16px;
+  background: linear-gradient(90deg, #ff6686, #ff4f78);
+}
+
+.recommend-action p {
+  margin: 10px 0 0;
+  color: #8c7b7b;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+/* 추천 결과 없음 */
+.empty-recipe-section,
+.recipe-section {
+  padding: 22px;
+  margin-bottom: 18px;
+}
+
+.empty-box {
+  margin-top: 16px;
+  min-height: 170px;
+  border: 1px solid #f0dede;
+  border-radius: 18px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  color: #333;
+  text-align: center;
+}
+
+.fridge-icon {
+  font-size: 46px;
+  margin-bottom: 12px;
+}
+
+.empty-box h4 {
+  margin: 0 0 10px;
+  font-size: 22px;
+  font-weight: 700;
+}
+
+.empty-box p {
+  margin: 0;
+  line-height: 1.5;
+  font-size: 15px;
+  font-weight: 500;
+  color: #635555;
+}
+
+/* 추천 결과 */
+.recipe-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.recipe-header span {
+  font-size: 14px;
+  font-weight: 500;
+  color: #6e5e5e;
+}
+
+.recipe-list {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.recipe-card {
+  display: grid;
+  grid-template-columns: 180px 1fr 205px;
+  gap: 18px;
+  padding: 14px;
+  border: 1px solid #f0dddd;
+  border-radius: 18px;
+  background: #fff;
+}
+
+.recipe-card img {
+  width: 180px;
+  height: 125px;
+  border-radius: 14px;
+  object-fit: cover;
+}
+
+.recipe-info h4 {
+  margin: 4px 0 8px;
+  font-size: 22px;
+  font-weight: 700;
+}
+
+.recipe-info h4 span {
+  margin-left: 10px;
+  padding: 4px 9px;
+  border-radius: 999px;
+  background: #ffe5ea;
+  color: #ff5f7c;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.recipe-items {
+  margin: 0 0 8px;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.recipe-desc {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 400;
+  line-height: 1.5;
+}
+
+.recipe-nutrients {
+  border: 1px solid #f3dddd;
+  border-radius: 14px;
+  padding: 12px;
+  background: #fffafa;
+}
+
+.nutrient-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.nutrient-grid p {
+  margin: 0;
+}
+
+.recipe-kcal {
+  margin: 12px 0;
+  padding: 12px;
+  background: #fff1f3;
+  border-radius: 14px;
+  text-align: center;
+}
+
+.recipe-kcal span {
+  display: block;
+  font-size: 12px;
+  font-weight: 500;
+  color: #7e6c6c;
+}
+
+.recipe-kcal strong {
+  font-size: 20px;
+  font-weight: 700;
+}
+
+.recipe-nutrients button {
+  width: 100%;
+  height: 42px;
+  border: 1px solid #f1b8be;
+  border-radius: 12px;
+  background: #fff0f1;
+  color: #3d2d2d;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+/* 반응형 */
+@media (max-width: 1200px) {
+  .goal-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .goal-side {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .calorie-circle {
+    margin: 0 auto;
+  }
+
+  .recipe-card {
+    grid-template-columns: 1fr;
+  }
+
+  .recipe-card img {
+    width: 100%;
+    height: 220px;
+  }
+}
+
+@media (max-width: 900px) {
+  .fridge-top {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .goal-side {
+    grid-template-columns: 1fr;
+  }
+
+  .step-row {
+    grid-template-columns: 1fr;
+  }
+
+  .ingredient-tags,
+  .recommend-action {
+    grid-column: auto;
+  }
+}
