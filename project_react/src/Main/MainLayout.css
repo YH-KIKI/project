@@ -1,13 +1,14 @@
-/* MainLayout.css */
-
 /* 가장 바깥 배경 도화지 (전체 화면) */
 .page-background {
-  min-height: 100vh;
-  /* ★ 핵심: 기존 깨끗한 배경 이미지 파일 경로 ★ */
+  height: 100vh;
+  overflow: hidden;
+  /* 핵심: 기존 깨끗한 배경 이미지 파일 경로 */
   background-image: url('../images/Main.png'); 
-  background-size: cover;
-  background-position: center top;
+  background-size: 100%;
+  background-position: center ;
+  background-color: #FFF3EB;
   background-repeat: no-repeat;
+  background-attachment: fixed;
   
   display: flex;
   justify-content: center;
@@ -19,14 +20,14 @@
   font-family: 'Pretendard', sans-serif;
 }
 
-/* --- [가운데 앱 실제 콘텐츠 영역 (디자인의 빨간 박스 부분)] --- */
+/* --- 가운데 앱 실제 콘텐츠 영역  --- */
 .app-wrapper {
   display: flex; /* 내부에 사이드바와 메인콘텐츠를 가로로 배치 */
   width: 100%;
   max-width: 850px; /* ★ 중요: 가운데 비어있는 공간의 최대 크기를 제한 ★ */
   
   /* 앱 전체에 하얀색 배경을 깔아주고 둥근 모서리와 그림자를 줘서 종이처럼 떠보이게 함 */
-  min-height: 100vh;
+  height: 100vh;
   background-color: #ffffff;
   border-radius: 30px;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08); /* 은은한 그림자 */
@@ -42,6 +43,10 @@
   display: flex;
   flex-direction: column;
   gap: 24px;
+}
+
+.main-content::-webkit-scrollbar {
+  display: none; /* 스크롤바 자체를 안 보이게 처리! */
 }
 
 .top-header {
@@ -118,6 +123,9 @@
   flex-direction: column; /* 글자들을 세로로 예쁘게 정렬 */
   gap: 8px; /* 위아래 간격 */
   padding: 24px 20px; 
+  justify-content: center;
+  height: auto;
+  min-height: 120px;
 }
 
 .card-title {
@@ -162,7 +170,7 @@
   display: flex;
   justify-content: space-between;
   align-items: flex-end;
-  margin-bottom: -10px; /* 아래 카드와의 간격 조절 */
+  margin-bottom: 12px !important; /* 아래 카드와의 간격 조절 */
   margin-top: 10px;
 }
 
@@ -202,6 +210,7 @@
   aspect-ratio: 1 / 1; /* 정사각형 비율 */
   background-color: #f0f0f0;
   border-radius: 10px;
+  flex-shrink: 0;
 }
 
 .meal-desc {
@@ -353,6 +362,22 @@
 
 .ai-message strong {
   font-weight: 600; /* 첫째 줄 글씨 강조 */
+}
+
+.api-test-container {
+  flex-direction: column !important; /* 무조건 세로로 정렬 */
+  align-items: flex-start !important; /* 왼쪽 기준으로 차곡차곡 */
+  padding: 24px !important;
+  gap: 16px; /* 버튼과 인풋 창 사이의 간격 */
+  width: 100%;
+}
+
+/* 대시보드 전체의 위아래 간격을 시원하게 띄워줍니다 */
+.dashboard-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 32px; /* 섹션들이 더 이상 겹치지 않습니다 */
+  width: 100%;
 }
 
 /* 모바일 화면(가로 768px 이하)일 때 적용되는 규칙 */

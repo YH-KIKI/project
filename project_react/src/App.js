@@ -11,6 +11,7 @@ import FridgeRecommendation from "./SidebarMenu/components/FridgeRecommendation"
 import SignUp from "./Login/SignUp"
 import Mypage from "./Mypage/Mypage"
 import Information from "./Mypage/Information"
+import AiAnalysis from "./SidebarMenu/components/AiAnalysis";
 import Analyze from "./ImageAnalyze/Analyze"
 
 function App() {
@@ -28,6 +29,8 @@ function App() {
                         <Route path="/recommend" element={<DietRecommendation />} />
                         {/* 식단 기록 관리 */}
                         <Route path="/record" element={<MealRecordDetail />} />
+                        {/* AI 분석 페이지 */}
+                        <Route path="/analyze" element={<AiAnalysis />} />
                         {/* 냉장고 추천 기능 */}
                         <Route path="/fridge-recommend" element={<FridgeRecommendation />} />
                     </Route>
