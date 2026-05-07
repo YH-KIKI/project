@@ -14,6 +14,7 @@ import Information from "./Mypage/Information"
 import AiAnalysis from "./SidebarMenu/components/AiAnalysis";
 import Analyze from "./ImageAnalyze/Analyze"
 import FavoritePage from "./SidebarMenu/components/FavoritePage";
+import Stats from "./SidebarMenu/components/Stats";
 
 function App() {
     return (
@@ -36,6 +37,8 @@ function App() {
                         <Route path="/fridge-recommend" element={<FridgeRecommendation />} />
                         {/* 음식 & 식단 즐겨찾기*/}
                         <Route path="/favorite" element={<FavoritePage />} />
+                        {/* 통계 페이지 */}
+                        <Route path="/stats" element={<Stats />} />
                     </Route>
 
                     {/* 배경과 사이드바가 필요 없는 단독 화면들 */}

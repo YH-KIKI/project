@@ -1,12 +1,11 @@
-/* 전체 배경 박스 (모바일 앱 느낌의 흰색 카드) */
+/* 전체 컨테이너: 이중 여백 제거, 투명 배경, 양옆 24px 들여쓰기 */
 .recommendation-container {
-  background-color: #ffffff;
-  border-radius: 20px;
-  padding: 24px;
-  box-shadow: 0 8px 24px rgba(0,0,0,0.06); /* 부드러운 그림자 */
+  background-color: transparent;
+  padding: 0 24px;
+  box-sizing: border-box; 
   font-family: 'Pretendard', -apple-system, sans-serif;
-  max-width: 420px;
-  margin: 0 auto; /* 화면 가운데 정렬 */
+  width: 100%;
+  max-width: none; 
 }
 
 /* 상단 타이틀 영역 */
@@ -14,13 +13,13 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 24px;
+  margin-bottom: 20px;
 }
 .header-area .title {
   margin: 0;
-  font-size: 20px;
+  font-size: 22px;
   font-weight: 800;
-  color: #333;
+  color: #333333;
 }
 .header-area .date {
   font-size: 14px;
@@ -29,12 +28,26 @@
   cursor: pointer;
 }
 
+/* 메인 카드 영역 (냠냠 감성 테마 적용) */
+.recommendation-card {
+  background-color: #FFFAF9; 
+  border: 2px solid #FFEDEA; 
+  border-radius: 30px;
+  padding: 35px;
+  box-shadow: 0 10px 30px rgba(255, 182, 163, 0.5); 
+  width: 100%;
+  box-sizing: border-box; 
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
 /* 탭 버튼 리스트 */
 .tab-menu {
   display: flex;
   gap: 8px;
-  margin-bottom: 24px;
-  background-color: #f8f9fa; /* 탭 뒷배경 회색 */
+  background-color: #FFFFFF; 
+  border: 1px solid #FFEDEA;
   padding: 4px;
   border-radius: 12px;
 }
@@ -50,9 +63,8 @@
   border-radius: 8px;
   transition: all 0.2s ease;
 }
-/* 선택된(active) 탭 버튼 디자인 */
 .tab-button.active {
-  background-color: #ff8fa3; /* 냠냠이 핑크 포인트 컬러 */
+  background-color: #ff8fa3; 
   color: white;
   box-shadow: 0 2px 8px rgba(255, 143, 163, 0.4);
 }
@@ -62,20 +74,20 @@
   display: flex;
   flex-direction: column;
   gap: 16px;
-  min-height: 250px; /* 로딩 중에도 화면 높이가 훅 줄어들지 않도록 유지 */
+  min-height: 250px; 
 }
 .diet-card {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  border: 1px solid #f0f0f0;
+  border: 1px solid #FFEDEA;
   border-radius: 16px;
   padding: 16px;
-  background-color: #fafafa;
+  background-color: #FFFFFF;
   transition: transform 0.2s ease;
 }
 .diet-card:hover {
-  transform: translateY(-2px); /* 마우스를 올리면 카드가 살짝 위로 뜸 */
+  transform: translateY(-2px); 
 }
 
 /* 텍스트 영역 */
@@ -89,7 +101,7 @@
   color: #222;
   font-weight: 700;
   line-height: 1.4;
-  word-break: keep-all; /* 단어 단위로 예쁘게 줄바꿈 */
+  word-break: keep-all; 
 }
 .menu-kcal {
   margin: 0;
@@ -118,7 +130,7 @@
 .diet-image-box {
   width: 80px;
   height: 80px;
-  flex-shrink: 0; /* 화면이 좁아져도 이미지 박스가 찌그러지지 않음 */
+  flex-shrink: 0; 
   border-radius: 12px;
   overflow: hidden;
   background-color: #f0f0f0;
@@ -127,7 +139,7 @@
 .diet-img {
   width: 100%;
   height: 100%;
-  object-fit: cover; /* 세로/가로 이미지가 들어와도 1:1 비율에 맞춰 예쁘게 잘림 */
+  object-fit: cover; 
 }
 .no-img-placeholder {
   width: 100%;
@@ -153,7 +165,7 @@
 .spinner {
   font-size: 32px;
   margin-bottom: 12px;
-  animation: spin 1.5s linear infinite; /* 빙글빙글 도는 효과 */
+  animation: spin 1.5s linear infinite; 
 }
 @keyframes spin {
   0% { transform: rotate(0deg); }
@@ -175,9 +187,9 @@
   transition: all 0.2s ease;
 }
 .record-button:hover:not(:disabled) {
-  background-color: #ff768e; /* 마우스 올렸을 때 살짝 진해짐 */
+  background-color: #ff768e; 
 }
 .record-button:disabled {
-  background-color: #ffd6de; /* 로딩 중일 때는 연한 핑크색으로 클릭 방지 */
+  background-color: #ffd6de; 
   cursor: not-allowed;
 }

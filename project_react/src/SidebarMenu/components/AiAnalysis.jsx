@@ -7,7 +7,7 @@ const AiAnalysis = () => {
     <div className="analysis-container">
       {/* 1. 상단 타이틀 영역 */}
       <div className="analysis-header">
-        <h2>15. 영양소 분석 요약</h2>
+        <h2>AI 분석 요약</h2>
         <span className="date-badge">2024.05.20 월</span>
       </div>
 
@@ -46,7 +46,16 @@ const AiAnalysis = () => {
             <div className="macro-label"><span>단백질</span> <span>45/57g</span></div>
             <div className="progress-bar"><div className="progress-fill protein" style={{ width: '78%' }}></div></div>
           </div>
-          {/* 지방, 당류, 나트륨 등도 동일한 구조로 들어갑니다 */}
+          {/* 🌟 새로 추가된 지방 영역 */}
+          <div className="macro-item">
+            <div className="macro-label"><span>지방</span> <span>25/35g</span></div>
+            <div className="progress-bar"><div className="progress-fill fat" style={{ width: '71%' }}></div></div>
+          </div>
+          {/* 🌟 새로 추가된 나트륨 영역 */}
+          <div className="macro-item">
+            <div className="macro-label"><span>나트륨</span> <span>800/2000mg</span></div>
+            <div className="progress-bar"><div className="progress-fill sodium" style={{ width: '40%' }}></div></div>
+          </div>
         </div>
 
         {/* 2-4. 하단 AI 코치 피드백 */}
