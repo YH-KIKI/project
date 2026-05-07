@@ -28,6 +28,7 @@ const Sidebar = ({ userName }) => {
     { name: '목표 관리', icon: '❤️', path: '/goal' },
     { name: '통계', icon: '📊', path: '/stats' },
     { name: '마이페이지', icon: '👤', path: '/mypage' },
+    { name: '식단즐찾(삭제예정)', icon: '👤', path: '/favorite' },
   ];
 
   const handleParentClick = (menuName) => {
