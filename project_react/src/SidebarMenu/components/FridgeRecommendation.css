@@ -61,22 +61,31 @@
   font-weight: 750;
 }
 
+/* 레이아웃 */
 .goal-layout {
   display: grid;
-  grid-template-columns: 1fr 190px 1fr;
+  grid-template-columns: 1fr 180px 1fr;
   align-items: center;
-  gap: 34px;
+  gap: 20px;
 }
 
+/* 양쪽 탄단지 영역 */
 .goal-side {
   display: flex;
   flex-direction: column;
-  gap: 28px;
+  gap: 26px;
+  align-items: center;
+}
+
+.macro-item {
+  width: 150px;
+  text-align: center;
 }
 
 .macro-item b {
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 5px;
   margin-bottom: 8px;
   font-size: 18px;
@@ -91,15 +100,17 @@
   color: #3f3434;
   line-height: 1.35;
   white-space: nowrap;
+  text-align: center;
 }
 
+/* 프로그레스 바 */
 .macro-progress {
-  width: 100%;
+  width: 126px;
   height: 10px;
   background: #e7e2e2;
   border-radius: 999px;
   overflow: hidden;
-  margin-top: 10px;
+  margin: 10px auto 0;
 }
 
 .macro-progress span {
@@ -127,7 +138,7 @@
 .macro-item em {
   display: block;
   margin-top: 5px;
-  text-align: right;
+  text-align: center;
   font-size: 13px;
   font-weight: 600;
   font-style: normal;
@@ -136,8 +147,8 @@
 
 /* 가운데 칼로리 원 */
 .calorie-circle {
-  width: 185px;
-  height: 185px;
+  width: 180px;
+  height: 180px;
   border-radius: 50%;
   background: conic-gradient(
     #ff8fa3 0deg 245deg,
@@ -148,19 +159,15 @@
   justify-content: center;
   position: relative;
 
-  /* 그래프 두께 느낌 */
+  /* 두께감 */
   box-shadow: inset 0 0 0 10px #fff6f7;
 }
-
 
 .calorie-circle::before {
   content: "";
   position: absolute;
-
-  /* 안쪽 원을 작게 만들수록 그래프 두께가 두꺼워짐 */
-  width: 125px;
-  height: 125px;
-
+  width: 118px;
+  height: 118px;
   border-radius: 50%;
   background: #fffdfc;
   box-shadow: inset 0 0 0 1px #f1dddd;
@@ -190,7 +197,6 @@
   font-weight: 500;
   color: #6f6262;
 }
-
 
 /* 재료 입력 섹션 */
 .ingredient-section,
