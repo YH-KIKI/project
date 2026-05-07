@@ -62,6 +62,7 @@ const LoginPage = () => {
         
         // 1. 받은 토큰을 브라우저에 저장
         localStorage.setItem('login_token', token);
+        localStorage.setItem('user_num', response.data.usernum);
         // 2. 로그인 상태를 '참'으로 변경
         setIsLoggedIn(true);
         alert("로그인 성공!");

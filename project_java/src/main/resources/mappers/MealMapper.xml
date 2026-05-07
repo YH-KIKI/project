@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.hi.project.dao.MealDao">
+
+    <insert id="insertMealLog" useGeneratedKeys="true" keyProperty="mk_num">
+        INSERT INTO meal_log (mk_image, mk_meal_type, user_num)
+        VALUES (#{Foodimage}, #{Mealtype}, #{Usernum})
+    </insert>
+
+    <select id="findFoodByName" resultType="kr.hi.project.domain.FoodDTO">
+        SELECT 
+        	fo_num       AS Foodnum,
+	        fo_name      AS Foodname,
+	        fo_base_gram AS Basegram,
+	        fo_kcal      AS Foodkcal,
+	        fo_carbs     AS Foodcarbs,
+	        fo_protein   AS Foodprotein,
+	        fo_fat       AS Foodfat,
+	        fo_natrium   AS Foodnatrium,
+	        fo_type      AS Foodtype
+        FROM food WHERE fo_name = #{foName}
+    </select>
+
+    <insert id="insertMealDetail">
+        INSERT INTO meal_detail (md_kcal, md_portion, mk_num, fo_num, mday_num)
+        VALUES (#{Mealkcal}, #{Mealportion}, #{mk_num}, #{Foodnum}, #{Mday_num})
+    </insert>
+    
+    <select id="findMdayNumByToday" resultType="Integer">
+	    SELECT mday_num 
+	    FROM meal_day 
+	    WHERE user_num = #{usernum} 
+	      AND DATE(mday_date) = CURDATE() 
+	</select>
+	
+	<insert id="insertMealDay" parameterType="kr.hi.project.domain.MealDayDTO" 
+	        useGeneratedKeys="true" keyProperty="mday_num">
+	    INSERT INTO meal_day (user_num, mday_date) 
+	    VALUES (#{usernum}, NOW())
+	</insert>
+	
+	<select id="findMonthNum" resultType="Integer">
+	    SELECT mm_num FROM meal_month 
+	    WHERE user_num = #{userNum} AND mm_year = #{year} AND mm_month = #{month}
+	</select>
+	
+	<select id="findWeekNum" resultType="Integer">
+	    SELECT mw_num FROM meal_week 
+	    WHERE mm_num = #{mmNum} AND mw_year = #{year} AND mw_month = #{month} AND mw_week = #{week}
+	</select>
+	
+	<select id="findDayNum" resultType="Integer">
+	    SELECT mday_num FROM meal_day 
+	    WHERE mw_num = #{mwNum} AND md_day = #{day}
+	</select>
+	
+	<insert id="insertMonth" parameterType="kr.hi.project.domain.MealMonthDTO" 
+        useGeneratedKeys="true" keyProperty="Mm_num"> 
+        INSERT INTO meal_month (user_num, mm_year, mm_month)
+    	VALUES (#{User_num}, #{MealMonthyear}, #{MealMonthmonth})
+	</insert>
+	
+	<insert id="insertWeek" parameterType="kr.hi.project.domain.MealWeekDTO" 
+	        useGeneratedKeys="true" keyProperty="Mw_num">
+	    INSERT INTO meal_week (mm_num, mw_year, mw_month, mw_week)
+	    VALUES (#{Mm_num}, #{MealWeekyear}, #{MealWeekmonth}, #{MealWeekweek})
+	</insert>
+	
+	<insert id="insertDay" parameterType="kr.hi.project.domain.MealDayDTO" 
+	        useGeneratedKeys="true" keyProperty="Mday_num">
+	    INSERT INTO meal_day (mw_num, md_day)
+	    VALUES (#{Mw_num}, #{Mealdayday})
+	</insert>
+	<!-- 하루칼로리 -->
+	<update id="updateDailyKcal">
+	    UPDATE meal_day 
+	    SET mday_kcal = (
+	        SELECT SUM(md_kcal) 
+	        FROM meal_detail 
+	        WHERE mday_num = #{mdayNum}
+	    )
+	    WHERE mday_num = #{mdayNum}
+	</update>
+
+</mapper>
