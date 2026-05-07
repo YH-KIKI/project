@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import axios from 'axios';
 import Sidebar from '../Main/Sidebar';
 import '../Main/MainLayout.css';
+import { useNavigate } from 'react-router-dom';
 
 const Analyze = () => {
   const [selectedFile, setSelectedFile] = useState(null); // 실제 파일 객체
@@ -13,7 +14,9 @@ const Analyze = () => {
   const [mealType, setMealType] = useState('아침');   // 아침, 점심, 저녁
   const [foodDetails, setFoodDetails] = useState({}); // { '제육볶음': 200, '냉면': 450 } 형식
 
-  // 1. 사진 선택 시 처리
+  const navigate = useNavigate(); //이동 함수 생성
+
+  //사진 선택 시 처리
   const handleFileChange = (e) => {
     const file = e.target.files[0];
     if (file) {
@@ -24,7 +27,7 @@ const Analyze = () => {
     }
   };
 
-  // 2. AI 분석 시작 (Python 서버 호출)
+  //AI 분석 시작 (Python 서버 호출)
   const handleAnalyze = async () => {
     if (!selectedFile) {
       alert("분석할 사진을 먼저 선택해주세요!");
@@ -53,7 +56,7 @@ const Analyze = () => {
     }
   };
 
-  // 3. 음식 선택/해제 토글 함수
+  //음식 선택/해제 토글 함수
   const toggleFoodSelection = (foodName) => {
     if (selectedFoods.includes(foodName)) {
       // 이미 선택됨 -> 제거
@@ -64,7 +67,7 @@ const Analyze = () => {
     }
   };
 
-  // 4. 추천하기(DB 저장) 버튼 클릭
+  //추천하기(DB 저장) 버튼 클릭
   const handleRecommend = () => {
     if (selectedFoods.length === 0) {
       alert("먹은 음식을 선택해주세요!");
@@ -74,7 +77,7 @@ const Analyze = () => {
   //   // 여기에 Spring Boot로 selectedFoods를 보내는 axios 코드를 넣으면 됩니다.
   // };
 
-  // 선택된 음식들의 초기 중량을 0으로 설정하여 세팅
+  //선택된 음식들의 초기 중량을 0으로 설정하여 세팅
   const initialDetails = {};
     selectedFoods.forEach(food => {
       initialDetails[food] = 0; 
@@ -84,6 +87,33 @@ const Analyze = () => {
     setShowModal(true); // 입력 팝업 열기
   };
 
+  const handleFinalSubmit = async () => {
+    const formData = new FormData();
+    formData.append('file', selectedFile); // AI 분석에 썼던 원본 파일
+    
+    // 나머지 데이터를 JSON 객체로 묶어서 보냄
+    const data = {
+      usernum: Number(localStorage.getItem('user_num')),
+      mealType: mealType,
+      foodDetails: foodDetails // { "제육볶음": 200, "냉면": 450 }
+    };
+    formData.append('data', JSON.stringify(data));
+
+    try {
+      const response = await axios.post('http://localhost:8080/api/record', formData, {
+        headers: { 
+          'Content-Type': 'multipart/form-data',
+          'Authorization': `Bearer ${localStorage.getItem('login_token')}`
+        }
+      });
+      alert("식단 기록 완료!");
+      console.log(response)
+      setShowModal(false);
+      navigate('/'); // 기록 후 메인 페이지로 이동
+    } catch (error) {
+      console.error("기록 실패", error);
+    }
+  };
   return (
     <div className="page-background">
       <div className="app-wrapper">
@@ -262,6 +292,7 @@ const Analyze = () => {
                         console.log("최종 전송 데이터:", { mealType, foodDetails });
                         alert("DB에 기록되었습니다!");
                         setShowModal(false);
+                        handleFinalSubmit();
                       }}
                       style={{ flex: 1, padding: '12px', border: 'none', borderRadius: '15px', backgroundColor: '#c6465d', color: '#fff', fontWeight: 'bold', cursor: 'pointer' }}
                     >최종 기록</button>
