@@ -27,6 +27,7 @@ const Sidebar = ({ userName }) => {
     },
     { name: '목표 관리', icon: '❤️', path: '/goal' },
     { name: '통계', icon: '📊', path: '/stats' },
+    { name: '눈바디', icon: '📷', path: '/bodycheck' },
     { name: '마이페이지', icon: '👤', path: '/mypage' },
   ];
 
@@ -100,13 +101,20 @@ const Sidebar = ({ userName }) => {
         </ul>
       </nav>
 
-      <div className="sidebar-robot-wink">
-        <img src={robotWinkSidebarImg} alt="메뉴 하단 윙크 로봇" />
-      </div>
+     <div className="sidebar-footer">
+        {/* 🌟 1. 로봇과 말풍선을 함께 감싸는 새로운 묶음 박스를 만듭니다 */}
+        <div className="sidebar-bot-group">
+          
+          {/* 말풍선 */}
+          <div className="cheer-balloon-sm">
+            오늘도<br />건강한 한 끼<br />함께해요! 💚
+          </div>
+          
+          {/* 🌟 2. 밖에서 방황하던 로봇을 이 그룹 안, 말풍선 바로 밑으로 데려옵니다 */}
+          <div className="sidebar-robot-wink">
+            <img src={robotWinkSidebarImg} alt="메뉴 하단 윙크 로봇" />
+          </div>
 
-      <div className="sidebar-footer">
-        <div className="cheer-balloon-sm">
-          오늘도<br />건강한 한 끼<br />함께해요! 💚
         </div>
       </div>
     </aside>
