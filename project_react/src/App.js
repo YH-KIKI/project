@@ -15,6 +15,7 @@ import AiAnalysis from "./SidebarMenu/components/AiAnalysis";
 import Analyze from "./ImageAnalyze/Analyze"
 import FavoritePage from "./SidebarMenu/components/FavoritePage";
 import Stats from "./SidebarMenu/components/Stats";
+import BodyCheck from "./SidebarMenu/components/BodyCheck";
 
 function App() {
     return (
@@ -39,6 +40,8 @@ function App() {
                         <Route path="/favorite" element={<FavoritePage />} />
                         {/* 통계 페이지 */}
                         <Route path="/stats" element={<Stats />} />
+                        {/* 눈바디 페이지 */}
+                        <Route path="/bodycheck" element={<BodyCheck />} />
                     </Route>
 
                     {/* 배경과 사이드바가 필요 없는 단독 화면들 */}

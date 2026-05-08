@@ -1,0 +1,251 @@
+/* 전체 래퍼 및 헤더 (기존과 동일) */
+.body-check-wrapper {
+  padding: 0 24px; 
+  box-sizing: border-box; 
+  background-color: transparent; 
+  width: 100%;
+  font-family: 'Pretendard', sans-serif; 
+  display: flex;
+  flex-direction: column;
+}
+
+.bc-header-area {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  margin-bottom: 20px;
+}
+
+.bc-main-title {
+  margin: 0;
+  font-size: 20px; 
+  font-weight: 800;
+  color: #333333;
+}
+
+.bc-header-date {
+  font-size: 13px;
+  font-weight: 600;
+  color: #888;
+}
+
+/* 메인 핑크 그림자 카드 */
+.bc-main-card {
+  background-color: #FFFAF9; 
+  border: 2px solid #FFEDEA; 
+  border-radius: 30px; 
+  padding: 24px; 
+  box-shadow: 0 10px 30px rgba(255, 182, 163, 0.4); 
+  width: 100%;
+  box-sizing: border-box; 
+  display: flex;
+  flex-direction: column;
+}
+
+/* 🌟 통계 페이지에서 가져온 탭 메뉴 스타일 */
+/* 🌟 냠냠플래닛 테마가 완벽하게 적용된 탭 메뉴 스타일 */
+.bc-tab-menu {
+  display: flex;
+  background-color: #FFFFFF; 
+  border: 1px solid #FFEDEA;
+  border-radius: 16px;
+  padding: 6px;
+  gap: 8px;
+  margin-bottom: 20px; 
+}
+
+.bc-tab-button {
+  flex: 1;
+  padding: 12px 0;
+  border: none;
+  background-color: transparent;
+  color: #A3938C; /* 냠냠플래닛 특유의 부드러운 브라운그레이 텍스트 */
+  font-size: 15px;
+  font-weight: 700;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.3s ease; /* 부드러운 색상 전환 애니메이션 */
+  font-family: inherit;
+}
+
+/* 마우스를 살짝 올렸을 때 (연한 핑크빛 반응) */
+.bc-tab-button:hover {
+  background-color: #FFF0F2;
+  color: #ff8fa3;
+}
+
+/* 🌟 선택된(눌린) 탭: 냠냠플래닛 시그니처 핑크 + 예쁜 그림자 */
+.bc-tab-button.active {
+  background-color: #ff8fa3; 
+  color: white;
+  box-shadow: 0 4px 12px rgba(255, 143, 163, 0.35); /* 핑크빛이 은은하게 퍼지는 입체감 */
+}
+
+/* 🌟 선택된 내용이 들어가는 거대한 하얀 박스 */
+.bc-content-card {
+  background-color: #FFFFFF;
+  border: 1px solid #FFEDEA; 
+  border-radius: 20px; 
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  flex: 1; /* 남은 공간 꽉 채우기 */
+}
+
+/* --- [앨범 탭 전용 스타일] --- */
+
+/* 넓어진 공간에 맞춰 앨범을 2개씩 나란히 배치 (반응형 Grid) */
+.bc-album-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr); 
+  gap: 16px;
+  padding: 20px;
+  overflow-y: auto;
+  max-height: 480px; 
+}
+
+.bc-album-grid::-webkit-scrollbar {
+  display: none; 
+}
+
+.bc-album-item {
+  display: flex;
+  flex-direction: column;
+  padding: 16px;
+  gap: 12px;
+  background-color: #FFFFFF;
+  border: 1px solid #F0F0F0; 
+  border-radius: 16px;
+}
+
+.bc-item-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.bc-item-date {
+  font-size: 14px;
+  font-weight: 700;
+  color: #333;
+}
+
+.bc-camera-icon {
+  font-size: 16px;
+  color: #A3938C;
+}
+
+/* --- [비교 탭 전용 스타일] --- */
+
+.bc-compare-header {
+  padding: 20px 20px 0 20px;
+  text-align: center;
+}
+
+.bc-compare-dates {
+  margin: 0;
+  font-size: 14px;
+  color: #888;
+  font-weight: 700;
+}
+
+.bc-compare-content {
+  flex: 1;
+  padding: 20px;
+  display: flex;
+  gap: 20px; /* 꽉 찬 화면에 맞게 전/후 간격 확보 */
+  justify-content: center;
+  align-items: stretch;
+}
+
+.bc-compare-item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.bc-compare-label {
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.bc-compare-label strong {
+  font-size: 16px;
+  font-weight: 800;
+  color: #333;
+}
+
+.bc-compare-label span {
+  font-size: 14px;
+  font-weight: 600;
+  color: #888;
+}
+
+/* --- [공통: 사진 빈칸 및 버튼] --- */
+
+.bc-image-placeholder {
+  width: 100%;
+  background-color: #FAFAFA;
+  border: 1px dashed #D3D3D3;
+  border-radius: 12px;
+  min-height: 200px; /* 사진 들어갈 높이 넉넉히 */
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 10px; 
+  padding: 20px;
+  box-sizing: border-box;
+}
+
+.bc-compare-content .bc-image-placeholder {
+  height: 100%; 
+  min-height: 350px; /* 비교칸은 세로로 훨씬 길게 */
+}
+
+.bc-upload-btn {
+  background-color: #ffffff;
+  border: 1px solid #FFEDEA;
+  border-radius: 8px;
+  padding: 10px 14px;
+  font-size: 13px;
+  font-weight: 700;
+  color: #555;
+  cursor: pointer;
+  transition: all 0.2s;
+  width: 100%; 
+  max-width: 200px; /* 버튼이 무한정 길어지는 것 방지 */
+  font-family: inherit;
+}
+
+.bc-upload-btn:hover {
+  background-color: #FFF0F2;
+  border-color: #ff8fa3;
+  color: #ff8fa3;
+}
+
+.bc-button-wrapper {
+  padding: 0 20px 20px 20px;
+}
+
+.bc-primary-btn {
+  width: 100%;
+  background-color: #ff8fa3; 
+  color: white;
+  border: none;
+  border-radius: 12px;
+  padding: 14px;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 4px 10px rgba(255, 143, 163, 0.3);
+  transition: background-color 0.2s;
+  font-family: inherit;
+}
+
+.bc-primary-btn:hover {
+  background-color: #FF7B93;
+}
