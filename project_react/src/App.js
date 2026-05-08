@@ -12,6 +12,7 @@ import SignUp from "./Login/SignUp"
 import Mypage from "./Mypage/Mypage"
 import Information from "./Mypage/Information"
 import Favorite from "./Mypage/Favorite"
+import FavoriteMeal from "./Mypage/Favorite"
 import MealLogPage from "./Mypage/MealLogPage"
 import AiAnalysis from "./SidebarMenu/components/AiAnalysis";
 import Analyze from "./ImageAnalyze/Analyze"
@@ -66,8 +67,8 @@ function App() {
                     <Route path="/mypage" element={<Mypage />} />
                     {/*개인정보 주소(/information)*/}
                     <Route path="/information" element={<Information />} />
-                    {/*즐겨찾기 주소(/favorite)*/}
-                    <Route path="/favorite" element={<Favorite />} />
+                    {/*식단즐겨찾기 주소(/favoritemeal)*/}
+                    <Route path="/favoritemeal" element={<FavoriteMeal />} />
                     {/*식단기록 주소(/meallogpage)*/}
                     <Route path="/meallogpage" element={<MealLogPage />} />
                     {/*음식사진인식 주소(/analyze)*/}

@@ -1,5 +1,6 @@
 package kr.hi.project.config;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -10,11 +11,16 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 @Configuration
 public class WebConfig implements WebMvcConfigurer{
 	
+	//application.properties에 설정된 경로를 가져오되, 
+    //만약 설정이 없으면 기본값으로 그 사람의 경로를 쓰겠다는 뜻입니다.
+    @Value("${spring.web.resources.static-locations:file:///C:/project_uploads/}")
+    private String uploadPath;
+	
 	// *** [박하/추가] 서버에 저장된 사진을 URL(http://localhost:8080/uploads/파일명)로 불러올 수 있도록 매핑
 	@Override
 	public void addResourceHandlers(ResourceHandlerRegistry registry) {
 		registry.addResourceHandler("/uploads/**")
-				.addResourceLocations("file:///C:/project_uploads/"); 
+				.addResourceLocations(uploadPath); 
 	}
 	
 	@Override
