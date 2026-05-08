@@ -4,12 +4,30 @@ import "./MealRecordDetail.css";
 import MealRecordModal from "./MealRecordModal";
 import MealDetailModal from "./MealDetailModal";
 
+const NutrientBar = ({ icon, name, status, type }) => {
+  return (
+    <div className="nutrient-row">
+      <div className={`nutrient-icon ${type}`}>{icon}</div>
+
+      <div className="nutrient-info">
+        <p>
+          {name} <span className={type}>{status}</span>
+        </p>
+        <div className="bar-bg">
+          <div className={`bar-fill ${type}`}></div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 const MealRecordDetail = () => {
   const [activeMeal, setActiveMeal] = useState("아침");
   const [selectedDate, setSelectedDate] = useState(new Date(2024, 4, 20));
   const [isCalendarOpen, setIsCalendarOpen] = useState(false);
   const [isRecordModalOpen, setIsRecordModalOpen] = useState(false);
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
+  const [favoriteRecords, setFavoriteRecords] = useState({});
 
   const [mealRecords, setMealRecords] = useState({});
 
@@ -33,8 +51,11 @@ const MealRecordDetail = () => {
   const dateKey = formatDateKey(selectedDate);
   const recordKey = `${dateKey}_${activeMeal}`;
   const mealData = mealRecords[recordKey] || null;
+  const isFavorite = favoriteRecords[recordKey] || false;
 
-  const recordedDates = [...new Set(Object.keys(mealRecords).map((key) => key.split("_")[0]))];
+  const recordedDates = [
+    ...new Set(Object.keys(mealRecords).map((key) => key.split("_")[0])),
+  ];
 
   const dailyTotalKcal = Object.entries(mealRecords)
     .filter(([key]) => key.startsWith(dateKey))
@@ -88,14 +109,33 @@ const MealRecordDetail = () => {
 >>>>>>> parkha
   };
 
+  const toggleFavorite = () => {
+    setFavoriteRecords({
+      ...favoriteRecords,
+      [recordKey]: !isFavorite,
+    });
+  };
+
+  const getFoodSummary = () => {
+    if (!mealData?.foods) return "";
+
+    const names = mealData.foods.slice(0, 3).map((food) => food.name).join(" · ");
+    const extraCount = mealData.foods.length - 3;
+
+    return extraCount > 0 ? `${names} 외 ${extraCount}개` : names;
+  };
+
   return (
+    <div className="analysis-card">
     <div className="meal-detail-container">
       <h2 className="meal-detail-title">식단 기록 상세</h2>
 
 <<<<<<< HEAD
       <div className="date-wrapper">
         <div className="date-box">
-          <button className="date-arrow" onClick={() => moveDate(-1)}>‹</button>
+          <button className="date-arrow" onClick={() => moveDate(-1)}>
+            ‹
+          </button>
 
           <button
             className="date-text-btn"
@@ -104,7 +144,9 @@ const MealRecordDetail = () => {
             {formatDateText(selectedDate)}
           </button>
 
-          <button className="date-arrow" onClick={() => moveDate(1)}>›</button>
+          <button className="date-arrow" onClick={() => moveDate(1)}>
+            ›
+          </button>
         </div>
 
         {isCalendarOpen && (
@@ -113,7 +155,11 @@ const MealRecordDetail = () => {
               <button
                 onClick={() =>
                   setSelectedDate(
-                    new Date(selectedDate.getFullYear(), selectedDate.getMonth() - 1, 1)
+                    new Date(
+                      selectedDate.getFullYear(),
+                      selectedDate.getMonth() - 1,
+                      1
+                    )
                   )
                 }
               >
@@ -127,7 +173,11 @@ const MealRecordDetail = () => {
               <button
                 onClick={() =>
                   setSelectedDate(
-                    new Date(selectedDate.getFullYear(), selectedDate.getMonth() + 1, 1)
+                    new Date(
+                      selectedDate.getFullYear(),
+                      selectedDate.getMonth() + 1,
+                      1
+                    )
                   )
                 }
               >
@@ -143,7 +193,9 @@ const MealRecordDetail = () => {
 
             <div className="calendar-grid">
               {getCalendarDays().map((date, index) => {
-                if (!date) return <div key={index} className="calendar-empty"></div>;
+                if (!date) {
+                  return <div key={index} className="calendar-empty"></div>;
+                }
 
                 const key = formatDateKey(date);
                 const isSelected = key === dateKey;
@@ -230,6 +282,13 @@ const MealRecordDetail = () => {
         </div>
       ) : (
         <div className="meal-content-card">
+          <button
+            className={`meal-favorite-btn ${isFavorite ? "active" : ""}`}
+            onClick={toggleFavorite}
+          >
+            {isFavorite ? "❤" : "♡"}
+          </button>
+
           <div className="meal-main-info">
             <div
               className="meal-photo-box clickable"
@@ -247,32 +306,54 @@ const MealRecordDetail = () => {
             <div className="nutrition-area">
               <h4>AI 영양분석</h4>
 
-              <div className="nutrient-item">
-                <p>탄수화물 <span>[적정]</span></p>
-                <div className="bar-bg">
-                  <div className="bar-fill carb"></div>
-                </div>
-              </div>
+              <NutrientBar
+                icon="🌾"
+                name="탄수화물"
+                status="적정"
+                type="carb"
+              />
 
-              <div className="nutrient-item">
-                <p>단백질 <span>[충분]</span></p>
-                <div className="bar-bg">
-                  <div className="bar-fill protein"></div>
-                </div>
-              </div>
+              <NutrientBar
+                icon="🥩"
+                name="단백질"
+                status="충분"
+                type="protein"
+              />
 
-              <div className="nutrient-item">
-                <p>지방 <span>[적정]</span></p>
-                <div className="bar-bg">
-                  <div className="bar-fill fat"></div>
-                </div>
-              </div>
+              <NutrientBar
+                icon="🥑"
+                name="지방"
+                status="적정"
+                type="fat"
+              />
+
+              <NutrientBar
+                icon="🧂"
+                name="나트륨"
+                status="주의"
+                type="sodium"
+              />
             </div>
           </div>
 
-          <div className="meal-desc">
-            <h3>{mealData.totalKcal} kcal</h3>
-            <p>{mealData.foods.map((food) => food.name).join(", ")}</p>
+          <div className="meal-summary-row">
+            <div className="meal-kcal-box">
+              <div className="summary-icon">🔥</div>
+              <div>
+                <span>총 섭취 칼로리</span>
+                <strong>{mealData.totalKcal} kcal</strong>
+              </div>
+            </div>
+
+            <div className="meal-food-box">
+              <div className="summary-icon">🍴</div>
+              <div>
+                <span>
+                  등록 음식 <b>{mealData.foods.length}개</b>
+                </span>
+                <p>{getFoodSummary()}</p>
+              </div>
+            </div>
           </div>
 
           <div className="ai-comment-box">
@@ -283,7 +364,10 @@ const MealRecordDetail = () => {
             </p>
           </div>
 
-          <button className="record-submit-btn" onClick={() => setIsRecordModalOpen(true)}>
+          <button
+            className="record-submit-btn"
+            onClick={() => setIsRecordModalOpen(true)}
+          >
             식단 수정하기
           </button>
         </div>
@@ -372,6 +456,7 @@ const MealRecordDetail = () => {
         </button>
       </div>
 >>>>>>> parkha
+    </div>
     </div>
   );
 };

@@ -11,8 +11,11 @@ import FridgeRecommendation from "./SidebarMenu/components/FridgeRecommendation"
 import SignUp from "./Login/SignUp"
 import Mypage from "./Mypage/Mypage"
 import Information from "./Mypage/Information"
+import Favorite from "./Mypage/Favorite"
+import MealLogPage from "./Mypage/MealLogPage"
 import AiAnalysis from "./SidebarMenu/components/AiAnalysis";
 import Analyze from "./ImageAnalyze/Analyze"
+import FavoritePage from "./SidebarMenu/components/FavoritePage";
 import Stats from "./SidebarMenu/components/Stats";
 import BodyCheck from "./SidebarMenu/components/BodyCheck";
 
@@ -36,9 +39,11 @@ function App() {
                         {/* 식단 기록 관리 */}
                         <Route path="/record" element={<MealRecordDetail />} />
                         {/* AI 분석 페이지 */}
-                        <Route path="/analyze" element={<AiAnalysis />} />
+                        {/* <Route path="/analyze" element={<AiAnalysis />} /> */}
                         {/* 냉장고 추천 기능 */}
                         <Route path="/fridge-recommend" element={<FridgeRecommendation />} />
+                        {/* 음식 & 식단 즐겨찾기*/}
+                        <Route path="/favorite" element={<FavoritePage />} />
                         {/* 통계 페이지 */}
                         <Route path="/stats" element={<Stats />} />
                         {/* 눈바디 페이지 */}
@@ -60,6 +65,10 @@ function App() {
                     <Route path="/mypage" element={<Mypage />} />
                     {/*개인정보 주소(/information)*/}
                     <Route path="/information" element={<Information />} />
+                    {/*즐겨찾기 주소(/favorite)*/}
+                    <Route path="/favorite" element={<Favorite />} />
+                    {/*식단기록 주소(/meallogpage)*/}
+                    <Route path="/meallogpage" element={<MealLogPage />} />
                     {/*음식사진인식 주소(/analyze)*/}
                     <Route path="/analyze" element={<Analyze />} />
                 </Routes>

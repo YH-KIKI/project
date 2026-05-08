@@ -6,6 +6,9 @@
   color: #2f2424;
   text-align: left;
   letter-spacing: -0.3px;
+
+  /* 🌟 핵심 수정 */
+  padding: 0 24px;
 }
 
 .fridge-container * {
@@ -28,8 +31,8 @@
 
 .fridge-title {
   margin: 0;
-  font-size: 34px;
-  font-weight: 800;
+  font-size: 30px;
+  font-weight: 750;
   line-height: 1.15;
 }
 
@@ -45,22 +48,24 @@
   font-weight: 700;
 }
 
-/* 목표 섭취량 카드 */
 .goal-summary-card {
+  width: 100%;
   background: #fffdfc;
   border: 1px solid #ead7d7;
   border-radius: 22px;
-  padding: 24px 28px;
+  padding: 34px 36px 32px;
   margin-bottom: 18px;
   box-shadow: 0 4px 14px rgba(0, 0, 0, 0.035);
 }
 
 .goal-summary-card h3 {
-  margin: 0 0 24px;
-  font-size: 25px;
+  margin: 0 0 34px;
+  font-size: 19px;
   font-weight: 750;
+  text-align: center;
 }
 
+/* 목표 영역 전체 */
 .goal-layout {
   display: grid;
   grid-template-columns: 1fr 190px 1fr;
@@ -68,29 +73,42 @@
   gap: 34px;
 }
 
+/* 좌우 영역 */
 .goal-side {
   display: flex;
   flex-direction: column;
-  gap: 28px;
+  gap: 42px;
+  align-items: stretch;
+}
+
+.macro-item {
+  width: 100%;
+  min-height: 118px;
+  text-align: left;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
 }
 
 .macro-item b {
   display: flex;
   align-items: center;
-  gap: 5px;
-  margin-bottom: 8px;
+  justify-content: flex-start;
+  gap: 7px;
   font-size: 18px;
   font-weight: 700;
   white-space: nowrap;
 }
 
 .macro-item p {
-  margin: 2px 0;
+  margin: 0px 0;
   font-size: 14px;
   font-weight: 600;
   color: #3f3434;
   line-height: 1.35;
   white-space: nowrap;
+  text-align: left;
 }
 
 .macro-progress {
@@ -99,7 +117,7 @@
   background: #e7e2e2;
   border-radius: 999px;
   overflow: hidden;
-  margin-top: 10px;
+  margin: 4px 0 0;
 }
 
 .macro-progress span {
@@ -126,9 +144,8 @@
 
 .macro-item em {
   display: block;
-  margin-top: 5px;
-  text-align: right;
-  font-size: 13px;
+  text-align: center;
+  font-size: 14px;
   font-weight: 600;
   font-style: normal;
   color: #8b7c7c;
@@ -136,8 +153,8 @@
 
 /* 가운데 칼로리 원 */
 .calorie-circle {
-  width: 185px;
-  height: 185px;
+  width: 190px;
+  height: 190px;
   border-radius: 50%;
   background: conic-gradient(
     #ff8fa3 0deg 245deg,
@@ -147,20 +164,14 @@
   align-items: center;
   justify-content: center;
   position: relative;
-
-  /* 그래프 두께 느낌 */
   box-shadow: inset 0 0 0 10px #fff6f7;
 }
-
 
 .calorie-circle::before {
   content: "";
   position: absolute;
-
-  /* 안쪽 원을 작게 만들수록 그래프 두께가 두꺼워짐 */
-  width: 125px;
-  height: 125px;
-
+  width: 128px;
+  height: 128px;
   border-radius: 50%;
   background: #fffdfc;
   box-shadow: inset 0 0 0 1px #f1dddd;
@@ -173,104 +184,106 @@
 }
 
 .circle-inner strong {
-  font-size: 32px;
+  font-size: 34px;
   font-weight: 800;
   line-height: 1;
 }
 
 .circle-inner span {
   margin-left: 3px;
-  font-size: 14px;
-  font-weight: 600;
+  font-size: 15px;
+  font-weight: 700;
 }
 
 .circle-inner p {
-  margin: 6px 0 0;
-  font-size: 12px;
-  font-weight: 500;
+  margin: 8px 0 0;
+  font-size: 13px;
+  font-weight: 600;
   color: #6f6262;
 }
-
-
-/* 재료 입력 섹션 */
-.ingredient-section,
-.empty-recipe-section,
-.recipe-section {
-  background: #fffdfc;
-  border: 1px solid #ead7d7;
-  border-radius: 22px;
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.035);
-}
+/* =========================
+   냉장고 재료 입력 섹션
+========================= */
 
 .ingredient-section {
-  padding: 24px;
+  padding: 20px;
   margin-bottom: 18px;
 }
 
-.ingredient-section h3,
-.empty-recipe-section h3,
-.recipe-section h3 {
+.ingredient-section h3 {
   margin: 0;
-  font-size: 25px;
+  font-size: 19px;   /* 25 → 축소 */
   font-weight: 750;
+  line-height: 1.2;
 }
 
 .ingredient-section > p {
-  margin: 10px 0 18px;
-  color: #5f5555;
-  font-size: 15px;
+  margin: 6px 0 14px;
+  color: #6d5c5c;
+  font-size: 13px;   /* 15 → 축소 */
   font-weight: 500;
 }
 
+/* 기존 점선 박스 제거 */
 .step-box {
-  border: 1px dashed #ff9db0;
-  border-radius: 18px;
-  overflow: hidden;
+  border: none;
+  border-radius: 0;
+  overflow: visible;
+  background: transparent;
 }
 
+/* 줄 간격 + 내부 크기 축소 */
 .step-row {
   display: grid;
-  grid-template-columns: 130px 1fr auto;
+  grid-template-columns: 92px 1fr auto; /* 130px → 축소 */
   align-items: center;
-  gap: 14px;
-  padding: 16px;
-  border-bottom: 1px solid #f3dddd;
+  gap: 10px;
+
+  padding: 14px 4px; /* 더 슬림 */
+  border-bottom: 1px solid #f1e3e3; /* 구분선만 */
 }
 
 .step-row:last-child {
   border-bottom: none;
 }
 
+/* STEP 번호 */
 .step-label {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
 }
 
 .step-label span {
-  width: 30px;
-  height: 30px;
+  width: 24px;
+  height: 24px;
   border-radius: 50%;
-  background: #ff6686;
+  background: #ff7f9a;
   color: white;
+
   display: flex;
   align-items: center;
   justify-content: center;
+
+  font-size: 12px;
   font-weight: 700;
 }
 
 .step-label b {
-  font-size: 16px;
+  font-size: 13px; /* 축소 */
   font-weight: 700;
+  color: #3c3030;
 }
 
+/* 인풋 */
 .step-row input {
-  height: 50px;
-  border: 1px solid #e4cfcf;
-  border-radius: 14px;
-  padding: 0 16px;
-  font-size: 15px;
-  font-weight: 400;
+  height: 42px; /* 50 → 축소 */
+  border: 1px solid #ead8d8;
+  border-radius: 12px;
+  padding: 0 14px;
+
+  font-size: 13px;
+  font-weight: 500;
   outline: none;
 }
 
@@ -278,58 +291,81 @@
   border-color: #ff8fa3;
 }
 
-.step-row > button,
-.recommend-action button {
+/* 추가 버튼 */
+.step-row > button {
+  width: 72px;   /* 축소 */
+  height: 40px;
+
   border: none;
-  background: #ff6686;
+  border-radius: 12px;
+
+  background: #ff7d97;
   color: white;
-  border-radius: 14px;
+
+  font-size: 14px;
   font-weight: 700;
   cursor: pointer;
 }
 
-.step-row > button {
-  width: 92px;
-  height: 50px;
-  font-size: 16px;
-}
-
+/* 태그 영역 */
 .ingredient-tags {
   display: flex;
   flex-wrap: wrap;
-  gap: 10px;
+  gap: 8px;
+
   grid-column: 2 / 4;
 }
 
+/* 태그 버튼 */
 .ingredient-tags button {
   border: none;
-  background: #fff0f1;
-  color: #3c3030;
-  padding: 10px 20px;
+  background: #fff2f4;
+  color: #4a3b3b;
+
+  padding: 8px 14px; /* 축소 */
   border-radius: 999px;
-  font-size: 15px;
+
+  font-size: 13px;
   font-weight: 600;
   cursor: pointer;
 }
 
+/* 추천 버튼 영역 */
 .recommend-action {
   grid-column: 2 / 4;
 }
 
+/* AI 추천 버튼 */
 .recommend-action button {
   width: 100%;
-  height: 52px;
-  font-size: 16px;
-  background: linear-gradient(90deg, #ff6686, #ff4f78);
+  height: 40px; /* 52 → 축소 */
+
+  border: none;
+  border-radius: 13px;
+
+  background: linear-gradient(
+    90deg,
+    #ff7292,
+    #ff5d84
+  );
+
+  color: white;
+  font-size: 14px;
+  font-weight: 700;
+
+  cursor: pointer;
 }
 
+/* 하단 안내문 */
 .recommend-action p {
-  margin: 10px 0 0;
-  color: #8c7b7b;
-  font-size: 13px;
-  font-weight: 500;
-}
+  margin: 7px 0 0;
+  color: #9a8787;
 
+  font-size: 11px;
+  font-weight: 500;
+
+  text-align: center;
+}
 /* 추천 결과 없음 */
 .empty-recipe-section,
 .recipe-section {

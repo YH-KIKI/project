@@ -28,7 +28,8 @@ public class SecurityConfig {
             .cors(cors -> cors.configurationSource(corsConfigurationSource())) // CORS 설정 적용
             .csrf(csrf -> csrf.disable()) // 테스트를 위해 CSRF 잠시 비활성화
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/api/signup", 
+                .requestMatchers("/uploads/**",
+                				 "/api/signup", 
                                  "/api/login", 
                                  "/api/user/info",
                                  "/api/information_updata",
@@ -40,7 +41,8 @@ public class SecurityConfig {
                                  "/api/comments/**", // [박하/추가] 댓글 API 허용 추가
                                  "/api/likes/**",    // [박하/추가] 추천 API 허용 추가
                                  "/uploads/**" // [박하/추가] 서버에 저장된 이미지를 로그인 없이도 브라우저에서 볼 수 있도록 허용
-
+                                 
+                                 "/api/meal/**"
                                  ).permitAll() // 가입, 로그인은 누구나 가능
                 .anyRequest().authenticated() // 나머지는 로그인이 필요함
             );
