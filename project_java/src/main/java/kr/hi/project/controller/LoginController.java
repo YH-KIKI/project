@@ -23,10 +23,8 @@ public class LoginController {
 	@Autowired
 	private UserService userService;
 
-<<<<<<< HEAD
-=======
+
 	// *** [박하/수정] 기존에는 문자열만 보냈지만, 숫자가 포함된 객체를 보내기 위해 Object 타입으로 변경
->>>>>>> parkha
 	@PostMapping("/api/login")
 	public Map<String, Object> login(@RequestBody Map<String, String> loginData){
 		String userid = loginData.get("userid");
@@ -37,13 +35,10 @@ public class LoginController {
 		if(user != null) {
 			// 성공하면 토큰 생성
 			String token = jwtService.createToken(userid);
-<<<<<<< HEAD
-			int usernum = userService.findUsernumByUserid(userid);
-			Map<String, Object> response = new HashMap<>();
-			response.put("token", token);
-			response.put("usernum", usernum);
-=======
-			
+
+//			int usernum = userService.findUsernumByUserid(userid);
+//			Map<String, Object> response = new HashMap<>();
+//			response.put("token", token);
 			/* *** [기존 코드 주석 처리] 
 			Map<String, String> response = new HashMap<>();
 			response.put("token", token);
@@ -55,6 +50,7 @@ public class LoginController {
 			
 			Map<String, Object> response = new HashMap<>();
 			response.put("token", token);
+			response.put("usernum", usernum);
 			
 			// *** [박하/추가] 리액트의 localStorage.setItem('user', ...) 형식에 맞게 user 키 안에 유저 정보를 객체로 담아 보냄
 			Map<String, Object> userInfo = new HashMap<>();
@@ -62,7 +58,6 @@ public class LoginController {
 			userInfo.put("user_id", userid);
 			response.put("user", userInfo);
 			
->>>>>>> parkha
 			return response;
 		}else {
 			throw new RuntimeException("아이디나 비밀번호가 틀렸어요.");
@@ -101,8 +96,7 @@ public class LoginController {
 		
 	}
 
-<<<<<<< HEAD
+
 }
-=======
-}
->>>>>>> parkha
+
+
