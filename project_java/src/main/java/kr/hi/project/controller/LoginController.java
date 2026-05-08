@@ -24,7 +24,7 @@ public class LoginController {
 	private UserService userService;
 
 	@PostMapping("/api/login")
-	public Map<String, String> login(@RequestBody Map<String, String> loginData){
+	public Map<String, Object> login(@RequestBody Map<String, String> loginData){
 		String userid = loginData.get("userid");
 		String password = loginData.get("password");
 		
@@ -33,9 +33,10 @@ public class LoginController {
 		if(user != null) {
 			// 성공하면 토큰 생성
 			String token = jwtService.createToken(userid);
-			
-			Map<String, String> response = new HashMap<>();
+			int usernum = userService.findUsernumByUserid(userid);
+			Map<String, Object> response = new HashMap<>();
 			response.put("token", token);
+			response.put("usernum", usernum);
 			return response;
 		}else {
 			throw new RuntimeException("아이디나 비밀번호가 틀렸어요.");

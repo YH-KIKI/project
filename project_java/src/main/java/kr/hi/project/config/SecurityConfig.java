@@ -5,6 +5,7 @@ import java.util.Arrays;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
@@ -13,6 +14,7 @@ import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 @Configuration
+@EnableWebSecurity
 public class SecurityConfig {
 
     @Bean
@@ -32,7 +34,8 @@ public class SecurityConfig {
                                  "/api/user/info",
                                  "/api/information_updata",
                                  "/api/information_select",
-                                 "/api/v1/diet/**"  // 🌟 이 부분이 방금 새로 추가된 곳입니다! (식단 API 허용)
+                                 "/api/v1/diet/**",  // 🌟 이 부분이 방금 새로 추가된 곳입니다! (식단 API 허용)
+                                 "/api/record"
                                  ).permitAll() // 가입, 로그인은 누구나 가능
                 .anyRequest().authenticated() // 나머지는 로그인이 필요함
             );
