@@ -19,7 +19,8 @@ import FavoritePage from "./SidebarMenu/components/FavoritePage";
 import Stats from "./SidebarMenu/components/Stats";
 import BodyCheck from "./SidebarMenu/components/BodyCheck";
 
-import Community from "./community/Community" //요고 추가해따잉~
+
+import Community from "./community/Community"; //요고 추가해따잉~
 import PostWrite from "./community/PostWrite"; //요고 추가해따잉~
 import PostDetail from "./community/PostDetail"; //요고 추가해따잉~
 
