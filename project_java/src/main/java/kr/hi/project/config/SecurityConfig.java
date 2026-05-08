@@ -29,13 +29,15 @@ public class SecurityConfig {
             .cors(cors -> cors.configurationSource(corsConfigurationSource())) // CORS 설정 적용
             .csrf(csrf -> csrf.disable()) // 테스트를 위해 CSRF 잠시 비활성화
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/api/signup", 
+                .requestMatchers("/uploads/**",
+                				 "/api/signup", 
                                  "/api/login", 
                                  "/api/user/info",
                                  "/api/information_updata",
                                  "/api/information_select",
                                  "/api/v1/diet/**",  // 🌟 이 부분이 방금 새로 추가된 곳입니다! (식단 API 허용)
-                                 "/api/record"
+                                 "/api/record",
+                                 "/api/meal/**"
                                  ).permitAll() // 가입, 로그인은 누구나 가능
                 .anyRequest().authenticated() // 나머지는 로그인이 필요함
             );

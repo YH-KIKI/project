@@ -9,6 +9,11 @@ const Mypage = () => {
 	const [isLoggedIn, setIsLoggedIn] = useState(false);
 
 	const navigate = useNavigate(); //이동 함수 생성
+
+  const handlefavoriteClick = () => {
+    navigate('/favorite')
+  }
+
   const handleInformationClick = () => {
     navigate('/information'); //로그인 페이지 경로로 이동
   };
@@ -151,7 +156,8 @@ const Mypage = () => {
             <div style={{ fontSize: '50px', marginBottom: '10px' }}>🏅</div>
             <div style={{ fontWeight: 'bold', fontSize: '18px' }}>내 뱃지</div>
           </div>
-          <div style={{ border: '1px solid #FFDADA', borderRadius: '30px', padding: '40px', textAlign: 'center' }}>
+          <div style={{ border: '1px solid #FFDADA', borderRadius: '30px', padding: '40px', textAlign: 'center' }}
+            onClick={handlefavoriteClick}>
             <div style={{ fontSize: '50px', marginBottom: '10px' }}>⭐</div>
             <div style={{ fontWeight: 'bold', fontSize: '18px' }}>즐겨찾기</div>
           </div>
