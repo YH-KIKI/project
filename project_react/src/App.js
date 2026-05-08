@@ -35,7 +35,7 @@ function App() {
                         {/* 식단 기록 관리 */}
                         <Route path="/record" element={<MealRecordDetail />} />
                         {/* AI 분석 페이지 */}
-                        {/* <Route path="/analyze" element={<AiAnalysis />} /> */}
+                        <Route path="/analyze" element={<AiAnalysis />} />
                         {/* 냉장고 추천 기능 */}
                         <Route path="/fridge-recommend" element={<FridgeRecommendation />} />
                         {/* 음식 & 식단 즐겨찾기*/}
@@ -58,7 +58,7 @@ function App() {
                     {/*식단기록 주소(/meallogpage)*/}
                     <Route path="/meallogpage" element={<MealLogPage />} />
                     {/*음식사진인식 주소(/analyze)*/}
-                    <Route path="/analyze" element={<Analyze />} />
+                    <Route path="/aiphoto" element={<Analyze />} />
                 </Routes>
             </div>
         </Router>

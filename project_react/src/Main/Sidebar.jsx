@@ -15,8 +15,8 @@ const Sidebar = ({ userName }) => {
 
   const menuItems = [
     { name: '대시보드', icon: '🏠', path: '/' },  
+    { name: 'AI 분석', icon: '✨', path: '/aiphoto' },
     { name: '식단 기록', icon: '📝', path: '/record' },
-    { name: 'AI 분석', icon: '✨', path: '/analyze' },
     {
       name: 'AI 식단 추천',
       icon: '🥗',
@@ -26,7 +26,12 @@ const Sidebar = ({ userName }) => {
       ],
     },
     { name: '목표 관리', icon: '❤️', path: '/goal' },
-    { name: '통계', icon: '📊', path: '/stats' },
+    { name: '통계', icon: '📊',
+      children: [
+        { name: 'AI 하루요약', path: '/analyze' },
+        { name: '통계', path: '/stats' },
+      ],
+    },
     { name: '눈바디', icon: '📷', path: '/bodycheck' },
     { name: '마이페이지', icon: '👤', path: '/mypage' },
     { name: '식단즐찾(삭제예정)', icon: '👤', path: '/favorite' },
