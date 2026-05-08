@@ -16,6 +16,10 @@ import Analyze from "./ImageAnalyze/Analyze"
 import Stats from "./SidebarMenu/components/Stats";
 import BodyCheck from "./SidebarMenu/components/BodyCheck";
 
+import Community from "./community/Community" //요고 추가해따잉~
+import PostWrite from "./community/PostWrite"; //요고 추가해따잉~
+import PostDetail from "./community/PostDetail"; //요고 추가해따잉~
+
 function App() {
     return (
         <Router>
@@ -39,6 +43,14 @@ function App() {
                         <Route path="/stats" element={<Stats />} />
                         {/* 눈바디 페이지 */}
                         <Route path="/bodycheck" element={<BodyCheck />} />
+                        
+                        {/* 게시판 관련 추가해쏘요*/}
+                        {/* 커뮤니티 게시판 */}
+                        <Route path="/community" element={<Community />} />
+                        {/* 커뮤니티 글쓰기 */}
+                        <Route path="/community/write" element={<PostWrite />} /> 
+                        {/* 커뮤니티 게시글 상세 */}
+                        <Route path="/community/post/:id" element={<PostDetail />} />
                     </Route>
 
                     {/* 배경과 사이드바가 필요 없는 단독 화면들 */}

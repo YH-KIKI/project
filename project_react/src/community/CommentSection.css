@@ -1,0 +1,164 @@
+.nnp-comment-container {
+    max-width: 700px;
+    width: 100%;
+    margin: 10px auto;
+    padding: 0 20px 40px 20px;
+    font-family: 'Pretendard', sans-serif;
+    box-sizing: border-box;
+    position: relative;
+}
+
+.nnp-comment-count {
+    font-size: 17px;
+    font-weight: 800;
+    color: #333;
+    margin-bottom: 15px;
+}
+
+.nnp-comment-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-bottom: 20px;
+    width: 100%;
+}
+
+.nnp-comment-item {
+    background-color: #fffdfc;
+    border: 1px solid #efdcdc;
+    border-radius: 16px;
+    padding: 16px;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    transition: background-color 0.2s;
+    width: 100%;
+}
+
+.nnp-comment-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+}
+
+.nnp-comment-author {
+    font-size: 14px;
+    font-weight: 800;
+    color: #222;
+}
+
+.nnp-comment-date {
+    font-size: 11px;
+    color: #8e8484;
+    font-weight: 600;
+}
+
+.nnp-comment-body p {
+    margin: 0;
+    font-size: 14px;
+    line-height: 1.5;
+    color: #444;
+}
+
+.nnp-comment-actions {
+    display: flex;
+    gap: 12px;
+    margin-top: 12px;
+    justify-content: flex-end;
+}
+
+.nnp-comment-actions span {
+    font-size: 12px;
+    font-weight: 700;
+    color: #8e8484;
+    cursor: pointer;
+}
+
+.nnp-comment-input-box textarea,
+.nnp-edit-textarea {
+    width: 100% !important;
+    border: none;
+    background: transparent;
+    resize: none;
+    outline: none;
+    font-size: 16px !important;
+    font-family: inherit;
+    box-sizing: border-box;
+    touch-action: manipulation;
+}
+
+.nnp-comment-input-box {
+    background-color: #f8f8f8;
+    border: 1px solid #efdcdc;
+    border-radius: 16px;
+    padding: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.nnp-comment-input-box textarea {
+    min-height: 50px;
+}
+
+.nnp-comment-submit,
+.nnp-edit-save,
+.nnp-edit-cancel {
+    padding: 8px 18px;
+    border: none;
+    border-radius: 12px;
+    font-size: 13px;
+    font-weight: 800;
+    cursor: pointer;
+    font-family: inherit;
+}
+
+.nnp-comment-submit,
+.nnp-edit-save {
+    background-color: #ff8fa3;
+    color: white;
+    align-self: flex-end;
+}
+
+.nnp-edit-cancel {
+    background-color: #e9e9ef;
+    color: #5f5555;
+}
+
+.nnp-edit-wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    width: 100% !important;
+    overflow: hidden;
+    box-sizing: border-box;
+}
+
+.nnp-edit-textarea {
+    min-height: 60px;
+    padding: 10px;
+    border: 1px solid #ff8fa3;
+    border-radius: 12px;
+    background-color: #fff;
+    font-size: 16px !important;
+}
+
+.nnp-edit-btns {
+    display: flex;
+    gap: 8px;
+    justify-content: flex-end;
+    width: 100%;
+}
+
+.nnp-child-comments {
+    margin-left: 25px;
+    border-left: 1px solid #efdcdc;
+    padding-left: 5px;
+}
+
+.nnp-reply-wrapper {
+    margin-top: 5px;
+}

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import Sidebar from '../Main/Sidebar';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import NyamNyamView from './NyamNyamView'; // *** [추가/박하] 테스트
 
 const Mypage = () => {
 
@@ -87,7 +88,11 @@ const Mypage = () => {
           <span style={{ color: '#999' }}>{formattedDate}</span>
         </div>
 
-        {/* 프로필 카드  */}
+        {/* *** 추가/박하: 새로운 캐릭터 및 경험치 뷰 적용, 기존 프로필카드 주석처리 */}
+        <NyamNyamView />
+
+        {/* *** 
+        {/* 프로필 카드 *}
         <section style={{
           width: '100%',
           border: '1px solid #FFDADA',
@@ -106,6 +111,7 @@ const Mypage = () => {
           </div>
           <button style={{ backgroundColor: '#FFE5E5', padding: '10px 20px', borderRadius: '15px', fontWeight: 'bold' }}>⚙️ 설정</button>
         </section>
+        *** 기존코드 끝 */}
 
         <p style={{ fontSize: '18px', fontWeight: '600', marginBottom: '18px' }}>{username}님, 오늘도 건강한 식단 관리 함께해요!</p>
 

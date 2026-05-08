@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="kr.hi.project.dao.PostCommentDao">
+
+    <select id="selectCommentsByPostNum" resultType="kr.hi.project.dto.PostCommentDTO">
+        SELECT 
+            c.*, 
+            u.user_name, 
+            u.user_id
+        FROM post_comment c
+        JOIN user u ON c.user_num = u.user_num
+        WHERE c.post_num = #{post_num}
+        ORDER BY COALESCE(c.parent_pc_num, c.pc_num) ASC, c.pc_created_at ASC
+    </select>
+
+    <insert id="insertComment" parameterType="kr.hi.project.dto.PostCommentDTO">
+        INSERT INTO post_comment (post_num, user_num, pc_content, parent_pc_num)
+        VALUES (#{post_num}, #{user_num}, #{pc_content}, #{parent_pc_num})
+    </insert>
+
+    <update id="updateComment" parameterType="kr.hi.project.dto.PostCommentDTO">
+        UPDATE post_comment 
+        SET pc_content = #{pc_content}, pc_updated_at = NOW()
+        WHERE pc_num = #{pc_num} AND user_num = #{user_num}
+    </update>
+
+    <update id="deleteComment">
+        UPDATE post_comment 
+        SET pc_is_deleted = 1 
+        WHERE pc_num = #{pc_num}
+    </update>
+
+    <select id="selectCommentByPcNum" resultType="kr.hi.project.dto.PostCommentDTO">
+        SELECT * FROM post_comment WHERE pc_num = #{pc_num}
+    </select>
+
+</mapper>

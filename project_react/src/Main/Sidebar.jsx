@@ -29,6 +29,8 @@ const Sidebar = ({ userName }) => {
     { name: '통계', icon: '📊', path: '/stats' },
     { name: '눈바디', icon: '📷', path: '/bodycheck' },
     { name: '마이페이지', icon: '👤', path: '/mypage' },
+    { name: '커뮤니티', icon: '💬', active: false, path: '/community' },//게시판 메뉴 추가했다리
+    { name: '마이페이지', icon: '👤', active: false, path: '/mypage' },
   ];
 
   const handleParentClick = (menuName) => {

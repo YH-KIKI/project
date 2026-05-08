@@ -62,7 +62,10 @@ const LoginPage = () => {
         
         // 1. 받은 토큰을 브라우저에 저장
         localStorage.setItem('login_token', token);
-        localStorage.setItem('user_num', response.data.usernum);
+
+        // 🌟🌟🌟 [박하] 커뮤니티 게시판에서 사용자 식별을 위해 서버에서 받은 사용자 정보를 'user' 키로 저장
+        localStorage.setItem('user', JSON.stringify(response.data.user));
+
         // 2. 로그인 상태를 '참'으로 변경
         setIsLoggedIn(true);
         alert("로그인 성공!");
@@ -75,6 +78,10 @@ const LoginPage = () => {
     const handleLogout = () => {
       // 로그아웃 시 토큰 삭제 및 상태 변경
       localStorage.removeItem('login_token');
+
+      // 🌟🌟🌟 [박하] 로그아웃 시 저장된 사용자 정보도 함께 삭제
+      localStorage.removeItem('user');
+
       setIsLoggedIn(false);
     };
 
