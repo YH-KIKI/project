@@ -24,9 +24,9 @@
   
   /* 박스의 위치 셋팅 */
   top: 15px;    /* 고양이 밥그릇 바로 아래 위치 */
-  bottom: -320px;  /* 하단 여백 */
-  left: 15px;
-  right: 15px;
+  bottom: 15px;  /* 하단 여백 */
+  left: 10px;
+  right: 10px;
   
   /* 회원님이 찾아내신 바로 그 색상과 테두리! */
   background-color: #FFF9F4; /* 안쪽 박스의 따뜻한 베이지 배경 */
@@ -88,7 +88,7 @@
   align-items: center; 
   margin-top: auto; 
   position: relative;
-  padding-bottom: 70px; /* 로봇이 들어갈 공간 */
+  padding-bottom: 210px; /* 로봇이 들어갈 공간 */
 }
 
 .cheer-balloon-sm { 
@@ -130,7 +130,7 @@
   width: 65px; 
   height: auto;
   position: absolute;
-  bottom: 0px; 
+  bottom: 150px; 
   left: 50%;   
   transform: translateX(-50%); 
   z-index: 1; /* 말풍선 뒤로 살짝 숨게 배치 */
