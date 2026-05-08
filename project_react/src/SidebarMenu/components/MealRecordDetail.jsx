@@ -109,7 +109,7 @@ const MealRecordDetail = () => {
   };
 
   return (
-    <div className="analysis-card">
+    <div className="meal-analysis-card">
     <div className="meal-detail-container">
       <h2 className="meal-detail-title">식단 기록 상세</h2>
 
