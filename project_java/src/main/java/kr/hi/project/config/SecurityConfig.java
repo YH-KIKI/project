@@ -5,6 +5,7 @@ import java.util.Arrays;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
@@ -28,20 +29,17 @@ public class SecurityConfig {
             .cors(cors -> cors.configurationSource(corsConfigurationSource())) // CORS 설정 적용
             .csrf(csrf -> csrf.disable()) // 테스트를 위해 CSRF 잠시 비활성화
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/uploads/**",
-                				 "/api/signup", 
+                .requestMatchers("/api/signup", 
                                  "/api/login", 
                                  "/api/user/info",
                                  "/api/information_updata",
                                  "/api/information_select",
                                  "/api/v1/diet/**",  // 🌟 이 부분이 방금 새로 추가된 곳입니다! (식단 API 허용)
-                                 "/api/record"
-                                 "/api/v1/diet/**",
+                                 "/api/record",
                                  "/api/community/**", // 추가했음(박하)
                                  "/api/comments/**", // [박하/추가] 댓글 API 허용 추가
                                  "/api/likes/**",    // [박하/추가] 추천 API 허용 추가
-                                 "/uploads/**" // [박하/추가] 서버에 저장된 이미지를 로그인 없이도 브라우저에서 볼 수 있도록 허용
-                                 
+                                 "/uploads/**", // [박하/추가] 서버에 저장된 이미지를 로그인 없이도 브라우저에서 볼 수 있도록 허용
                                  "/api/meal/**"
                                  ).permitAll() // 가입, 로그인은 누구나 가능
                 .anyRequest().authenticated() // 나머지는 로그인이 필요함
