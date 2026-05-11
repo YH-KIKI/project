@@ -1,211 +1,238 @@
 import React, { useState, useRef } from 'react';
 import axios from 'axios';
 import './BodyCheck.css';
-import { uploadBodyCheckImage } from '../api/bodyCheckApi'; // 앞서 만든 통신 파일 연결
 
 const BodyCheck = () => {
-  // 🌟 기본 탭 및 로딩 상태
-  const [activeTab, setActiveTab] = useState('album');
-  const [isLoading, setIsLoading] = useState(false);
+  const [activeTab, setActiveTab] = useState('album'); 
   
-  // 🌟 AI 분석 타입 ('pose' 또는 'outline') 및 파일 업로드 돔 제어
-  const [analyzeType, setAnalyzeType] = useState('pose');
-  const fileInputRef = useRef(null);
+  // 🌟 앨범 목록 상태: 빈 배열로 시작하여 기본 이미지를 없앴습니다.
+  const [albumRecords, setAlbumRecords] = useState([]);
 
-  // 🌟 잠금(시크릿 모드) 상태 관리
+  // 비교 탭 상태
+  const [leftPreview, setLeftPreview] = useState(null);
+  const [leftDate, setLeftDate] = useState('과거 날짜');
+  const [rightPreview, setRightPreview] = useState(null);
+  const [rightDate, setRightDate] = useState('오늘 날짜');
+
+  const [internalAlbumTarget, setInternalAlbumTarget] = useState(null); 
+
+  const cameraInputRef = useRef(null);
+  const galleryInputRef = useRef(null);
+  const [uploadTarget, setUploadTarget] = useState(null); 
+
+  const [showAIPopup, setShowAIPopup] = useState(false);
+  const [pendingFile, setPendingFile] = useState(null);
+
   const [isUnlocked, setIsUnlocked] = useState(false); 
   const [passwordInput, setPasswordInput] = useState('');
   const [passwordError, setPasswordError] = useState(false);
 
-  // 임시 앨범 데이터 (나중에 DB에서 불러올 데이터)
-  const albumRecords = [
-    { id: 1, date: '2026.05.11' },
-    { id: 2, date: '2026.04.11' },
-  ];
-
-  const getTodayString = () => {
-    const today = new Date(); 
-    const year = today.getFullYear();
-    const month = String(today.getMonth() + 1).padStart(2, '0'); 
-    const day = String(today.getDate()).padStart(2, '0');
-    const week = ['일', '월', '화', '수', '목', '금', '토'];
-    const dayOfWeek = week[today.getDay()];
-    return `${year}.${month}.${day} ${dayOfWeek}`; 
+  const formatDate = (dateObj) => {
+    const year = dateObj.getFullYear();
+    const month = String(dateObj.getMonth() + 1).padStart(2, '0'); 
+    const day = String(dateObj.getDate()).padStart(2, '0');
+    return `${year}.${month}.${day}`;
   };
 
-  // 🔒 비밀번호 확인 통신 함수
   const handlePasswordSubmit = async () => {
-    if (!passwordInput.trim()) {
-      setPasswordError(true);
-      return;
-    }
-
+    if (!passwordInput.trim()) { setPasswordError(true); return; }
     try {
-      // 스프링부트로 비밀번호 검증 요청 (API 주소 및 파라미터는 환경에 맞게 조정 가능)
-      const response = await axios.post('http://localhost:8080/api/v1/user/verify-password?userNum=1', {
-        password: passwordInput
-      }, { withCredentials: true });
-
-      if (response.data === true) {
-        setIsUnlocked(true); // 잠금 해제! (블러가 걷힘)
-        setPasswordError(false);
-      } else {
-        setPasswordError(true); // 비밀번호 틀림
-      }
-    } catch (error) {
-      console.error("비밀번호 검증 에러", error);
-      alert("비밀번호 확인 중 오류가 발생했습니다. 백엔드 서버를 확인해주세요.");
+      const response = await axios.post('http://localhost:8080/api/v1/user/verify-password?userNum=1', { password: passwordInput }, { withCredentials: true });
+      if (response.data === true) { setIsUnlocked(true); setPasswordError(false); } 
+      else { setPasswordError(true); }
+    } catch (error) { 
+      alert("서버 연결 오류. (테스트를 위해 임시로 잠금 해제합니다)"); 
+      setIsUnlocked(true); 
     }
   };
 
-  // 📷 사진 업로드 함수 (스프링부트로 전송)
-  const handleFileChange = async (e) => {
+  const triggerUpload = (target, type) => {
+    setUploadTarget(target);
+    if (type === 'camera') cameraInputRef.current.click();
+    else galleryInputRef.current.click();
+  };
+
+  const handleFileChange = (e) => {
     const file = e.target.files[0];
     if (!file) return;
 
-    setIsLoading(true);
-    try {
-      // API 파일의 uploadBodyCheckImage 함수 호출!
-      const result = await uploadBodyCheckImage(file, analyzeType);
-      console.log("🔥 AI 분석 결과 도착:", result);
-      alert(`[${analyzeType === 'pose' ? '자세 분석' : '윤곽선 따기'}] 완료! 콘솔창을 확인하세요.`);
-      
-    } catch (error) {
-      alert("사진 전송에 실패했습니다. 스프링부트 서버가 켜져 있는지 확인해주세요.");
-    } finally {
-      setIsLoading(false);
-      e.target.value = ''; // 동일한 파일 다시 선택 가능하도록 초기화
+    if (uploadTarget === 'album') {
+      const previewUrl = URL.createObjectURL(file);
+      const newRecord = {
+        id: Date.now(),
+        date: formatDate(new Date()),
+        preview: previewUrl,
+        aiType: '원본' 
+      };
+      setAlbumRecords([newRecord, ...albumRecords]);
+      alert("오늘의 눈바디가 앨범에 등록되었습니다! 📸");
+
+    } else if (uploadTarget === 'compare-right') {
+      setPendingFile(file);
+      setShowAIPopup(true);
+    }
+    e.target.value = ''; 
+  };
+
+  const selectFromInternalAlbum = (record) => {
+    if (internalAlbumTarget === 'left') {
+      setLeftPreview(record.preview);
+      setLeftDate(record.date);
+    } else if (internalAlbumTarget === 'right') {
+      setRightPreview(record.preview);
+      setRightDate(record.date);
+    }
+    setInternalAlbumTarget(null); 
+  };
+
+  const handleAISelection = (type) => {
+    setShowAIPopup(false);
+    if (!pendingFile) return;
+
+    const previewUrl = URL.createObjectURL(pendingFile);
+    const todayStr = formatDate(new Date());
+
+    if (uploadTarget === 'compare-right') {
+      setRightPreview(previewUrl);
+      setRightDate(todayStr);
+      alert(`[${type === 'pose' ? '체형 점수 분석' : '실루엣 따기'}] 모드가 선택되었습니다! 🚀`);
+    }
+    setPendingFile(null);
+  };
+
+  const handleDeleteRecord = (id) => {
+    if (window.confirm("정말로 이 눈바디 기록을 삭제하시겠습니까?")) {
+      const updatedRecords = albumRecords.filter(record => record.id !== id);
+      setAlbumRecords(updatedRecords);
+      alert("기록이 삭제되었습니다.");
     }
   };
 
-  // 🖼️ 각 사진 칸을 구성하는 컴포넌트
-  const ImagePlaceholder = () => (
-    <div className="bc-image-placeholder">
-       {/* 숨겨진 파일 입력창 */}
-       <input 
-        type="file" 
-        accept="image/*" 
-        style={{ display: 'none' }} 
-        ref={fileInputRef} 
-        onChange={handleFileChange} 
-      />
-
-      {isLoading ? (
-        <div className="bc-loading-text">
-          <span className="spinner">✨</span> AI가 체형을 분석 중입니다...
-        </div>
-      ) : (
-        <div className="bc-btn-group">
-          <button 
-            className="bc-upload-btn pose-btn" 
-            onClick={() => {
-              setAnalyzeType('pose');
-              fileInputRef.current.click();
-            }}
-          >
-            🦴 1번 AI: 골격/자세 분석
-          </button>
-          <button 
-            className="bc-upload-btn outline-btn" 
-            onClick={() => {
-              setAnalyzeType('outline');
-              fileInputRef.current.click();
-            }}
-          >
-            👤 2번 AI: 실루엣(누끼) 따기
-          </button>
-        </div>
-      )}
-    </div>
-  );
-
   return (
     <div className="body-check-wrapper">
-      
-      {/* 🔒 1. 비밀번호 입력 팝업 (모달) */}
+      <input type="file" accept="image/*" capture="environment" style={{ display: 'none' }} ref={cameraInputRef} onChange={handleFileChange} />
+      <input type="file" accept="image/*" style={{ display: 'none' }} ref={galleryInputRef} onChange={handleFileChange} />
+
       {!isUnlocked && (
-        <div className="password-modal-overlay">
-          <div className="password-modal">
+        <div className="password-modal-overlay" style={{zIndex: 999}}>
+          <form className="password-modal" onSubmit={(e) => { e.preventDefault(); handlePasswordSubmit(); }}>
             <h3>🔒 눈바디 시크릿 모드</h3>
-            <p>소중한 기록을 보호하기 위해<br/>비밀번호를 한 번 더 입력해 주세요.</p>
+            <p>비밀번호를 입력해 주세요.</p>
+            <input type="password" value={passwordInput} onChange={(e) => setPasswordInput(e.target.value)} autoFocus />
+            <button type="submit">기록 보기</button>
+          </form>
+        </div>
+      )}
+
+      {internalAlbumTarget && (
+        <div className="password-modal-overlay" style={{zIndex: 1000}}>
+          <div className="ai-select-modal internal-album-modal">
+            <h3>📁 내 눈바디 앨범</h3>
+            <p>비교하고 싶은 과거의 기록을 선택하세요.</p>
             
-            <input 
-              type="password" 
-              placeholder="비밀번호 입력"
-              value={passwordInput}
-              onChange={(e) => setPasswordInput(e.target.value)}
-              onKeyDown={(e) => e.key === 'Enter' && handlePasswordSubmit()} // 엔터키 지원
-              className={passwordError ? 'error-shake' : ''}
-              autoFocus
-            />
-            {passwordError && <span className="error-msg">비밀번호가 일치하지 않습니다.</span>}
-            
-            <button onClick={handlePasswordSubmit}>기록 보기</button>
+            <div className="mini-album-grid">
+              {albumRecords.map(record => (
+                <div key={record.id} className="mini-album-item" onClick={() => selectFromInternalAlbum(record)}>
+                  <img src={record.preview} alt="과거기록" />
+                  <span>{record.date}</span>
+                </div>
+              ))}
+              {albumRecords.length === 0 && <p style={{color: '#999', gridColumn: 'span 2', padding: '20px'}}>저장된 앨범이 없습니다.</p>}
+            </div>
+            <button className="cancel-btn" onClick={() => setInternalAlbumTarget(null)}>닫기</button>
           </div>
         </div>
       )}
 
-      {/* 🌟 2. 메인 컨텐츠 영역 (isUnlocked가 false면 blurred 클래스 추가) */}
+      {showAIPopup && (
+        <div className="password-modal-overlay" style={{zIndex: 1000}}>
+          <div className="ai-select-modal">
+            <h3>🤖 AI 분석 모드 선택</h3>
+            <p>선택하신 사진으로 어떤 분석을 진행할까요?</p>
+            <div className="ai-select-buttons">
+              <button className="bc-upload-btn pose-btn" onClick={() => handleAISelection('pose')}>🦴 체형 점수 분석</button>
+              <button className="bc-upload-btn outline-btn" onClick={() => handleAISelection('outline')}>👤 체형 변화 비교 (실루엣 따기)</button>
+            </div>
+            <button className="cancel-btn" onClick={() => { setShowAIPopup(false); setPendingFile(null); }}>취소</button>
+          </div>
+        </div>
+      )}
+
       <div className={`bc-main-content ${!isUnlocked ? 'blurred' : ''}`}>
-        
         <div className="bc-header-area">
           <h2 className="bc-main-title">눈바디(Body Check) 앨범</h2>
-          <span className="bc-header-date">{getTodayString()}</span>
+          <span className="bc-header-date">{formatDate(new Date())}</span>
         </div>
 
         <div className="bc-main-card">
           <div className="bc-tab-menu">
-            <button
-              className={`bc-tab-button ${activeTab === 'album' ? 'active' : ''}`}
-              onClick={() => setActiveTab('album')}
-            >
-              눈바디 앨범
-            </button>
-            <button
-              className={`bc-tab-button ${activeTab === 'compare' ? 'active' : ''}`}
-              onClick={() => setActiveTab('compare')}
-            >
-              변화 비교
-            </button>
+            <button className={`bc-tab-button ${activeTab === 'album' ? 'active' : ''}`} onClick={() => setActiveTab('album')}>눈바디 앨범</button>
+            <button className={`bc-tab-button ${activeTab === 'compare' ? 'active' : ''}`} onClick={() => setActiveTab('compare')}>변화 비교</button>
           </div>
 
           <div className="bc-content-card">
             
-            {/* --- [눈바디 앨범 탭] --- */}
             {activeTab === 'album' && (
-              <>
-                <div className="bc-album-grid">
-                  {albumRecords.map((record) => (
-                    <div key={record.id} className="bc-album-item">
-                      <div className="bc-item-header">
-                        <span className="bc-item-date">{record.date}</span>
-                        <span className="bc-camera-icon">📸</span>
-                      </div>
-                      <ImagePlaceholder />
-                    </div>
-                  ))}
-                </div>
-              </>
+               <div className="bc-album-grid">
+                 {/* 🌟 '오늘의 눈바디 기록하기' 카드만 남겨두었습니다. */}
+                 <div className="bc-album-item add-new-item">
+                   <div className="add-new-content">
+                     <p>오늘의 눈바디 기록하기</p>
+                     <div className="bc-btn-group" style={{width: '90%'}}>
+                       <button className="bc-upload-btn camera-btn" onClick={() => triggerUpload('album', 'camera')}>📷 카메라 촬영</button>
+                       <button className="bc-upload-btn gallery-btn" onClick={() => triggerUpload('album', 'gallery')}>📁 기기에서 첨부</button>
+                     </div>
+                   </div>
+                 </div>
+
+                 {albumRecords.map((record) => (
+                   <div key={record.id} className="bc-album-item">
+                     <div className="bc-item-header">
+                       <div className="bc-item-header-left">
+                         <span className="bc-item-date">{record.date}</span>
+                         <span className="bc-tag" style={{ backgroundColor: record.aiType === '원본' ? '#bbb' : '#8c7ae6' }}>
+                           {record.aiType === 'pose' ? '🦴 체형분석' : record.aiType === 'outline' ? '👤 실루엣' : '📸 원본'}
+                         </span>
+                       </div>
+                       <button className="bc-delete-btn" onClick={() => handleDeleteRecord(record.id)}>🗑️ 삭제</button>
+                     </div>
+                     <div className="bc-image-placeholder">
+                       {record.preview && <img src={record.preview} alt="눈바디" className="bc-preview-img" />}
+                     </div>
+                   </div>
+                 ))}
+               </div>
             )}
 
-            {/* --- [변화 비교 탭] --- */}
             {activeTab === 'compare' && (
               <div className="bc-compare-wrapper">
                 <div className="bc-compare-header">
-                  <p className="bc-compare-dates">2026.04.11 → 2026.05.11</p>
+                  <p className="bc-compare-dates">{leftDate} ➔ {rightDate}</p>
                 </div>
                 <div className="bc-compare-content">
                   <div className="bc-compare-item">
-                    <ImagePlaceholder />
-                    <div className="bc-compare-label">
-                      <strong>전</strong> <span>2026.04.11</span>
+                    <div className="bc-compare-label"><strong>전</strong></div>
+                    <div className="bc-image-placeholder">
+                      {leftPreview ? (
+                        <img src={leftPreview} alt="과거" className="bc-preview-img" onClick={() => setInternalAlbumTarget('left')}/>
+                      ) : (
+                        <button className="bc-upload-btn gallery-btn" style={{width: '80%'}} onClick={() => setInternalAlbumTarget('left')}>📁 눈바디 앨범에서 선택</button>
+                      )}
                     </div>
                   </div>
                   
                   <div className="bc-compare-item">
-                    <ImagePlaceholder />
-                    <div className="bc-compare-label">
-                      <strong>후</strong> <span>2026.05.11</span>
+                    <div className="bc-compare-label"><strong>후</strong></div>
+                    <div className="bc-image-placeholder">
+                      {rightPreview ? (
+                        <img src={rightPreview} alt="현재" className="bc-preview-img" onClick={() => triggerUpload('compare-right', 'gallery')}/>
+                      ) : (
+                        <div className="bc-btn-group" style={{width: '90%'}}>
+                          <button className="bc-upload-btn camera-btn" onClick={() => triggerUpload('compare-right', 'camera')}>📷 카메라로 촬영</button>
+                          <button className="bc-upload-btn gallery-btn" onClick={() => triggerUpload('compare-right', 'gallery')}>📁 기기에서 첨부</button>
+                          <button className="bc-upload-btn" style={{backgroundColor: '#ffb8b8', color: 'white'}} onClick={() => setInternalAlbumTarget('right')}>📁 눈바디 앨범에서 선택</button>
+                        </div>
+                      )}
                     </div>
                   </div>
                 </div>
