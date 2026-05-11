@@ -52,7 +52,7 @@ const Information = () => {
     }
 
     try {
-      const token = localStorage.getItem('login_token');
+      const token = localStorage.getItem('login_token') || sessionStorage.getItem('login_token');
       await axios.post('http://localhost:8080/api/information_updata', {
 				Usernum: usernum,
 				Userid: userid,
@@ -81,7 +81,7 @@ const Information = () => {
 
 	//id가져오고
 		const fetchUserInfo = async () => {
-		const token = localStorage.getItem('login_token');
+		const token = localStorage.getItem('login_token') || sessionStorage.getItem('login_token');
 		try{
 			const response = await axios.get('http://localhost:8080/api/information_select', {
 				headers:{
@@ -105,7 +105,7 @@ const Information = () => {
 	}
 	// 페이지가 새로고침되어도 토큰이 있으면 로그인 유지
 	useEffect(() => {
-		const token = localStorage.getItem('login_token');
+		const token = localStorage.getItem('login_token') || sessionStorage.getItem('login_token');
 		if (token) {
 			fetchUserInfo();
 		}

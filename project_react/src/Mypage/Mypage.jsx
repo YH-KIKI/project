@@ -24,7 +24,7 @@ const Mypage = () => {
 	const formattedDate = `${today.getFullYear()}.${String(today.getMonth() + 1).padStart(2, '0')}.${String(today.getDate()).padStart(2, '0')} ${days[today.getDay()]}요일`;
 
 	const fetchUserInfo = async () => {
-		const token = localStorage.getItem('login_token');
+		const token = localStorage.getItem('login_token') || sessionStorage.getItem('login_token');
 		try{
 			const response = await axios.get('http://localhost:8080/api/user/info', {
 				headers:{
@@ -39,7 +39,7 @@ const Mypage = () => {
 
 	// 페이지가 새로고침되어도 토큰이 있으면 로그인 유지
 	useEffect(() => {
-		const token = localStorage.getItem('login_token');
+		const token = localStorage.getItem('login_token') || sessionStorage.getItem('login_token');
 		if (token) {
 			setIsLoggedIn(true);
 			fetchUserInfo();
