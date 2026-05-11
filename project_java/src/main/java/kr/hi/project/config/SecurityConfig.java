@@ -44,6 +44,7 @@ public class SecurityConfig {
                                  "/api/likes/**",    // [박하/추가] 추천 API 허용 추가
                                  "/api/meal/**"
                                  ).permitAll() // 가입, 로그인은 누구나 가능
+                .requestMatchers("/api/v1/user/verify-password").permitAll()
                 .anyRequest().authenticated() // 나머지는 로그인이 필요함
             );
         

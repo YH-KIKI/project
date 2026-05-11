@@ -72,5 +72,11 @@
 	        p.up_daily_natrium = #{Dailynatrium}  
 	    WHERE u.user_num = #{Usernum}
 	</update>
-
+	
+	<!-- [재근/추가] 눈바디 암호화를 위해 추가 -->
+	<select id="findPasswordByUserNum" resultType="string">
+        SELECT user_password
+        FROM user
+        WHERE user_num = #{userNum}
+    </select>
 </mapper>
