@@ -29,18 +29,18 @@
 	
 	<select id="getUserInfo" resultType="kr.hi.project.dto.UserPrivacyDTO">
 	    SELECT 
-	        u.user_num AS usernum,
-	        u.user_id AS userid,
-	        u.user_name AS username,
-	        u.user_email AS email,
+	        u.user_num AS userNum,
+	        u.user_id AS userId,
+	        u.user_name AS userName,
+	        u.user_email AS userEmail,
 	
-	        p.up_gender AS gender,
-	        p.up_height AS height,
-	        p.up_weight AS weight,
-	        p.up_target_weight AS targetweight,
-	        p.up_age AS age,
-	        p.up_act AS act
-
+	        p.up_gender AS userGender,
+	        p.up_height AS userHeight,
+	        p.up_weight AS userWeight,
+	        p.up_target_weight AS userTargetweight,
+	        p.up_age AS userAge,
+	        p.up_act AS userAct
+	
 	    FROM user u
 	    JOIN user_privacy p ON u.user_num = p.user_num
 	    WHERE u.user_num = #{userNum}
@@ -57,19 +57,24 @@
 	<update id="informationUpdata" parameterType="kr.hi.project.dto.UserPrivacyDTO">
 	    UPDATE user u
 	    JOIN user_privacy p ON u.user_num = p.user_num
-	    SET u.user_name = #{userName},       
-	    	u.user_email = #{email},         
-	    	p.up_gender = #{gender},         
-	    	p.up_height = #{height},
-	        p.up_weight = #{weight},
-	        p.up_target_weight = #{targetWeight}, 
-	        p.up_age = #{age},
-	        p.up_act = #{act},
-	        p.up_daily_kcal = #{dailyKcal},  
-	        p.up_daily_carbs = #{dailyCarbs},     
-	        p.up_daily_protein = #{dailyProtein}, 
-	        p.up_daily_fat = #{dailyFat},         
-	        p.up_daily_natrium = #{dailyNatrium}  
+	
+	    SET 
+	        u.user_name = #{userName},
+	        u.user_email = #{userEmail},
+	
+	        p.up_gender = #{userGender},
+	        p.up_height = #{userHeight},
+	        p.up_weight = #{userWeight},
+	        p.up_target_weight = #{userTargetweight},
+	        p.up_age = #{userAge},
+	        p.up_act = #{userAct},
+	
+	        p.up_daily_kcal = #{userDailyKcal},
+	        p.up_daily_carbs = #{userDailyCarbs},
+	        p.up_daily_protein = #{userDailyProtein},
+	        p.up_daily_fat = #{userDailyFat},
+	        p.up_daily_natrium = #{userDailyNatrium}
+	
 	    WHERE u.user_num = #{userNum}
 	</update>
 	

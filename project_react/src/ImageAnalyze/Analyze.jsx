@@ -93,8 +93,8 @@ const Analyze = () => {
     const user = JSON.parse(localStorage.getItem('user') || '{}');
     // 나머지 데이터를 JSON 객체로 묶어서 보냄
     const data = {
-      usernum: user.user_num,
-      mealType: mealType,
+      userNum: user.user_num,
+      mkMealType: mealType,
       foodDetails: foodDetails // { "제육볶음": 200, "냉면": 450 }
     };
     formData.append('data', JSON.stringify(data));

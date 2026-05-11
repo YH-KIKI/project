@@ -29,7 +29,7 @@ public interface UserDao {
 
 	void deleteUserAllergies(int usernum);
 
-	void insertUserAllergy(@Param("usernum") int usernum, @Param("alName") String alName);
+	void insertUserAllergy(@Param("userNum") int userNum, @Param("alName") String alName);
 	
 	// [재근/추가] 눈바디 암호화를 위해 추가
 	String findPasswordByUserNum(Long userNum);

@@ -2,9 +2,9 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="kr.hi.project.dao.MealDao">
 
-    <insert id="insertMealLog" useGeneratedKeys="true" keyProperty="mk_num">
+    <insert id="insertMealLog" useGeneratedKeys="true" keyProperty="mkNum">
         INSERT INTO meal_log (mk_image, mk_meal_type, user_num)
-        VALUES (#{Foodimage}, #{Mealtype}, #{Usernum})
+        VALUES (#{mkImage}, #{mkMealType}, #{userNum})
     </insert>
 
     <select id="findFoodByName" resultType="kr.hi.project.dto.FoodDTO">
@@ -23,7 +23,7 @@
 
     <insert id="insertMealDetail">
         INSERT INTO meal_detail (md_kcal, md_portion, mk_num, fo_num, mday_num)
-        VALUES (#{Mealkcal}, #{Mealportion}, #{mk_num}, #{Foodnum}, #{Mday_num})
+        VALUES (#{mdKcal}, #{mdPortion}, #{mkNum}, #{foNum}, #{mdNum})
     </insert>
     
     <select id="findMdayNumByToday" resultType="Integer">
@@ -34,7 +34,7 @@
 	</select>
 	
 	<insert id="insertMealDay" parameterType="kr.hi.project.dto.MealDayDTO" 
-	        useGeneratedKeys="true" keyProperty="mday_num">
+	        useGeneratedKeys="true" keyProperty="mdayNum">
 	    INSERT INTO meal_day (user_num, mday_date) 
 	    VALUES (#{usernum}, NOW())
 	</insert>
@@ -55,19 +55,19 @@
 	</select>
 	
 	<insert id="insertMonth" parameterType="kr.hi.project.dto.MealMonthDTO" 
-	        useGeneratedKeys="true" keyProperty="Mm_num"> 
+	        useGeneratedKeys="true" keyProperty="mmNum"> 
 	    INSERT INTO meal_month (user_num, mm_year, mm_month)
-	    VALUES (#{User_num}, #{MealMonthyear}, #{MealMonthmonth})
+	    VALUES (#{userNum}, #{mmYear}, #{mmMonth})
 	</insert>
 	
 	<insert id="insertWeek" parameterType="kr.hi.project.dto.MealWeekDTO" 
-	        useGeneratedKeys="true" keyProperty="Mw_num">
+	        useGeneratedKeys="true" keyProperty="mwNum">
 	    INSERT INTO meal_week (mm_num, mw_year, mw_month, mw_week)
 	    VALUES (#{Mm_num}, #{MealWeekyear}, #{MealWeekmonth}, #{MealWeekweek})
 	</insert>
 	
 	<insert id="insertDay" parameterType="kr.hi.project.dto.MealDayDTO" 
-	        useGeneratedKeys="true" keyProperty="Mday_num">
+	        useGeneratedKeys="true" keyProperty="mdayNum">
 	    INSERT INTO meal_day (mw_num, md_day)
 	    VALUES (#{Mw_num}, #{Mealdayday})
 	</insert>

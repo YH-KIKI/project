@@ -54,17 +54,17 @@ const Information = () => {
     try {
       const token = localStorage.getItem('login_token') || sessionStorage.getItem('login_token');
       await axios.post('http://localhost:8080/api/information_updata', {
-				Usernum: usernum,
-				Userid: userid,
-        Username: username,
-        Email: email,
-				Gender: gender,
-				Height: height,
-				Weight: weight,
-				Targetweight: targetweight,
-				Age: age,
-				Act: act,
-        Allergies: allergies
+				userNum: usernum,
+        userId: userid,
+        userName: username,
+        userEmail: email,
+        userGender: gender,
+        userHeight: height,
+        userWeight: weight,
+        userTargetweight: targetweight,
+        userAge: age,
+        userAct: act,
+        userAllergies: allergies
       },
       {
         headers: {
@@ -88,17 +88,21 @@ const Information = () => {
 					Authorization: `Bearer ${token}`
 				}
 			});
-      setUsernum(response.data.Usernum);
-			setUserid(response.data.Userid)
-			setUsername(response.data.Username)
-			setEmail(response.data.Email)
-      setgender(response.data.Gender)
-      setheight(response.data.Height)
-      setweight(response.data.Weight)
-      settargetweight(response.data.Targetweight)
-      setage(response.data.Age)
-      setact(response.data.Act)
-      setallergies(response.data.Allergies)
+      setUsernum(response.data.userNum);
+      setUserid(response.data.userId);
+      setUsername(response.data.userName);
+      setEmail(response.data.userEmail);
+
+      setgender(response.data.userGender);
+      setheight(response.data.userHeight);
+
+      setweight(response.data.userWeight);
+      settargetweight(response.data.userTargetweight);
+
+      setage(response.data.userAge);
+      setact(response.data.userAct);
+
+      setallergies(response.data.userAllergies || []);
 		}catch(error){
 			alert("인증에 실패했습니다. 다시 로그인하세요")
 		}
