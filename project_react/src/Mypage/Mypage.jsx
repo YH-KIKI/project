@@ -113,7 +113,8 @@ const Mypage = () => {
     padding: '24px',
     textAlign: 'center',
     cursor: 'pointer',
-  }}>
+  }}
+    onClick={handleInformationClick}>
     <div style={{ fontSize: '40px', marginBottom: '6px' }}>👤✏️</div>
     <div style={{ fontWeight: 'bold', fontSize: '16px' }}>개인정보 수정</div>
     <div style={{ color: '#888', marginTop: '4px', fontSize: '13px' }}>
