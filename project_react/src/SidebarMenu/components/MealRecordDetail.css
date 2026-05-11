@@ -319,22 +319,51 @@ gap: 30px;
 
 .meal-favorite-btn {
   position: absolute;
-  top: 14px;
-  right: 14px;
-  width: 28px;
-  height: 28px;
-  border-radius: 8px;
-  border: 1px solid #ffb5c2;
-  background: #fff;
+  top: 12px;
+  right: 12px;
+  width: 30px;
+  height: 30px;
+  border-radius: 12px;
+
+  border: 1px solid #ffd0da;
+  background: rgba(255, 255, 255, 0.95);
   color: #ff6686;
-  font-size: 15px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
   cursor: pointer;
-  z-index: 2;
+  z-index: 10;
+
+  box-shadow: 0 6px 14px rgba(255, 102, 134, 0.18);
+  transition: all 0.18s ease;
+}
+
+.meal-favorite-btn svg {
+  width: 18px;
+  height: 18px;
+  stroke-width: 2.4;
+  transition: all 0.18s ease;
 }
 
 .meal-favorite-btn.active {
-  background: #fff4f6;
+  background: white;
+  border-color: #ff6686;
+  color: #ff6686;
+}
+
+.meal-favorite-btn:hover {
+  transform: translateY(-2px) scale(1.05);
+  background: #fff0f3;
+  border-color: #ff9db0;
   color: #ff4f78;
+  box-shadow: 0 8px 18px rgba(255, 102, 134, 0.28);
+}
+
+.meal-favorite-btn.active svg {
+  fill: #ff6686;
+  stroke: #ff6686;
 }
 
 .nutrition-area {
@@ -783,6 +812,15 @@ gap: 30px;
   cursor: pointer;
 }
 
+.added-food-empty {
+  padding: 28px 16px;
+  text-align: center;
+  color: #8a7777;
+  font-size: 13px;
+  line-height: 1.5;
+  background: #fffdfc;
+}
+
 .added-food-list {
   border: 1px solid #edd8d8;
   border-radius: 16px;
@@ -882,6 +920,101 @@ gap: 30px;
   text-align: center;
   margin-bottom: 18px;
   padding: 22px;
+}
+
+/* 드래그 업로드 */
+.photo-drop-zone {
+  border: 1.5px dashed #ff9db0;
+  border-radius: 20px;
+  background: #fffdfc;
+
+  min-height: 250px;
+  padding: 30px 24px;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+
+  text-align: center;
+  gap: 12px;
+
+  transition: all 0.2s ease;
+}
+
+.photo-drop-zone:hover {
+  background: #fff7f9;
+  border-color: #ff6686;
+  transform: translateY(-2px);
+}
+
+.upload-icon {
+  width: 68px;
+  height: 68px;
+  border-radius: 50%;
+
+  background: #fff0f3;
+  border: 1px solid #ffc2ce;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  font-size: 32px;
+}
+
+.photo-drop-zone h3 {
+  margin: 0;
+
+  font-size: 20px;
+  font-weight: 800;
+  color: #ff6686;
+}
+
+.photo-drop-zone p {
+  margin: 0;
+
+  font-size: 14px;
+  line-height: 1.6;
+  font-weight: 600;
+  color: #5f5555;
+}
+
+.upload-label {
+  margin-top: 4px;
+
+  height: 46px;
+  padding: 0 24px;
+
+  border-radius: 14px;
+  background: linear-gradient(90deg, #ff6686, #ff4f78);
+
+  color: white;
+  font-size: 14px;
+  font-weight: 700;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  cursor: pointer;
+
+  box-shadow: 0 6px 14px rgba(255, 102, 134, 0.2);
+
+  transition: all 0.18s ease;
+}
+
+.upload-label:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 8px 18px rgba(255, 102, 134, 0.28);
+}
+
+.photo-drop-zone small {
+  margin-top: 2px;
+
+  font-size: 12px;
+  color: #9a8787;
+  line-height: 1.5;
 }
 
 .camera-icon {
@@ -992,26 +1125,44 @@ gap: 30px;
   display: grid;
   grid-template-columns: 1fr 1.4fr;
   gap: 12px;
+  align-items: center;
+  margin-top: 16px;
 }
 
 .modal-actions button {
+  width: 100%;
   height: 52px;
+  padding: 0;
   border-radius: 14px;
   font-size: 15px;
   font-weight: 700;
   cursor: pointer;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  line-height: 1;
+  box-sizing: border-box;
 }
 
 .cancel-btn {
   border: 1px solid #ead1d1;
-  background: #fff;
+  background: #f1dddd;
   color: #3f3434;
 }
 
-.save-btn {
+.detail-save-btn {
   border: none;
+  border-radius: 14px;
   background: linear-gradient(90deg, #ff6686, #ff4f78);
   color: white;
+  box-shadow: 0 4px 10px rgba(255, 102, 134, 0.22);
+}
+
+.cancel-btn,
+.detail-save-btn {
+  padding-top: 1px;
 }
 
 /* 상세 모달 */

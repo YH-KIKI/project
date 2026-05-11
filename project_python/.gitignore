@@ -1,0 +1,13 @@
+# 파이썬 컴파일 파일 무시
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# 가상환경 무시 (나중에 venv 쓰실 때를 대비)
+venv/
+.venv/
+
+# IDE 설정 파일 무시
+.vscode/
+.idea/

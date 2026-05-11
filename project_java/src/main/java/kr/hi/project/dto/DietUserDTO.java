@@ -9,4 +9,8 @@ public class DietUserDTO {
     private Double height;
     private Double weight;
     private Integer targetCalorie; 
+    private Integer carbs;    // 탄수화물
+    private Integer protein;  // 단백질
+    private Integer fat;      // 지방
+    private Integer sodium;   // 나트륨
 }
