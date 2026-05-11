@@ -90,10 +90,10 @@ const Analyze = () => {
   const handleFinalSubmit = async () => {
     const formData = new FormData();
     formData.append('file', selectedFile); // AI 분석에 썼던 원본 파일
-    
+    const user = JSON.parse(localStorage.getItem('user') || '{}');
     // 나머지 데이터를 JSON 객체로 묶어서 보냄
     const data = {
-      usernum: Number(localStorage.getItem('user_num')),
+      usernum: user.user_num,
       mealType: mealType,
       foodDetails: foodDetails // { "제육볶음": 200, "냉면": 450 }
     };

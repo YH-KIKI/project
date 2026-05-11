@@ -8,8 +8,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import kr.hi.project.dao.UserDao;
-import kr.hi.project.domain.UserDTO;
-import kr.hi.project.domain.UserPrivacyDTO;
+import kr.hi.project.dto.UserDTO;
+import kr.hi.project.dto.UserPrivacyDTO;
 
 @Service
 public class UserService {

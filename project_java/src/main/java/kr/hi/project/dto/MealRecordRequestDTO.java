@@ -1,4 +1,4 @@
-package kr.hi.project.domain;
+package kr.hi.project.dto;
 import lombok.Data;
 import java.util.Map;
 

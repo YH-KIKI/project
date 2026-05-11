@@ -12,7 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import kr.hi.project.dao.PostDao;
-import kr.hi.project.domain.PostDTO;
+import kr.hi.project.dto.PostDTO;
 import kr.hi.project.dto.PostRequestDTO;
 
 @Service

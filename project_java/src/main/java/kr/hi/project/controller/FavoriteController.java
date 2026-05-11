@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import kr.hi.project.domain.MealFavoritesDTO;
+import kr.hi.project.dto.MealFavoritesDTO;
 import kr.hi.project.service.FavoriteService;
 
 @RestController

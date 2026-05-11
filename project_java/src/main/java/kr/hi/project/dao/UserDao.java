@@ -6,8 +6,8 @@ import java.util.Map;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
-import kr.hi.project.domain.UserDTO;
-import kr.hi.project.domain.UserPrivacyDTO;
+import kr.hi.project.dto.UserDTO;
+import kr.hi.project.dto.UserPrivacyDTO;
 
 @Mapper
 public interface UserDao {

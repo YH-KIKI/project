@@ -6,7 +6,8 @@ import axios from 'axios';
 		const [logs, setLogs] = useState([]);
 
 		//Application 탭에 있는 'user_num'이라는 키값으로 가져오기
-		const userNum = localStorage.getItem('user_num');
+	const user = JSON.parse(localStorage.getItem('user') || '{}');
+  const userNum = user.user_num;
 
 	useEffect(() => {
 			axios.get(`/api/meal/logs?userNum=${userNum}`)

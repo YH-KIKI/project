@@ -8,13 +8,13 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import kr.hi.project.dao.MealDao;
-import kr.hi.project.domain.FoodDTO;
-import kr.hi.project.domain.MealDayDTO;
-import kr.hi.project.domain.MealDetailDTO;
-import kr.hi.project.domain.MealLogDTO;
-import kr.hi.project.domain.MealMonthDTO;
-import kr.hi.project.domain.MealRecordRequestDTO;
-import kr.hi.project.domain.MealWeekDTO;
+import kr.hi.project.dto.FoodDTO;
+import kr.hi.project.dto.MealDayDTO;
+import kr.hi.project.dto.MealDetailDTO;
+import kr.hi.project.dto.MealLogDTO;
+import kr.hi.project.dto.MealMonthDTO;
+import kr.hi.project.dto.MealRecordRequestDTO;
+import kr.hi.project.dto.MealWeekDTO;
 
 @Service
 public class MealService {
@@ -66,14 +66,12 @@ public class MealService {
         log.setUsernum(request.getUsernum()); // React에서 받아온 user_num
         
         mealDAO.insertMealLog(log); // XML 실행 -> log객체에 생성된 mk_num이 담김
-
         //음식 상세 정보들 저장
         for (String foodName : request.getFoodDetails().keySet()) {
             int intakeGram = request.getFoodDetails().get(foodName); // 사용자가 입력한 g
 
             // DB에서 해당 음식의 영양 데이터 가져오기
             FoodDTO food = mealDAO.findFoodByName(foodName);
-            
             if (food != null) {
 
                 MealDetailDTO detail = new MealDetailDTO();
@@ -85,7 +83,6 @@ public class MealService {
                 // 칼로리 계산 (소수점 버림 처리)
                 int calculatedKcal = (int)(food.getFoodkcal() * (double) intakeGram);
                 detail.setMealkcal(calculatedKcal);
-                System.out.println(detail);
                 mealDAO.insertMealDetail(detail);
             }
         }

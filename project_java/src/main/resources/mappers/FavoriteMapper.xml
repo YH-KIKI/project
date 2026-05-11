@@ -33,7 +33,7 @@
 	    ORDER BY l.mk_created_at DESC
 	</select>
 
-	<select id="getFavoriteList" resultType="kr.hi.project.domain.MealFavoritesDTO">
+	<select id="getFavoriteList" resultType="kr.hi.project.dto.MealFavoritesDTO">
 	    SELECT 
 	        f.mf_num as Mf_num, 
 	        f.mf_name as Mf_name, 
