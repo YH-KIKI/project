@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { FiTrash2 } from "react-icons/fi";
+import { FiTrash2, FiHeart } from "react-icons/fi";
 import "./FavoritePage.css";
 
 const FavoritePage = () => {
@@ -191,7 +191,7 @@ const FavoritePage = () => {
                   ) : (
                     <div className="no-favorite-img">등록 사진 없음</div>
                   )}
-                  <button className="heart-btn">❤️</button>
+                  <button className="heart-btn active"><FiHeart /></button>
                 </div>
 
                 <div className="food-content">

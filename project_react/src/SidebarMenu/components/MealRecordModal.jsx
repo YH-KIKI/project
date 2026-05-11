@@ -3,6 +3,7 @@ import React, { useState } from "react";
 const MealRecordModal = ({ mealType, selectedDate, initialData, onClose, onSave }) => {
   const [mode, setMode] = useState("manual");
   const [foodName, setFoodName] = useState("");
+  const [previewImage, setPreviewImage] = useState(null);
 
   const [foods, setFoods] = useState(
     initialData?.foods || [
@@ -72,6 +73,44 @@ const MealRecordModal = ({ mealType, selectedDate, initialData, onClose, onSave 
     setFoodName("");
   };
 
+  const handleDropImage = (e) => {
+  e.preventDefault();
+
+  const file = e.dataTransfer.files[0];
+
+  if (!file) return;
+
+  console.log(file);
+
+  // FormData 생성
+  const formData = new FormData();
+  formData.append("image", file);
+
+  // FastAPI / Spring 전송
+
+  //이미지 미리보기 
+  const imageUrl = URL.createObjectURL(file);
+  setPreviewImage(imageUrl);
+};
+
+  const addPhotoRecognizedFoods = () => {
+    const recognizedFoods = [
+      {
+        id: Date.now(),
+        name: "사진 인식 음식",
+        kcal: 180,
+        count: 1,
+        carbs: 22,
+        protein: 8,
+        fat: 5,
+        sodium: 210,
+        imageUrl: "",
+      },
+    ];
+
+    setFoods([...foods, ...recognizedFoods]);
+  };
+
   const removeFood = (id) => {
     setFoods(foods.filter((food) => food.id !== id));
   };
@@ -126,6 +165,7 @@ const MealRecordModal = ({ mealType, selectedDate, initialData, onClose, onSave 
           >
             ✎ 직접 입력
           </button>
+
           <button
             className={mode === "photo" ? "active" : ""}
             onClick={() => setMode("photo")}
@@ -135,67 +175,102 @@ const MealRecordModal = ({ mealType, selectedDate, initialData, onClose, onSave 
         </div>
 
         {mode === "manual" ? (
-          <>
-            <div className="food-input-row">
-              <input
-                value={foodName}
-                onChange={(e) => setFoodName(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") addFood();
-                }}
-                placeholder="음식명을 검색하세요 (예: 계란, 바나나, 그릭요거트)"
-              />
-              <button onClick={addFood}>추가</button>
-            </div>
-
-            <div className="added-food-header">
-              <h3>추가된 음식 ({foods.length})</h3>
-              <button onClick={() => setFoods([])}>전체 삭제</button>
-            </div>
-
-            <div className="added-food-list">
-              {foods.map((food) => (
-                <div className="added-food-item" key={food.id}>
-                  <div className="food-thumb">
-                    {food.imageUrl ? (
-                      <img src={food.imageUrl} alt={food.name} />
-                    ) : (
-                      <span>🍽️</span>
-                    )}
-                  </div>
-
-                  <div className="food-info">
-                    <strong>{food.name}</strong>
-                    <span>{food.kcal} kcal</span>
-                  </div>
-
-                  <div className="food-count">
-                    <button onClick={() => changeCount(food.id, "minus")}>-</button>
-                    <span>{food.count} 개</span>
-                    <button onClick={() => changeCount(food.id, "plus")}>+</button>
-                  </div>
-
-                  <button className="remove-food" onClick={() => removeFood(food.id)}>
-                    ×
-                  </button>
-                </div>
-              ))}
-            </div>
-          </>
+          <div className="food-input-row">
+            <input
+              value={foodName}
+              onChange={(e) => setFoodName(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") addFood();
+              }}
+              placeholder="음식명을 검색하세요 (예: 계란, 바나나, 그릭요거트)"
+            />
+            <button onClick={addFood}>추가</button>
+          </div>
         ) : (
-          <div className="photo-upload-box">
-            <div className="camera-icon">📷</div>
-            <h3>음식 사진을 찍거나 업로드해 주세요</h3>
-            <p>AI가 자동으로 인식해 식단으로 추가해드려요!</p>
+          <div
+            className="photo-drop-zone"
+            onDragOver={(e) => e.preventDefault()}
+            onDrop={handleDropImage}
+          >
+          {!previewImage ? (
+            <>
+              <div className="upload-icon">🖼️</div>
 
-            <div className="photo-buttons">
-              <button>사진 촬영하기</button>
-              <button>앨범에서 선택</button>
-            </div>
+              <h3>음식 사진을 끌어놓아 주세요</h3>
 
-            <small>ⓘ 조명이나 구도에 따라 인식 정확도가 달라질 수 있어요.</small>
+              <p>
+                이미지를 드래그하거나 클릭해서 업로드하면
+                <br />
+                AI가 음식을 인식해 식단에 추가해드려요!
+              </p>
+
+              <label className="upload-label">
+                이미지 파일 선택
+
+                <input
+                  type="file"
+                  accept="image/*"
+                  hidden
+                  onChange={addPhotoRecognizedFoods}
+                />
+              </label>
+
+              <small>
+                JPG, PNG 파일 업로드 가능 · 여러 음식도 함께 인식할 수 있어요
+              </small>
+            </>
+          ) : (
+            <img
+              src={previewImage}
+              alt="preview"
+              className="preview-image"
+            />
+          )}
+
           </div>
         )}
+
+        <div className="added-food-header">
+          <h3>추가된 음식 ({foods.length})</h3>
+          <button onClick={() => setFoods([])}>전체 삭제</button>
+        </div>
+
+        <div className="added-food-list">
+          {foods.length === 0 ? (
+            <div className="added-food-empty">
+              아직 추가된 음식이 없어요.
+              <br />
+              직접 입력하거나 사진으로 음식을 추가해보세요!
+            </div>
+          ) : (
+            foods.map((food) => (
+              <div className="added-food-item" key={food.id}>
+                <div className="food-thumb">
+                  {food.imageUrl ? (
+                    <img src={food.imageUrl} alt={food.name} />
+                  ) : (
+                    <span>🍽️</span>
+                  )}
+                </div>
+
+                <div className="food-info">
+                  <strong>{food.name}</strong>
+                  <span>{food.kcal} kcal</span>
+                </div>
+
+                <div className="food-count">
+                  <button onClick={() => changeCount(food.id, "minus")}>-</button>
+                  <span>{food.count} 개</span>
+                  <button onClick={() => changeCount(food.id, "plus")}>+</button>
+                </div>
+
+                <button className="remove-food" onClick={() => removeFood(food.id)}>
+                  ×
+                </button>
+              </div>
+            ))
+          )}
+        </div>
 
         <div className="meal-total-box">
           <div>
@@ -222,8 +297,10 @@ const MealRecordModal = ({ mealType, selectedDate, initialData, onClose, onSave 
         </div>
 
         <div className="modal-actions">
-          <button className="cancel-btn" onClick={onClose}>취소</button>
-          <button className="save-btn" onClick={handleSave}>
+          <button className="cancel-btn" onClick={onClose}>
+            취소
+          </button>
+          <button className="detail-save-btn" onClick={handleSave}>
             AI 분석하고 저장하기 ✨
           </button>
         </div>
