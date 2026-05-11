@@ -4,7 +4,7 @@ import Sidebar from '../Main/Sidebar';
 import '../Main/MainLayout.css'; // 🌟 배경 이미지가 들어있는 CSS를 가져옵니다!
 import { useNavigate } from 'react-router-dom';
 
-const LoginPage = () => {
+const SignupPage = () => {
 
   const [userid, setUserid] = useState('');
   const [password, setPassword] = useState('');
@@ -28,10 +28,10 @@ const LoginPage = () => {
 
     try {
       await axios.post('http://localhost:8080/api/signup', {
-        Userid: userid,
-        Password: password,
-        Username: username,
-        Email: email,
+        userId: userid,
+        userPassWord: password,
+        userName: username,
+        userEmail: email,
       });
       alert("회원가입 성공! 로그인 페이지로 이동합니다.");
       navigate('/login'); // 가입 성공하면 자동으로 로그인 페이지로 슝!
@@ -127,4 +127,4 @@ const LoginPage = () => {
   );
 };
 
-export default LoginPage;
+export default SignupPage;

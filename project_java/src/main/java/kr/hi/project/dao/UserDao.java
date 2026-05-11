@@ -11,7 +11,7 @@ import kr.hi.project.dto.UserPrivacyDTO;
 
 @Mapper
 public interface UserDao {
-    Map<String, String> findByUserid(@Param("userid") String userid);
+    Map<String, String> findByUserid(@Param("userId") String userid);
 
 	void insertUser(UserDTO user);
 
@@ -26,4 +26,8 @@ public interface UserDao {
 	UserPrivacyDTO getUserInfo(int usernum);
 
 	List<String> findUserAllergies(int usernum);
+
+	void deleteUserAllergies(int usernum);
+
+	void insertUserAllergy(@Param("usernum") int usernum, @Param("alName") String alName);
 }
