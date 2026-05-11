@@ -34,14 +34,13 @@ public class UserInformation {
 
 	    UserPrivacyDTO dto = userService.getUserInfo(usernum);
 	    dto.setAllergies(userService.findUserAllergies(usernum));
-	    System.out.println(dto);
 	    return dto;
 	}
 
 	
 	@PostMapping("/api/information_updata")
-	public Map<String, String> signup(@RequestBody UserPrivacyDTO UserPrivacyDTO){
-	    userService.informationUpdata(UserPrivacyDTO);
+	public Map<String, String> signup(@RequestBody UserPrivacyDTO userPrivacyDTO){
+	    userService.informationUpdata(userPrivacyDTO);
 	    
 	    Map<String, String> response = new HashMap<>();
 	    
