@@ -6,11 +6,11 @@
 
     <select id="findUserByNum" resultType="kr.hi.project.dto.DietUserDTO">
         SELECT 
-            user_num, 
+            user_num as userNum, 
             up_height as height,        
-       		up_weight as weight,         
-        	up_daily_kcal as targetCalorie
-        FROM 
+            up_weight as weight,         
+            up_daily_kcal as targetCalorie,
+            up_daily_carbs as carbs,       up_daily_protein as protein,   up_daily_fat as fat,           up_daily_natrium as sodium     FROM 
             user_privacy
         WHERE 
             user_num = #{userNum}

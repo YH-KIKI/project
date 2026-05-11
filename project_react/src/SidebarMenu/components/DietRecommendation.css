@@ -110,6 +110,18 @@
   font-weight: 600;
 }
 
+/* 🌟 추가됨: 매크로(탄/단/지) 및 나트륨 영역 */
+.menu-macros {
+  margin-top: 6px;
+  font-size: 12px;
+  color: #666;
+  font-weight: 500;
+}
+.menu-macros .sodium {
+  color: #ff6b8b; /* 기존 핑크 테마를 활용해 나트륨에 약간의 주의/강조 효과 부여 */
+  font-weight: 600;
+}
+
 /* 태그 뱃지 영역 */
 .menu-tags {
   margin-top: 8px;
@@ -151,8 +163,9 @@
   background-color: #f1f3f5;
 }
 
-/* 로딩 스피너 애니메이션 */
-.loading-state {
+/* 로딩 스피너 및 에러 상태 애니메이션 */
+.loading-state, 
+.error-state /* 🌟 추가됨: 에러 상태 클래스 추가 */ {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -162,6 +175,12 @@
   font-size: 14px;
   font-weight: 500;
 }
+
+/* 🌟 추가됨: 에러 텍스트는 조금 더 눈에 띄게 */
+.error-state {
+  color: #ff6b8b; 
+}
+
 .spinner {
   font-size: 32px;
   margin-bottom: 12px;

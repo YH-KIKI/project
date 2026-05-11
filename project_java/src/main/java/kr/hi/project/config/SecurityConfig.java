@@ -31,6 +31,7 @@ public class SecurityConfig {
             .csrf(csrf -> csrf.disable()) // 테스트를 위해 CSRF 잠시 비활성화
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers("/uploads/**", // [박하/추가] 서버에 저장된 이미지를 로그인 없이도 브라우저에서 볼 수 있도록 허용
+                				 "/error",	// [재근/추가] DB에러 났을때 403안나오게 
                 				 "/api/signup", 
                                  "/api/login", 
                                  "/api/user/info",
