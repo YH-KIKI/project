@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { FiTrash2 } from "react-icons/fi";
 import "./FavoritePage.css";
 
 const FavoritePage = () => {
@@ -200,7 +201,7 @@ const FavoritePage = () => {
 
                   <div className="food-actions">
                     <button className="pink-btn">식단 추가</button>
-                    <button className="delete-btn">🗑</button>
+                    <button className="meal-delete-btn"><FiTrash2 /></button>
                   </div>
                 </div>
               </div>

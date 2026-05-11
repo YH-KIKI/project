@@ -178,12 +178,19 @@
   cursor: pointer;
 }
 
-.delete-btn {
-  height: 44px;
+.meal-delete-btn {
+  height: px;
+  width: 44px;
+  font-size: 18px;
   border-radius: 13px;
   border: 1px solid #eddcdc;
   background: #fff;
   cursor: pointer;
+}
+
+.meal-delete-btn svg {
+  width: 18px;
+  height: 18px;
 }
 
 /* 저장한 식단 */
