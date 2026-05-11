@@ -10,7 +10,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import kr.hi.project.domain.MealRecordRequestDTO;
+import kr.hi.project.dto.MealRecordRequestDTO;
 import kr.hi.project.service.FileService;
 import kr.hi.project.service.MealService;
 

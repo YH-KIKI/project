@@ -3,7 +3,8 @@ package kr.hi.project.dao;
 import java.util.List;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
-import kr.hi.project.domain.PostDTO;
+
+import kr.hi.project.dto.PostDTO;
 import kr.hi.project.dto.PostRequestDTO;
 
 @Mapper

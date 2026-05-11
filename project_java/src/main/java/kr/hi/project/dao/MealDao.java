@@ -3,12 +3,12 @@ package kr.hi.project.dao;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
-import kr.hi.project.domain.FoodDTO;
-import kr.hi.project.domain.MealDayDTO;
-import kr.hi.project.domain.MealDetailDTO;
-import kr.hi.project.domain.MealLogDTO;
-import kr.hi.project.domain.MealMonthDTO;
-import kr.hi.project.domain.MealWeekDTO;
+import kr.hi.project.dto.FoodDTO;
+import kr.hi.project.dto.MealDayDTO;
+import kr.hi.project.dto.MealDetailDTO;
+import kr.hi.project.dto.MealLogDTO;
+import kr.hi.project.dto.MealMonthDTO;
+import kr.hi.project.dto.MealWeekDTO;
 
 @Mapper
 public interface MealDao {

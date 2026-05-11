@@ -9,7 +9,8 @@ const FavoriteMeal = () => {
   const itemsPerPage = 12; //한 페이지에 보여줄 개수
 
   const navigate = useNavigate();
-  const userNum = localStorage.getItem('user_num');
+  const user = JSON.parse(localStorage.getItem('user') || '{}');
+  const userNum = user.user_num;
 
   const handlemeallogpageClick = () => {
     navigate('/meallogpage');

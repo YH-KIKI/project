@@ -7,7 +7,7 @@
         VALUES (#{Foodimage}, #{Mealtype}, #{Usernum})
     </insert>
 
-    <select id="findFoodByName" resultType="kr.hi.project.domain.FoodDTO">
+    <select id="findFoodByName" resultType="kr.hi.project.dto.FoodDTO">
         SELECT 
         	fo_num       AS Foodnum,
 	        fo_name      AS Foodname,
@@ -33,7 +33,7 @@
 	      AND DATE(mday_date) = CURDATE() 
 	</select>
 	
-	<insert id="insertMealDay" parameterType="kr.hi.project.domain.MealDayDTO" 
+	<insert id="insertMealDay" parameterType="kr.hi.project.dto.MealDayDTO" 
 	        useGeneratedKeys="true" keyProperty="mday_num">
 	    INSERT INTO meal_day (user_num, mday_date) 
 	    VALUES (#{usernum}, NOW())
@@ -54,19 +54,19 @@
 	    WHERE mw_num = #{mwNum} AND md_day = #{day}
 	</select>
 	
-	<insert id="insertMonth" parameterType="kr.hi.project.domain.MealMonthDTO" 
-        useGeneratedKeys="true" keyProperty="Mm_num"> 
-        INSERT INTO meal_month (user_num, mm_year, mm_month)
-    	VALUES (#{User_num}, #{MealMonthyear}, #{MealMonthmonth})
+	<insert id="insertMonth" parameterType="kr.hi.project.dto.MealMonthDTO" 
+	        useGeneratedKeys="true" keyProperty="Mm_num"> 
+	    INSERT INTO meal_month (user_num, mm_year, mm_month)
+	    VALUES (#{User_num}, #{MealMonthyear}, #{MealMonthmonth})
 	</insert>
 	
-	<insert id="insertWeek" parameterType="kr.hi.project.domain.MealWeekDTO" 
+	<insert id="insertWeek" parameterType="kr.hi.project.dto.MealWeekDTO" 
 	        useGeneratedKeys="true" keyProperty="Mw_num">
 	    INSERT INTO meal_week (mm_num, mw_year, mw_month, mw_week)
 	    VALUES (#{Mm_num}, #{MealWeekyear}, #{MealWeekmonth}, #{MealWeekweek})
 	</insert>
 	
-	<insert id="insertDay" parameterType="kr.hi.project.domain.MealDayDTO" 
+	<insert id="insertDay" parameterType="kr.hi.project.dto.MealDayDTO" 
 	        useGeneratedKeys="true" keyProperty="Mday_num">
 	    INSERT INTO meal_day (mw_num, md_day)
 	    VALUES (#{Mw_num}, #{Mealdayday})
@@ -75,8 +75,7 @@
 	<update id="updateDailyKcal">
 	    UPDATE meal_day 
 	    SET mday_kcal = (
-	        SELECT SUM(md_kcal) 
-	        FROM meal_detail 
+	        SELECT IFNULL(SUM(md_kcal), 0)  FROM meal_detail 
 	        WHERE mday_num = #{mdayNum}
 	    )
 	    WHERE mday_num = #{mdayNum}

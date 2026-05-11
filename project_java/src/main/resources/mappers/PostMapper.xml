@@ -4,7 +4,7 @@
 
 <mapper namespace="kr.hi.project.dao.PostDao">
 
-    <select id="selectAllPosts" resultType="kr.hi.project.domain.PostDTO">
+    <select id="selectAllPosts" resultType="kr.hi.project.dto.PostDTO">
         SELECT p.*, u.user_name,
                (SELECT COUNT(*) FROM post_like l WHERE l.post_num = p.post_num) as like_count,
                (SELECT COUNT(*) FROM post_comment c WHERE c.post_num = p.post_num AND c.pc_is_deleted = 0) as comment_count
@@ -13,7 +13,7 @@
         ORDER BY p.post_num DESC
     </select>
 
-    <select id="selectPostByNum" resultType="kr.hi.project.domain.PostDTO">
+    <select id="selectPostByNum" resultType="kr.hi.project.dto.PostDTO">
         SELECT p.*, u.user_name,
                (SELECT COUNT(*) FROM post_like l WHERE l.post_num = p.post_num) as like_count,
                (SELECT COUNT(*) FROM post_comment c WHERE c.post_num = p.post_num AND c.pc_is_deleted = 0) as comment_count
@@ -31,7 +31,7 @@
         UPDATE post SET post_views = post_views + 1 WHERE post_num = #{post_num}
     </update>
 
-    <update id="updatePost" parameterType="kr.hi.project.domain.PostDTO">
+    <update id="updatePost" parameterType="kr.hi.project.dto.PostDTO">
         UPDATE post 
         SET post_title = #{post_title}, 
             post_content = #{post_content}, 
@@ -45,7 +45,7 @@
         DELETE FROM post WHERE post_num = #{post_num}
     </delete>
 
-    <select id="selectPostsWithPaging" resultType="kr.hi.project.domain.PostDTO">
+    <select id="selectPostsWithPaging" resultType="kr.hi.project.dto.PostDTO">
         SELECT p.*, u.user_name,
                (SELECT COUNT(*) FROM post_like l WHERE l.post_num = p.post_num) as like_count,
                (SELECT COUNT(*) FROM post_comment c WHERE c.post_num = p.post_num AND c.pc_is_deleted = 0) as comment_count

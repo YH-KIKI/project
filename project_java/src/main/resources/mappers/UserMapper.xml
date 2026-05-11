@@ -7,7 +7,7 @@
         WHERE user_id = #{userid}
     </select>
     
-    <insert id="insertUser" parameterType="kr.hi.project.domain.UserDTO">
+    <insert id="insertUser" parameterType="kr.hi.project.dto.UserDTO">
         INSERT INTO user (user_name, user_id,user_password, user_email)
         VALUES (#{username}, #{userid}, #{password}, #{email})
     </insert>
@@ -27,7 +27,7 @@
     	WHERE user_id = #{userid}
 	</select>
 	
-	<select id="getUserInfo" resultType="kr.hi.project.domain.UserPrivacyDTO">
+	<select id="getUserInfo" resultType="kr.hi.project.dto.UserPrivacyDTO">
 	    SELECT 
 	        u.user_num AS usernum,
 	        u.user_id AS userid,
@@ -54,7 +54,7 @@
 	</select>
 	
 	<!-- 목표 -->
-	<update id="informationUpdata" parameterType="kr.hi.project.domain.UserPrivacyDTO">
+	<update id="informationUpdata" parameterType="kr.hi.project.dto.UserPrivacyDTO">
 	    UPDATE user u
 	    JOIN user_privacy p ON u.user_num = p.user_num
 	    SET u.user_name = #{Username},       
