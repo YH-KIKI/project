@@ -10,6 +10,7 @@ const LoginPage = () => {
   const [userid, setUserid] = useState('');
   const [password, setPassword] = useState('');
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [rememberMe, setRememberMe] = useState(false);
 
   const handleProtectedFeature = () => {
   // 방법 1: isLoggedIn 변수로 확인하기
@@ -24,7 +25,7 @@ const LoginPage = () => {
   };
 
     const fetchUserInfo = async () => {
-    const token = localStorage.getItem('login_token'); // 저장된 토큰 꺼내기
+    const token = localStorage.getItem('login_token') || sessionStorage.getItem('login_token'); // 저장된 토큰 꺼내기
     try {
       const response = await axios.get('http://localhost:8080/api/user/info', {
         headers: {
@@ -39,7 +40,7 @@ const LoginPage = () => {
   
     // 페이지가 새로고침되어도 토큰이 있으면 로그인 유지
     useEffect(() => {
-      const token = localStorage.getItem('login_token');
+      const token = localStorage.getItem('login_token') || sessionStorage.getItem('login_token');
       if (token) {
         setIsLoggedIn(true);
       }
@@ -60,8 +61,13 @@ const LoginPage = () => {
   
         const token = response.data.token;
         
-        // 1. 받은 토큰을 브라우저에 저장
+        if (rememberMe) {
+        // 받은 토큰을 브라우저에 저장
         localStorage.setItem('login_token', token);
+      } else {
+        // 브라우저 끄면 바로 삭제!
+        sessionStorage.setItem('login_token', token);
+      }
 
         // 🌟🌟🌟 [박하] 커뮤니티 게시판에서 사용자 식별을 위해 서버에서 받은 사용자 정보를 'user' 키로 저장
         localStorage.setItem('user', JSON.stringify(response.data.user));
@@ -135,6 +141,15 @@ const LoginPage = () => {
             style={{ padding: '10px', width: '200px' }}
             onChange={(e) => setPassword(e.target.value)}
             />
+          </div>
+          <div style={{ marginBottom: '10px', textAlign: 'left' }}>
+            <input 
+              type="checkbox" 
+              id="rememberMe" 
+              checked={rememberMe} 
+              onChange={(e) => setRememberMe(e.target.checked)} 
+            />
+            <label htmlFor="rememberMe" style={{ marginLeft: '5px' }}>빠른 로그인 (로그인 유지)</label>
           </div>
           
           <button onClick={handleLogin} 

@@ -3,7 +3,7 @@ import Sidebar from '../Main/Sidebar';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 
-const Favorite = () => {
+const FavoriteMeal = () => {
   const [favorites, setFavorites] = useState([]);
   const [currentPage, setCurrentPage] = useState(1); //현재 페이지 번호
   const itemsPerPage = 12; //한 페이지에 보여줄 개수
@@ -120,4 +120,4 @@ const Favorite = () => {
   );
 };
 
-export default Favorite;
+export default FavoriteMeal;

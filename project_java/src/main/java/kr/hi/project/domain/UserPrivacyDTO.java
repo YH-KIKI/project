@@ -36,7 +36,22 @@ public class UserPrivacyDTO {
     private int Age;
 
     @JsonProperty("Act")
-    private int Act;
+    private float Act;
+    
+    @JsonProperty("Dailykcal")
+    private float Dailykcal;
+    
+    @JsonProperty("Dailycarbs")
+    private float Dailycarbs;
+    
+    @JsonProperty("Dailyprotein")
+    private float Dailyprotein;
+    
+    @JsonProperty("Dailyfat")
+    private float Dailyfat;
+    
+    @JsonProperty("Dailynatrium")
+    private float Dailynatrium;
     
     @JsonProperty("Allergies")
     private List<String> Allergies;

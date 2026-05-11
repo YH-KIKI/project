@@ -46,25 +46,31 @@
 	    WHERE u.user_num = #{usernum}
 	</select>
 	
-    <update id="informationUpdata" parameterType="kr.hi.project.domain.UserPrivacyDTO">
-	    UPDATE user u
-	    JOIN user_privacy p ON u.user_num = p.user_num
-	    SET u.user_name = #{username},
-	    u.user_email = #{email},
-	    p.up_gender = #{gender},
-	    p.up_height = #{height},
-	    p.up_weight = #{weight},
-	    p.up_target_weight = #{targetweight},
-	    p.up_age = #{age},
-	    p.up_act = #{act}
-	    WHERE u.user_num = #{usernum}
-	</update>
-	
 	<select id="findUserAllergies" parameterType="int" resultType="String">
 	    SELECT a.al_name
 	    FROM user_allergy ua
 	    JOIN allergy a ON ua.al_num = a.al_num
 	    WHERE ua.user_num = #{usernum}
 	</select>
+	
+	<!-- 목표 -->
+	<update id="informationUpdata" parameterType="kr.hi.project.domain.UserPrivacyDTO">
+	    UPDATE user u
+	    JOIN user_privacy p ON u.user_num = p.user_num
+	    SET u.user_name = #{Username},       
+	    	u.user_email = #{Email},         
+	    	p.up_gender = #{Gender},
+	        p.up_height = #{Height},
+	        p.up_weight = #{Weight},
+	        p.up_target_weight = #{Targetweight},
+	        p.up_age = #{Age},
+	        p.up_act = #{Act},
+	        p.up_daily_kcal = #{Dailykcal},
+	        p.up_daily_carbs = #{Dailycarbs},     
+	        p.up_daily_protein = #{Dailyprotein}, 
+	        p.up_daily_fat = #{Dailyfat},         
+	        p.up_daily_natrium = #{Dailynatrium}  
+	    WHERE u.user_num = #{Usernum}
+	</update>
 
 </mapper>

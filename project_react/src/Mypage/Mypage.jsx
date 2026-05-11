@@ -12,7 +12,7 @@ const Mypage = () => {
 	const navigate = useNavigate(); //이동 함수 생성
 
   const handlefavoriteClick = () => {
-    navigate('/favorite')
+    navigate('/favoritemeal')
   }
 
   const handleInformationClick = () => {
@@ -24,7 +24,7 @@ const Mypage = () => {
 	const formattedDate = `${today.getFullYear()}.${String(today.getMonth() + 1).padStart(2, '0')}.${String(today.getDate()).padStart(2, '0')} ${days[today.getDay()]}요일`;
 
 	const fetchUserInfo = async () => {
-		const token = localStorage.getItem('login_token');
+		const token = localStorage.getItem('login_token') || sessionStorage.getItem('login_token');
 		try{
 			const response = await axios.get('http://localhost:8080/api/user/info', {
 				headers:{
@@ -39,7 +39,7 @@ const Mypage = () => {
 
 	// 페이지가 새로고침되어도 토큰이 있으면 로그인 유지
 	useEffect(() => {
-		const token = localStorage.getItem('login_token');
+		const token = localStorage.getItem('login_token') || sessionStorage.getItem('login_token');
 		if (token) {
 			setIsLoggedIn(true);
 			fetchUserInfo();
@@ -96,78 +96,74 @@ const Mypage = () => {
         {/* *** 추가/박하: 새로운 캐릭터 및 경험치 뷰 적용, 기존 프로필카드 주석처리 */}
         <NyamNyamView />
 
-        {/* *** 
-        {/* 프로필 카드 *}
-        <section style={{
-          width: '100%',
-          border: '1px solid #FFDADA',
-          borderRadius: '30px',
-          padding: '30px',
-          display: 'flex',
-          alignItems: 'center',
-          marginBottom: '0px'
-        }}>
-          <div style={{ width: '100px', height: '100px', backgroundColor: '#FFE5E5', borderRadius: '50%', marginRight: '20px', fontSize: '40px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            🐱
-          </div>
-          <div style={{ flex: 1 }}>
-            <h2 style={{ fontSize: '24px', fontWeight: 'bold' }}>냠냠이</h2>
-            <p style={{ color: '#888' }}>냠냠이</p>
-          </div>
-          <button style={{ backgroundColor: '#FFE5E5', padding: '10px 20px', borderRadius: '15px', fontWeight: 'bold' }}>⚙️ 설정</button>
-        </section>
-        *** 기존코드 끝 */}
-
         <p style={{ fontSize: '18px', fontWeight: '600', marginBottom: '18px' }}>{username}님, 오늘도 건강한 식단 관리 함께해요!</p>
 
-        {/* 개인정보 수정 */}
-        <section style={{
-          width: '100%',
-          border: '1px solid #FFDADA',
-          borderRadius: '30px',
-          padding: '30px',
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          marginBottom: '30px',
-        }}onClick={handleInformationClick}
-				>
-          <div>
-            <h3 style={{ fontSize: '22px', fontWeight: 'bold', marginBottom: '5px' }}>개인정보 수정</h3>
-            <p style={{ color: '#888' }}>이름, 연락처, 사진 등을 관리하세요.</p>
-          </div>
-          <span style={{ fontSize: '50px', opacity: 0.5 }}>👤✏️</span>
-        </section>
+        <div
+  style={{
+    width: '100%',
+    display: 'grid',
+    gridTemplateColumns: '1fr 1fr',
+    gap: '20px',
+    marginBottom: '30px',
+  }}
+>
+  <div style={{
+    border: '1px solid #FFDADA',
+    borderRadius: '30px',
+    padding: '24px',
+    textAlign: 'center',
+    cursor: 'pointer',
+  }}
+    onClick={handleInformationClick}>
+    <div style={{ fontSize: '40px', marginBottom: '6px' }}>👤✏️</div>
+    <div style={{ fontWeight: 'bold', fontSize: '16px' }}>개인정보 수정</div>
+    <div style={{ color: '#888', marginTop: '4px', fontSize: '13px' }}>
+      이름, 연락처, 사진 관리
+    </div>
+  </div>
 
-				<section style={{
-          width: '100%',
-          border: '1px solid #FFDADA',
-          borderRadius: '30px',
-          padding: '30px',
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          marginBottom: '30px',
-        }}>
-          <div>
-            <h3 style={{ fontSize: '22px', fontWeight: 'bold', marginBottom: '5px' }}>목표 관리</h3>
-            <p style={{ color: '#888' }}>목표를 관리하세요.</p>
-          </div>
-          <span style={{ fontSize: '50px', opacity: 0.5 }}>🏹🎯</span>
-        </section>
+  <div style={{
+    border: '1px solid #FFDADA',
+    borderRadius: '30px',
+    padding: '24px',
+    textAlign: 'center',
+    cursor: 'pointer',
+  }}>
+    <div style={{ fontSize: '40px', marginBottom: '6px' }}>🏹🎯</div>
+    <div style={{ fontWeight: 'bold', fontSize: '16px' }}>목표 관리</div>
+    <div style={{ color: '#888', marginTop: '4px', fontSize: '13px' }}>
+      목표를 관리하세요
+    </div>
+  </div>
 
-        {/* 하단 버튼 2개 */}
-        <div style={{ width: '100%', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
-          <div style={{ border: '1px solid #FFDADA', borderRadius: '30px', padding: '40px', textAlign: 'center' }}>
-            <div style={{ fontSize: '50px', marginBottom: '10px' }}>🏅</div>
-            <div style={{ fontWeight: 'bold', fontSize: '18px' }}>내 뱃지</div>
-          </div>
-          <div style={{ border: '1px solid #FFDADA', borderRadius: '30px', padding: '40px', textAlign: 'center' }}
-            onClick={handlefavoriteClick}>
-            <div style={{ fontSize: '50px', marginBottom: '10px' }}>⭐</div>
-            <div style={{ fontWeight: 'bold', fontSize: '18px' }}>즐겨찾기</div>
-          </div>
-        </div>
+  <div style={{
+    border: '1px solid #FFDADA',
+    borderRadius: '30px',
+    padding: '24px',
+    textAlign: 'center',
+  }}>
+    <div style={{ fontSize: '40px', marginBottom: '6px' }}>🏅</div>
+    <div style={{ fontWeight: 'bold', fontSize: '16px' }}>내 뱃지</div>
+    <div style={{ color: '#888', marginTop: '4px', fontSize: '13px' }}>
+      나의 영광 나의 뱃지
+    </div>
+  </div>
+
+  <div style={{
+    border: '1px solid #FFDADA',
+    borderRadius: '30px',
+    padding: '24px',
+    textAlign: 'center',
+    cursor: 'pointer',
+  }}
+    onClick={handlefavoriteClick}>
+    <div style={{ fontSize: '40px', marginBottom: '6px' }}>⭐</div>
+    <div style={{ fontWeight: 'bold', fontSize: '16px' }}>즐겨찾기</div>
+    <div style={{ color: '#888', marginTop: '4px', fontSize: '13px' }}>
+      뭐좀 맛있는거 있냥?
+    </div>
+  </div>
+</div>
       </main>
     </div>
 		</div>
