@@ -120,52 +120,40 @@
   object-fit: cover;
 }
 
-.heart-btn {
+.star-btn {
   position: absolute;
-  top: 12px;
-  right: 12px;
+  top: 10px;
+  right: 10px;
+
   width: 28px;
   height: 28px;
-  border-radius: 12px;
+  border-radius: 10px;
 
-  border: 1px solid #ffd0da;
-  background: rgba(255, 255, 255, 0.95);
-  color: #ff6686;
+  border: 1px solid #ffc7d3;
+
+  background: rgba(255, 255, 255, 0.96);
+
+  font-size: 18px;
+  color: #f4b400;
 
   display: flex;
   align-items: center;
   justify-content: center;
 
+  line-height: 1;
+  padding-bottom: 2px;
+
+  box-shadow: 0 4px 10px rgba(255, 102, 134, 0.15);
+
   cursor: pointer;
-  z-index: 10;
-
-  box-shadow: 0 6px 14px rgba(255, 102, 134, 0.18);
-  transition: all 0.18s ease;
-}
-.heart-btn svg {
-  width: 16px;
-  height: 16px;
-  stroke-width: 2.4;
-  transition: all 0.18s ease;
 }
 
-.heart-btn.active {
-  background: white;
-  border-color: #ff6686;
-  color: #ff6686;
+.star-btn:hover {
+  transform: scale(1.12);
 }
 
-.heart-btn:hover {
-  transform: translateY(-2px) scale(1.05);
-  background: #fff0f3;
-  border-color: #ff9db0;
-  color: #ff4f78;
-  box-shadow: 0 8px 18px rgba(255, 102, 134, 0.28);
-}
-
-.heart-btn.active svg {
-  fill: #ff6686;
-  stroke: #ff6686;
+.star-btn.active {
+  color: #ffd84d;
 }
 
 .food-content {
