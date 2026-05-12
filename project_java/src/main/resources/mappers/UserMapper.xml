@@ -29,17 +29,24 @@
 	
 	<select id="getUserInfo" resultType="kr.hi.project.dto.UserPrivacyDTO">
 	    SELECT 
+	    	<!-- 보통정보 -->
 	        u.user_num AS userNum,
 	        u.user_id AS userId,
 	        u.user_name AS userName,
 	        u.user_email AS userEmail,
-	
+			<!-- 비밀정보 -->
 	        p.up_gender AS userGender,
 	        p.up_height AS userHeight,
 	        p.up_weight AS userWeight,
 	        p.up_target_weight AS userTargetweight,
 	        p.up_age AS userAge,
-	        p.up_act AS userAct
+	        p.up_act AS userAct,
+	        <!-- 목표가져오기 -->
+	        p.up_daily_kcal AS userDailyKcal,
+	        p.up_daily_carbs AS userDailyCarbs,
+	        p.up_daily_protein AS userDailyProtein,
+	        p.up_daily_fat AS userDailyFat,
+	        p.up_daily_natrium AS userDailyNatrium
 	
 	    FROM user u
 	    JOIN user_privacy p ON u.user_num = p.user_num
@@ -95,6 +102,25 @@
         SELECT user_password
         FROM user
         WHERE user_num = #{userNum}
+    </select>
+    
+    <!-- [준성/추가] 목표보기 결과가 여러 영양소(kcal, carbs 등)이므로 Map으로 받습. -->
+    <select id="getTodayTotalNutrition" resultType="map">
+	    SELECT 
+	        IFNULL(SUM(md.md_kcal), 0) AS totalKcal,
+	        
+	        IFNULL(ROUND(SUM(f.fo_carbs * md.md_portion), 1), 0) AS totalCarbs,
+	        IFNULL(ROUND(SUM(f.fo_protein * md.md_portion), 1), 0) AS totalProtein,
+	        IFNULL(ROUND(SUM(f.fo_fat * md.md_portion), 1), 0) AS totalFat,
+	        IFNULL(ROUND(SUM(f.fo_natrium * md.md_portion), 1), 0) AS totalNatrium
+	        
+	    FROM meal_detail md
+	    JOIN food f ON md.fo_num = f.fo_num
+	    JOIN meal_day mday ON md.mday_num = mday.mday_num
+	    JOIN meal_week mw ON mday.mw_num = mw.mw_num
+	    JOIN meal_month mm ON mw.mm_num = mm.mm_num
+	    
+	    WHERE mm.user_num = #{userNum}          AND mday.mday_created_at = CURDATE() 
     </select>
 
 </mapper>

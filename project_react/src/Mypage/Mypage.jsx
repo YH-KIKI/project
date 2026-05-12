@@ -19,6 +19,10 @@ const Mypage = () => {
     navigate('/information'); //로그인 페이지 경로로 이동
   };
 
+  const handleTargetClick = () => {
+    navigate('/targetgoals');
+  };
+
 	const today = new Date();
 	const days = ['일', '월', '화', '수', '목', '금', '토'];
 	const formattedDate = `${today.getFullYear()}.${String(today.getMonth() + 1).padStart(2, '0')}.${String(today.getDate()).padStart(2, '0')} ${days[today.getDay()]}요일`;
@@ -128,11 +132,12 @@ const Mypage = () => {
     padding: '24px',
     textAlign: 'center',
     cursor: 'pointer',
-  }}>
+  }}
+    onClick={handleTargetClick}>
     <div style={{ fontSize: '40px', marginBottom: '6px' }}>🏹🎯</div>
-    <div style={{ fontWeight: 'bold', fontSize: '16px' }}>목표 관리</div>
+    <div style={{ fontWeight: 'bold', fontSize: '16px' }}>목표 보기</div>
     <div style={{ color: '#888', marginTop: '4px', fontSize: '13px' }}>
-      목표를 관리하세요
+      오늘목표 달성도 보려가자!
     </div>
   </div>
 
