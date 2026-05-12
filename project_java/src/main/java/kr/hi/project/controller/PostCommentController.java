@@ -13,9 +13,9 @@ public class PostCommentController {
 
     private final PostCommentService postCommentService;
 
-    @GetMapping("/{post_num}")
-    public List<PostCommentDTO> getComments(@PathVariable("post_num") int post_num) { // *** ("post_num") 추가 ***
-        return postCommentService.getCommentsByPostNum(post_num);
+    @GetMapping("/{postNum}")
+    public List<PostCommentDTO> getComments(@PathVariable("postNum") int postNum) {
+        return postCommentService.getCommentsByPostNum(postNum);
     }
 
     @PostMapping
@@ -28,8 +28,8 @@ public class PostCommentController {
         return postCommentService.modifyComment(commentDTO);
     }
 
-    @DeleteMapping("/{pc_num}")
-    public int deleteComment(@PathVariable("pc_num") int pc_num) { // *** ("pc_num") 추가 ***
-        return postCommentService.removeComment(pc_num);
+    @DeleteMapping("/{pcNum}")
+    public int deleteComment(@PathVariable("pcNum") int pcNum) {
+        return postCommentService.removeComment(pcNum);
     }
 }

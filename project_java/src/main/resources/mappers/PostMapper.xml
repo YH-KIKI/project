@@ -19,30 +19,30 @@
                (SELECT COUNT(*) FROM post_comment c WHERE c.post_num = p.post_num AND c.pc_is_deleted = 0) as comment_count
         FROM post p
         JOIN user u ON p.user_num = u.user_num
-        WHERE p.post_num = #{post_num}
+        WHERE p.post_num = #{postNum}
     </select>
 
     <insert id="insertPost" parameterType="kr.hi.project.dto.PostRequestDTO">
         INSERT INTO post (user_num, post_title, post_content, post_img_path, post_img_pos)
-        VALUES (#{user_num}, #{post_title}, #{post_content}, #{post_img_path}, #{post_img_pos})
+        VALUES (#{userNum}, #{postTitle}, #{postContent}, #{postImgPath}, #{postImgPos}) 
     </insert>
 
     <update id="updateViews">
-        UPDATE post SET post_views = post_views + 1 WHERE post_num = #{post_num}
+        UPDATE post SET post_views = post_views + 1 WHERE post_num = #{postNum} 
     </update>
 
     <update id="updatePost" parameterType="kr.hi.project.dto.PostDTO">
         UPDATE post 
-        SET post_title = #{post_title}, 
-            post_content = #{post_content}, 
-            post_img_path = #{post_img_path},
-            post_img_pos = #{post_img_pos},
+        SET post_title = #{postTitle}, 
+            post_content = #{postContent}, 
+            post_img_path = #{postImgPath},
+            post_img_pos = #{postImgPos},
             post_updated_at = NOW()
-        WHERE post_num = #{post_num}
+        WHERE post_num = #{postNum}
     </update>
 
     <delete id="deletePost">
-        DELETE FROM post WHERE post_num = #{post_num}
+        DELETE FROM post WHERE post_num = #{postNum}
     </delete>
 
     <select id="selectPostsWithPaging" resultType="kr.hi.project.dto.PostDTO">

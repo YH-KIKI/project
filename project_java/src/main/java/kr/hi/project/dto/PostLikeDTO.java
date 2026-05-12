@@ -5,11 +5,11 @@ import lombok.Data;
 
 @Data
 public class PostLikeDTO {
-    private int pl_num;
-    private int post_num;
-    private int user_num;
-    private Date pl_created_at;
+    private int plNum;
+    private int postNum;
+    private int userNum;
+    private Date plCreatedAt;
 
-    private int like_count;
-    private boolean is_liked;
+    private int likeCount;
+    private boolean isLiked;
 }

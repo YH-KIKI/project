@@ -5,18 +5,19 @@ import lombok.Data;
 
 @Data
 public class PostDTO {
-    private int post_num;
-    private int user_num;
-    private String user_name;
-    private String post_title;
-    private String post_content;
-    private int post_views;
-    private LocalDateTime post_created_at;
-    private LocalDateTime post_updated_at;
     
-    private String post_img_path;
-    private String post_img_pos;
+    private int postNum;
+    private int userNum;
+    private String userName;
+    private String postTitle;
+    private String postContent;
+    private int postViews;
+    private LocalDateTime postCreatedAt;
+    private LocalDateTime postUpdatedAt;
+    
+    private String postImgPath;
+    private String postImgPos;
 
-    private int like_count;
-    private int comment_count;
+    private int likeCount;
+    private int commentCount;
 }

@@ -6,21 +6,21 @@
 
     <insert id="insertLike" parameterType="kr.hi.project.dto.PostLikeDTO">
         INSERT INTO post_like (post_num, user_num)
-        VALUES (#{post_num}, #{user_num})
+        VALUES (#{postNum}, #{userNum})
     </insert>
 
     <delete id="deleteLike" parameterType="kr.hi.project.dto.PostLikeDTO">
         DELETE FROM post_like 
-        WHERE post_num = #{post_num} AND user_num = #{user_num}
+        WHERE post_num = #{postNum} AND user_num = #{userNum}
     </delete>
 
     <select id="checkLikeStatus" parameterType="kr.hi.project.dto.PostLikeDTO" resultType="int">
         SELECT COUNT(*) FROM post_like 
-        WHERE post_num = #{post_num} AND user_num = #{user_num}
+        WHERE post_num = #{postNum} AND user_num = #{userNum}
     </select>
 
     <select id="countLikesByPostNum" resultType="int">
-        SELECT COUNT(*) FROM post_like WHERE post_num = #{post_num}
+        SELECT COUNT(*) FROM post_like WHERE post_num = #{postNum}
     </select>
 
 </mapper>
