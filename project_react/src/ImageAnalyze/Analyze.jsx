@@ -106,14 +106,20 @@ const Analyze = () => {
           'Authorization': `Bearer ${localStorage.getItem('login_token')}`
         }
       });
-      alert("식단 기록 완료!");
+      alert("식단 기록중...");
       console.log(response)
       setShowModal(false);
       navigate('/'); // 기록 후 메인 페이지로 이동
     } catch (error) {
       console.error("기록 실패", error);
+    // 중복식사 알림 등를 alert으로 띄웁니다.
+    if (error.response && error.response.data) {
+      alert(`🛑 등록 실패: ${error.response.data}`);
+    } else {
+      alert("❌ 서버 오류가 발생했습니다. 잠시 후 다시 시도해주세요.");
     }
-  };
+  }
+};
   return (
     <div className="page-background">
       <div className="app-wrapper">
