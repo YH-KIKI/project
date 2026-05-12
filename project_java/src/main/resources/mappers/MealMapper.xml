@@ -68,8 +68,16 @@
 	
 	<insert id="insertDay" parameterType="kr.hi.project.dto.MealDayDTO" 
 	        useGeneratedKeys="true" keyProperty="mdayNum">
-	    INSERT INTO meal_day (mw_num, md_day)
-    	VALUES (#{mwNum}, #{mdDay})
+	    INSERT INTO meal_day (
+        mday_kcal,
+        md_day,
+        mw_num
+	    )
+	    VALUES (
+	        #{mdayKcal},
+	        #{mdDay},
+	        #{mwNum}
+	    )
 	</insert>
 	<!-- 하루칼로리 -->
 	<update id="updateDailyKcal">

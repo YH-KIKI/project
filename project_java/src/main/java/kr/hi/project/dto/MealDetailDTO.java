@@ -9,5 +9,11 @@ public class MealDetailDTO {
     private int mdPortion;    // 중량(g)
     private int mkNum;        // 식단기록고유번호 (FK)
     private int foNum;        // 음식고유번호 (FK)
+    
+    
+    
+    private int mdayNum; 		// 하루식단고유번호
+    private String foName;		// 음식이름
+    private String mkMealType;	// 식사종류(아침,점심,저녁)
 
 }
