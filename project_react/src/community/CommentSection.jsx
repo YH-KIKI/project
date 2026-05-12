@@ -8,19 +8,18 @@ const CommentSection = ({ post_num, user_num }) => {
     const [newComment, setNewComment] = useState("");
 
     const fetchComments = useCallback(async () => {
+        if (!post_num) return;
         try {
             const response = await axios.get(`http://localhost:8080/api/comments/${post_num}`);
-            setComments(response.data);
+            setComments(Array.isArray(response.data) ? response.data : []);
         } catch (error) {
-            console.error(error);
+            console.error("댓글 로딩 오류:", error);
         }
     }, [post_num]);
 
     useEffect(() => {
-        if (post_num) {
-            fetchComments();
-        }
-    }, [post_num, fetchComments]);
+        fetchComments();
+    }, [fetchComments]);
 
     const handleWriteComment = async () => {
         if (!user_num) {
@@ -33,34 +32,51 @@ const CommentSection = ({ post_num, user_num }) => {
         }
         try {
             await axios.post('http://localhost:8080/api/comments', {
-                post_num,
-                user_num,
-                pc_content: newComment,
-                parent_pc_num: null
+                postNum: parseInt(post_num),
+                userNum: parseInt(user_num),
+                pcContent: newComment,
+                parentPcNum: null 
             });
             alert("댓글을 작성하였습니다.");
             setNewComment("");
             fetchComments();
         } catch (error) {
-            console.error(error);
+            console.error("댓글 작성 오류:", error);
+            alert("댓글 작성에 실패했습니다.");
         }
     };
 
     const renderComments = (parentId = null) => {
+        if (!comments || !Array.isArray(comments)) return null;
+
         return comments
-            .filter(comment => comment.parent_pc_num === parentId)
-            .map(comment => (
-                <div key={comment.pc_num} className={parentId ? "nnp-reply-wrapper" : ""}>
-                    <CommentItem 
-                        comment={comment} 
-                        user_num={user_num} 
-                        onRefresh={fetchComments}
-                    />
-                    <div className="nnp-child-comments">
-                        {renderComments(comment.pc_num)}
+            .filter(comment => {
+                if (!comment) return false;
+                
+                const pNum = comment.parentPcNum !== undefined ? comment.parentPcNum : comment.parent_pc_num;
+                
+                if (parentId === null) {
+                    return pNum === null || pNum === undefined || pNum === 0 || pNum === "0";
+                }
+                
+                return pNum === parentId;
+            })
+            .map(comment => {
+                const currentPcNum = comment.pcNum || comment.pc_num;
+
+                return (
+                    <div key={currentPcNum} className={parentId ? "nnp-reply-wrapper" : ""}>
+                        <CommentItem 
+                            comment={comment} 
+                            user_num={user_num} 
+                            onRefresh={fetchComments}
+                        />
+                        <div className="nnp-child-comments">
+                            {currentPcNum && renderComments(currentPcNum)}
+                        </div>
                     </div>
-                </div>
-            ));
+                );
+            });
     };
 
     return (

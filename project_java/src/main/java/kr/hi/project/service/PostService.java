@@ -27,6 +27,8 @@ public class PostService {
 
     public PostDTO getPostDetail(int postNum, Integer loginUserNum, HttpServletRequest request, HttpServletResponse response) {
         PostDTO post = postDao.selectPostByNum(postNum);
+        
+        if (post == null) return null;
 
         if (loginUserNum != null && loginUserNum.equals(post.getUserNum())) {
             return post;
@@ -77,13 +79,18 @@ public class PostService {
     }
 
     public Map<String, Object> getPostsWithPaging(int page, int size, String category, String keyword) {
+        String searchKeyword = (keyword == null || keyword.trim().isEmpty() || keyword.contains("200xhr")) 
+                               ? null : keyword.trim();
+        
+        String searchCategory = (category == null || category.isEmpty()) ? "title" : category;
+
         int offset = (page - 1) * size;
-        
-        List<PostDTO> posts = postDao.selectPostsWithPaging(size, offset, category, keyword);
-        
-        int totalCount = postDao.selectTotalCount(category, keyword);
+
+        List<PostDTO> posts = postDao.selectPostsWithPaging(size, offset, searchCategory, searchKeyword);
+        int totalCount = postDao.selectTotalCount(searchCategory, searchKeyword);
         
         int totalPages = (int) Math.ceil((double) totalCount / size);
+        if (totalPages == 0) totalPages = 1;
 
         Map<String, Object> result = new HashMap<>();
         result.put("posts", posts);
