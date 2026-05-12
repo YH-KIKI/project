@@ -42,7 +42,8 @@ public class SecurityConfig {
                                  "/api/community/**", // 추가했음(박하)
                                  "/api/comments/**", // [박하/추가] 댓글 API 허용 추가
                                  "/api/likes/**",    // [박하/추가] 추천 API 허용 추가
-                                 "/api/meal/**"
+                                 "/api/meal/**",
+                                 "/api/food/**" //[연희/추가] food 테이블 불러오는 API
                                  ).permitAll() // 가입, 로그인은 누구나 가능
                 .requestMatchers("/api/v1/user/verify-password").permitAll()
                 .anyRequest().authenticated() // 나머지는 로그인이 필요함

@@ -1,47 +1,13 @@
 import React, { useState } from "react";
+import axios from "axios";
 
 const MealRecordModal = ({ mealType, selectedDate, initialData, onClose, onSave }) => {
   const [mode, setMode] = useState("manual");
   const [foodName, setFoodName] = useState("");
   const [previewImage, setPreviewImage] = useState(null);
+  const [searchResults, setSearchResults] = useState([]);
 
-  const [foods, setFoods] = useState(
-    initialData?.foods || [
-      {
-        id: 1,
-        name: "그릭요거트",
-        kcal: 120,
-        count: 1,
-        carbs: 12,
-        protein: 10,
-        fat: 3,
-        sodium: 60,
-        imageUrl: "https://images.unsplash.com/photo-1488477181946-6428a0291777?w=400",
-      },
-      {
-        id: 2,
-        name: "바나나",
-        kcal: 80,
-        count: 1,
-        carbs: 20,
-        protein: 1,
-        fat: 0,
-        sodium: 1,
-        imageUrl: "https://images.unsplash.com/photo-1603833665858-e61d17a86224?w=400",
-      },
-      {
-        id: 3,
-        name: "삶은 달걀",
-        kcal: 70,
-        count: 1,
-        carbs: 0,
-        protein: 9,
-        fat: 5,
-        sodium: 70,
-        imageUrl: "",
-      },
-    ]
-  );
+  const [foods, setFoods] = useState(initialData?.foods || []);
 
   const totalKcal = foods.reduce((sum, food) => sum + food.kcal * food.count, 0);
   const totalCarbs = foods.reduce((sum, food) => sum + food.carbs * food.count, 0);
@@ -49,28 +15,44 @@ const MealRecordModal = ({ mealType, selectedDate, initialData, onClose, onSave 
   const totalFat = foods.reduce((sum, food) => sum + food.fat * food.count, 0);
   const totalSodium = foods.reduce((sum, food) => sum + food.sodium * food.count, 0);
 
-  const addFood = () => {
-    const value = foodName.trim();
+  const searchFood = async () => {
+  const keyword = foodName.trim();
 
-    if (!value) {
-      alert("음식명을 입력해주세요.");
-      return;
-    }
+  if (!keyword) {
+    alert("검색할 음식명을 입력해주세요.");
+    return;
+  }
 
+  try {
+    const res = await axios.get("http://localhost:8080/api/food/search", {
+      params: { keyword },
+    });
+
+    setSearchResults(res.data);
+  } catch (error) {
+    console.error(error);
+    alert("음식 검색 중 오류가 발생했습니다.");
+  }
+};
+
+  const addSelectedFood = (food) => {
     const newFood = {
-      id: Date.now(),
-      name: value,
-      kcal: 100,
+      id: food.foNum,
+      foNum: food.foNum,
+      name: food.foName,
+      kcal: food.foKcal,
       count: 1,
-      carbs: 15,
-      protein: 6,
-      fat: 3,
-      sodium: 120,
+      carbs: food.foCarbs,
+      protein: food.foProtein,
+      fat: food.foFat,
+      sodium: food.foNatrium,
+      baseGram: food.foBaseGram,
       imageUrl: "",
     };
 
     setFoods([...foods, newFood]);
     setFoodName("");
+    setSearchResults([]);
   };
 
   const handleDropImage = (e) => {
@@ -128,11 +110,24 @@ const MealRecordModal = ({ mealType, selectedDate, initialData, onClose, onSave 
     );
   };
 
-  const handleSave = () => {
-    if (foods.length === 0) {
-      alert("음식을 1개 이상 추가해주세요.");
-      return;
-    }
+  const handleSave = async () => {
+  if (foods.length === 0) {
+    alert("음식을 1개 이상 추가해주세요.");
+    return;
+  }
+
+  const foodDetails = {};
+
+  foods.forEach((food) => {
+    foodDetails[food.name] = food.count * food.baseGram;
+  });
+
+  try {
+    await axios.post("http://localhost:8080/api/meal/record", {
+      userNum: 1,
+      mkMealType: mealType,
+      foodDetails: foodDetails,
+    });
 
     const firstImageFood = foods.find((food) => food.imageUrl);
 
@@ -145,7 +140,14 @@ const MealRecordModal = ({ mealType, selectedDate, initialData, onClose, onSave 
       totalSodium,
       imageUrl: firstImageFood?.imageUrl || "",
     });
-  };
+
+    alert("식단이 저장되었습니다!");
+  } catch (error) {
+    console.error(error);
+    console.log(error.response?.data);
+    alert("식단 저장 중 오류가 발생했습니다.");
+  }
+};
 
   return (
     <div className="modal-backdrop">
@@ -175,17 +177,37 @@ const MealRecordModal = ({ mealType, selectedDate, initialData, onClose, onSave 
         </div>
 
         {mode === "manual" ? (
-          <div className="food-input-row">
-            <input
-              value={foodName}
-              onChange={(e) => setFoodName(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === "Enter") addFood();
-              }}
-              placeholder="음식명을 검색하세요 (예: 계란, 바나나, 그릭요거트)"
-            />
-            <button onClick={addFood}>추가</button>
-          </div>
+          <>
+            <div className="food-input-row">
+              <input
+                value={foodName}
+                onChange={(e) => setFoodName(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") searchFood();
+                }}
+                placeholder="음식명을 검색하세요 (예: 계란, 바나나, 그릭요거트)"
+              />
+              <button onClick={searchFood}>검색</button>
+            </div>
+
+            {searchResults.length > 0 && (
+              <div className="food-search-results">
+                {searchResults.map((food) => (
+                  <button
+                    key={food.foNum}
+                    type="button"
+                    className="food-search-item"
+                    onClick={() => addSelectedFood(food)}
+                  >
+                    <strong>{food.foName}</strong>
+                    <span>
+                      {food.foKcal} kcal / 기준 {food.foBaseGram}g
+                    </span>
+                  </button>
+                ))}
+              </div>
+            )}
+          </>
         ) : (
           <div
             className="photo-drop-zone"

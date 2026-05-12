@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="kr.hi.project.dao.MealRecordDao">
+
+    <!-- meal_log 저장 -->
+    <insert id="insertMealLog"
+            parameterType="kr.hi.project.dto.MealLogDTO"
+            useGeneratedKeys="true"
+            keyProperty="mkNum">
+
+        INSERT INTO meal_log (
+            mk_meal_type,
+            mk_image,
+            mk_user_memo,
+            user_num
+        )
+        VALUES (
+            #{mkMealType},
+            #{mkImage},
+            #{mkUserMemo},
+            #{userNum}
+        )
+
+    </insert>
+
+
+    <!-- 음식 조회 -->
+    <select id="findFoodByName"
+            resultType="kr.hi.project.dto.FoodDTO">
+
+        SELECT
+            fo_num AS foNum,
+            fo_name AS foName,
+            fo_base_gram AS foBaseGram,
+            fo_kcal AS foKcal,
+            fo_carbs AS foCarbs,
+            fo_protein AS foProtein,
+            fo_fat AS foFat,
+            fo_natrium AS foNatrium,
+            fo_type AS foType
+        FROM food
+        WHERE fo_name = #{foName}
+        LIMIT 1
+
+    </select>
+
+
+    <!-- meal_detail 저장 -->
+    <insert id="insertMealDetail"
+            parameterType="kr.hi.project.dto.MealDetailDTO">
+
+        INSERT INTO meal_detail (
+            md_kcal,
+            md_portion,
+            mk_num,
+            fo_num
+        )
+        VALUES (
+            #{mdKcal},
+            #{mdPortion},
+            #{mkNum},
+            #{foNum}
+        )
+
+    </insert>
+
+</mapper>
