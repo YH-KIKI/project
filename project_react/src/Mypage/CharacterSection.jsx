@@ -4,10 +4,8 @@ import './CharacterSection.css';
 
 const CharacterSection = ({ charInfo, onUpdate }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
-  // [수정] 서버 데이터와 별개로 현재 선택된 캐릭터 타입을 관리하는 로컬 state 추가
   const [localType, setLocalType] = useState(null);
 
-  // 부모로부터 charInfo가 새로 오면 로컬 상태 동기화
   useEffect(() => {
     if (charInfo && charInfo.chType) {
       setLocalType(charInfo.chType);
@@ -22,6 +20,15 @@ const CharacterSection = ({ charInfo, onUpdate }) => {
     );
   }
 
+  // --- [로직 수정] 기획안 기반 레벨별 필요 경험치(Max XP) 반환 ---
+  const getRequiredExp = (level) => {
+    if (level >= 91) return 1000; // 👑 다이어트 신 구간 (91~98)
+    if (level >= 61) return 750;  // 🏋️ 건강 마스터 구간 (61~90)
+    if (level >= 31) return 500;  // 🍎 프로 식단러 구간 (31~60)
+    if (level >= 11) return 250;  // 🌱 쑥쑥 자라요 구간 (11~30)
+    return 100;                   // 🐣 식단 병아리 구간 (1~10)
+  };
+
   const getLevelTitle = (level) => {
     if (level >= 91) return "👑 다이어트 신";
     if (level >= 61) return "🏋️ 건강 마스터";
@@ -30,7 +37,10 @@ const CharacterSection = ({ charInfo, onUpdate }) => {
     return "🐣 식단 병아리"; 
   };
 
-  // [수정] localType을 기반으로 이름과 이미지를 결정 (서버 응답 지연 해결)
+  // --- 경험치 계산 ---
+  const requiredExp = getRequiredExp(charInfo.chLevel);
+  const expPercentage = Math.min((charInfo.chExp / requiredExp) * 100, 100);
+
   const getCharNameByType = (type) => {
     const typeNum = Number(type);
     if (typeNum === 1) return "냠냠이";
@@ -51,23 +61,18 @@ const CharacterSection = ({ charInfo, onUpdate }) => {
 
   const currentName = getCharNameByType(localType || charInfo.chType);
   const levelTitle = getLevelTitle(charInfo.chLevel);
-  const expPercentage = (charInfo.chExp / charInfo.nextLevelExp) * 100;
 
   const changeCharacter = async (typeNum) => {
     const token = localStorage.getItem('login_token') || sessionStorage.getItem('login_token');
-    
     try {
       const response = await axios.post(`http://localhost:8080/api/character/update`, 
         { userNum: charInfo.userNum, type: typeNum },
         { headers: { Authorization: `Bearer ${token}` } }
       );
-      
       if (response.status === 200) {
-        // [수정] 서버에서 데이터를 다시 가져오기 전에 로컬에서 먼저 이미지를 바꿔버림
         setLocalType(typeNum); 
         alert("캐릭터가 변경되었습니다!");
         setIsModalOpen(false);
-        
         if (onUpdate) onUpdate(); 
       }
     } catch (error) {
@@ -95,9 +100,15 @@ const CharacterSection = ({ charInfo, onUpdate }) => {
           <span style={{ fontWeight: 'bold', fontSize: '18px' }}>LV. {charInfo.chLevel}</span>
           <div className="char-progress-container">
             <div className="char-progress-fill" style={{ width: `${expPercentage}%` }} />
+            {/* 호버 시 나타날 툴팁 추가 */}
+            <div className="char-exp-tooltip">
+              ({charInfo.chExp} / {requiredExp} XP)
+            </div>
           </div>
         </div>
-        <p className="char-status-text">{levelTitle} {currentName}</p>
+        <p className="char-status-text">
+          {levelTitle} {currentName}
+        </p>
       </div>
 
       <button onClick={() => setIsModalOpen(true)} className="char-change-btn">
