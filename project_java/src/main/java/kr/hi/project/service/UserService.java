@@ -8,8 +8,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import kr.hi.project.dao.UserDao;
-import kr.hi.project.domain.UserDTO;
-import kr.hi.project.domain.UserPrivacyDTO;
+import kr.hi.project.dto.UserDTO;
+import kr.hi.project.dto.UserPrivacyDTO;
 
 @Service
 public class UserService {
@@ -30,15 +30,15 @@ public class UserService {
     private PasswordEncoder passwordEncoder;//SecurityConfig에서 만든 암호화 도구
     
     public void register(UserDTO user) {
-        if (user.getPassword().length() > 10) {
+        if (user.getUserPassWord().length() > 10) {
             throw new RuntimeException("비밀번호가 너무 깁니다. (최대 10자)");
         }
     	
     	//암호화
-    	String encodedPassword = passwordEncoder.encode(user.getPassword());
+    	String encodedPassword = passwordEncoder.encode(user.getUserPassWord());
     	
     	//암호화된 비밀번호를 DB에 저장합니다.
-    	user.setPassword(encodedPassword);
+    	user.setUserPassWord(encodedPassword);
     	userDAO.insertUser(user);
     }
 
@@ -57,10 +57,49 @@ public class UserService {
 		return usernum;
 	}
 
-	public void informationUpdata(UserPrivacyDTO userPrivacyDTO) {
-		userDAO.informationUpdata(userPrivacyDTO);
-		
-	}
+	public void informationUpdata(UserPrivacyDTO dto) {
+        calculateAndSetGoals(dto);
+        //계산된 결과가 포함된 DTO를 DB에 업데이트합니다.
+        userDAO.informationUpdata(dto);
+        //추가로 알레르기 정보가 있다면 여기서 처리
+        if (dto.getUserAllergies() != null) {
+        	userDAO.deleteUserAllergies(dto.getUserNum());
+        }
+        	for (String alName : dto.getUserAllergies()) {
+                userDAO.insertUserAllergy(dto.getUserNum(), alName);
+        	}
+    }
+
+    //영양소 계산 전용 내부 메서드
+    private void calculateAndSetGoals(UserPrivacyDTO dto) {
+        //기초대사량(BMR) 계산
+        double bmr;
+        if ("M".equals(dto.getUserGender())) {
+            bmr = (10 * dto.getUserWeight()) + (6.25 * dto.getUserHeight()) - (5 * dto.getUserAge()) + 5;
+        } else {
+            bmr = (10 * dto.getUserWeight()) + (6.25 * dto.getUserHeight()) - (5 * dto.getUserAge()) - 161;
+        }
+
+        //유지 칼로리(TDEE) 계산 (활동지수 Act 곱하기)
+        double tdee = bmr * dto.getUserAct();
+
+        //목표 칼로리 설정 (감량/유지/증량 판단 로직)
+        int calorieAdjustment = 0;
+        if (dto.getUserWeight() > dto.getUserTargetweight()) {
+            calorieAdjustment = -500; // 다이어트
+        } else if (dto.getUserWeight() < dto.getUserTargetweight()) {
+            calorieAdjustment = 300;  // 뚱뚱해지고 싶다
+        }
+        
+        int targetKcal = (int) Math.round(tdee + calorieAdjustment);
+
+        //영양소 배분 (탄 5 : 단 3 : 지 2) 후 DTO에 저장
+        dto.setUserDailyKcal(targetKcal);
+        dto.setUserDailyCarbs((int) Math.round((targetKcal * 0.5) / 4));
+        dto.setUserDailyProtein((int) Math.round((targetKcal * 0.3) / 4));
+        dto.setUserDailyFat((int) Math.round((targetKcal * 0.2) / 9));
+        dto.setUserDailyNatrium(2000); // 고정값
+    }
 
 	public UserPrivacyDTO getUserInfo(int usernum) {
 		return userDAO.getUserInfo(usernum);

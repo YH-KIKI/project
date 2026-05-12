@@ -1,29 +1,45 @@
+# main.py
 from fastapi import FastAPI, UploadFile, File, Form
-from pydantic import BaseModel
+
+# 🌟 방금 만든 두 파일에서 필요한 클래스와 함수를 가져옵니다!
+from schemas import UserInfo
+from ai_service import get_best_diet
 
 app = FastAPI()
 
-@app.get("/test")
-async def index():
-    return {"message": "Hello FastAPI"}
+# 1. AI 식단 추천 엔드포인트
+@app.post("/api/ai/recommend")
+async def ai_recommend(user: UserInfo):
+    print(f"🔥 [Python] 스프링부트 요청 도착! 유저번호: {user.userNum}")
+    
+    # ai_service.py의 추천 함수를 호출 (1끼 기준 3으로 나눈 값을 전달)
+    best_food = get_best_diet(
+        target_kcal = user.targetCalorie / 3,
+        target_carbs = user.carbs / 3,
+        target_protein = user.protein / 3,
+        target_fat = user.fat / 3,
+        diet_type = user.type  # 🌟 유저가 누른 탭 이름을 추가로 전달!
+    )   
+    
+    print(f"🤖 AI 추천 결과: {best_food['menu']}")
 
-# 2. Spring Boot에서 보낼 데이터 형식을 정의
-class InputData(BaseModel):
-    text: str
+    # 스프링부트로 다시 예쁘게 포장해서 돌려보냄
+    return [{
+        "id": best_food["id"],
+        "menu": best_food["menu"],
+        "kcal": best_food["kcal"],
+        "carbs": best_food["carbs"],
+        "protein": best_food["protein"],
+        "fat": best_food["fat"],
+        "sodium": best_food["sodium"],
+        "tags": best_food["tags"] + ["AI 정밀분석"]
+    }]
 
+# 2. 사진 분석 테스트 엔드포인트
 @app.post("/detect")
 async def detect_service(message: str = Form(...), file: UploadFile = File(...)):
-    
-    # 전달받은 메시지와 파일 이름을 확인합니다.
     file_name = file.filename
-    
-    # 필요하다면 여기서 파일을 읽거나 AI 모델에 넘기는 로직을 작성합니다.
-    # 예시: contents = await file.read()
-    print("3. [Python] 스프링부트에서 넘어온 데이터 확인 👇")
-    print(f" - 받은 메시지: {message}")
     print(f"4. [Python] 받은 파일명: {file_name}")
-    
-    # Spring Boot로 다시 돌려보낼 결과 (String.class로 받으므로 문자열 형태의 JSON 반환)
     return {
         "status": "success",
         "received_message": message,
@@ -32,4 +48,5 @@ async def detect_service(message: str = Form(...), file: UploadFile = File(...))
 
 if __name__ == "__main__":
     import uvicorn
+    # 터미널 명령어 대신 파이썬 파일 자체를 실행해도 서버가 켜집니다.
     uvicorn.run("main:app", port=8000, reload=True)

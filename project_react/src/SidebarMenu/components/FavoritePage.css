@@ -122,15 +122,50 @@
 
 .heart-btn {
   position: absolute;
-  top: 10px;
-  right: 10px;
-  width: 34px;
-  height: 34px;
-  border-radius: 50%;
-  border: none;
-  background: white;
+  top: 12px;
+  right: 12px;
+  width: 28px;
+  height: 28px;
+  border-radius: 12px;
+
+  border: 1px solid #ffd0da;
+  background: rgba(255, 255, 255, 0.95);
+  color: #ff6686;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
   cursor: pointer;
-  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08);
+  z-index: 10;
+
+  box-shadow: 0 6px 14px rgba(255, 102, 134, 0.18);
+  transition: all 0.18s ease;
+}
+.heart-btn svg {
+  width: 16px;
+  height: 16px;
+  stroke-width: 2.4;
+  transition: all 0.18s ease;
+}
+
+.heart-btn.active {
+  background: white;
+  border-color: #ff6686;
+  color: #ff6686;
+}
+
+.heart-btn:hover {
+  transform: translateY(-2px) scale(1.05);
+  background: #fff0f3;
+  border-color: #ff9db0;
+  color: #ff4f78;
+  box-shadow: 0 8px 18px rgba(255, 102, 134, 0.28);
+}
+
+.heart-btn.active svg {
+  fill: #ff6686;
+  stroke: #ff6686;
 }
 
 .food-content {
@@ -178,12 +213,33 @@
   cursor: pointer;
 }
 
-.delete-btn {
+.meal-delete-btn {
   height: 44px;
+  width: 44px;
+  font-size: 18px;
   border-radius: 13px;
-  border: 1px solid #eddcdc;
+  border: 1px solid #f0dede;
   background: #fff;
+  
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  color: #9a8a8a;
+
   cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.meal-delete-btn:hover {
+  background: #fff3f5;
+  border-color: #ffb5c2;
+  color: #ff6686;
+}
+
+.meal-delete-btn svg {
+  width: 16px;
+  height: 16px;
 }
 
 /* 저장한 식단 */

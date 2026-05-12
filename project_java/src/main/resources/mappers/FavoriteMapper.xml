@@ -33,20 +33,28 @@
 	    ORDER BY l.mk_created_at DESC
 	</select>
 
-	<select id="getFavoriteList" resultType="kr.hi.project.domain.MealFavoritesDTO">
-	    SELECT 
-	        f.mf_num as Mf_num, 
-	        f.mf_name as Mf_name, 
-	        l.mk_image as Mk_image,
-	        l.mk_num as Mk_num,
+	<select id="getFavoriteList" resultType="kr.hi.project.dto.MealFavoritesDTO">
+	    SELECT
+	        f.mf_num as mfNum,
+	        f.mf_name as mfName,
+	        l.mk_image as mkImage,
+	        l.mk_num as mkNum,
 	        IFNULL(SUM(d.md_kcal), 0) as TotalKcal,
-	        GROUP_CONCAT(fd.fo_name SEPARATOR ', ') as FoodListStr 
+	        GROUP_CONCAT(fd.fo_name SEPARATOR ', ') as FoodListStr
+	
 	    FROM meal_favorites f
-	    /* 🌟 여기서 meal_log와 연결합니다! */
-	    INNER JOIN meal_log l ON f.mk_num = l.mk_num
-	    LEFT JOIN meal_detail d ON l.mk_num = d.mk_num
-	    LEFT JOIN food fd ON d.fo_num = fd.fo_num
+	
+	    INNER JOIN meal_log l
+	        ON f.mk_num = l.mk_num
+	
+	    LEFT JOIN meal_detail d
+	        ON l.mk_num = d.mk_num
+	
+	    LEFT JOIN food fd
+	        ON d.fo_num = fd.fo_num
+	
 	    WHERE f.user_num = #{userNum}
+	
 	    GROUP BY f.mf_num
 	</select>
 

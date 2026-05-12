@@ -29,26 +29,49 @@ const Information = () => {
       return;
     }
 
+    //키, 몸무게, 나이 범위 검사 추가
+    if (height < 100 || height > 300) {
+      alert("키는 100cm에서 300cm 사이여야 합니다!");
+      return;
+    }
+    if (weight < 40 || weight > 150) {
+      alert("몸무게는 40kg에서 150kg 사이여야 합니다!");
+      return;
+    }
+    if (targetweight < 40 || targetweight > 150) {
+      alert("목표몸무게는 40kg에서 150kg 사이여야 합니다!");
+      return;
+    }
+    if (age < 18 || age > 100) {
+      alert("나이는 18세에서 100세 사이여야 합니다!");
+      return;
+    }
+    if (act === '0') {
+      alert("활동량을 선택해 주세요!");
+      return;
+    }
+
     try {
-      const token = localStorage.getItem('login_token');
+      const token = localStorage.getItem('login_token') || sessionStorage.getItem('login_token');
       await axios.post('http://localhost:8080/api/information_updata', {
-				Usernum: usernum,
-				Userid: userid,
-        Username: username,
-        Email: email,
-				Gender: gender,
-				Height: height,
-				Weight: weight,
-				Targetweight: targetweight,
-				Age: age,
-				Act: act,
-        Allergies: allergies
+				userNum: usernum,
+        userId: userid,
+        userName: username,
+        userEmail: email,
+        userGender: gender,
+        userHeight: height,
+        userWeight: weight,
+        userTargetweight: targetweight,
+        userAge: age,
+        userAct: act,
+        userAllergies: allergies
       },
       {
         headers: {
           Authorization: `Bearer ${token}`
         }
       });
+      console.log(axios)
       alert("회원가입 성공! 로그인 페이지로 이동합니다.");
       navigate('/login'); // 가입 성공하면 자동으로 로그인 페이지로 슝!
     } catch (error) {
@@ -58,31 +81,35 @@ const Information = () => {
 
 	//id가져오고
 		const fetchUserInfo = async () => {
-		const token = localStorage.getItem('login_token');
+		const token = localStorage.getItem('login_token') || sessionStorage.getItem('login_token');
 		try{
 			const response = await axios.get('http://localhost:8080/api/information_select', {
 				headers:{
 					Authorization: `Bearer ${token}`
 				}
 			});
-      setUsernum(response.data.Usernum);
-			setUserid(response.data.Userid)
-			setUsername(response.data.Username)
-			setEmail(response.data.Email)
-      setgender(response.data.Gender)
-      setheight(response.data.Height)
-      setweight(response.data.Weight)
-      settargetweight(response.data.Targetweight)
-      setage(response.data.Age)
-      setact(response.data.Act)
-      setallergies(response.data.Allergies)
+      setUsernum(response.data.userNum);
+      setUserid(response.data.userId);
+      setUsername(response.data.userName);
+      setEmail(response.data.userEmail);
+
+      setgender(response.data.userGender);
+      setheight(response.data.userHeight);
+
+      setweight(response.data.userWeight);
+      settargetweight(response.data.userTargetweight);
+
+      setage(response.data.userAge);
+      setact(response.data.userAct);
+
+      setallergies(response.data.userAllergies || []);
 		}catch(error){
 			alert("인증에 실패했습니다. 다시 로그인하세요")
 		}
 	}
 	// 페이지가 새로고침되어도 토큰이 있으면 로그인 유지
 	useEffect(() => {
-		const token = localStorage.getItem('login_token');
+		const token = localStorage.getItem('login_token') || sessionStorage.getItem('login_token');
 		if (token) {
 			fetchUserInfo();
 		}
@@ -113,10 +140,12 @@ const Information = () => {
           <h1>개인정보</h1>
           
           <div style={{ margin: '20px 0' }}>
+            닉네임 : 
             <input type="text" placeholder="닉네임" value={username}
             style={{ padding: '10px', width: '200px', marginBottom: '10px' }} 
             onChange={(e) => setUsername(e.target.value)}
             /><br/>
+            이메일 : 
             <input type="email" placeholder="이메일"  value={email}
             style={{ padding: '10px', width: '200px' }} 
             onChange={(e) => setEmail(e.target.value)} 
@@ -143,11 +172,12 @@ const Information = () => {
               /> 비밀~
       			</div>
 
+            키높이 : 
             <input type="text" placeholder="키" value={height}
             style={{ padding: '10px', width: '200px' }} 
             onChange={(e) => setheight(e.target.value)}
             /><br/>
-
+            무게 : 
 						<input type="text" placeholder="무게" value={weight}
             style={{ padding: '10px', width: '200px' }} 
             onChange={(e) => setweight(e.target.value)}
@@ -157,16 +187,24 @@ const Information = () => {
             style={{ padding: '10px', width: '200px' }} 
             onChange={(e) => settargetweight(e.target.value)}
             /><br/>
-
+            나이 : 
 						<input type="text" placeholder="나이" value={age}
             style={{ padding: '10px', width: '200px' }} 
             onChange={(e) => setage(e.target.value)}
             /><br/>
-
-						<input type="text" placeholder="활동량" value={act}
-            style={{ padding: '10px', width: '200px' }} 
-            onChange={(e) => setact(e.target.value)}
-            /><br/>
+            활동량 : 
+            <select 
+              value={act} 
+              onChange={(e) => setact(e.target.value)}
+              style={{ padding: '10px', width: '220px', marginBottom: '10px' }}
+            >
+              <option value="0">활동량을 선택하세요</option>
+              <option value="1.2">매우 낮음 (거의 활동 안 함)</option>
+              <option value="1.375">낮음 (가벼운 운동 주 1~3회)</option>
+              <option value="1.55">보통 (적당한 운동 주 3~5회)</option>
+              <option value="1.725">높음 (격렬한 운동 주 6~7회)</option>
+              <option value="1.9">매우 높음 (선수급, 육체노동)</option>
+            </select>
             
             <div style={{ marginBottom: '20px' }}>
 							<label>알레르기: </label>

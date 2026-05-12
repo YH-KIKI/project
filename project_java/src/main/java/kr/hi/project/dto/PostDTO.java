@@ -1,4 +1,4 @@
-package kr.hi.project.domain;
+package kr.hi.project.dto;
 
 import java.time.LocalDateTime;
 import lombok.Data;

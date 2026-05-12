@@ -3,13 +3,14 @@ import Sidebar from '../Main/Sidebar';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 
-const Favorite = () => {
+const FavoriteMeal = () => {
   const [favorites, setFavorites] = useState([]);
   const [currentPage, setCurrentPage] = useState(1); //현재 페이지 번호
   const itemsPerPage = 12; //한 페이지에 보여줄 개수
 
   const navigate = useNavigate();
-  const userNum = localStorage.getItem('user_num');
+  const user = JSON.parse(localStorage.getItem('user') || '{}');
+  const userNum = user.user_num;
 
   const handlemeallogpageClick = () => {
     navigate('/meallogpage');
@@ -75,16 +76,16 @@ const Favorite = () => {
         {/*12개씩 보여주는 그리드 */}
         <div style={styles.grid}>
           {currentItems.map(fav => (
-            <div key={fav.Mf_num} style={styles.card}>
+            <div key={fav.mfNum} style={styles.card}>
               <div style={styles.imgBox}>
-                {fav.Mk_image ? (
-                  <img src={fav.Mk_image} alt="식단" style={styles.img} />
+                {fav.mkImage ? (
+                  <img src={fav.mkImage} alt="식단" style={styles.img} />
                 ) : (
                   <div style={{display: 'flex', height: '100%', alignItems: 'center', justifyContent: 'center', color: '#ccc', fontSize: '12px'}}>No Image</div>
                 )}
               </div>
-              <p style={styles.foodName}>{fav.FoodListStr}</p>
-              <p style={styles.kcal}>{fav.TotalKcal} <span style={{fontSize: '12px'}}>kcal</span></p>
+              <p style={styles.foodName}>{fav.foodListStr}</p>
+              <p style={styles.kcal}>{fav.totalKcal} <span style={{fontSize: '12px'}}>kcal</span></p>
               <button style={{...styles.navBtn, width: '100%', marginTop: '10px', marginBottom: 0}}>식단 복사</button>
             </div>
           ))}
@@ -120,4 +121,4 @@ const Favorite = () => {
   );
 };
 
-export default Favorite;
+export default FavoriteMeal;

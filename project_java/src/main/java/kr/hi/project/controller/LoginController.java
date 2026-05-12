@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
 
-import kr.hi.project.domain.UserDTO;
+import kr.hi.project.dto.UserDTO;
 import kr.hi.project.service.JwtService;
 import kr.hi.project.service.UserService;
 

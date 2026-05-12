@@ -2,21 +2,23 @@
 .page-background {
   width: 100vw;
   height: 100vh;
-  overflow: hidden; 
-  
-  background-image: url('../images/Main.png'); 
-  
-  /* 🌟 핵심: 비율을 유지한 채 빈틈없이 화면을 덮어버립니다 (Cover) */
-  background-size: cover; 
-  
-  /* 🌟 냠냠이가 있는 바닥 부분을 최우선으로 화면 아래에 고정시킵니다 */
-  background-position: center bottom; 
-  
+  overflow: hidden;
+
+  background-image: url('../images/Main.png');
+
+  /* 배경 전체를 꽉 채움 */
+  background-size: cover;
+
+  /* 🌟 기존 center bottom → center center 로 변경 */
+  background-position: center center;
+
   background-repeat: no-repeat;
-  background-attachment: fixed; 
+  background-attachment: fixed;
+
   display: flex;
   justify-content: center;
   align-items: flex-start;
+
   margin: 0;
   padding: 0;
 }

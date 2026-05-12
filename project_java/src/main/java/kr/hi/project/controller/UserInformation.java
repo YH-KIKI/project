@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
 
-import kr.hi.project.domain.UserPrivacyDTO;
+import kr.hi.project.dto.UserPrivacyDTO;
 import kr.hi.project.service.JwtService;
 import kr.hi.project.service.UserService;
 
@@ -33,15 +33,14 @@ public class UserInformation {
 	    int usernum = userService.findUsernumByUserid(userid);
 
 	    UserPrivacyDTO dto = userService.getUserInfo(usernum);
-	    dto.setAllergies(userService.findUserAllergies(usernum));
-	    System.out.println(dto);
+	    dto.setUserAllergies(userService.findUserAllergies(usernum));
 	    return dto;
 	}
 
 	
 	@PostMapping("/api/information_updata")
-	public Map<String, String> signup(@RequestBody UserPrivacyDTO UserPrivacyDTO){
-	    userService.informationUpdata(UserPrivacyDTO);
+	public Map<String, String> signup(@RequestBody UserPrivacyDTO userPrivacyDTO){
+	    userService.informationUpdata(userPrivacyDTO);
 	    
 	    Map<String, String> response = new HashMap<>();
 	    

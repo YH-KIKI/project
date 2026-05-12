@@ -4,67 +4,97 @@
 
 	<select id="findByUserid" parameterType="String" resultType="map">
         SELECT * FROM user
-        WHERE user_id = #{userid}
+        WHERE user_id = #{userId}
     </select>
     
-    <insert id="insertUser" parameterType="kr.hi.project.domain.UserDTO">
-        INSERT INTO user (user_name, user_id,user_password, user_email)
-        VALUES (#{username}, #{userid}, #{password}, #{email})
+    <insert id="insertUser" parameterType="kr.hi.project.dto.UserDTO">
+        INSERT INTO user (user_name, user_id, user_password, user_email)
+    	VALUES (#{userName}, #{userId}, #{userPassWord}, #{userEmail})
     </insert>
     
     <select id="findUsernameByUserid" parameterType="string" resultType="string">
     	SELECT user_name FROM user
-    	WHERE user_id = #{userid}
+    	WHERE user_id = #{userId}
 	</select>
 	
 	<select id="findEmailByUserid" parameterType="string" resultType="string">
     	SELECT user_email FROM user
-    	WHERE user_id = #{userid}
+    	WHERE user_id = #{userId}
 	</select>
 	
 	<select id="findUsernumByUserid" parameterType="string" resultType="int">
     	SELECT user_num FROM user
-    	WHERE user_id = #{userid}
+    	WHERE user_id = #{userId}
 	</select>
 	
-	<select id="getUserInfo" resultType="kr.hi.project.domain.UserPrivacyDTO">
+	<select id="getUserInfo" resultType="kr.hi.project.dto.UserPrivacyDTO">
 	    SELECT 
-	        u.user_num AS usernum,
-	        u.user_id AS userid,
-	        u.user_name AS username,
-	        u.user_email AS email,
+	        u.user_num AS userNum,
+	        u.user_id AS userId,
+	        u.user_name AS userName,
+	        u.user_email AS userEmail,
 	
-	        p.up_gender AS gender,
-	        p.up_height AS height,
-	        p.up_weight AS weight,
-	        p.up_target_weight AS targetweight,
-	        p.up_age AS age,
-	        p.up_act AS act
-
+	        p.up_gender AS userGender,
+	        p.up_height AS userHeight,
+	        p.up_weight AS userWeight,
+	        p.up_target_weight AS userTargetweight,
+	        p.up_age AS userAge,
+	        p.up_act AS userAct
+	
 	    FROM user u
 	    JOIN user_privacy p ON u.user_num = p.user_num
-	    WHERE u.user_num = #{usernum}
+	    WHERE u.user_num = #{userNum}
 	</select>
-	
-    <update id="informationUpdata" parameterType="kr.hi.project.domain.UserPrivacyDTO">
-	    UPDATE user u
-	    JOIN user_privacy p ON u.user_num = p.user_num
-	    SET u.user_name = #{username},
-	    u.user_email = #{email},
-	    p.up_gender = #{gender},
-	    p.up_height = #{height},
-	    p.up_weight = #{weight},
-	    p.up_target_weight = #{targetweight},
-	    p.up_age = #{age},
-	    p.up_act = #{act}
-	    WHERE u.user_num = #{usernum}
-	</update>
 	
 	<select id="findUserAllergies" parameterType="int" resultType="String">
 	    SELECT a.al_name
 	    FROM user_allergy ua
 	    JOIN allergy a ON ua.al_num = a.al_num
-	    WHERE ua.user_num = #{usernum}
+	    WHERE ua.user_num = #{userNum}
 	</select>
+	
+	<!-- 목표 -->
+	<update id="informationUpdata" parameterType="kr.hi.project.dto.UserPrivacyDTO">
+	    UPDATE user u
+	    JOIN user_privacy p ON u.user_num = p.user_num
+	
+	    SET 
+	        u.user_name = #{userName},
+	        u.user_email = #{userEmail},
+	
+	        p.up_gender = #{userGender},
+	        p.up_height = #{userHeight},
+	        p.up_weight = #{userWeight},
+	        p.up_target_weight = #{userTargetweight},
+	        p.up_age = #{userAge},
+	        p.up_act = #{userAct},
+	
+	        p.up_daily_kcal = #{userDailyKcal},
+	        p.up_daily_carbs = #{userDailyCarbs},
+	        p.up_daily_protein = #{userDailyProtein},
+	        p.up_daily_fat = #{userDailyFat},
+	        p.up_daily_natrium = #{userDailyNatrium}
+	
+	    WHERE u.user_num = #{userNum}
+	</update>
+	
+	<delete id="deleteUserAllergies">
+    	DELETE FROM user_allergy WHERE user_num = #{userNum}
+	</delete>
+	
+	<insert id="insertUserAllergy">
+	    INSERT INTO user_allergy (user_num, al_num)
+	    VALUES (
+	        #{userNum}, 
+	        (SELECT al_num FROM allergy WHERE al_name = #{alName})
+	    )
+	</insert>
+
+	<!-- [재근/추가] 눈바디 암호화를 위해 추가 -->
+	<select id="findPasswordByUserNum" resultType="string">
+        SELECT user_password
+        FROM user
+        WHERE user_num = #{userNum}
+    </select>
 
 </mapper>

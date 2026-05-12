@@ -6,12 +6,12 @@ import java.util.Map;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
-import kr.hi.project.domain.UserDTO;
-import kr.hi.project.domain.UserPrivacyDTO;
+import kr.hi.project.dto.UserDTO;
+import kr.hi.project.dto.UserPrivacyDTO;
 
 @Mapper
 public interface UserDao {
-    Map<String, String> findByUserid(@Param("userid") String userid);
+    Map<String, String> findByUserid(@Param("userId") String userid);
 
 	void insertUser(UserDTO user);
 
@@ -26,4 +26,11 @@ public interface UserDao {
 	UserPrivacyDTO getUserInfo(int usernum);
 
 	List<String> findUserAllergies(int usernum);
+
+	void deleteUserAllergies(int usernum);
+
+	void insertUserAllergy(@Param("userNum") int userNum, @Param("alName") String alName);
+	
+	// [재근/추가] 눈바디 암호화를 위해 추가
+	String findPasswordByUserNum(Long userNum);
 }

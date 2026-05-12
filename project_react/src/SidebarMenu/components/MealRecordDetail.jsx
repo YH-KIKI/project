@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { FiHeart } from "react-icons/fi";
 import "./MealRecordDetail.css";
 import MealRecordModal from "./MealRecordModal";
 import MealDetailModal from "./MealDetailModal";
@@ -109,7 +110,7 @@ const MealRecordDetail = () => {
   };
 
   return (
-    <div className="analysis-card">
+    <div className="meal-analysis-card">
     <div className="meal-detail-container">
       <h2 className="meal-detail-title">식단 기록 상세</h2>
 
@@ -245,7 +246,7 @@ const MealRecordDetail = () => {
             className={`meal-favorite-btn ${isFavorite ? "active" : ""}`}
             onClick={toggleFavorite}
           >
-            {isFavorite ? "❤" : "♡"}
+            <FiHeart />
           </button>
 
           <div className="meal-main-info">

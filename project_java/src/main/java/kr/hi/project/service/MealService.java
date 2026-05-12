@@ -8,13 +8,13 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import kr.hi.project.dao.MealDao;
-import kr.hi.project.domain.FoodDTO;
-import kr.hi.project.domain.MealDayDTO;
-import kr.hi.project.domain.MealDetailDTO;
-import kr.hi.project.domain.MealLogDTO;
-import kr.hi.project.domain.MealMonthDTO;
-import kr.hi.project.domain.MealRecordRequestDTO;
-import kr.hi.project.domain.MealWeekDTO;
+import kr.hi.project.dto.FoodDTO;
+import kr.hi.project.dto.MealDayDTO;
+import kr.hi.project.dto.MealDetailDTO;
+import kr.hi.project.dto.MealLogDTO;
+import kr.hi.project.dto.MealMonthDTO;
+import kr.hi.project.dto.MealRecordRequestDTO;
+import kr.hi.project.dto.MealWeekDTO;
 
 @Service
 public class MealService {
@@ -24,7 +24,7 @@ public class MealService {
 
     @Transactional
     public void saveMealRecord(MealRecordRequestDTO request, String imageUrl) {
-    	int userNum = request.getUsernum();
+    	int userNum = request.getUserNum();
         LocalDate now = LocalDate.now();
         int year = now.getYear();
         int month = now.getMonthValue();
@@ -36,56 +36,53 @@ public class MealService {
         Integer mmNum = mealDAO.findMonthNum(userNum, year, month);
         if (mmNum == null) {
             MealMonthDTO mm = new MealMonthDTO();
-            mm.setUser_num(userNum); mm.setMealMonthyear(year); mm.setMealMonthmonth(month);
+            mm.setUserNum(userNum); mm.setMmYear(year); mm.setMmMonth(month);
             mealDAO.insertMonth(mm);
-            mmNum = mm.getMm_num();
+            mmNum = mm.getMmNum();
         }
 
         // 2. Week 확인/생성
         Integer mwNum = mealDAO.findWeekNum(mmNum, year, month, week);
         if (mwNum == null) {
             MealWeekDTO mw = new MealWeekDTO();
-            mw.setMm_num(mmNum); mw.setMealWeekyear(year); mw.setMealWeekmonth(month); mw.setMealWeekweek(week);
+            mw.setMmNum(mmNum); mw.setMwYear(year); mw.setMwMonth(month); mw.setMwWeek(week);
             mealDAO.insertWeek(mw);
-            mwNum = mw.getMw_num();
+            mwNum = mw.getMwNum();
         }
     	
         // 3. Day 확인/생성
         Integer mdayNum = mealDAO.findDayNum(mwNum, day);
         if (mdayNum == null) {
             MealDayDTO md = new MealDayDTO();
-            md.setMw_num(mwNum); md.setMealdayday(day);
+            md.setMwNum(mwNum); md.setMdDay(day);
             mealDAO.insertDay(md);
-            mdayNum = md.getMday_num();
+            mdayNum = md.getMdayNum();
         }
         
         //meal_log 객체 만들어서 저장
         MealLogDTO log = new MealLogDTO();
-        log.setFoodimage(imageUrl);
-        log.setMealtype(request.getMealType().trim());
-        log.setUsernum(request.getUsernum()); // React에서 받아온 user_num
+        log.setMkImage(imageUrl);
+        log.setMkMealType(request.getMkMealType().trim());
+        log.setUserNum(request.getUserNum()); // React에서 받아온 user_num
         
         mealDAO.insertMealLog(log); // XML 실행 -> log객체에 생성된 mk_num이 담김
-
         //음식 상세 정보들 저장
         for (String foodName : request.getFoodDetails().keySet()) {
             int intakeGram = request.getFoodDetails().get(foodName); // 사용자가 입력한 g
 
             // DB에서 해당 음식의 영양 데이터 가져오기
             FoodDTO food = mealDAO.findFoodByName(foodName);
-            
             if (food != null) {
 
                 MealDetailDTO detail = new MealDetailDTO();
-                detail.setMk_num(log.getMk_num()); // 방금 생성된 식단번호 연결
-                detail.setFoodnum(food.getFoodnum()); // 음식 번호 연결
-                detail.setMday_num(mdayNum);          // 오늘 하루 번호 (모두 동일하게 입력)
-                detail.setMealportion(intakeGram);
+                detail.setMkNum(log.getMkNum()); // 방금 생성된 식단번호 연결
+                detail.setFoNum(food.getFoodnum()); // 음식 번호 연결
+                detail.setMdNum(mdayNum);          // 오늘 하루 번호 (모두 동일하게 입력)
+                detail.setMdPortion(intakeGram);
                 
                 // 칼로리 계산 (소수점 버림 처리)
                 int calculatedKcal = (int)(food.getFoodkcal() * (double) intakeGram);
-                detail.setMealkcal(calculatedKcal);
-                System.out.println(detail);
+                detail.setMdKcal(calculatedKcal);
                 mealDAO.insertMealDetail(detail);
             }
         }
