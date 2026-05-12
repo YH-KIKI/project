@@ -7,22 +7,26 @@ const LikeButton = ({ post_num, user_num }) => {
     const [likeCount, setLikeCount] = useState(0);
 
     const fetchLikeStatus = useCallback(async () => {
+        if (!post_num) return;
+
         try {
             const response = await axios.get(`http://localhost:8080/api/likes/status`, {
-                params: { post_num, user_num: user_num || 0 }
+                // [수정] 컨트롤러의 @RequestParam("postNum") 명칭에 맞춤
+                params: { 
+                    postNum: parseInt(post_num), 
+                    userNum: user_num ? parseInt(user_num) : 0 
+                }
             });
             setIsLiked(response.data.isLiked);
             setLikeCount(response.data.likeCount);
         } catch (error) {
-            console.error(error);
+            console.error("좋아요 상태 로딩 오류:", error);
         }
     }, [post_num, user_num]);
 
     useEffect(() => {
-        if (post_num) {
-            fetchLikeStatus();
-        }
-    }, [post_num, fetchLikeStatus]);
+        fetchLikeStatus();
+    }, [fetchLikeStatus]);
 
     const handleLikeToggle = async () => {
         if (!user_num) {
@@ -31,9 +35,10 @@ const LikeButton = ({ post_num, user_num }) => {
         }
 
         try {
+            // [수정] 컨트롤러의 PostLikeDTO 필드명(postNum, userNum)에 맞춤
             const response = await axios.post('http://localhost:8080/api/likes/toggle', {
-                post_num,
-                user_num
+                postNum: parseInt(post_num),
+                userNum: parseInt(user_num)
             });
             
             const newLikedStatus = response.data.isLiked;
@@ -46,7 +51,8 @@ const LikeButton = ({ post_num, user_num }) => {
                 alert("게시글 추천을 취소하였습니다.");
             }
         } catch (error) {
-            console.error(error);
+            console.error("좋아요 토글 오류:", error);
+            alert("처리 중 오류가 발생했습니다.");
         }
     };
 

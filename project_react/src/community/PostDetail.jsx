@@ -26,7 +26,8 @@ const PostDetail = () => {
     const fetchPostDetail = async () => {
       try {
         const userNum = getStoredUserNum() || '';
-        const response = await axios.get(`http://localhost:8080/api/community/post/${id}?user_num=${userNum}`, {
+        // [수정] 백엔드 컨트롤러 파라미터 명칭 userNum 에 맞춰 수정
+        const response = await axios.get(`http://localhost:8080/api/community/post/${id}?userNum=${userNum}`, {
           withCredentials: true
         });
         setPost(response.data);
@@ -39,6 +40,7 @@ const PostDetail = () => {
   }, [id, getStoredUserNum]);
 
   const formatDate = (dateString) => {
+    if (!dateString) return ""; 
     const date = new Date(dateString);
     const ymd = date.toLocaleDateString('ko-KR').replace(/\. /g, '.').replace(/\.$/, '');
     const hm = date.toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit', hour12: false });
@@ -65,11 +67,17 @@ const PostDetail = () => {
   }
 
   const renderImage = () => {
-    if (!post.post_img_path) return null;
+    if (!post.postImgPath) return null;
+    
+    // [수정] 백엔드에서 이미 전체 URL을 주므로 중복 방지 로직 추가
+    const imgSrc = post.postImgPath.startsWith('http') 
+                   ? post.postImgPath 
+                   : `http://localhost:8080/uploads/${post.postImgPath}`;
+
     return (
       <div className="post-image-box" style={{ margin: '20px 0', textAlign: 'center' }}>
         <img 
-          src={`http://localhost:8080/uploads/${post.post_img_path}`} 
+          src={imgSrc} 
           alt="post" 
           style={{ maxWidth: '100%', borderRadius: '12px' }} 
         />
@@ -82,16 +90,16 @@ const PostDetail = () => {
       <header className="post-detail-header">
         <button className="back-btn" onClick={() => navigate(-1)}>‹</button>
         <div className="post-title-area">
-          <h2 className="post-detail-title">{post.post_title}</h2>
+          <h2 className="post-detail-title">{post.postTitle}</h2>
           <div className="post-detail-meta">
-            <span className="author">{post.user_name}</span>
+            <span className="author">{post.userName}</span>
             <span className="divider">|</span>
-            <span className="date">{formatDate(post.post_created_at)}</span>
+            <span className="date">{formatDate(post.postCreatedAt)}</span>
             <span className="divider">|</span>
-            <span className="views">조회 {post.post_views}</span>
+            <span className="views">조회 {post.postViews}</span>
           </div>
         </div>
-        {getStoredUserNum() === post.user_num && (
+        {Number(getStoredUserNum()) === Number(post.userNum) && (
           <div className="post-edit-actions">
             <button className="edit-btn" onClick={() => navigate('/community/write', { state: { post } })}>수정</button>
             <button className="delete-btn" onClick={handleDelete}>삭제</button>
@@ -102,9 +110,9 @@ const PostDetail = () => {
       <hr className="post-divider" />
 
       <div className="post-content">
-        {post.post_img_pos === 'top' && renderImage()}
-        <div dangerouslySetInnerHTML={{ __html: post.post_content }} />
-        {post.post_img_pos === 'bottom' && renderImage()}
+        {post.postImgPos === 'top' && renderImage()}
+        <div dangerouslySetInnerHTML={{ __html: post.postContent }} />
+        {post.postImgPos === 'bottom' && renderImage()}
         <div className="post-image-placeholder">
         </div>
       </div>
