@@ -43,7 +43,8 @@ public class SecurityConfig {
                                  "/api/comments/**", 
                                  "/api/likes/**",    
                                  "/api/meal/**",
-                                 "/api/character/**" 
+                                 "/api/character/**" ,
+                                 "/api/v1/bodycheck/**"
                                  ).permitAll() 
                 .requestMatchers("/api/v1/user/verify-password").permitAll()
                 .anyRequest().authenticated() 
