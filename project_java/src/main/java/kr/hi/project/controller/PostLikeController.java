@@ -18,7 +18,7 @@ public class PostLikeController {
     @PostMapping("/toggle")
     public Map<String, Object> toggleLike(@RequestBody PostLikeDTO likeDTO) {
         int result = postLikeService.toggleLike(likeDTO);
-        int count = postLikeService.getLikeCount(likeDTO.getPost_num());
+        int count = postLikeService.getLikeCount(likeDTO.getPostNum());
         
         Map<String, Object> response = new HashMap<>();
         response.put("isLiked", result == 1);
@@ -27,14 +27,14 @@ public class PostLikeController {
     }
 
     @GetMapping("/status")
-    public Map<String, Object> getStatus(@RequestParam("post_num") int post_num, @RequestParam("user_num") int user_num) { // *** ("이름") 추가 ***
+    public Map<String, Object> getStatus(@RequestParam("postNum") int postNum, @RequestParam("userNum") int userNum) {
         PostLikeDTO dto = new PostLikeDTO();
-        dto.setPost_num(post_num);
-        dto.setUser_num(user_num);
+        dto.setPostNum(postNum);
+        dto.setUserNum(userNum);
 
         Map<String, Object> response = new HashMap<>();
         response.put("isLiked", postLikeService.isLikedByUser(dto));
-        response.put("likeCount", postLikeService.getLikeCount(post_num));
+        response.put("likeCount", postLikeService.getLikeCount(postNum));
         return response;
     }
 }

@@ -11,29 +11,29 @@
             u.user_id
         FROM post_comment c
         JOIN user u ON c.user_num = u.user_num
-        WHERE c.post_num = #{post_num}
+        WHERE c.post_num = #{postNum}
         ORDER BY COALESCE(c.parent_pc_num, c.pc_num) ASC, c.pc_created_at ASC
     </select>
 
     <insert id="insertComment" parameterType="kr.hi.project.dto.PostCommentDTO">
         INSERT INTO post_comment (post_num, user_num, pc_content, parent_pc_num)
-        VALUES (#{post_num}, #{user_num}, #{pc_content}, #{parent_pc_num})
+        VALUES (#{postNum}, #{userNum}, #{pcContent}, #{parentPcNum})
     </insert>
 
     <update id="updateComment" parameterType="kr.hi.project.dto.PostCommentDTO">
         UPDATE post_comment 
-        SET pc_content = #{pc_content}, pc_updated_at = NOW()
-        WHERE pc_num = #{pc_num} AND user_num = #{user_num}
+        SET pc_content = #{pcContent}, pc_updated_at = NOW()
+        WHERE pc_num = #{pcNum} AND user_num = #{userNum}
     </update>
 
     <update id="deleteComment">
         UPDATE post_comment 
         SET pc_is_deleted = 1 
-        WHERE pc_num = #{pc_num}
+        WHERE pc_num = #{pcNum}
     </update>
 
     <select id="selectCommentByPcNum" resultType="kr.hi.project.dto.PostCommentDTO">
-        SELECT * FROM post_comment WHERE pc_num = #{pc_num}
+        SELECT * FROM post_comment WHERE pc_num = #{pcNum}
     </select>
 
 </mapper>

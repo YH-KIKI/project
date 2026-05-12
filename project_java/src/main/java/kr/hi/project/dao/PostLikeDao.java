@@ -8,5 +8,5 @@ public interface PostLikeDao {
     int insertLike(PostLikeDTO likeDTO);
     int deleteLike(PostLikeDTO likeDTO);
     int checkLikeStatus(PostLikeDTO likeDTO);
-    int countLikesByPostNum(int post_num);
+    int countLikesByPostNum(int postNum);
 }

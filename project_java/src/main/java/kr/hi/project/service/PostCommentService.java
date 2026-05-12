@@ -13,8 +13,8 @@ public class PostCommentService {
 
     private final PostCommentDao postCommentDao;
 
-    public List<PostCommentDTO> getCommentsByPostNum(int post_num) {
-        return postCommentDao.selectCommentsByPostNum(post_num);
+    public List<PostCommentDTO> getCommentsByPostNum(int postNum) {
+        return postCommentDao.selectCommentsByPostNum(postNum);
     }
 
     @Transactional
@@ -28,7 +28,7 @@ public class PostCommentService {
     }
 
     @Transactional
-    public int removeComment(int pc_num) {
-        return postCommentDao.deleteComment(pc_num);
+    public int removeComment(int pcNum) {
+        return postCommentDao.deleteComment(pcNum);
     }
 }

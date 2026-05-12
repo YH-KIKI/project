@@ -24,8 +24,8 @@ public class PostLikeService {
         }
     }
 
-    public int getLikeCount(int post_num) {
-        return postLikeDao.countLikesByPostNum(post_num);
+    public int getLikeCount(int postNum) {
+        return postLikeDao.countLikesByPostNum(postNum);
     }
 
     public boolean isLikedByUser(PostLikeDTO likeDTO) {

@@ -4,11 +4,11 @@ import lombok.Data;
 
 @Data
 public class PostRequestDTO {
-    private int user_num;
-    private String post_title;
-    private String post_content;
+    private int userNum;
+    private String postTitle;
+    private String postContent;
     
-    private String post_img_path;
+    private String postImgPath;
 
-    private String post_img_pos;
+    private String postImgPos;
 }

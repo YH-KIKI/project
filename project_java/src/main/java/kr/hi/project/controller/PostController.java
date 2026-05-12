@@ -35,10 +35,10 @@ public class PostController {
     @GetMapping("/post/{id}")
     public PostDTO getPostDetail(
             @PathVariable("id") int id,
-            @RequestParam(value = "user_num", required = false) Integer user_num,
+            @RequestParam(value = "userNum", required = false) Integer userNum,
             HttpServletRequest request,
             HttpServletResponse response) {
-        return postService.getPostDetail(id, user_num, request, response);
+        return postService.getPostDetail(id, userNum, request, response);
     }
 
     @PostMapping("/write")
@@ -63,7 +63,7 @@ public class PostController {
     public String uploadImage(@RequestParam("file") MultipartFile file) throws IOException {
         if (!file.isEmpty()) {
             String fileName = UUID.randomUUID().toString() + "_" + file.getOriginalFilename();
-            // 물리적 경로에 파일 저장
+            
             File saveFile = new File("C:/project_uploads/" + fileName);
             file.transferTo(saveFile);
             
