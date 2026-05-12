@@ -1,0 +1,96 @@
+/* CharacterSection.css */
+.char-section {
+    width: 100%;
+    border: 1px solid #FFDADA;
+    border-radius: 30px;
+    padding: 30px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-bottom: 20px;
+    background-color: #fff;
+    position: relative;
+}
+
+.char-change-btn {
+    position: absolute;
+    bottom: 20px;
+    right: 25px;
+    background-color: #f8f8f8;
+    border: 1px solid #ddd;
+    border-radius: 20px;
+    padding: 6px 12px;
+    cursor: pointer;
+    font-size: 12px;
+    color: #666;
+    font-weight: bold;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    transition: all 0.2s ease;
+}
+
+.char-progress-container {
+    flex: 1;
+    height: 12px;
+    background-color: #F0F0F0;
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.char-progress-fill {
+    height: 100%;
+    background-color: #FF8A3D;
+    border-radius: 10px;
+    transition: width 0.5s ease-in-out;
+}
+
+.char-status-text {
+    font-size: 14px;
+    color: #888;
+    font-weight: bold;
+}
+
+/* 모달 스타일 */
+.char-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.char-modal-content {
+    background-color: #fff;
+    padding: 25px;
+    border-radius: 20px;
+    width: 280px;
+    text-align: center;
+}
+
+.char-option-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+}
+
+.char-option-item {
+    border: 1px solid #eee;
+    padding: 10px;
+    border-radius: 15px;
+    cursor: pointer;
+    background-color: #f9f9f9;
+}
+
+.char-modal-close-btn {
+    margin-top: 20px;
+    padding: 8px 20px;
+    border: none;
+    background-color: #d1b8a0;
+    color: #fff;
+    border-radius: 10px;
+    cursor: pointer;
+}
