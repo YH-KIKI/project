@@ -4,64 +4,75 @@
 
 <mapper namespace="kr.hi.project.dao.PostDao">
 
-    <select id="selectAllPosts" resultType="kr.hi.project.dto.PostDTO">
+    <resultMap id="PostResultMap" type="kr.hi.project.dto.PostDTO">
+        <id property="postNum" column="post_num" />
+        <result property="userNum" column="user_num" />
+        <result property="userName" column="user_name" />
+        <result property="postTitle" column="post_title" />
+        <result property="postContent" column="post_content" />
+        <result property="postViews" column="post_views" />
+        <result property="postCreatedAt" column="post_created_at" />
+        <result property="postUpdatedAt" column="post_updated_at" />
+        <result property="postImgPath" column="post_img_path" />
+        <result property="postImgPos" column="post_img_pos" />
+        <result property="likeCount" column="like_count" />
+        <result property="commentCount" column="comment_count" />
+    </resultMap>
+
+    <sql id="postSelectBase">
         SELECT p.*, u.user_name,
+               p.post_img_path as post_img_path, 
                (SELECT COUNT(*) FROM post_like l WHERE l.post_num = p.post_num) as like_count,
                (SELECT COUNT(*) FROM post_comment c WHERE c.post_num = p.post_num AND c.pc_is_deleted = 0) as comment_count
         FROM post p
         JOIN user u ON p.user_num = u.user_num
+    </sql>
+
+    <select id="selectAllPosts" resultMap="PostResultMap">
+        <include refid="postSelectBase" />
         ORDER BY p.post_num DESC
     </select>
 
-    <select id="selectPostByNum" resultType="kr.hi.project.dto.PostDTO">
-        SELECT p.*, u.user_name,
-               (SELECT COUNT(*) FROM post_like l WHERE l.post_num = p.post_num) as like_count,
-               (SELECT COUNT(*) FROM post_comment c WHERE c.post_num = p.post_num AND c.pc_is_deleted = 0) as comment_count
-        FROM post p
-        JOIN user u ON p.user_num = u.user_num
-        WHERE p.post_num = #{post_num}
+    <select id="selectPostByNum" resultMap="PostResultMap">
+        <include refid="postSelectBase" />
+        WHERE p.post_num = #{postNum}
     </select>
 
-    <insert id="insertPost" parameterType="kr.hi.project.dto.PostRequestDTO">
-        INSERT INTO post (user_num, post_title, post_content, post_img_path, post_img_pos)
-        VALUES (#{user_num}, #{post_title}, #{post_content}, #{post_img_path}, #{post_img_pos})
+    <insert id="insertPost" parameterType="kr.hi.project.dto.PostRequestDTO" useGeneratedKeys="true" keyProperty="postNum">
+        INSERT INTO post (user_num, post_title, post_content, post_img_path)
+        VALUES (#{userNum}, #{postTitle}, #{postContent}, #{postImgPath})
     </insert>
 
     <update id="updateViews">
-        UPDATE post SET post_views = post_views + 1 WHERE post_num = #{post_num}
+        UPDATE post SET post_views = post_views + 1 WHERE post_num = #{postNum} 
     </update>
 
     <update id="updatePost" parameterType="kr.hi.project.dto.PostDTO">
         UPDATE post 
-        SET post_title = #{post_title}, 
-            post_content = #{post_content}, 
-            post_img_path = #{post_img_path},
-            post_img_pos = #{post_img_pos},
+        SET post_title = #{postTitle}, 
+            post_content = #{postContent}, 
+            post_img_path = #{postImgPath},
             post_updated_at = NOW()
-        WHERE post_num = #{post_num}
+        WHERE post_num = #{postNum}
     </update>
 
     <delete id="deletePost">
-        DELETE FROM post WHERE post_num = #{post_num}
+        DELETE FROM post WHERE post_num = #{postNum}
     </delete>
 
-    <select id="selectPostsWithPaging" resultType="kr.hi.project.dto.PostDTO">
-        SELECT p.*, u.user_name,
-               (SELECT COUNT(*) FROM post_like l WHERE l.post_num = p.post_num) as like_count,
-               (SELECT COUNT(*) FROM post_comment c WHERE c.post_num = p.post_num AND c.pc_is_deleted = 0) as comment_count
-        FROM post p
-        JOIN user u ON p.user_num = u.user_num
+    <select id="selectPostsWithPaging" resultMap="PostResultMap">
+        <include refid="postSelectBase" />
         <where>
-            <if test="keyword != null and keyword != ''">
+            <if test="keyword != null and keyword != '' and !keyword.contains('xhr')">
                 <choose>
                     <when test="category == 'title'">
-                        p.post_title LIKE CONCAT('%', #{keyword}, '%')
+                        AND p.post_title LIKE CONCAT('%', #{keyword}, '%')
                     </when>
                     <when test="category == 'title_content'">
-                        (p.post_title LIKE CONCAT('%', #{keyword}, '%') OR p.post_content LIKE CONCAT('%', #{keyword}, '%'))
+                        AND (p.post_title LIKE CONCAT('%', #{keyword}, '%') OR p.post_content LIKE CONCAT('%', #{keyword}, '%'))
                     </when>
                     <when test="category == 'author'">
-                        u.user_name LIKE CONCAT('%', #{keyword}, '%')
+                        AND u.user_name LIKE CONCAT('%', #{keyword}, '%')
                     </when>
                 </choose>
             </if>
@@ -75,16 +86,16 @@
         FROM post p
         JOIN user u ON p.user_num = u.user_num
         <where>
-            <if test="keyword != null and keyword != ''">
+            <if test="keyword != null and keyword != '' and !keyword.contains('xhr')">
                 <choose>
                     <when test="category == 'title'">
-                        p.post_title LIKE CONCAT('%', #{keyword}, '%')
+                        AND p.post_title LIKE CONCAT('%', #{keyword}, '%')
                     </when>
                     <when test="category == 'title_content'">
-                        (p.post_title LIKE CONCAT('%', #{keyword}, '%') OR p.post_content LIKE CONCAT('%', #{keyword}, '%'))
+                        AND (p.post_title LIKE CONCAT('%', #{keyword}, '%') OR p.post_content LIKE CONCAT('%', #{keyword}, '%'))
                     </when>
                     <when test="category == 'author'">
-                        u.user_name LIKE CONCAT('%', #{keyword}, '%')
+                        AND u.user_name LIKE CONCAT('%', #{keyword}, '%')
                     </when>
                 </choose>
             </if>

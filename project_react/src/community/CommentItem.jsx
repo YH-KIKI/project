@@ -4,17 +4,20 @@ import axios from 'axios';
 const CommentItem = ({ comment, user_num, onRefresh }) => {
     const [isEditing, setIsEditing] = useState(false);
     const [isReplying, setIsReplying] = useState(false);
-    const [editContent, setEditContent] = useState(comment.pc_content);
+    // [수정] pc_content -> pcContent
+    const [editContent, setEditContent] = useState(comment.pcContent);
     const [replyContent, setReplyContent] = useState("");
 
-    const isAuthor = user_num === comment.user_num;
+    // [수정] user_num -> userNum
+    const isAuthor = Number(user_num) === Number(comment.userNum);
 
     const handleUpdate = async () => {
         try {
             await axios.put('http://localhost:8080/api/comments', {
-                pc_num: comment.pc_num,
-                user_num: user_num,
-                pc_content: editContent
+                // [수정] 스네이크 케이스를 모두 DTO 필드명(CamelCase)으로 변경
+                pcNum: comment.pcNum,
+                userNum: user_num,
+                pcContent: editContent
             });
             setIsEditing(false);
             onRefresh();
@@ -24,7 +27,8 @@ const CommentItem = ({ comment, user_num, onRefresh }) => {
     const handleDelete = async () => {
         if (!window.confirm("댓글을 삭제하시겠습니까?")) return;
         try {
-            await axios.delete(`http://localhost:8080/api/comments/${comment.pc_num}`);
+            // [수정] pc_num -> pcNum
+            await axios.delete(`http://localhost:8080/api/comments/${comment.pcNum}`);
             onRefresh();
         } catch (error) { console.error(error); }
     };
@@ -40,10 +44,11 @@ const CommentItem = ({ comment, user_num, onRefresh }) => {
         }
         try {
             await axios.post('http://localhost:8080/api/comments', {
-                post_num: comment.post_num,
-                user_num: user_num,
-                pc_content: replyContent,
-                parent_pc_num: comment.pc_num
+                // [수정] 스네이크 케이스를 모두 DTO 필드명(CamelCase)으로 변경
+                postNum: comment.postNum,
+                userNum: user_num,
+                pcContent: replyContent,
+                parentPcNum: comment.pcNum
             });
             alert("댓글을 작성하였습니다.");
             setReplyContent("");
@@ -52,13 +57,19 @@ const CommentItem = ({ comment, user_num, onRefresh }) => {
         } catch (error) { console.error(error); }
     };
 
-    if (comment.pc_is_deleted) return <div className="nnp-comment-item deleted">삭제된 댓글입니다.</div>;
+    // [수정] pc_is_deleted -> pcIsDeleted
+    if (comment.pcIsDeleted) return <div className="nnp-comment-item deleted">삭제된 댓글입니다.</div>;
 
     return (
-        <div className={`nnp-comment-item ${comment.parent_pc_num ? 'nnp-reply-item' : ''}`}>
+        // [수정] parent_pc_num -> parentPcNum
+        <div className={`nnp-comment-item ${comment.parentPcNum ? 'nnp-reply-item' : ''}`}>
             <div className="nnp-comment-header">
-                <span className="nnp-comment-author">{comment.user_name}</span>
-                <span className="nnp-comment-date">{new Date(comment.pc_created_at).toLocaleString()}</span>
+                {/* [수정] user_name -> userName */}
+                <span className="nnp-comment-author">{comment.userName}</span>
+                {/* [수정] pc_created_at -> pcCreatedAt */}
+                <span className="nnp-comment-date">
+                    {comment.pcCreatedAt ? new Date(comment.pcCreatedAt).toLocaleString() : ""}
+                </span>
             </div>
             <div className="nnp-comment-body">
                 {isEditing ? (
@@ -69,7 +80,10 @@ const CommentItem = ({ comment, user_num, onRefresh }) => {
                             <button className="nnp-edit-cancel" onClick={() => setIsEditing(false)}>취소</button>
                         </div>
                     </div>
-                ) : <p>{comment.pc_content}</p>}
+                ) : (
+                    /* [수정] pc_content -> pcContent */
+                    <p>{comment.pcContent}</p>
+                )}
             </div>
             <div className="nnp-comment-actions">
                 <span onClick={() => setIsReplying(!isReplying)}>답글</span>

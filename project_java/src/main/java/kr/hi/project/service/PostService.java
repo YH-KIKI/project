@@ -25,10 +25,12 @@ public class PostService {
         return postDao.selectAllPosts();
     }
 
-    public PostDTO getPostDetail(int post_num, Integer loginUserNum, HttpServletRequest request, HttpServletResponse response) {
-        PostDTO post = postDao.selectPostByNum(post_num);
+    public PostDTO getPostDetail(int postNum, Integer loginUserNum, HttpServletRequest request, HttpServletResponse response) {
+        PostDTO post = postDao.selectPostByNum(postNum);
+        
+        if (post == null) return null;
 
-        if (loginUserNum != null && loginUserNum.equals(post.getUser_num())) {
+        if (loginUserNum != null && loginUserNum.equals(post.getUserNum())) {
             return post;
         }
 
@@ -45,23 +47,23 @@ public class PostService {
         }
 
         if (viewCookie == null) {
-            Cookie newCookie = new Cookie("postView", "[" + post_num + "]");
+            Cookie newCookie = new Cookie("postView", "[" + postNum + "]");
             newCookie.setPath("/");
             newCookie.setMaxAge(60 * 60 * 24);
             response.addCookie(newCookie);
-            postDao.updateViews(post_num);
+            postDao.updateViews(postNum);
         } else {
             String value = viewCookie.getValue();
-            if (!value.contains("[" + post_num + "]")) {
-                viewCookie.setValue(value + "[" + post_num + "]");
+            if (!value.contains("[" + postNum + "]")) {
+                viewCookie.setValue(value + "[" + postNum + "]");
                 viewCookie.setPath("/");
                 viewCookie.setMaxAge(60 * 60 * 24);
                 response.addCookie(viewCookie);
-                postDao.updateViews(post_num);
+                postDao.updateViews(postNum);
             }
         }
 
-        return postDao.selectPostByNum(post_num);
+        return postDao.selectPostByNum(postNum);
     }
 
     public void writePost(PostRequestDTO dto) {
@@ -72,18 +74,23 @@ public class PostService {
         postDao.updatePost(dto);
     }
 
-    public void removePost(int post_num) {
-        postDao.deletePost(post_num);
+    public void removePost(int postNum) {
+        postDao.deletePost(postNum);
     }
 
     public Map<String, Object> getPostsWithPaging(int page, int size, String category, String keyword) {
+        String searchKeyword = (keyword == null || keyword.trim().isEmpty() || keyword.contains("200xhr")) 
+                               ? null : keyword.trim();
+        
+        String searchCategory = (category == null || category.isEmpty()) ? "title" : category;
+
         int offset = (page - 1) * size;
-        
-        List<PostDTO> posts = postDao.selectPostsWithPaging(size, offset, category, keyword);
-        
-        int totalCount = postDao.selectTotalCount(category, keyword);
+
+        List<PostDTO> posts = postDao.selectPostsWithPaging(size, offset, searchCategory, searchKeyword);
+        int totalCount = postDao.selectTotalCount(searchCategory, searchKeyword);
         
         int totalPages = (int) Math.ceil((double) totalCount / size);
+        if (totalPages == 0) totalPages = 1;
 
         Map<String, Object> result = new HashMap<>();
         result.put("posts", posts);

@@ -6,34 +6,50 @@
 
     <select id="selectCommentsByPostNum" resultType="kr.hi.project.dto.PostCommentDTO">
         SELECT 
-            c.*, 
-            u.user_name, 
-            u.user_id
+            c.pc_num AS pcNum,
+            c.post_num AS postNum,
+            c.user_num AS userNum,
+            c.pc_content AS pcContent,
+            c.parent_pc_num AS parentPcNum,
+            c.pc_created_at AS pcCreatedAt,
+            /* 존재하지 않는 pc_updated_at, pc_is_deleted 컬럼은 제거했습니다 */
+            u.user_name AS userName, 
+            u.user_id AS userId
         FROM post_comment c
         JOIN user u ON c.user_num = u.user_num
-        WHERE c.post_num = #{post_num}
+        WHERE c.post_num = #{postNum}
+        /* 정렬 로직 유지 */
         ORDER BY COALESCE(c.parent_pc_num, c.pc_num) ASC, c.pc_created_at ASC
     </select>
 
     <insert id="insertComment" parameterType="kr.hi.project.dto.PostCommentDTO">
         INSERT INTO post_comment (post_num, user_num, pc_content, parent_pc_num)
-        VALUES (#{post_num}, #{user_num}, #{pc_content}, #{parent_pc_num})
+        VALUES (#{postNum}, #{userNum}, #{pcContent}, #{parentPcNum})
     </insert>
 
     <update id="updateComment" parameterType="kr.hi.project.dto.PostCommentDTO">
         UPDATE post_comment 
-        SET pc_content = #{pc_content}, pc_updated_at = NOW()
-        WHERE pc_num = #{pc_num} AND user_num = #{user_num}
+        SET pc_content = #{pcContent}
+        WHERE pc_num = #{pcNum} AND user_num = #{userNum}
     </update>
 
     <update id="deleteComment">
-        UPDATE post_comment 
-        SET pc_is_deleted = 1 
-        WHERE pc_num = #{pc_num}
+        /* pc_is_deleted 컬럼이 없다면 실제로 DELETE를 하거나, 
+           테이블에 해당 컬럼을 추가해야 합니다. 일단 실제 삭제 쿼리로 예시를 둡니다. */
+        DELETE FROM post_comment 
+        WHERE pc_num = #{pcNum}
     </update>
 
     <select id="selectCommentByPcNum" resultType="kr.hi.project.dto.PostCommentDTO">
-        SELECT * FROM post_comment WHERE pc_num = #{pc_num}
+        SELECT 
+            pc_num AS pcNum,
+            post_num AS postNum,
+            user_num AS userNum,
+            pc_content AS pcContent,
+            parent_pc_num AS parentPcNum,
+            pc_created_at AS pcCreatedAt
+        FROM post_comment 
+        WHERE pc_num = #{pcNum}
     </select>
 
 </mapper>

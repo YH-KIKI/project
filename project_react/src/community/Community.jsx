@@ -36,17 +36,25 @@ const Community = () => {
   useEffect(() => {
     const fetchPosts = async () => {
       try {
-        const response = await axios.get(`http://localhost:8080/api/community/posts`, {
-          params: {
-            page: currentPage,
-            category: activeSearch.category,
-            keyword: activeSearch.keyword
-          }
-        });
-        setPosts(response.data.posts);
-        setTotalPages(response.data.totalPages);
+        // ✅ keyword가 명확히 있을 때만 keyword 파라미터를 보냄 (이상한 값 방지)
+        const params = {
+          page: currentPage,
+          category: activeSearch.category,
+          keyword: activeSearch.keyword.trim() === '' ? '' : activeSearch.keyword
+        };
+
+        const response = await axios.get(`http://localhost:8080/api/community/posts`, { params });
+        
+        if (response.data && response.data.posts) {
+          setPosts(response.data.posts);
+          setTotalPages(response.data.totalPages || 1);
+        } else {
+          setPosts([]);
+          setTotalPages(1);
+        }
       } catch (error) {
         console.error("데이터를 불러오는 중 오류가 발생했습니다:", error);
+        setPosts([]);
       }
     };
 
@@ -56,6 +64,7 @@ const Community = () => {
   const handleSearch = () => {
     const selectedCat = categories.find(c => c.label === searchCategory);
     
+    // ✅ 검색 버튼 클릭 시 현재 입력된 keyword를 activeSearch에 반영
     setActiveSearch({
       category: selectedCat ? selectedCat.id : 'title',
       keyword: keyword
@@ -70,6 +79,7 @@ const Community = () => {
   };
 
   const formatDate = (dateString) => {
+    if (!dateString) return "";
     const date = new Date(dateString);
     const ymd = date.toLocaleDateString('ko-KR').replace(/\. /g, '.').replace(/\.$/, '');
     const hm = date.toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit', hour12: false });
@@ -83,14 +93,14 @@ const Community = () => {
     if (userData) {
       try {
         const parsedUser = JSON.parse(userData);
-        userNum = parsedUser.user_num || parsedUser.userNum;
+        userNum = parsedUser.userNum || parsedUser.user_num;
       } catch (e) {
         console.error("로컬스토리지 파싱 에러:", e);
       }
     }
 
     if (!userNum) {
-        userNum = localStorage.getItem('user_num') || localStorage.getItem('userNum');
+        userNum = localStorage.getItem('userNum') || localStorage.getItem('user_num');
     }
     
     if (!userNum) {
@@ -109,7 +119,7 @@ const Community = () => {
 
   const pageNumbers = [];
   for (let i = startPage; i <= endPage; i++) {
-    pageNumbers.push(i);
+    if (i <= totalPages) pageNumbers.push(i);
   }
 
   return (
@@ -119,27 +129,47 @@ const Community = () => {
       </header>
 
       <div className="post-list">
-        {posts.map(post => (
-          <div key={post.post_num} className="post-card" onClick={() => navigate('/community/post/' + post.post_num)}>
-            <div className="post-info">
-              <h3>
-                {post.post_num}. {post.post_title}
-                {(post.post_img_path || (post.post_content && post.post_content.includes('<img'))) && (
-                  <span className="image-icon"> 🖼️</span>
-                )}
-              </h3>
-              <div className="post-meta">
-                <span className="author-name">{post.user_name}</span>
-                <span className="post-date">{formatDate(post.post_created_at)}</span>
+        {posts && posts.length > 0 ? (
+          posts.map(post => {
+            if (!post) return null;
+            
+            const pNum = post.postNum || post.post_num;
+            const pTitle = post.postTitle || post.post_title;
+            const pContent = post.postContent || post.post_content;
+            const pImgPath = post.postImgPath || post.post_img_path;
+            const pUserName = post.userName || post.user_name;
+            const pDate = post.postCreatedAt || post.post_created_at;
+            const pViews = post.postViews || post.post_views;
+            const pLike = post.likeCount || post.like_count;
+            const pComment = post.commentCount || post.comment_count;
+
+            return (
+              <div key={pNum} className="post-card" onClick={() => navigate('/community/post/' + pNum)}>
+                <div className="post-info">
+                  <h3>
+                    {pNum}. {pTitle}
+                    {(pImgPath || (pContent && pContent.includes('<img'))) && (
+                      <span className="image-icon"> 🖼️</span>
+                    )}
+                  </h3>
+                  <div className="post-meta">
+                    <span className="author-name">{pUserName}</span>
+                    <span className="post-date">{formatDate(pDate)}</span>
+                  </div>
+                </div>
+                <div className="post-stats">
+                  <span className="stat-item stat-views">👁️ {pViews || 0}</span>
+                  <span className="stat-item stat-like">❤️ {pLike || 0}</span>
+                  <span className="stat-item stat-comment">💬 {pComment || 0}</span>
+                </div>
               </div>
-            </div>
-            <div className="post-stats">
-              <span className="stat-item stat-views">👁️ {post.post_views}</span>
-              <span className="stat-item stat-like">❤️ {post.like_count}</span>
-              <span className="stat-item stat-comment">💬 {post.comment_count}</span>
-            </div>
+            );
+          })
+        ) : (
+          <div className="no-posts" style={{ textAlign: 'center', padding: '50px', color: '#666' }}>
+            게시글이 존재하지 않습니다.
           </div>
-        ))}
+        )}
       </div>
 
       <div className="pagination">
@@ -161,7 +191,7 @@ const Community = () => {
 
         <button 
           className="page-arrow"
-          disabled={endPage === totalPages}
+          disabled={endPage >= totalPages}
           onClick={() => setCurrentPage(endPage + 1)}
         >›</button>
       </div>
