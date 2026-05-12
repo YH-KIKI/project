@@ -19,6 +19,10 @@ const Mypage = () => {
     navigate('/information');
   };
 
+  const handleTargetClick = () => {
+    navigate('/targetgoals');
+  };
+
   const today = new Date();
   const days = ['일', '월', '화', '수', '목', '금', '토'];
   const formattedDate = `${today.getFullYear()}.${String(today.getMonth() + 1).padStart(2, '0')}.${String(today.getDate()).padStart(2, '0')} ${days[today.getDay()]}요일`;
@@ -104,37 +108,72 @@ const Mypage = () => {
           <p style={{ fontSize: '18px', fontWeight: '600', marginBottom: '18px' }}>
             {username}님, 오늘도 건강한 식단 관리 함께해요!
           </p>
+          <div
+            style={{
+              width: '100%',
+              display: 'grid',
+              gridTemplateColumns: '1fr 1fr',
+              gap: '20px',
+              marginBottom: '30px',
+            }}
+          >
+          <div style={{
+            border: '1px solid #FFDADA',
+            borderRadius: '30px',
+            padding: '24px',
+            textAlign: 'center',
+            cursor: 'pointer',
+          }}
+            onClick={handleInformationClick}>
+            <div style={{ fontSize: '40px', marginBottom: '6px' }}>👤✏️</div>
+            <div style={{ fontWeight: 'bold', fontSize: '16px' }}>개인정보 수정</div>
+            <div style={{ color: '#888', marginTop: '4px', fontSize: '13px' }}>
+              이름, 연락처, 사진 관리
+            </div>
+          </div>
 
           <div style={{
-            width: '100%',
-            display: 'grid',
-            gridTemplateColumns: '1fr 1fr',
-            gap: '20px',
-            marginBottom: '30px',
+            border: '1px solid #FFDADA',
+            borderRadius: '30px',
+            padding: '24px',
+            textAlign: 'center',
+            cursor: 'pointer',
+          }}
+            onClick={handleTargetClick}>
+            <div style={{ fontSize: '40px', marginBottom: '6px' }}>🏹🎯</div>
+            <div style={{ fontWeight: 'bold', fontSize: '16px' }}>목표 보기</div>
+            <div style={{ color: '#888', marginTop: '4px', fontSize: '13px' }}>
+              오늘목표 달성도 보려가자!
+            </div>
+          </div>
+
+          <div style={{
+            border: '1px solid #FFDADA',
+            borderRadius: '30px',
+            padding: '24px',
+            textAlign: 'center',
           }}>
-            <div style={menuItemStyle} onClick={handleInformationClick}>
-              <div style={{ fontSize: '40px', marginBottom: '6px' }}>👤✏️</div>
-              <div style={{ fontWeight: 'bold', fontSize: '16px' }}>개인정보 수정</div>
-              <div style={{ color: '#888', marginTop: '4px', fontSize: '13px' }}>이름, 연락처, 사진 관리</div>
+            <div style={{ fontSize: '40px', marginBottom: '6px' }}>🏅</div>
+            <div style={{ fontWeight: 'bold', fontSize: '16px' }}>내 뱃지</div>
+            <div style={{ color: '#888', marginTop: '4px', fontSize: '13px' }}>
+              나의 영광 나의 뱃지
             </div>
+          </div>
 
-            <div style={menuItemStyle}>
-              <div style={{ fontSize: '40px', marginBottom: '6px' }}>🏹🎯</div>
-              <div style={{ fontWeight: 'bold', fontSize: '16px' }}>목표 관리</div>
-              <div style={{ color: '#888', marginTop: '4px', fontSize: '13px' }}>목표를 관리하세요</div>
+          <div style={{
+            border: '1px solid #FFDADA',
+            borderRadius: '30px',
+            padding: '24px',
+            textAlign: 'center',
+            cursor: 'pointer',
+          }}
+            onClick={handlefavoriteClick}>
+            <div style={{ fontSize: '40px', marginBottom: '6px' }}>⭐</div>
+            <div style={{ fontWeight: 'bold', fontSize: '16px' }}>즐겨찾기</div>
+            <div style={{ color: '#888', marginTop: '4px', fontSize: '13px' }}>
+              뭐좀 맛있는거 있냥?
             </div>
-
-            <div style={menuItemStyle}>
-              <div style={{ fontSize: '40px', marginBottom: '6px' }}>🏅</div>
-              <div style={{ fontWeight: 'bold', fontSize: '16px' }}>내 뱃지</div>
-              <div style={{ color: '#888', marginTop: '4px', fontSize: '13px' }}>나의 영광 나의 뱃지</div>
-            </div>
-
-            <div style={menuItemStyle} onClick={handlefavoriteClick}>
-              <div style={{ fontSize: '40px', marginBottom: '6px' }}>⭐</div>
-              <div style={{ fontWeight: 'bold', fontSize: '16px' }}>즐겨찾기</div>
-              <div style={{ color: '#888', marginTop: '4px', fontSize: '13px' }}>뭐좀 맛있는거 있냥?</div>
-            </div>
+          </div>
           </div>
         </main>
       </div>

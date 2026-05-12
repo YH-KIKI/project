@@ -1,7 +1,6 @@
 package kr.hi.project.controller;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,6 +9,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import kr.hi.project.dto.UserPrivacyDTO;
@@ -47,6 +47,13 @@ public class UserInformation {
 	    response.put("message", "정보수정이 완료되었습니다!");
 		return response;
 		
+	}
+	
+	/* 오늘 목표보기 */
+	@GetMapping("/api/meal/today-nutrition")
+	public Map<String, Object> getTodayNutrition(@RequestParam("userNum") int userNum) {
+	    // 마이페이지 대시보드용 오늘 섭취량 합계 반환
+	    return userService.getTodayNutrition(userNum);
 	}
 
 }

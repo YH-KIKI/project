@@ -33,4 +33,6 @@ public interface UserDao {
 	
 	// [재근/추가] 눈바디 암호화를 위해 추가
 	String findPasswordByUserNum(Long userNum);
+	// [준성/추가] 목표보기 결과가 여러 영양소(kcal, carbs 등)이므로 Map으로 받습.
+	Map<String, Object> getTodayTotalNutrition(@Param("userNum") int userNum);
 }

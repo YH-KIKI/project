@@ -24,6 +24,7 @@ import BodyCheck from "./SidebarMenu/components/BodyCheck";
 import Community from "./community/Community"; //요고 추가해따잉~
 import PostWrite from "./community/PostWrite"; //요고 추가해따잉~
 import PostDetail from "./community/PostDetail"; //요고 추가해따잉~
+import TargetGoals from "./Mypage/TargetGoals";
 
 function App() {
     return (
@@ -67,6 +68,8 @@ function App() {
                     <Route path="/mypage" element={<Mypage />} />
                     {/*개인정보 주소(/information)*/}
                     <Route path="/information" element={<Information />} />
+                    {/*마이페이지 목표보기 주소(/targetgoals)*/}
+                    <Route path="/targetgoals" element={<TargetGoals />} />
                     {/*식단즐겨찾기 주소(/favoritemeal)*/}
                     <Route path="/favoritemeal" element={<FavoriteMeal />} />
                     {/*식단기록 주소(/meallogpage)*/}

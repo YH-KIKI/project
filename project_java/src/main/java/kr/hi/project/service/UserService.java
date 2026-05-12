@@ -62,12 +62,12 @@ public class UserService {
         //계산된 결과가 포함된 DTO를 DB에 업데이트합니다.
         userDAO.informationUpdata(dto);
         //추가로 알레르기 정보가 있다면 여기서 처리
-        if (dto.getUserAllergies() != null) {
-        	userDAO.deleteUserAllergies(dto.getUserNum());
-        }
-        	for (String alName : dto.getUserAllergies()) {
+        if (dto.getUserAllergies() != null && !dto.getUserAllergies().isEmpty()) {
+            userDAO.deleteUserAllergies(dto.getUserNum());
+            for (String alName : dto.getUserAllergies()) {
                 userDAO.insertUserAllergy(dto.getUserNum(), alName);
-        	}
+            }
+        }
     }
 
     //영양소 계산 전용 내부 메서드
@@ -107,6 +107,11 @@ public class UserService {
 
 	public List<String> findUserAllergies(int usernum) {
 	    return userDAO.findUserAllergies(usernum);
+	}
+
+	/* 오늘 목표보기 */
+	public Map<String, Object> getTodayNutrition(int userNum) {
+	    return userDAO.getTodayTotalNutrition(userNum);
 	}
     
 }
