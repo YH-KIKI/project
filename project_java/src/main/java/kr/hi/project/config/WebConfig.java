@@ -30,11 +30,16 @@ public class WebConfig implements WebMvcConfigurer {
             }
         }
 
-        // 매핑 경로 /uploads/** 유지
+        // 1. 기존 매핑 경로 /uploads/** 유지
         registry.addResourceHandler("/uploads/**")
                 .addResourceLocations(location)
                 .setCachePeriod(0)
                 .resourceChain(false);
+
+        // 2. 캐릭터 이미지 경로 /images/** 추가 (src/main/resources/static/images/ 참조)
+        registry.addResourceHandler("/images/**")
+                .addResourceLocations("classpath:/static/images/")
+                .setCachePeriod(0);
     }
 
     @Override
