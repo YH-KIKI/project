@@ -1,0 +1,183 @@
+.char-info-container {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    /* 컨테이너는 클릭 무시 */
+    z-index: 10;
+}
+
+/* 물음표 버튼: 이미지의 검정 동그라미 위치(카드 우측 상단 끝 구석) */
+.help-icon-btn {
+    pointer-events: auto;
+    position: absolute;
+    /* 이미지 속 검정 동그라미 위치에 맞춰 가장 구석으로 배치 */
+    top: 10px;
+    right: 10px;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: #fff;
+    border: 1px solid #FFDADA;
+    color: #FF8A3D;
+    font-weight: bold;
+    font-size: 18px;
+    cursor: pointer;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 20;
+}
+
+/* 도감 보기 버튼 래퍼: 캐릭터 섹션 하단 중앙 위치 */
+.preview-btn-wrapper {
+    pointer-events: auto;
+    position: absolute;
+    /* 카드 하단 테두리 안쪽 하단에 배치 */
+    bottom: 12px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 20;
+}
+
+.open-preview-modal-btn {
+    background-color: #fff;
+    border: 1px solid #FFDADA;
+    padding: 8px 18px;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: bold;
+    color: #FF8A3D;
+    cursor: pointer;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    white-space: nowrap;
+    transition: all 0.2s;
+}
+
+.help-icon-btn:hover,
+.open-preview-modal-btn:hover {
+    background: #FFF8F1;
+    border-color: #FF8A3D;
+}
+
+/* --- 모달 스타일 (기존 디자인 및 기능 동일) --- */
+.char-modal-overlay {
+    pointer-events: auto;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.4);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+    backdrop-filter: blur(3px);
+}
+
+.char-modal-content {
+    background: white;
+    border-radius: 30px;
+    width: 90%;
+    max-width: 550px;
+    overflow: hidden;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.2);
+}
+
+.preview-modal-width {
+    max-width: 650px;
+}
+
+.char-modal-header {
+    padding: 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #F5F5F5;
+}
+
+.char-close-x {
+    background: none;
+    border: none;
+    font-size: 28px;
+    color: #CCC;
+    cursor: pointer;
+}
+
+.char-modal-body {
+    padding: 25px;
+}
+
+.reward-info-table {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: center;
+}
+
+.reward-info-table th {
+    padding: 12px;
+    background: #FAFAFA;
+    color: #666;
+    font-size: 14px;
+}
+
+.reward-info-table td {
+    padding: 15px 10px;
+    border-bottom: 1px solid #F0F0F0;
+    font-size: 13px;
+}
+
+.reward-tip-box {
+    margin-top: 15px;
+    background: #FFF9F5;
+    padding: 12px;
+    border-radius: 12px;
+    font-size: 12px;
+    color: #FF8A3D;
+}
+
+/* 도감 내부 그리드 */
+.preview-tabs {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+    justify-content: center;
+}
+
+.p-tab-btn {
+    padding: 8px 16px;
+    border: none;
+    background: none;
+    font-weight: bold;
+    color: #BBB;
+    cursor: pointer;
+}
+
+.p-tab-btn.active {
+    color: #FF8A3D;
+    border-bottom: 2px solid #FF8A3D;
+}
+
+.preview-evolution-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 15px;
+}
+
+.p-evo-card {
+    background: #F9F9F9;
+    padding: 15px;
+    border-radius: 20px;
+    border: 1px solid #EEE;
+    text-align: center;
+}
+
+.p-img-box img {
+    width: 65px;
+    height: 65px;
+    object-fit: contain;
+}

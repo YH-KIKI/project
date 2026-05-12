@@ -2,7 +2,8 @@ import React, { useState, useEffect } from 'react';
 import Sidebar from '../Main/Sidebar';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
-import CharacterSection from './CharacterSection'; // 분리한 컴포넌트 임포트
+import CharacterSection from './CharacterSection'; 
+import CharacterInfo from './CharacterInfo'; 
 
 const Mypage = () => {
   const [username, setUsername] = useState('');
@@ -23,26 +24,22 @@ const Mypage = () => {
   const days = ['일', '월', '화', '수', '목', '금', '토'];
   const formattedDate = `${today.getFullYear()}.${String(today.getMonth() + 1).padStart(2, '0')}.${String(today.getDate()).padStart(2, '0')} ${days[today.getDay()]}요일`;
 
-  // 데이터 로딩 함수 보정
   const fetchUserInfo = async () => {
     const token = localStorage.getItem('login_token') || sessionStorage.getItem('login_token');
     
     if (!token) return;
 
     try {
-      // 1. 유저 정보 가져오기
       const userResponse = await axios.get('http://localhost:8080/api/user/info', {
         headers: { Authorization: `Bearer ${token}` }
       });
       const userData = userResponse.data;
       setUsername(userData.username);
 
-      // 2. 캐릭터 정보 가져오기 (데이터 존재 여부 확실히 체크)
       if (userData && userData.usernum) {
         const charResponse = await axios.get(`http://localhost:8080/api/character/info?userNum=${userData.usernum}`, {
           headers: { Authorization: `Bearer ${token}` }
         });
-        // 데이터를 state에 반영하여 CharacterSection이 리렌더링되게 함
         setCharInfo(charResponse.data);
       } else {
         console.error("유저 번호(usernum)를 찾을 수 없습니다.", userData);
@@ -79,10 +76,13 @@ const Mypage = () => {
           textAlign: 'center',
           border: '2px solid #d1b8a0',
           position: 'relative',
-          height: '800px', width: '62%', top: '20px',
+          height: 'auto',
+          minHeight: '800px',
+          width: '62%', top: '20px',
           display: 'flex',
           flexDirection: 'column',
           alignItems: 'center',
+          overflowY: 'auto'
         }}>
           <a href="/" style={{ 
             fontSize: '20px', position: 'absolute', top: '0', right: '80px', width: '20%', 
@@ -97,11 +97,14 @@ const Mypage = () => {
             <span style={{ color: '#999' }}>{formattedDate}</span>
           </div>
 
-          {/* --- 분리된 캐릭터 섹션 컴포넌트 적용 --- */}
-          {/* onUpdate에 fetchUserInfo를 넘겨 변경 시 정보를 다시 읽어오게 함 */}
-          <CharacterSection charInfo={charInfo} onUpdate={fetchUserInfo} />
+          {/* --- 캐릭터 섹션 영역 (여기에 물음표와 도감 버튼이 배치됨) --- */}
+          <div style={{ width: '100%', position: 'relative' }}>
+            <CharacterSection charInfo={charInfo} onUpdate={fetchUserInfo} />
+            {/* 위치 보정된 CharacterInfo 호출 */}
+            <CharacterInfo /> 
+          </div>
 
-          <p style={{ fontSize: '18px', fontWeight: '600', marginBottom: '18px' }}>
+          <p style={{ fontSize: '18px', fontWeight: '600', marginBottom: '18px', marginTop: '40px' }}>
             {username}님, 오늘도 건강한 식단 관리 함께해요!
           </p>
 
