@@ -28,12 +28,15 @@
     transition: all 0.2s ease;
 }
 
+/* 경험치 바 컨테이너: 툴팁 표시를 위해 overflow: hidden을 제거하고 relative 설정 */
 .char-progress-container {
     flex: 1;
     height: 12px;
     background-color: #F0F0F0;
     border-radius: 10px;
-    overflow: hidden;
+    position: relative;
+    overflow: visible;
+    cursor: pointer;
 }
 
 .char-progress-fill {
@@ -42,6 +45,47 @@
     border-radius: 10px;
     transition: width 0.5s ease-in-out;
 }
+
+/* --- 추가된 호버 툴팁 스타일 --- */
+.char-exp-tooltip {
+    position: absolute;
+    top: -35px;
+    /* 바 위쪽으로 위치 */
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: rgba(0, 0, 0, 0.8);
+    color: #fff;
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-size: 11px;
+    white-space: nowrap;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.2s ease, top 0.2s ease;
+    z-index: 10;
+}
+
+/* 바에 마우스를 올렸을 때 툴팁 노출 */
+.char-progress-container:hover .char-exp-tooltip {
+    opacity: 1;
+    visibility: visible;
+    top: -40px;
+    /* 살짝 위로 떠오르는 애니메이션 */
+}
+
+/* 툴팁 아래 작은 삼각형 화살표 */
+.char-exp-tooltip::after {
+    content: '';
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    margin-left: -5px;
+    border-width: 5px;
+    border-style: solid;
+    border-color: rgba(0, 0, 0, 0.8) transparent transparent transparent;
+}
+
+/* -------------------------- */
 
 .char-status-text {
     font-size: 14px;
