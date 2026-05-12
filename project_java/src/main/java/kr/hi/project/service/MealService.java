@@ -76,12 +76,12 @@ public class MealService {
 
                 MealDetailDTO detail = new MealDetailDTO();
                 detail.setMkNum(log.getMkNum()); // 방금 생성된 식단번호 연결
-                detail.setFoNum(food.getFoodnum()); // 음식 번호 연결
+                detail.setFoNum(food.getFoNum()); // 음식 번호 연결
                 detail.setMdNum(mdayNum);          // 오늘 하루 번호 (모두 동일하게 입력)
                 detail.setMdPortion(intakeGram);
                 
                 // 칼로리 계산 (소수점 버림 처리)
-                int calculatedKcal = (int)(food.getFoodkcal() * (double) intakeGram);
+                int calculatedKcal = (int)(food.getFoKcal() * (double) intakeGram);
                 detail.setMdKcal(calculatedKcal);
                 mealDAO.insertMealDetail(detail);
             }

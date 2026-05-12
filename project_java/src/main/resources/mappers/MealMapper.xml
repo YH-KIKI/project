@@ -8,17 +8,17 @@
     </insert>
 
     <select id="findFoodByName" resultType="kr.hi.project.dto.FoodDTO">
-        SELECT 
-        	fo_num       AS Foodnum,
-	        fo_name      AS Foodname,
-	        fo_base_gram AS Basegram,
-	        fo_kcal      AS Foodkcal,
-	        fo_carbs     AS Foodcarbs,
-	        fo_protein   AS Foodprotein,
-	        fo_fat       AS Foodfat,
-	        fo_natrium   AS Foodnatrium,
-	        fo_type      AS Foodtype
-        FROM food WHERE fo_name = #{foName}
+    	SELECT 
+	        fo_num       AS foNum,
+	        fo_name      AS foName,
+	        fo_base_gram AS foBaseGram,
+	        fo_kcal      AS foKcal,
+	        fo_carbs     AS foCarbs,
+	        fo_protein   AS foProtein,
+	        fo_fat       AS foFat,
+	        fo_natrium   AS foNatrium,
+	        fo_type      AS foType
+	    FROM food WHERE fo_name = #{foName}
     </select>
 
     <insert id="insertMealDetail">
@@ -63,13 +63,13 @@
 	<insert id="insertWeek" parameterType="kr.hi.project.dto.MealWeekDTO" 
 	        useGeneratedKeys="true" keyProperty="mwNum">
 	    INSERT INTO meal_week (mm_num, mw_year, mw_month, mw_week)
-	    VALUES (#{Mm_num}, #{MealWeekyear}, #{MealWeekmonth}, #{MealWeekweek})
+    	VALUES (#{mmNum}, #{mwYear}, #{mwMonth}, #{mwWeek})
 	</insert>
 	
 	<insert id="insertDay" parameterType="kr.hi.project.dto.MealDayDTO" 
 	        useGeneratedKeys="true" keyProperty="mdayNum">
 	    INSERT INTO meal_day (mw_num, md_day)
-	    VALUES (#{Mw_num}, #{Mealdayday})
+    	VALUES (#{mwNum}, #{mdDay})
 	</insert>
 	<!-- 하루칼로리 -->
 	<update id="updateDailyKcal">
