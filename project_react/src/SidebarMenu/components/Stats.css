@@ -1,4 +1,6 @@
-/* 전체 컨테이너: 이중 여백 제거, 투명 배경, 양옆 24px 들여쓰기 */
+/* ==============================================
+   1. 전체 컨테이너 및 헤더
+   ============================================== */
 .stats-container {
   padding: 0 24px; 
   box-sizing: border-box; 
@@ -7,13 +9,13 @@
   font-family: 'Pretendard', sans-serif; 
 }
 
-/* 상단 타이틀 (22px 굵게) */
 .header-area {
   display: flex;
   justify-content: space-between;
   align-items: center;
   margin-bottom: 20px;
 }
+
 .header-area .title {
   margin: 0;
   font-size: 22px; 
@@ -21,324 +23,447 @@
   color: #333333;
 }
 
-/* 메인 카드 영역 (냠냠 감성 테마 적용) */
+/* ==============================================
+   2. 달력 (Datepicker) 공통 스타일
+   ============================================== */
+.date-picker-wrapper { 
+  position: relative; 
+}
+
+.date-badge-input {
+  background-color: #F3E5DF; 
+  padding: 6px 14px; 
+  border-radius: 20px;
+  font-size: 14px; 
+  font-weight: 600; 
+  color: #6B5B54; 
+  border: none;
+  outline: none; 
+  text-align: center; 
+  cursor: pointer; 
+  width: 135px; 
+  font-family: inherit; 
+  transition: background-color 0.2s;
+}
+
+.date-badge-input:hover { 
+  background-color: #e8d5cc; 
+}
+
+.react-datepicker {
+  border: none !important; 
+  border-radius: 12px !important;
+  font-family: 'Pretendard', sans-serif !important;
+  box-shadow: 0 4px 12px rgba(255, 182, 163, 0.3) !important; 
+  overflow: hidden;
+}
+
+.react-datepicker__header {
+  background-color: #FFFAF9 !important; 
+  border-bottom: 1px solid #FFEDEA !important; 
+  padding-top: 12px !important; 
+}
+
+.react-datepicker__current-month, 
+.react-datepicker-time__header, 
+.react-datepicker-year-header {
+  color: #4A3B32 !important; 
+  font-weight: 800 !important;
+}
+
+.react-datepicker__day--selected, 
+.react-datepicker__day--keyboard-selected, 
+.react-datepicker__month-text--keyboard-selected, 
+.react-datepicker__month-text--selected {
+  background-color: #FF7B89 !important; 
+  color: white !important; 
+  border-radius: 50% !important; 
+}
+
+/* 🌟 식단 기록된 날짜(Highlight) 커스텀 스타일 추가! */
+.react-datepicker__day--highlighted-custom {
+  background-color: #FFEDEA !important; 
+  color: #FF7B89 !important;            
+  font-weight: 800 !important;          
+  border-radius: 50% !important;        
+}
+.react-datepicker__day--selected.react-datepicker__day--highlighted-custom {
+  background-color: #FF7B89 !important;
+  color: white !important;
+}
+
+/* ==============================================
+   🌟 2-1. 달력 월간 모드(Month Picker) 전용 스타일
+   ============================================== */
+.react-datepicker__month-wrapper {
+  display: flex;
+  justify-content: space-around;
+  margin-top: 10px;
+}
+
+.react-datepicker__month-text {
+  width: 50px !important; 
+  padding: 8px 0;
+  border-radius: 12px !important; 
+  font-size: 14px;
+  font-weight: 700;
+  color: #6B5B54;
+  transition: background-color 0.2s, transform 0.1s;
+}
+
+.react-datepicker__month-text:hover {
+  background-color: #FFEDEA !important;
+  transform: scale(1.05);
+}
+
+.react-datepicker__month-text--selected,
+.react-datepicker__month-text--keyboard-selected {
+  background-color: #FF7B89 !important;
+  color: white !important;
+  box-shadow: 0 2px 8px rgba(255, 123, 137, 0.4);
+}
+
+.react-datepicker__month-text--disabled {
+  color: #E0D8D5 !important;
+  background-color: transparent !important;
+  pointer-events: none;
+}
+
+.react-datepicker__month .react-datepicker__month-text {
+  border-radius: 12px !important;
+}
+
+/* ==============================================
+   3. 메인 카드 및 탭 메뉴
+   ============================================== */
 .stats-card {
   background-color: #FFFAF9; 
   border: 2px solid #FFEDEA; 
   border-radius: 30px; 
-  padding: 35px;
+  padding: 35px; 
   box-shadow: 0 10px 30px rgba(255, 182, 163, 0.5); 
-  width: 100%;
+  width: 100%; 
   box-sizing: border-box; 
-  display: flex;
-  flex-direction: column;
+  display: flex; 
+  flex-direction: column; 
   gap: 35px; 
 }
 
-/* 탭 버튼 메뉴 */
 .stats-tab-menu {
-  display: flex;
+  display: flex; 
   background-color: #FFFFFF; 
   border: 1px solid #FFEDEA;
-  border-radius: 16px;
-  padding: 6px;
+  border-radius: 16px; 
+  padding: 6px; 
   gap: 8px;
 }
+
 .stats-tab-button {
-  flex: 1;
-  padding: 12px 0;
-  border: none;
+  flex: 1; 
+  padding: 12px 0; 
+  border: none; 
   background-color: transparent;
-  color: #888;
-  font-size: 15px;
-  font-weight: 700;
+  color: #A3938C; 
+  font-size: 15px; 
+  font-weight: 700; 
   border-radius: 12px;
-  cursor: pointer;
+  cursor: pointer; 
   transition: all 0.2s;
 }
+
 .stats-tab-button.active {
-  background-color: #ff8fa3; 
-  color: white;
+  background-color: #FF8FA3; 
+  color: white; 
   box-shadow: 0 2px 8px rgba(255, 143, 163, 0.4);
 }
 
-/* 차트 섹션 제목 */
-.section-title {
-  font-size: 17px;
-  font-weight: 700;
-  color: #333;
-  margin: 0 0 16px 0;
-}
-.cumulative {
-  font-size: 14px;
-  font-weight: 600;
-  color: #888;
-  margin-left: 6px;
+.section-title { 
+  font-size: 17px; 
+  font-weight: 700; 
+  color: #333; 
+  margin: 0 0 16px 0; 
 }
 
-/* 📊 바 차트 (Y축 정렬 완벽 보정) */
+.avg-badge {
+  font-size: 14px; 
+  font-weight: 600; 
+  color: #FF7B89; 
+  margin-left: 8px;
+  background-color: #FFFFFF; 
+  padding: 2px 8px; 
+  border-radius: 8px; 
+  border: 1px solid #FFEDEA;
+}
+
+/* ==============================================
+   4. 바 차트 (칼로리 그래프)
+   ============================================== */
 .bar-chart-container {
-  display: flex;
+  display: flex; 
   height: 240px; 
   background-color: #FFFFFF;
-  border: 1px solid #FFEDEA;
-  border-radius: 20px;
+  border: 1px solid #FFEDEA; 
+  border-radius: 20px; 
   padding: 30px 24px 20px 24px; 
   gap: 15px;
 }
 
 .y-axis {
-  display: flex;
-  flex-direction: column;
+  display: flex; 
+  flex-direction: column; 
   justify-content: space-between;
-  color: #A3938C;
-  font-size: 12px;
-  font-weight: 600;
-  /* 막대기가 서 있는 바닥 선(border-bottom)과 Y축 숫자의 높이를 일치시킴 */
+  color: #A3938C; 
+  font-size: 12px; 
+  font-weight: 600; 
   height: calc(100% - 24px); 
   margin-top: -6px; 
 }
 
 .bars-area {
-  flex: 1;
-  display: flex;
-  justify-content: space-around;
+  flex: 1; 
+  display: flex; 
+  justify-content: space-around; 
   align-items: flex-end;
-  height: 100%;
-  border-bottom: 2px solid #EAEAEA;
-  padding-bottom: 24px;
+  height: 100%; 
+  border-bottom: 2px solid #EAEAEA; 
+  padding-bottom: 24px; 
   position: relative;
 }
 
 .bar-group {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
+  display: flex; 
+  flex-direction: column; 
+  align-items: center; 
   height: 100%;
-  justify-content: flex-end;
+  justify-content: flex-end; 
   position: relative;
-  cursor: pointer;
 }
 
 .bar-wrapper {
-  width: 100%;
-  height: 100%;
-  display: flex;
-  align-items: flex-end;
+  width: 100%; 
+  height: 100%; 
+  display: flex; 
+  align-items: flex-end; 
   justify-content: center;
-  position: relative;
+  position: relative; 
+  background-color: #F8F9FA; 
+  border-radius: 4px 4px 0 0;
 }
 
 .bar-fill {
-  width: 100%;
-  max-width: 24px;
-  background-color: #D3B8F8;
-  border-radius: 4px 4px 0 0;
-  transition: all 0.2s;
+  width: 100%; 
+  max-width: 24px; 
+  background-color: #D3B8F8; 
+  border-radius: 4px 4px 0 0; 
+  transition: height 0.5s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.bar-group:hover .bar-fill {
+.bar-group:hover .bar-fill { 
   background-color: #B588F2; 
-  transform: scaleY(1.02); 
 }
 
-.x-axis-label {
-  position: absolute;
-  bottom: -24px;
-  font-size: 13px;
-  color: #666;
-  font-weight: 600;
+.x-axis-label { 
+  position: absolute; 
+  bottom: -24px; 
+  font-size: 13px; 
+  color: #666; 
+  font-weight: 600; 
 }
 
-/* 말풍선 툴팁 */
 .bar-tooltip {
-  position: absolute;
-  top: -30px;
-  background-color: #332B27;
+  position: absolute; 
+  top: -30px; 
+  background-color: #332B27; 
   color: white;
-  font-size: 12px;
-  font-weight: 600;
-  padding: 6px 10px;
-  border-radius: 8px;
+  font-size: 11px; 
+  padding: 4px 8px; 
+  border-radius: 6px; 
   opacity: 0;
-  visibility: hidden;
-  transition: all 0.2s cubic-bezier(0.68, -0.55, 0.265, 1.55);
-  white-space: nowrap;
+  visibility: hidden; 
+  transition: all 0.2s; 
   z-index: 10;
-  box-shadow: 0 4px 8px rgba(0,0,0,0.15);
-}
-.bar-tooltip::after {
-  content: '';
-  position: absolute;
-  top: 100%;
-  left: 50%;
-  margin-left: -5px;
-  border-width: 5px;
-  border-style: solid;
-  border-color: #332B27 transparent transparent transparent;
-}
-.bar-group:hover .bar-tooltip {
-  opacity: 1;
-  visibility: visible;
-  top: -40px; 
 }
 
-/* --- [영양소 비율 섹션] --- */
-
-.nutrient-ratio-section {
-  display: flex;
-  flex-direction: column;
+.bar-group:hover .bar-tooltip { 
+  opacity: 1; 
+  visibility: visible; 
+  top: -38px; 
 }
 
+/* ==============================================
+   5. 영양소 비율 섹션 (도넛 차트 & 리스트)
+   ============================================== */
 .ratio-content-wrapper {
-  display: flex;
-  gap: 20px;
+  display: flex; 
+  gap: 20px; 
   align-items: stretch; 
 }
 
-.ratio-left-column {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-}
-.ratio-right-column {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
+.ratio-left-column { 
+  flex: 0 0 35%; 
 }
 
-/* 🍩 도넛 차트 컨테이너 & 차트 구현 */
+.ratio-right-column { 
+  flex: 1; 
+  display: flex; 
+  flex-direction: column; 
+  gap: 12px; 
+  justify-content: space-between; 
+}
+
+/* 도넛 차트 */
 .donut-chart-box {
-  flex: 1;
-  background-color: #FFFFFF;
-  border: 1px solid #FFEDEA;
+  background-color: #FFFFFF; 
+  border: 1px solid #FFEDEA; 
   border-radius: 20px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  padding: 20px;
-  min-height: 200px;
+  display: flex; 
+  justify-content: center; 
+  align-items: center; 
+  height: 100%; 
+  padding: 20px; 
+  box-sizing: border-box;
 }
 
 .donut-chart {
-  position: relative;
-  width: 170px;
-  height: 170px;
+  position: relative; 
+  width: 150px; 
+  height: 150px; 
   border-radius: 50%;
-  background: conic-gradient(
-    #E2CDBA 0% 8%,   /* 나트륨 8% */
-    #F3A683 8% 26%,  /* 지방 18% */
-    #C4A4F7 26% 48%, /* 단백질 22% */
-    #7AB0F3 48% 100% /* 탄수화물 52% */
-  );
-  display: flex;
-  justify-content: center;
-  align-items: center;
 }
 
 .donut-hole {
-  position: absolute;
-  width: 90px;
-  height: 90px;
-  background-color: #FFFFFF;
+  position: absolute; 
+  top: 50%; 
+  left: 50%; 
+  transform: translate(-50%, -50%);
+  width: 100px; 
+  height: 100px; 
+  background-color: #FFFFFF; 
   border-radius: 50%;
+  display: flex; 
+  justify-content: center; 
+  align-items: center; 
+  box-shadow: inset 0 2px 6px rgba(0,0,0,0.05);
 }
 
-/* 도넛 차트 내부 퍼센트 글씨 위치 완벽 고정 */
-.donut-label {
-  position: absolute;
-  font-size: 13px;
-  font-weight: 800;
-  color: #333;
-  transform: translate(-50%, -50%); 
+.donut-hole-center-kcal { 
+  display: flex; 
+  flex-direction: column; 
+  align-items: center; 
+  justify-content: center; 
 }
 
-/* 시계방향 핀포인트 고정 */
-.label-sodium { top: 12%; left: 60%; } 
-.label-fat { top: 30%; left: 83%; } 
-.label-protein { top: 78%; left: 78%; } 
-.label-carbs { top: 50%; left: 15%; } 
+.hole-avg-kcal { 
+  font-size: 24px; 
+  font-weight: 800; 
+  color: #FF7B89; 
+  line-height: 1.1; 
+}
 
-/* 개별 영양소 카드 공통 스타일 */
-.nut-card {
-  background-color: #FFFFFF;
+.hole-kcal-unit { 
+  font-size: 12px; 
+  font-weight: 600; 
+  color: #A3938C; 
+}
+
+/* ==============================================
+   🌟 6. 가로형 매크로 리스트 (글씨 깨짐 완벽 방어)
+   ============================================== */
+.macro-list-card {
+  background-color: #FFFFFF; 
+  border: 2px solid #FFEDEA; 
   border-radius: 16px;
-  padding: 18px 20px;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  border: 2px solid transparent; 
+  padding: 14px 16px; 
+  display: flex; 
+  flex-direction: column; 
+  gap: 10px;
+  transition: all 0.2s ease-in-out; 
 }
 
-.nut-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 6px;
+.macro-list-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.04);
 }
-.nut-name {
-  font-size: 15px;
-  font-weight: 800;
-  color: #333;
-}
-.nut-icon {
-  font-size: 20px;
-}
-.nut-middle {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 8px;
-}
-.nut-value {
-  font-size: 13px;
-  font-weight: 600;
-  color: #555;
-}
-.nut-badge {
-  font-size: 13px;
-  font-weight: 800;
-}
-.badge-gray { color: #888; } 
 
-.nut-progress-bg {
-  width: 100%;
-  height: 6px;
-  background-color: #F0F0F0;
-  border-radius: 4px;
+.carbs-card   { border-color: #A7E0B3; } 
+.protein-card { border-color: #F5A9A9; } 
+.fat-card     { border-color: #F7D560; } 
+.sodium-card  { border-color: #E2CDBA; } 
+
+.macro-list-header {
+  display: flex; 
+  justify-content: space-between; 
+  align-items: center;
+  flex-wrap: nowrap; 
+}
+
+.macro-title {
+  font-size: 14px; 
+  font-weight: 800; 
+  color: #4A3B32; 
+  display: flex; 
+  align-items: center; 
+  white-space: nowrap; 
+  flex-shrink: 0; 
+}
+
+.legend-dot {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  margin-right: 6px; 
+}
+
+.macro-values {
+  display: flex; 
+  align-items: baseline; 
+  gap: 4px;
+  justify-content: flex-end;
+  white-space: nowrap; 
+  flex-shrink: 0;
+}
+
+.m-current { 
+  font-size: 14px; 
+  font-weight: 800; 
+  color: #333333; 
+  white-space: nowrap;
+}
+
+.m-max { 
+  font-size: 12px; 
+  font-weight: 600; 
+  color: #A3938C; 
+  white-space: nowrap;
+}
+
+.m-pct { 
+  font-size: 14px; 
+  font-weight: 800; 
+  margin-left: 6px; 
+  white-space: nowrap;
+}
+
+.carbs-txt { color: #4CAF50; }
+.protein-txt { color: #E53935; }
+.fat-txt { color: #FBC02D; }
+
+.m-progress-bg {
+  width: 100%; 
+  height: 8px; 
+  background-color: #F5F5F5; 
+  border-radius: 4px; 
   overflow: hidden;
 }
-.nut-progress-fill {
-  height: 100%;
-  border-radius: 4px;
+
+.m-progress-fill {
+  height: 100%; 
+  border-radius: 4px; 
+  transition: width 0.5s ease-in-out;
 }
 
-.nut-footer {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-top: 8px;
-}
-.nut-percent {
-  font-size: 15px;
-  font-weight: 800;
-  color: #333;
-}
-
-/* 테마별 카드 테두리 및 게이지 색상 */
-.carbs-card { border-color: #A7E0B3; }
-.carbs-card .nut-progress-fill { background-color: #A7E0B3; }
-.carbs-card .nut-badge { color: #4CAF50; }
-
-.protein-card { border-color: #F5A9A9; }
-.protein-card .nut-progress-fill { background-color: #F5A9A9; }
-.protein-card .nut-badge { color: #E53935; }
-
-.fat-card { border-color: #F7D560; }
-.fat-card .nut-progress-fill { background-color: #F7D560; }
-.fat-card .nut-badge { color: #FBC02D; }
-
-.sodium-card { border-color: #E2CDBA; } 
-.sodium-card .nut-progress-fill { background-color: #E2CDBA; }
+.carbs-bg { background-color: #A7E0B3; }
+.protein-bg { background-color: #F5A9A9; }
+.fat-bg { background-color: #F7D560; }
+.sodium-bg { background-color: #E2CDBA; }

@@ -1,4 +1,3 @@
-// AiAnalysis.jsx
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import DatePicker from 'react-datepicker'; 
@@ -7,7 +6,7 @@ import { format } from 'date-fns';
 import { ko } from 'date-fns/locale'; 
 import './AiAnalysis.css';
 
-// 🌟 진짜 로로 이미지 임포트! (파일 경로와 이름이 맞는지 확인해주세요)
+// 로로 이미지 임포트
 import roroIcon from '../../images/로봇2.png'; 
 
 const AiAnalysis = ({ userNum = 1 }) => {
@@ -17,59 +16,47 @@ const AiAnalysis = ({ userNum = 1 }) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // 1. 달력 도장용 기록된 날짜 가져오기
+  // 달력에 칠할 기록된 날짜 가져오기
   useEffect(() => {
     const fetchRecordedDates = async () => {
       try {
-        const response = await axios.get(`http://localhost:8080/api/v1/diet/recorded-dates`, {
-          params: { userNum: userNum }
-        });
-        const dateObjects = response.data.map(dateStr => new Date(dateStr));
-        setRecordedDates(dateObjects);
+        const response = await axios.get(`http://localhost:8080/api/v1/diet/recorded-dates`, { params: { userNum } });
+        setRecordedDates(response.data.map(dateStr => new Date(dateStr)));
       } catch (err) {
-        console.error("기록된 날짜 목록 가져오기 실패:", err);
+        console.error("기록된 날짜 가져오기 실패:", err);
       }
     };
     fetchRecordedDates();
   }, [userNum]);
 
-  // 2. 선택된 날짜의 식단 분석 데이터 가져오기
+  // 식단 데이터 가져오기
   useEffect(() => {
     const fetchAnalysisData = async () => {
       try {
         setLoading(true);
         const formattedDate = format(selectedDate, 'yyyy-MM-dd');
-        
         const response = await axios.get(`http://localhost:8080/api/v1/diet/analyze/daily`, {
-          params: {
-            userNum: userNum,
-            date: formattedDate
-          }
+          params: { userNum, date: formattedDate }
         });
-        
         setAnalysisData(response.data);
         setError(null); 
       } catch (err) {
-        console.error("데이터 로딩 실패:", err);
         setAnalysisData(null); 
       } finally {
         setLoading(false);
       }
     };
-
     fetchAnalysisData();
   }, [userNum, selectedDate]);
 
-  // 게이지 바 너비 계산
   const calculateWidth = (current, target) => {
     if (!target || target === 0) return '0%';
-    const percentage = (current / target) * 100;
-    return `${Math.min(percentage, 100)}%`;
+    return `${Math.min((current / target) * 100, 100)}%`;
   };
 
   return (
     <div className="analysis-container">
-      {/* 상단 타이틀 및 달력 영역 */}
+      {/* 1. 상단 헤더 및 달력 영역 */}
       <div className="analysis-header">
         <h2>AI 분석 요약</h2>
         <div className="date-picker-wrapper">
@@ -77,22 +64,16 @@ const AiAnalysis = ({ userNum = 1 }) => {
             selected={selectedDate}
             onChange={(date) => setSelectedDate(date)}
             dateFormat={["yyyy.MM.dd", "yyyyMMdd", "yyyy-MM-dd"]} 
+            dateFormatCalendar="yyyy년 MM월" /* 🌟 버그 없이 깔끔하게 "년 월" 표시 */
             locale={ko}
             maxDate={new Date()}
             className="date-badge-input"
-            showYearDropdown 
-            showMonthDropdown 
-            dropdownMode="select"
-            highlightDates={[
-              {
-                "react-datepicker__day--highlighted-custom": recordedDates
-              }
-            ]}
+            highlightDates={[{ "react-datepicker__day--highlighted-custom": recordedDates }]}
           />
         </div>
       </div>
 
-      {/* 로딩 / 에러 / 빈 화면(데이터 없음) 처리 */}
+      {/* 2. 메인 콘텐츠 분기 처리 (로딩/에러/빈화면/데이터있음) */}
       {loading ? (
         <div className="analysis-card loading">데이터를 불러오는 중입니다... ⏳</div>
       ) : error ? (
@@ -107,7 +88,6 @@ const AiAnalysis = ({ userNum = 1 }) => {
           </button>
         </div>
       ) : (
-        /* 메인 카드 영역 (데이터가 있을 때) */
         <div className="analysis-card">
           
           <div className="calorie-section">
@@ -117,10 +97,7 @@ const AiAnalysis = ({ userNum = 1 }) => {
               <span className="target-kcal"> / {analysisData.targetKcal} kcal</span>
             </div>
             <div className="progress-bar">
-              <div 
-                className="progress-fill" 
-                style={{ width: calculateWidth(analysisData.currentKcal, analysisData.targetKcal) }}
-              ></div>
+              <div className="progress-fill" style={{ width: calculateWidth(analysisData.currentKcal, analysisData.targetKcal) }}></div>
             </div>
             <p className="calorie-message">
                {analysisData.targetKcal - analysisData.currentKcal > 0 
@@ -156,7 +133,7 @@ const AiAnalysis = ({ userNum = 1 }) => {
             </div>
           </div>
 
-          {/* 🌟 하단 AI 코치 피드백 구역 (초록빛 로로 적용!) 🌟 */}
+          {/* 하단 로로 코치 피드백 */}
           <div className="feedback-section">
             <div className="feedback-header">
               <div className="roro-icon-wrap">
@@ -164,13 +141,10 @@ const AiAnalysis = ({ userNum = 1 }) => {
               </div>
               <strong>다정한 로로 코치의 맞춤 피드백</strong>
             </div>
-            
             <div className="feedback-message-list">
               {analysisData.aiFeedback ? (
                 analysisData.aiFeedback.split('\n').map((line, index) => (
-                  <p key={index} className="feedback-bubble">
-                    {line}
-                  </p>
+                  <p key={index} className="feedback-bubble">{line}</p>
                 ))
               ) : (
                 <p className="feedback-bubble">로로 코치가 식단을 분석 중입니다!</p>

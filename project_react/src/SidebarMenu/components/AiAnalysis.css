@@ -1,4 +1,6 @@
-/* 전체 컨테이너 */
+/* ==============================================
+   🌟 전체 컨테이너 및 헤더
+   ============================================== */
 .analysis-container {
   padding: 0 24px;
   box-sizing: border-box;
@@ -8,7 +10,6 @@
   font-family: 'Pretendard', sans-serif; 
 }
 
-/* 상단 헤더: 제목과 달력 */
 .analysis-header {
   display: flex;
   justify-content: space-between;
@@ -23,7 +24,9 @@
   color: #333333;
 }
 
-/* 날짜 선택기(Datepicker) 스타일 */
+/* ==============================================
+   🌟 날짜 선택기(Datepicker) 공통 스타일
+   ============================================== */
 .date-picker-wrapper {
   position: relative;
 }
@@ -39,7 +42,7 @@
   outline: none;
   text-align: center;
   cursor: pointer;
-  width: 130px; 
+  width: 135px; 
   font-family: inherit; 
   transition: background-color 0.2s;
 }
@@ -48,35 +51,37 @@
   background-color: #e8d5cc; 
 }
 
-/* react-datepicker 기본 달력 팝업 스타일 수정 */
+/* react-datepicker 레이아웃 꼬임 해결: 패딩 원상복구 */
 .react-datepicker {
-  border-color: #FFEDEA !important;
+  border: none !important;
   border-radius: 12px !important;
   font-family: 'Pretendard', sans-serif !important;
   box-shadow: 0 4px 12px rgba(255, 182, 163, 0.3) !important;
+  overflow: hidden;
 }
 
 .react-datepicker__header {
   background-color: #FFFAF9 !important;
-  border-bottom-color: #FFEDEA !important;
-  border-top-left-radius: 12px !important;
-  border-top-right-radius: 12px !important;
+  border-bottom: 1px solid #FFEDEA !important;
+  padding-top: 12px !important; /* 패딩을 살려주어야 텍스트가 안 겹칩니다! */
 }
 
 .react-datepicker__current-month, 
 .react-datepicker-time__header, 
 .react-datepicker-year-header {
   color: #4A3B32 !important;
+  font-weight: 800 !important;
 }
 
 .react-datepicker__day--selected, 
-.react-datepicker__day--keyboard-selected {
+.react-datepicker__day--keyboard-selected,
+.react-datepicker__month-text--keyboard-selected,
+.react-datepicker__month-text--selected {
   background-color: #FF7B89 !important;
   color: white !important;
   border-radius: 50% !important; 
 }
 
-/* 식단이 기록된 날짜(Highlight) 커스텀 스타일 */
 .react-datepicker__day--highlighted-custom {
   background-color: #FFEDEA !important; 
   color: #FF7B89 !important;            
@@ -89,7 +94,9 @@
   color: white !important;
 }
 
-/* 메인 카드 영역 */
+/* ==============================================
+   🌟 메인 카드 영역
+   ============================================== */
 .analysis-card {
   background-color: #FFFAF9; 
   border: 2px solid #FFEDEA; 
@@ -106,7 +113,8 @@
 }
 
 /* 로딩 & 에러 메시지 */
-.analysis-card.loading, .analysis-card.error {
+.analysis-card.loading, 
+.analysis-card.error {
   justify-content: center;
   align-items: center;
   height: 300px;
@@ -170,6 +178,9 @@
   50% { transform: translateY(-10px); }
 }
 
+/* ==============================================
+   🌟 각 데이터 세션 스타일
+   ============================================== */
 /* 1. 칼로리 요약 구역 */
 .calorie-section h3 {
   margin: 0 0 15px 0;
@@ -181,7 +192,7 @@
 .current-kcal {
   font-size: 32px;
   font-weight: 800;
-  color: #FF7B89; 
+  color: #FF7B89;
 }
 .target-kcal {
   font-size: 18px;
@@ -198,7 +209,7 @@
 
 /* 2. AI 등급 평가 구역 */
 .grade-section {
-  background-color: #FFFFFF; 
+  background-color: #FFFFFF;
   border: 1px solid #FFEDEA;
   border-radius: 20px;
   padding: 20px 25px;
@@ -236,53 +247,48 @@
 .macro-section {
   display: flex;
   flex-direction: column;
-  gap: 15px; 
-  margin-bottom: auto; 
+  gap: 15px;
+  margin-bottom: auto;
   width: 100%;
 }
-
 .ai-macro-item {
   display: flex;
   flex-direction: column;
-  gap: 8px; 
+  gap: 8px;
   width: 100%;
 }
-
 .macro-label {
   display: flex;
   justify-content: space-between;
-  width: 100%; 
-  font-size: 14px; 
+  width: 100%;
+  font-size: 14px;
   font-weight: 600;
   color: #5C4D45;
 }
-
 .progress-bar {
   width: 100%;
   height: 12px;
-  background-color: #F5EAE6; 
+  background-color: #F5EAE6;
   border-radius: 10px;
   overflow: hidden;
 }
 .progress-fill {
   height: 100%;
   border-radius: 10px;
-  background-color: #FFB6C1; 
   transition: width 0.5s ease-in-out;
 }
-
 .progress-fill.carbs { background-color: #FFB6C1; } 
 .progress-fill.protein { background-color: #FFD285; } 
 .progress-fill.fat { background-color: #A2D5F2; } 
 .progress-fill.sodium { background-color: #DAB6FC; } 
 
-/* =========================================
-   🌟 4. 하단 AI 코치 피드백 구역 (로로 리뉴얼) 🌟
-   ========================================= */
+/* ==============================================
+   🌟 하단 AI 코치 피드백 구역 (로로 리뉴얼)
+   ============================================== */
 .feedback-section {
   display: flex;
   flex-direction: column;
-  background-color: #FFF9F7; 
+  background-color: #FFF9F7;
   border: 2px solid #FFEDEA;
   border-radius: 20px;
   padding: 24px;
@@ -290,7 +296,6 @@
   margin-top: 10px;
 }
 
-/* 로로 코치 헤더 */
 .feedback-header {
   display: flex;
   align-items: center;
@@ -300,37 +305,33 @@
   color: #FF7B89;
 }
 
-/* 🌟 로로 이미지 컨테이너 (진짜 로로의 연두/베이지 톤 적용!) */
 .roro-icon-wrap {
-  background-color: #F8FAF2; 
-  width: 55px; 
+  background-color: #F8FAF2;
+  width: 55px;
   height: 55px;
   display: flex;
   justify-content: center;
   align-items: center;
   border-radius: 50%;
-  box-shadow: 0 4px 10px rgba(185, 204, 165, 0.4); 
-  animation: float 3s ease-in-out infinite; 
-  overflow: hidden; 
-  border: 2px solid #DCE5C5; 
+  box-shadow: 0 4px 10px rgba(185, 204, 165, 0.4);
+  animation: float 3s ease-in-out infinite;
+  overflow: hidden;
+  border: 2px solid #DCE5C5;
 }
 
-/* 로로 이미지 조절 */
 .roro-icon-img {
-  width: 90%; 
+  width: 90%;
   height: auto;
   display: block;
   object-fit: contain;
 }
 
-/* 말풍선 리스트 컨테이너 */
 .feedback-message-list {
   display: flex;
   flex-direction: column;
   gap: 12px;
 }
 
-/* 개별 메시지 말풍선 스타일 */
 .feedback-bubble {
   margin: 0;
   font-size: 15px;
@@ -339,20 +340,18 @@
   background-color: #FFFFFF;
   padding: 16px 20px;
   border-radius: 16px;
-  border-top-left-radius: 4px; 
+  border-top-left-radius: 4px;
   box-shadow: 0 2px 8px rgba(255, 182, 163, 0.15);
   font-weight: 600;
-  word-break: keep-all; 
+  word-break: keep-all;
   position: relative;
   padding-left: 40px;
 }
 
-/* 말풍선 앞의 귀여운 이모지 불릿 */
 .feedback-bubble:nth-child(1)::before { content: '📊'; position: absolute; left: 16px; }
 .feedback-bubble:nth-child(2)::before { content: '💡'; position: absolute; left: 16px; }
 .feedback-bubble:nth-child(3)::before { content: '💖'; position: absolute; left: 16px; }
 
-/* 둥둥 애니메이션 */
 @keyframes float {
   0%, 100% { transform: translateY(0); }
   50% { transform: translateY(-5px); }

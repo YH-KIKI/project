@@ -19,4 +19,12 @@ public interface DietAnalysisDao {
     void updateCharacterExp(@Param("userNum") Long userNum, @Param("earnedXp") int earnedXp);
     
     List<String> selectRecordedDates(@Param("userNum") Long userNum);
+    
+     // 특정 기간 동안의 일별 통계 데이터 조회
+     
+    List<Map<String, Object>> selectStatsByPeriod(
+        @Param("userNum") Long userNum, 
+        @Param("startDate") String startDate, 
+        @Param("endDate") String endDate
+    );
 }
