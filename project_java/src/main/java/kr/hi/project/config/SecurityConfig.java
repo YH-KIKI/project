@@ -39,10 +39,11 @@ public class SecurityConfig {
                                  "/api/information_select",
                                  "/api/v1/diet/**",  
                                  "/api/record",
-                                 "/api/community/**", 
-                                 "/api/comments/**", 
-                                 "/api/likes/**",    
+                                 "/api/community/**", // 추가했음(박하)
+                                 "/api/comments/**", // [박하/추가] 댓글 API 허용 추가
+                                 "/api/likes/**",    // [박하/추가] 추천 API 허용 추가
                                  "/api/meal/**",
+                                 "/api/food/**", //[연희/추가] food 테이블 불러오는 API
                                  "/api/character/**" ,
                                  "/api/v1/bodycheck/**"
                                  ).permitAll() 

@@ -19,17 +19,18 @@ import kr.hi.project.dto.MealWeekDTO;
 @Service
 public class MealService {
 
-	@Autowired
+    @Autowired
     private MealDao mealDAO;
 
     @Transactional
     public void saveMealRecord(MealRecordRequestDTO request, String imageUrl) {
-    	int userNum = request.getUserNum();
+
+        int userNum = request.getUserNum();
+
         LocalDate now = LocalDate.now();
         int year = now.getYear();
         int month = now.getMonthValue();
         int day = now.getDayOfMonth();
-        // 주차 계산 (현재 월의 몇 번째 주인지)
         int week = now.get(ChronoField.ALIGNED_WEEK_OF_MONTH);
         String mealType = request.getMkMealType().trim();
         int count = mealDAO.checkDuplicateMeal(userNum, mealType, now);
@@ -40,29 +41,44 @@ public class MealService {
         
         // 1. Month 확인/생성
         Integer mmNum = mealDAO.findMonthNum(userNum, year, month);
+
         if (mmNum == null) {
-            MealMonthDTO mm = new MealMonthDTO();
-            mm.setUserNum(userNum); mm.setMmYear(year); mm.setMmMonth(month);
-            mealDAO.insertMonth(mm);
-            mmNum = mm.getMmNum();
+            MealMonthDTO monthDTO = new MealMonthDTO();
+            monthDTO.setUserNum(userNum);
+            monthDTO.setMmYear(year);
+            monthDTO.setMmMonth(month);
+
+            mealDAO.insertMonth(monthDTO);
+            mmNum = monthDTO.getMmNum();
         }
 
-        // 2. Week 확인/생성
+        // 2. 주간 기록 확인/생성
         Integer mwNum = mealDAO.findWeekNum(mmNum, year, month, week);
+
         if (mwNum == null) {
-            MealWeekDTO mw = new MealWeekDTO();
-            mw.setMmNum(mmNum); mw.setMwYear(year); mw.setMwMonth(month); mw.setMwWeek(week);
-            mealDAO.insertWeek(mw);
-            mwNum = mw.getMwNum();
+            MealWeekDTO weekDTO = new MealWeekDTO();
+            weekDTO.setMmNum(mmNum);
+            weekDTO.setMwYear(year);
+            weekDTO.setMwMonth(month);
+            weekDTO.setMwWeek(week);
+
+            mealDAO.insertWeek(weekDTO);
+            mwNum = weekDTO.getMwNum();
         }
-    	
-        // 3. Day 확인/생성
+
+        // 3. 일간 기록 확인/생성
         Integer mdayNum = mealDAO.findDayNum(mwNum, day);
+
         if (mdayNum == null) {
-            MealDayDTO md = new MealDayDTO();
-            md.setMwNum(mwNum); md.setMdDay(day);
-            mealDAO.insertDay(md);
-            mdayNum = md.getMdayNum();
+            MealDayDTO dayDTO = new MealDayDTO();
+            dayDTO.setMwNum(mwNum);
+            dayDTO.setMdDay(day);
+            dayDTO.setMdayKcal(0);
+
+            // DAO에 insertDay가 있으니까 이 이름 그대로 사용
+            mealDAO.insertDay(dayDTO);
+
+            mdayNum = dayDTO.getMdayNum();
         }
         
         //meal_log 객체 만들어서 저장
@@ -74,25 +90,34 @@ public class MealService {
         mealDAO.insertMealLog(log); 
         //음식 상세 정보들 저장
         for (String foodName : request.getFoodDetails().keySet()) {
-            int intakeGram = request.getFoodDetails().get(foodName); // 사용자가 입력한 g
 
-            // DB에서 해당 음식의 영양 데이터 가져오기
+            int intakeGram = request.getFoodDetails().get(foodName);
+
             FoodDTO food = mealDAO.findFoodByName(foodName);
-            if (food != null) {
 
-                MealDetailDTO detail = new MealDetailDTO();
-                detail.setMkNum(log.getMkNum()); // 방금 생성된 식단번호 연결
-                detail.setFoNum(food.getFoNum()); // 음식 번호 연결
-                detail.setMdNum(mdayNum);          // 오늘 하루 번호 (모두 동일하게 입력)
-                detail.setMdPortion(intakeGram);
-                
-                // 칼로리 계산 (소수점 버림 처리)
-                int calculatedKcal = (int)(food.getFoKcal() * (double) intakeGram);
-                detail.setMdKcal(calculatedKcal);
-                mealDAO.insertMealDetail(detail);
+            if (food == null) {
+                continue;
             }
+
+            MealDetailDTO detailDTO = new MealDetailDTO();
+
+            detailDTO.setMkNum(logDTO.getMkNum());
+            detailDTO.setFoNum(food.getFoNum());
+
+            // 중요: meal_day FK
+            detailDTO.setMdayNum(mdayNum);
+
+            // 섭취량 g
+            detailDTO.setMdPortion(intakeGram);
+
+            // 칼로리 계산
+            int calculatedKcal = (int) (food.getFoKcal() * intakeGram);
+            detailDTO.setMdKcal(calculatedKcal);
+
+            mealDAO.insertMealDetail(detailDTO);
         }
+
+        // 6. 하루 총 칼로리 업데이트
         mealDAO.updateDailyKcal(mdayNum);
     }
 }
-
