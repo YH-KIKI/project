@@ -1412,6 +1412,24 @@ gap: 30px;
   color: #777;
 }
 
+.food-no-image {
+  width: 60px;
+  height: 60px;
+  min-width: 60px;
+
+  border-radius: 14px;
+  background: #fff1f3;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  font-size: 24px;
+
+  margin-right: 12px;
+  flex-shrink: 0;
+}
+
 /* ==============================
    MealRecordModal v2
    기존 CSS 유지 + 아래만 추가

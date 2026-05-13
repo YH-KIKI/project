@@ -232,9 +232,7 @@ function MealRecordModal({
                       carbs: food.foCarbs,
                       protein: food.foProtein,
                       fat: food.foFat,
-                      image:
-                        food.foImage ||
-                        "https://via.placeholder.com/80x80.png?text=Food",
+                      image: food.foImage,
                     }}
                     isFavorite={favorites.includes(food.foNum)}
                     onAdd={() =>
@@ -444,8 +442,11 @@ function MealRecordModal({
 function FoodRow({ food, isFavorite, onAdd, onFavorite }) {
   return (
     <div className="mr-food-row">
-      <img src={food.image} alt={food.name} />
-
+      {food.image ? (
+        <img src={food.image} alt={food.name} />
+      ) : (
+        <div className="food-no-image">🍽️</div>
+      )}
       <div className="mr-food-info">
         <strong>{food.name}</strong>
         <span>{food.kcal} kcal</span>

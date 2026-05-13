@@ -117,8 +117,8 @@ public class MealRecordService {
         mealRecordDao.updateDailyKcal(mdayNum);
     }
     
-    public List<MealDetailDTO> getTodayMealRecord(int userNum) {
-        return mealRecordDao.getTodayMealRecord(userNum);
+    public List<MealDetailDTO> getTodayMealRecord(int userNum, String date) {
+        return mealRecordDao.getTodayMealRecord(userNum, date);
     }
     
     

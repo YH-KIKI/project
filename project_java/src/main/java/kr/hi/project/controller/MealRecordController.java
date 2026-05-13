@@ -33,9 +33,10 @@ public class MealRecordController {
 
     @GetMapping("/today")
     public ResponseEntity<List<MealDetailDTO>> getTodayMealRecord(
-            @RequestParam("userNum") int userNum) {
+            @RequestParam("userNum") int userNum,
+            @RequestParam("date") String date) {
 
-        List<MealDetailDTO> result = mealRecordService.getTodayMealRecord(userNum);
+        List<MealDetailDTO> result = mealRecordService.getTodayMealRecord(userNum, date);
 
         return ResponseEntity.ok(result);
     }

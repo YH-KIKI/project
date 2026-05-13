@@ -47,5 +47,5 @@ public interface MealRecordDao {
 
     int updateDailyKcal(@Param("mdayNum") Integer mdayNum);
 
-	List<MealDetailDTO> getTodayMealRecord(@Param("userNum") int userNum);
+	List<MealDetailDTO> getTodayMealRecord(@Param("userNum") int userNum, @Param("date") String date);
 }

@@ -167,7 +167,6 @@
 	
 	<select id="getTodayMealRecord"
 	        resultType="kr.hi.project.dto.MealDetailDTO">
-	
 	    SELECT
 	        md.md_num AS mdNum,
 	        md.md_kcal AS mdKcal,
@@ -183,9 +182,8 @@
 	    JOIN food f
 	        ON md.fo_num = f.fo_num
 	    WHERE ml.user_num = #{userNum}
-	      AND DATE(ml.mk_created_at) = CURDATE()
+	      AND DATE(ml.mk_created_at) = #{date}
 	    ORDER BY ml.mk_created_at DESC, md.md_num DESC
-	
 	</select>
 
 </mapper>

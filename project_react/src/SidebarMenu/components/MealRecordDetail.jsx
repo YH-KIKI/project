@@ -57,15 +57,14 @@ const MealRecordDetail = () => {
     const userNum = 1;
 
     axios
-      .get(`http://localhost:8080/api/meal/today?userNum=${userNum}`)
+      .get(`http://localhost:8080/api/meal/today?userNum=${userNum}&date=${dateKey}`)
       .then((res) => {
         console.log("오늘 식단 조회 성공:", res.data);
 
         const converted = {};
 
         res.data.forEach((item) => {
-          const todayKey = formatDateKey(new Date());
-          const key = `${todayKey}_${item.mkMealType}`;
+          const key = `${dateKey}_${item.mkMealType}`;
 
           if (!converted[key]) {
             converted[key] = {
@@ -89,7 +88,7 @@ const MealRecordDetail = () => {
       .catch((err) => {
         console.error("오늘 식단 조회 실패:", err);
       });
-  }, []);
+  }, [dateKey]);
 
   const recordedDates = [
     ...new Set(Object.keys(mealRecords).map((key) => key.split("_")[0])),
@@ -122,14 +121,41 @@ const MealRecordDetail = () => {
     return days;
   };
 
-  const handleSaveMeal = (data) => {
-    setMealRecords({
-      ...mealRecords,
-      [recordKey]: data,
-    });
+  const handleSaveMeal = async (data) => {
+    try {
+      const userNum = 1;
 
-    setIsRecordModalOpen(false);
+      const requestData = {
+        userNum: userNum,
+        mkMealType: data.mealType,
+        foods: data.foods.map((food) => ({
+          foNum: food.id,
+          mdPortion: food.count,
+          mdKcal: Math.round(food.kcal * food.count),
+        })),
+      };
+
+      console.log("DB 저장 요청:", requestData);
+
+      await axios.post("http://localhost:8080/api/meal/record", requestData);
+
+      setMealRecords({
+        ...mealRecords,
+        [recordKey]: {
+          totalKcal: data.total.kcal,
+          foods: data.foods,
+          imageUrl: null,
+        },
+      });
+
+      setIsRecordModalOpen(false);
+      alert("식단 기록 저장 완료!");
+    } catch (err) {
+      console.error("식단 저장 실패:", err);
+      alert("식단 저장 실패!");
+    }
   };
+  
 
   const toggleFavorite = () => {
     setFavoriteRecords({
