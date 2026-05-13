@@ -1370,6 +1370,422 @@ gap: 30px;
   cursor: pointer;
 }
 
+.food-search-results {
+  margin-top: 10px;
+  padding: 10px;
+  border: 1px solid #ffe0e6;
+  border-radius: 16px;
+  background-color: #fff8fa;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-height: 180px;
+  overflow-y: auto;
+}
+
+.food-search-item {
+  width: 100%;
+  border: 1px solid #ffd1dc;
+  background-color: #ffffff;
+  border-radius: 12px;
+  padding: 10px 12px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  text-align: left;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.food-search-item:hover {
+  background-color: #fff0f4;
+  border-color: #ff7fa3;
+}
+
+.food-search-item strong {
+  font-size: 14px;
+  color: #333;
+}
+
+.food-search-item span {
+  font-size: 12px;
+  color: #777;
+}
+
+.food-no-image {
+  width: 60px;
+  height: 60px;
+  min-width: 60px;
+
+  border-radius: 14px;
+  background: #fff1f3;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  font-size: 24px;
+
+  margin-right: 12px;
+  flex-shrink: 0;
+}
+
+/* ==============================
+   MealRecordModal v2
+   기존 CSS 유지 + 아래만 추가
+============================== */
+
+.mr-modal {
+  width: 540px;
+  max-height: 90vh;
+  padding: 24px;
+  background: #fffdfb;
+  border: 1px solid #f4dddd;
+}
+
+.mr-modal .modal-header {
+  margin-bottom: 16px;
+}
+
+.mr-modal .modal-header h2 {
+  font-size: 24px;
+  font-weight: 900;
+}
+
+.mr-modal .modal-header p {
+  font-size: 14px;
+  font-weight: 700;
+  color: #8a7777;
+}
+
+/* 검색창 */
+.mr-search-row {
+  margin-bottom: 14px;
+}
+
+/* 검색 / 즐겨찾기 탭 */
+.mr-content-tabs {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  border: 1px solid #ffd0da;
+  border-radius: 15px 15px 0 0;
+  overflow: hidden;
+  background: #fff;
+}
+
+.mr-content-tabs button {
+  height: 44px;
+  border: none;
+  border-right: 1px solid #ffd0da;
+  background: #fffdfc;
+  color: #3b3030;
+  font-size: 14px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.mr-content-tabs button:last-child {
+  border-right: none;
+}
+
+.mr-content-tabs button.active {
+  background: #fff1f5;
+  color: #ff6686;
+}
+
+/* 검색 결과 박스 */
+.mr-result-box {
+  border: 1px solid #ffd0da;
+  border-top: none;
+  border-radius: 0 0 16px 16px;
+  background: #fffdfc;
+  padding: 8px 14px;
+  max-height: 290px;
+  overflow-y: auto;
+  margin-bottom: 18px;
+}
+
+.mr-result-box::-webkit-scrollbar,
+.mr-modal::-webkit-scrollbar {
+  width: 6px;
+}
+
+.mr-result-box::-webkit-scrollbar-thumb,
+.mr-modal::-webkit-scrollbar-thumb {
+  background: #ffd0da;
+  border-radius: 999px;
+}
+
+/* 음식 검색 결과 한 줄 */
+.mr-food-row {
+  display: grid;
+  grid-template-columns: 58px 1fr 36px 82px;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 0;
+  border-bottom: 1px solid #f4e0e0;
+}
+
+.mr-food-row:last-child {
+  border-bottom: none;
+}
+
+.mr-food-row img {
+  width: 54px;
+  height: 54px;
+  border-radius: 12px;
+  object-fit: cover;
+  border: 1px solid #f1d9d9;
+}
+
+.mr-food-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.mr-food-info strong {
+  font-size: 15px;
+  font-weight: 800;
+  color: #2f2424;
+}
+
+.mr-food-info span {
+  font-size: 13px;
+  color: #7b6a6a;
+}
+
+.mr-star-btn {
+  border: none;
+  background: transparent;
+  color: #b9abab;
+  font-size: 22px;
+  cursor: pointer;
+  line-height: 1;
+}
+
+.mr-star-btn.active {
+  color: #ffc83d;
+}
+
+.mr-add-btn {
+  height: 36px;
+  border: 1px solid #ffb5c2;
+  border-radius: 12px;
+  background: #fff7f9;
+  color: #ff6686;
+  font-size: 13px;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.mr-add-btn:hover {
+  background: #fff0f3;
+}
+
+/* 즐겨찾기 식단 */
+.mr-favorite-meal {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 13px 0;
+  border-bottom: 1px solid #f4e0e0;
+}
+
+.mr-favorite-meal:last-child {
+  border-bottom: none;
+}
+
+.mr-favorite-meal strong {
+  display: block;
+  margin-bottom: 4px;
+  font-size: 15px;
+  font-weight: 900;
+}
+
+.mr-favorite-meal p {
+  margin: 0 0 4px;
+  font-size: 13px;
+  color: #7b6a6a;
+}
+
+.mr-favorite-meal span {
+  font-size: 13px;
+  color: #ff6686;
+  font-weight: 800;
+}
+
+.mr-favorite-meal button {
+  align-self: center;
+  height: 36px;
+  padding: 0 14px;
+  border: none;
+  border-radius: 12px;
+  background: #ff6686;
+  color: white;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+/* 추가된 음식 */
+.mr-added-section {
+  border: 1px solid #edd8d8;
+  border-radius: 16px;
+  background: #fffdfc;
+  padding: 14px;
+  margin-bottom: 14px;
+}
+
+.mr-added-list {
+  display: flex;
+  flex-direction: column;
+}
+
+.mr-added-item {
+  display: grid;
+  grid-template-columns: 48px 1fr 96px 34px 30px;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 0;
+  border-bottom: 1px solid #f4e0e0;
+}
+
+.mr-added-item:last-child {
+  border-bottom: none;
+}
+
+.mr-added-item img {
+  width: 44px;
+  height: 44px;
+  border-radius: 10px;
+  object-fit: cover;
+  border: 1px solid #f1d9d9;
+}
+
+.mr-added-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.mr-added-info strong {
+  font-size: 14px;
+  font-weight: 800;
+}
+
+.mr-added-info span {
+  font-size: 12px;
+  color: #7b6a6a;
+}
+
+.mr-trash-btn {
+  border: none;
+  background: transparent;
+  font-size: 18px;
+  cursor: pointer;
+}
+
+/* 영양 합계 */
+.mr-total-box {
+  display: grid;
+  grid-template-columns: 48px 1.2fr 1fr 1fr 1fr;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid #ffb5c2;
+  border-radius: 16px;
+  background: #fff8fa;
+  padding: 13px;
+  margin-bottom: 14px;
+}
+
+.mr-robot {
+  width: 42px;
+  height: 42px;
+  border-radius: 14px;
+  background: #eff9e9;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 23px;
+}
+
+.mr-total-box span {
+  display: block;
+  margin-bottom: 5px;
+  font-size: 12px;
+  color: #6b5d5d;
+  font-weight: 700;
+}
+
+.mr-total-box strong {
+  font-size: 17px;
+  font-weight: 900;
+  color: #2f2424;
+}
+
+.mr-total-box em {
+  font-style: normal;
+  font-size: 12px;
+  color: #6b5d5d;
+}
+
+.mr-total-main strong {
+  font-size: 24px;
+}
+
+/* AI 안내 */
+.mr-ai-tip {
+  margin-bottom: 14px;
+}
+
+/* 식단 즐겨찾기 버튼 */
+.mr-meal-fav-btn {
+  width: 100%;
+  height: 46px;
+  border: 1.5px solid #ffb5c2;
+  border-radius: 14px;
+  background: #fffdfc;
+  color: #ff6686;
+  font-size: 15px;
+  font-weight: 900;
+  cursor: pointer;
+  margin-bottom: 16px;
+}
+
+.mr-meal-fav-btn:hover {
+  background: #fff4f6;
+}
+
+/* 540px 모달 내부 조정 */
+@media (max-width: 620px) {
+  .mr-modal {
+    width: calc(100% - 28px);
+  }
+
+  .mr-food-row {
+    grid-template-columns: 48px 1fr 32px 76px;
+    gap: 8px;
+  }
+
+  .mr-food-row img {
+    width: 46px;
+    height: 46px;
+  }
+
+  .mr-added-item {
+    grid-template-columns: 42px 1fr 88px 30px 28px;
+    gap: 7px;
+  }
+
+  .mr-total-box {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .mr-robot {
+    display: none;
+  }
+}
+
 /* 반응형 */
 @media (max-width: 620px) {
   .meal-modal,

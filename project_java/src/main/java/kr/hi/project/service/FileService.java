@@ -1,33 +1,38 @@
 package kr.hi.project.service;
-import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
 import java.io.File;
 import java.io.IOException;
 import java.util.UUID;
 
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
+
 @Service
 public class FileService {
-    // 실제 파일이 저장될 로컬 경로
-    private final String uploadPath = "C:/nnp_uploads/";
+
+    // 🌟 [수정] 이제 직접 경로를 쓰지 않고, WebConfig처럼 설정값을 가져옵니다.
+    // 설정이 없으면 프로젝트 폴더 내 uploads 폴더를 기본값으로 사용합니다.
+    @Value("${spring.web.resources.static-locations:uploads/}")
+    private String uploadPath;
 
     public String saveFile(MultipartFile file) throws IOException {
         if (file.isEmpty()) return null;
 
-        //폴더가 없으면 생성
-        File folder = new File(uploadPath);
+        // 🌟 [수정] WebConfig의 로직과 일치시킵니다.
+        String cleanPath = uploadPath.replace("file:", "").replace("///", "/");
+        
+        File folder = new File(cleanPath);
         if (!folder.exists()) folder.mkdirs();
 
-        //파일명 중복 방지를 위한 랜덤 이름 생성 (uuid_originalName)
         String originalName = file.getOriginalFilename();
         String uuid = UUID.randomUUID().toString();
         String savedName = uuid + "_" + originalName;
 
-        //파일 저장
-        File target = new File(uploadPath + savedName);
+        // 파일 실제 저장
+        File target = new File(folder.getAbsolutePath() + File.separator + savedName);
         file.transferTo(target);
 
-        //브라우저에서 접근할 경로 반환
-        // WebConfig 설정 덕분에 /uploads/파일명 으로 접근 가능해집니다.
+        // DB에는 브라우저 접근 경로인 /uploads/파일명 만 저장
         return "/uploads/" + savedName;
     }
 }

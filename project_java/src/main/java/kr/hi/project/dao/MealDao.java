@@ -1,5 +1,7 @@
 package kr.hi.project.dao;
 
+import java.time.LocalDate;
+
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
@@ -52,4 +54,8 @@ public interface MealDao {
 	void insertDay(MealDayDTO md);
 
 	void updateDailyKcal(@Param("mdayNum") Integer mdayNum);
+
+	int checkDuplicateMeal(@Param("userNum") int userNum, 
+            				@Param("mealType") String mealType, 
+            				@Param("dietDate") java.time.LocalDate dietDate);
 }

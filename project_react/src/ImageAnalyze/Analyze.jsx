@@ -73,9 +73,6 @@ const Analyze = () => {
       alert("먹은 음식을 선택해주세요!");
       return;
     }
-  //   alert(`선택된 음식: ${selectedFoods.join(', ')}\nDB 저장을 시작합니다!`);
-  //   // 여기에 Spring Boot로 selectedFoods를 보내는 axios 코드를 넣으면 됩니다.
-  // };
 
   //선택된 음식들의 초기 중량을 0으로 설정하여 세팅
   const initialDetails = {};
@@ -106,22 +103,24 @@ const Analyze = () => {
           'Authorization': `Bearer ${localStorage.getItem('login_token')}`
         }
       });
-      alert("식단 기록 완료!");
+      alert("식단 기록중...");
       console.log(response)
       setShowModal(false);
       navigate('/'); // 기록 후 메인 페이지로 이동
     } catch (error) {
       console.error("기록 실패", error);
+    // 중복식사 알림 등를 alert으로 띄웁니다.
+    if (error.response && error.response.data) {
+      alert(`🛑 등록 실패: ${error.response.data}`);
+    } else {
+      alert("❌ 서버 오류가 발생했습니다. 잠시 후 다시 시도해주세요.");
     }
-  };
+  }
+};
   return (
-    <div className="page-background">
-      <div className="app-wrapper">
-        <Sidebar />
-        
         <div style={{ 
           backgroundColor: '#fffcf9', padding: '40px', borderRadius: '30px', 
-          height: '850px', width: '62%', top: '20px', position: 'relative',
+          height: '100%', width: '85%', position: 'relative',
           overflowY: 'auto', border: '1px solid #eee'
         }}>
           <h2 style={{ color: '#5d4037', textAlign: 'left', marginBottom: '30px' }}>
@@ -301,17 +300,15 @@ const Analyze = () => {
               </div>
             )}
           </div>
+          {/* 로딩 애니메이션 CSS */}
+          <style>{`
+            @keyframes spin {
+              0% { transform: rotate(0deg); }
+              100% { transform: rotate(360deg); }
+            }
+          `}</style>
         </div>
-      </div>
 
-      {/* 로딩 애니메이션 CSS */}
-      <style>{`
-        @keyframes spin {
-          0% { transform: rotate(0deg); }
-          100% { transform: rotate(360deg); }
-        }
-      `}</style>
-    </div>
   );
 };
 

@@ -23,7 +23,7 @@
 
     <insert id="insertMealDetail">
         INSERT INTO meal_detail (md_kcal, md_portion, mk_num, fo_num, mday_num)
-        VALUES (#{mdKcal}, #{mdPortion}, #{mkNum}, #{foNum}, #{mdNum})
+        VALUES (#{mdKcal}, #{mdPortion}, #{mkNum}, #{foNum}, #{mdayNum})
     </insert>
     
     <select id="findMdayNumByToday" resultType="Integer">
@@ -68,8 +68,16 @@
 	
 	<insert id="insertDay" parameterType="kr.hi.project.dto.MealDayDTO" 
 	        useGeneratedKeys="true" keyProperty="mdayNum">
-	    INSERT INTO meal_day (mw_num, md_day)
-    	VALUES (#{mwNum}, #{mdDay})
+	    INSERT INTO meal_day (
+        mday_kcal,
+        md_day,
+        mw_num
+	    )
+	    VALUES (
+	        #{mdayKcal},
+	        #{mdDay},
+	        #{mwNum}
+	    )
 	</insert>
 	<!-- 하루칼로리 -->
 	<update id="updateDailyKcal">
@@ -80,5 +88,13 @@
 	    )
 	    WHERE mday_num = #{mdayNum}
 	</update>
+	
+	<select id="checkDuplicateMeal" resultType="int">
+	    SELECT COUNT(*) 
+	    FROM meal_log 
+	    WHERE user_num = #{userNum} 
+	      AND mk_meal_type = #{mealType} 
+	      AND mk_diet_date = #{dietDate}
+	</select>
 
 </mapper>

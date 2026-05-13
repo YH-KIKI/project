@@ -1,0 +1,189 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="kr.hi.project.dao.MealRecordDao">
+
+    <!-- meal_log 저장 -->
+    <insert id="insertMealLog"
+            parameterType="kr.hi.project.dto.MealLogDTO"
+            useGeneratedKeys="true"
+            keyProperty="mkNum">
+
+        INSERT INTO meal_log (
+            mk_meal_type,
+            mk_image,
+            mk_usermemo,
+            user_num
+        )
+        VALUES (
+            #{mkMealType},
+            #{mkImage},
+            #{mkUserMemo},
+            #{userNum}
+        )
+
+    </insert>
+
+
+    <!-- 음식 조회 -->
+    <select id="findFoodByName"
+            resultType="kr.hi.project.dto.FoodDTO">
+
+        SELECT
+            fo_num AS foNum,
+            fo_name AS foName,
+            fo_base_gram AS foBaseGram,
+            fo_kcal AS foKcal,
+            fo_carbs AS foCarbs,
+            fo_protein AS foProtein,
+            fo_fat AS foFat,
+            fo_natrium AS foNatrium,
+            fo_type AS foType
+        FROM food
+        WHERE fo_name = #{foName}
+        LIMIT 1
+
+    </select>
+
+
+    <!-- meal_detail 저장 -->
+    <insert id="insertMealDetail"
+            parameterType="kr.hi.project.dto.MealDetailDTO">
+
+        INSERT INTO meal_detail (
+		    md_kcal,
+		    md_portion,
+		    mk_num,
+		    fo_num,
+		    mday_num
+		)
+		VALUES (
+		    #{mdKcal},
+		    #{mdPortion},
+		    #{mkNum},
+		    #{foNum},
+		    #{mdayNum}
+		)
+
+    </insert>
+    
+    
+    <!-- 월간 기록 조회 -->
+	<select id="findMonthNum" resultType="int">
+	    SELECT mm_num
+	    FROM meal_month
+	    WHERE user_num = #{userNum}
+	      AND mm_year = #{year}
+	      AND mm_month = #{month}
+	    LIMIT 1
+	</select>
+	
+	<!-- 월간 기록 생성 -->
+	<insert id="insertMonth"
+	        parameterType="kr.hi.project.dto.MealMonthDTO"
+	        useGeneratedKeys="true"
+	        keyProperty="mmNum">
+	    INSERT INTO meal_month (
+	        user_num,
+	        mm_year,
+	        mm_month
+	    )
+	    VALUES (
+	        #{userNum},
+	        #{mmYear},
+	        #{mmMonth}
+	    )
+	</insert>
+	
+	<!-- 주간 기록 조회 -->
+	<select id="findWeekNum" resultType="int">
+	    SELECT mw_num
+	    FROM meal_week
+	    WHERE mm_num = #{mmNum}
+	      AND mw_year = #{year}
+	      AND mw_month = #{month}
+	      AND mw_week = #{week}
+	    LIMIT 1
+	</select>
+	
+	<!-- 주간 기록 생성 -->
+	<insert id="insertWeek"
+	        parameterType="kr.hi.project.dto.MealWeekDTO"
+	        useGeneratedKeys="true"
+	        keyProperty="mwNum">
+	    INSERT INTO meal_week (
+	        mm_num,
+	        mw_year,
+	        mw_month,
+	        mw_week
+	    )
+	    VALUES (
+	        #{mmNum},
+	        #{mwYear},
+	        #{mwMonth},
+	        #{mwWeek}
+	    )
+	</insert>
+	
+	<!-- 일간 기록 조회 -->
+	<select id="findDayNum" resultType="int">
+	    SELECT mday_num
+	    FROM meal_day
+	    WHERE mw_num = #{mwNum}
+	      AND md_day = #{day}
+	    LIMIT 1
+	</select>
+	
+	<!-- 일간 기록 생성 -->
+	<insert id="insertDay"
+	        parameterType="kr.hi.project.dto.MealDayDTO"
+	        useGeneratedKeys="true"
+	        keyProperty="mdayNum">
+	    INSERT INTO meal_day (
+	        mday_kcal,
+	        md_day,
+	        mw_num
+	    )
+	    VALUES (
+	        #{mdayKcal},
+	        #{mdDay},
+	        #{mwNum}
+	    )
+	</insert>
+	
+	<!-- 하루 총칼로리 업데이트 -->
+	<update id="updateDailyKcal">
+	    UPDATE meal_day
+	    SET mday_kcal = (
+	        SELECT IFNULL(SUM(md_kcal), 0)
+	        FROM meal_detail
+	        WHERE mday_num = #{mdayNum}
+	    )
+	    WHERE mday_num = #{mdayNum}
+	</update>
+	
+	
+	<select id="getTodayMealRecord"
+	        resultType="kr.hi.project.dto.MealDetailDTO">
+	    SELECT
+	        md.md_num AS mdNum,
+	        md.md_kcal AS mdKcal,
+	        md.md_portion AS mdPortion,
+	        md.mk_num AS mkNum,
+	        md.fo_num AS foNum,
+	        md.mday_num AS mdayNum,
+	        f.fo_name AS foName,
+	        ml.mk_meal_type AS mkMealType
+	    FROM meal_detail md
+	    JOIN meal_log ml
+	        ON md.mk_num = ml.mk_num
+	    JOIN food f
+	        ON md.fo_num = f.fo_num
+	    WHERE ml.user_num = #{userNum}
+	      AND DATE(ml.mk_created_at) = #{date}
+	    ORDER BY ml.mk_created_at DESC, md.md_num DESC
+	</select>
+
+</mapper>
