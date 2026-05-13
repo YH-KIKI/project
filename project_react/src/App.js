@@ -25,6 +25,7 @@ import Community from "./community/Community"; //요고 추가해따잉~
 import PostWrite from "./community/PostWrite"; //요고 추가해따잉~
 import PostDetail from "./community/PostDetail"; //요고 추가해따잉~
 import TargetGoals from "./Mypage/TargetGoals";
+import Evaluation from "./ImageAnalyze/Evaluation";
 
 function App() {
     return (
@@ -59,6 +60,17 @@ function App() {
                         <Route path="/community/write" element={<PostWrite />} /> 
                         {/* 커뮤니티 게시글 상세 */}
                         <Route path="/community/post/:id" element={<PostDetail />} />
+
+                        {/*마이페이지식단즐겨찾기 주소(/favoritemeal)*/}
+                        <Route path="/favoritemeal" element={<FavoriteMeal />} />
+                        {/*음식사진인식 주소(/analyze)*/}
+                        <Route path="/aiphoto" element={<Analyze />} />
+                        {/*음식사진인식후평가 주소(/evaluation)*/}
+                        <Route path="/evaluation" element={<Evaluation />} />
+                        {/*개인정보 주소(/information)*/}
+                        <Route path="/information" element={<Information />} />
+                        {/*마이페이지 목표보기 주소(/targetgoals)*/}
+                        <Route path="/targetgoals" element={<TargetGoals />} />
                     </Route>
 
                     {/* 배경과 사이드바가 필요 없는 단독 화면들 */}
@@ -66,16 +78,8 @@ function App() {
                     <Route path="/signup" element={<SignUp />} />
                     {/*마이페이지 주소(/mypage)*/}
                     <Route path="/mypage" element={<Mypage />} />
-                    {/*개인정보 주소(/information)*/}
-                    <Route path="/information" element={<Information />} />
-                    {/*마이페이지 목표보기 주소(/targetgoals)*/}
-                    <Route path="/targetgoals" element={<TargetGoals />} />
-                    {/*식단즐겨찾기 주소(/favoritemeal)*/}
-                    <Route path="/favoritemeal" element={<FavoriteMeal />} />
                     {/*식단기록 주소(/meallogpage)*/}
                     <Route path="/meallogpage" element={<MealLogPage />} />
-                    {/*음식사진인식 주소(/analyze)*/}
-                    <Route path="/aiphoto" element={<Analyze />} />
                 </Routes>
             </div>
         </Router>

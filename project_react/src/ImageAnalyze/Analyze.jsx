@@ -73,9 +73,6 @@ const Analyze = () => {
       alert("먹은 음식을 선택해주세요!");
       return;
     }
-  //   alert(`선택된 음식: ${selectedFoods.join(', ')}\nDB 저장을 시작합니다!`);
-  //   // 여기에 Spring Boot로 selectedFoods를 보내는 axios 코드를 넣으면 됩니다.
-  // };
 
   //선택된 음식들의 초기 중량을 0으로 설정하여 세팅
   const initialDetails = {};
@@ -121,13 +118,9 @@ const Analyze = () => {
   }
 };
   return (
-    <div className="page-background">
-      <div className="app-wrapper">
-        <Sidebar />
-        
         <div style={{ 
           backgroundColor: '#fffcf9', padding: '40px', borderRadius: '30px', 
-          height: '850px', width: '62%', top: '20px', position: 'relative',
+          height: '100%', width: '85%', position: 'relative',
           overflowY: 'auto', border: '1px solid #eee'
         }}>
           <h2 style={{ color: '#5d4037', textAlign: 'left', marginBottom: '30px' }}>
@@ -307,17 +300,15 @@ const Analyze = () => {
               </div>
             )}
           </div>
+          {/* 로딩 애니메이션 CSS */}
+          <style>{`
+            @keyframes spin {
+              0% { transform: rotate(0deg); }
+              100% { transform: rotate(360deg); }
+            }
+          `}</style>
         </div>
-      </div>
 
-      {/* 로딩 애니메이션 CSS */}
-      <style>{`
-        @keyframes spin {
-          0% { transform: rotate(0deg); }
-          100% { transform: rotate(360deg); }
-        }
-      `}</style>
-    </div>
   );
 };
 

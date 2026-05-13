@@ -68,7 +68,7 @@ public class MealService {
 
         // 3. 일간 기록 확인/생성
         Integer mdayNum = mealDAO.findDayNum(mwNum, day);
-
+        
         if (mdayNum == null) {
             MealDayDTO dayDTO = new MealDayDTO();
             dayDTO.setMwNum(mwNum);
@@ -86,22 +86,22 @@ public class MealService {
         log.setMkImage(imageUrl);
         log.setMkMealType(request.getMkMealType().trim());
         log.setUserNum(request.getUserNum()); // React에서 받아온 user_num
-        
         mealDAO.insertMealLog(log); 
+        
         //음식 상세 정보들 저장
         for (String foodName : request.getFoodDetails().keySet()) {
-
             int intakeGram = request.getFoodDetails().get(foodName);
-
             FoodDTO food = mealDAO.findFoodByName(foodName);
-
             if (food == null) {
                 continue;
             }
 
             MealDetailDTO detailDTO = new MealDetailDTO();
 
-            detailDTO.setMkNum(logDTO.getMkNum());
+            detailDTO.setMkNum(log.getMkNum());
+            detailDTO.setMkMealType(log.getMkMealType());
+            detailDTO.setFoNum(food.getFoNum());
+            detailDTO.setFoName(food.getFoName());
             detailDTO.setFoNum(food.getFoNum());
 
             // 중요: meal_day FK
@@ -113,7 +113,7 @@ public class MealService {
             // 칼로리 계산
             int calculatedKcal = (int) (food.getFoKcal() * intakeGram);
             detailDTO.setMdKcal(calculatedKcal);
-
+            
             mealDAO.insertMealDetail(detailDTO);
         }
 

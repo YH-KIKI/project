@@ -76,12 +76,9 @@ const TargetGoals = () => {
   if (loading) return <div style={{textAlign: 'center', marginTop: '50px'}}>데이터를 불러오는 중...</div>;
 
   return (
-    <div className="page-background">
-      <div className="app-wrapper">
-        <Sidebar />
         <div style={{ 
           backgroundColor: 'rgba(255, 255, 255, 0.95)', padding: '40px', borderRadius: '30px', 
-          width: '62%', top: '20px', position: 'relative', boxShadow: '0 10px 30px rgba(0,0,0,0.1)',
+          width: '85%', position: 'relative', boxShadow: '0 10px 30px rgba(0,0,0,0.1)',
           minHeight: '800px', overflowY: 'auto'
         }}>
           <h2 style={{ color: '#5d4037', marginBottom: '30px', textAlign: 'left' }}>
@@ -159,8 +156,6 @@ const TargetGoals = () => {
             <span style={{ fontSize: '30px' }}>{todayTotal.totalNatrium > 2000 ? '🧂⚠️' : '🥦✅'}</span>
           </div>
         </div>
-      </div>
-    </div>
   );
 };
 

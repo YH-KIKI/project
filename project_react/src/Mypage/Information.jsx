@@ -117,12 +117,6 @@ const Information = () => {
 
 
   return (
-    /* 🌟 page-background 클래스를 주면 전체 배경 이미지가 나타납니다! */
-    <div className="page-background">
-      <div className="app-wrapper">
-        {/* 앱 내부의 왼쪽: 사이드바 */}
-        <Sidebar />
-        {/* 로그인 박스 */}
         <div style={{ 
           backgroundColor: 'rgba(255, 255, 255, 0.9)', 
           padding: '40px', 
@@ -130,7 +124,7 @@ const Information = () => {
           textAlign: 'center',
           border: '2px solid #d1b8a0',
           position: 'relative',
-          height: '800px', width: '62%', top: '20px',
+          height: '100%', width: '85%',
           
         }}>
         {/* <div style={{ display: 'flex', 
@@ -284,9 +278,6 @@ const Information = () => {
           </button>
           <hr></hr>
         </div>
-
-      </div>
-    </div>
   );
 };
 
