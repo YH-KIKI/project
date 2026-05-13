@@ -7,22 +7,23 @@ import { format } from 'date-fns';
 import { ko } from 'date-fns/locale'; 
 import './AiAnalysis.css';
 
+// 🌟 진짜 로로 이미지 임포트! (파일 경로와 이름이 맞는지 확인해주세요)
+import roroIcon from '../../images/로봇2.png'; 
+
 const AiAnalysis = ({ userNum = 1 }) => {
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [analysisData, setAnalysisData] = useState(null);
-  const [recordedDates, setRecordedDates] = useState([]); // 🌟 식단이 기록된 날짜들 보관
+  const [recordedDates, setRecordedDates] = useState([]); 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // 1. 컴포넌트 렌더링 시 기록된 전체 날짜 목록 가져오기 (달력에 도장 찍기용)
+  // 1. 달력 도장용 기록된 날짜 가져오기
   useEffect(() => {
     const fetchRecordedDates = async () => {
       try {
-        // 추후 백엔드에 이 API를 만들어주세요!
         const response = await axios.get(`http://localhost:8080/api/v1/diet/recorded-dates`, {
           params: { userNum: userNum }
         });
-        // ["2026-05-12", "2026-05-13"] 형태의 문자열을 Date 객체 배열로 변환
         const dateObjects = response.data.map(dateStr => new Date(dateStr));
         setRecordedDates(dateObjects);
       } catch (err) {
@@ -59,7 +60,7 @@ const AiAnalysis = ({ userNum = 1 }) => {
     fetchAnalysisData();
   }, [userNum, selectedDate]);
 
-  // 프로그레스 바 너비 계산
+  // 게이지 바 너비 계산
   const calculateWidth = (current, target) => {
     if (!target || target === 0) return '0%';
     const percentage = (current / target) * 100;
@@ -68,14 +69,13 @@ const AiAnalysis = ({ userNum = 1 }) => {
 
   return (
     <div className="analysis-container">
-      {/* 1. 상단 타이틀 및 달력 영역 */}
+      {/* 상단 타이틀 및 달력 영역 */}
       <div className="analysis-header">
         <h2>AI 분석 요약</h2>
         <div className="date-picker-wrapper">
           <DatePicker
             selected={selectedDate}
             onChange={(date) => setSelectedDate(date)}
-            // 🌟 3가지 입력 방식 지원 (2026.05.13, 20260513, 2026-05-13 모두 가능!)
             dateFormat={["yyyy.MM.dd", "yyyyMMdd", "yyyy-MM-dd"]} 
             locale={ko}
             maxDate={new Date()}
@@ -83,7 +83,6 @@ const AiAnalysis = ({ userNum = 1 }) => {
             showYearDropdown 
             showMonthDropdown 
             dropdownMode="select"
-            // 🌟 기록된 날짜들에 핑크색 배경 커스텀 클래스 적용
             highlightDates={[
               {
                 "react-datepicker__day--highlighted-custom": recordedDates
@@ -99,7 +98,6 @@ const AiAnalysis = ({ userNum = 1 }) => {
       ) : error ? (
         <div className="analysis-card error">데이터를 불러오는데 실패했습니다.</div>
       ) : (!analysisData || analysisData.currentKcal === 0) ? (
-        /* 🌟 데이터가 없을 때 나오는 귀여운 Empty State 🌟 */
         <div className="analysis-card empty-state">
           <div className="empty-character">🍳</div>
           <h3>아직 기록된 식단이 없어요!</h3>
@@ -109,7 +107,7 @@ const AiAnalysis = ({ userNum = 1 }) => {
           </button>
         </div>
       ) : (
-        /* 2. 메인 카드 영역 (정상적으로 데이터가 있을 때) */
+        /* 메인 카드 영역 (데이터가 있을 때) */
         <div className="analysis-card">
           
           <div className="calorie-section">
@@ -158,13 +156,26 @@ const AiAnalysis = ({ userNum = 1 }) => {
             </div>
           </div>
 
+          {/* 🌟 하단 AI 코치 피드백 구역 (초록빛 로로 적용!) 🌟 */}
           <div className="feedback-section">
-            {/* 파이썬에서 \n으로 넘어오는 줄바꿈을 html <br/>로 변환하여 출력 */}
-            <p dangerouslySetInnerHTML={{ __html: analysisData.aiFeedback ? analysisData.aiFeedback.replace(/\n/g, '<br/>') : 'AI 피드백 준비 중입니다!' }}></p>
-            <button className="ai-coach-btn">
-              <span className="robot-icon">🤖</span>
-              AI 코치 피드백 {'>'}
-            </button>
+            <div className="feedback-header">
+              <div className="roro-icon-wrap">
+                <img src={roroIcon} alt="Roro AI Coach" className="roro-icon-img" />
+              </div>
+              <strong>다정한 로로 코치의 맞춤 피드백</strong>
+            </div>
+            
+            <div className="feedback-message-list">
+              {analysisData.aiFeedback ? (
+                analysisData.aiFeedback.split('\n').map((line, index) => (
+                  <p key={index} className="feedback-bubble">
+                    {line}
+                  </p>
+                ))
+              ) : (
+                <p className="feedback-bubble">로로 코치가 식단을 분석 중입니다!</p>
+              )}
+            </div>
           </div>
 
         </div>

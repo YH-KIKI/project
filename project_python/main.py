@@ -1,11 +1,25 @@
 # main.py
 from fastapi import FastAPI, UploadFile, File, Form
+from pydantic import BaseModel # 🌟 새로 추가됨: 데이터 모델링용
 
-# 🌟 눈바디 분석 함수(analyze_pose, extract_outline)도 함께 불러옵니다!
+# 🌟 눈바디 분석 함수(analyze_pose, extract_outline) 및 피드백 함수(generate_daily_feedback) 불러오기
 from schemas import UserInfo
-from ai_service import get_best_diet, analyze_pose, extract_outline
+from ai_service import get_best_diet, analyze_pose, extract_outline, generate_daily_feedback
 
 app = FastAPI()
+
+# ==========================================
+# 🌟 [새로 추가됨] AI 피드백을 받기 위한 데이터 형식
+# ==========================================
+class DietFeedbackRequest(BaseModel):
+    userNum: int
+    grade: str
+    currentKcal: int
+    targetKcal: int
+    carbs: int
+    protein: int
+    fat: int
+    sodium: int
 
 # ==========================================
 # 1. AI 식단 추천 엔드포인트 (기존)
@@ -37,7 +51,7 @@ async def ai_recommend(user: UserInfo):
 
 
 # ==========================================
-# 🌟 2. [새로 추가됨] AI 눈바디 분석 엔드포인트
+# 2. AI 눈바디 분석 엔드포인트 (기존)
 # ==========================================
 @app.post("/api/ai/bodycheck")
 async def bodycheck_service(
@@ -78,6 +92,32 @@ async def detect_service(message: str = Form(...), file: UploadFile = File(...))
         "received_filename": file_name
     }
 
+# ==========================================
+# 🌟 4. [새로 추가됨] AI 식단 3줄 요약 피드백 엔드포인트
+# ==========================================
+@app.post("/api/v1/ai/feedback")
+async def daily_feedback_service(data: DietFeedbackRequest):
+    print(f"📝 [Python] AI 피드백 요청 도착! 유저번호: {data.userNum}, 등급: {data.grade}")
+    
+    # ai_service.py의 텍스트 생성 모델 호출
+    feedback_result = generate_daily_feedback(
+        grade=data.grade, 
+        current_kcal=data.currentKcal, 
+        target_kcal=data.targetKcal, 
+        carbs=data.carbs, 
+        protein=data.protein, 
+        fat=data.fat, 
+        sodium=data.sodium
+    )
+    
+    print(f"🤖 AI 생성 피드백:\n{feedback_result}")
+    
+    return {
+        "status": "success",
+        "feedback": feedback_result
+    }
+
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run("main:app", port=8000, reload=True)
+    # 포트는 8000번 그대로 유지, 외부 접속 허용을 위해 0.0.0.0
+    uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)

@@ -23,7 +23,7 @@
   color: #333333;
 }
 
-/* 🌟 날짜 선택기(Datepicker) 스타일 */
+/* 날짜 선택기(Datepicker) 스타일 */
 .date-picker-wrapper {
   position: relative;
 }
@@ -76,7 +76,7 @@
   border-radius: 50% !important; 
 }
 
-/* 🌟 식단이 기록된 날짜(Highlight) 커스텀 스타일 🌟 */
+/* 식단이 기록된 날짜(Highlight) 커스텀 스타일 */
 .react-datepicker__day--highlighted-custom {
   background-color: #FFEDEA !important; 
   color: #FF7B89 !important;            
@@ -115,7 +115,7 @@
   font-weight: 500;
 }
 
-/* 🌟 빈 화면(Empty State) 스타일 🌟 */
+/* 빈 화면(Empty State) 스타일 */
 .analysis-card.empty-state {
   display: flex;
   flex-direction: column;
@@ -276,43 +276,84 @@
 .progress-fill.fat { background-color: #A2D5F2; } 
 .progress-fill.sodium { background-color: #DAB6FC; } 
 
-/* 4. 하단 AI 코치 피드백 구역 */
+/* =========================================
+   🌟 4. 하단 AI 코치 피드백 구역 (로로 리뉴얼) 🌟
+   ========================================= */
 .feedback-section {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
-  background-color: #FFFFFF;
-  border: 1px solid #FFEDEA;
+  flex-direction: column;
+  background-color: #FFF9F7; 
+  border: 2px solid #FFEDEA;
   border-radius: 20px;
-  padding: 20px;
-  gap: 15px;
+  padding: 24px;
+  gap: 16px;
+  margin-top: 10px;
 }
-.feedback-section p {
-  margin: 0;
-  font-size: 15px;
-  line-height: 1.5;
-  color: #4A3B32;
-  font-weight: 500;
-}
-.ai-coach-btn {
-  background-color: #FF8E9C; 
-  color: white;
-  border: none;
-  border-radius: 16px;
-  padding: 12px 20px;
-  font-size: 15px;
-  font-weight: 700;
-  cursor: pointer;
+
+/* 로로 코치 헤더 */
+.feedback-header {
   display: flex;
   align-items: center;
-  gap: 8px;
-  box-shadow: 0 4px 10px rgba(255, 142, 156, 0.3);
-  transition: transform 0.2s, background-color 0.2s;
-}
-.ai-coach-btn:hover {
-  background-color: #FF7B89;
-  transform: translateY(-2px);
-}
-.robot-icon {
+  gap: 12px;
   font-size: 18px;
+  font-weight: 800;
+  color: #FF7B89;
+}
+
+/* 🌟 로로 이미지 컨테이너 (진짜 로로의 연두/베이지 톤 적용!) */
+.roro-icon-wrap {
+  background-color: #F8FAF2; 
+  width: 55px; 
+  height: 55px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border-radius: 50%;
+  box-shadow: 0 4px 10px rgba(185, 204, 165, 0.4); 
+  animation: float 3s ease-in-out infinite; 
+  overflow: hidden; 
+  border: 2px solid #DCE5C5; 
+}
+
+/* 로로 이미지 조절 */
+.roro-icon-img {
+  width: 90%; 
+  height: auto;
+  display: block;
+  object-fit: contain;
+}
+
+/* 말풍선 리스트 컨테이너 */
+.feedback-message-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* 개별 메시지 말풍선 스타일 */
+.feedback-bubble {
+  margin: 0;
+  font-size: 15px;
+  line-height: 1.6;
+  color: #5C4D45;
+  background-color: #FFFFFF;
+  padding: 16px 20px;
+  border-radius: 16px;
+  border-top-left-radius: 4px; 
+  box-shadow: 0 2px 8px rgba(255, 182, 163, 0.15);
+  font-weight: 600;
+  word-break: keep-all; 
+  position: relative;
+  padding-left: 40px;
+}
+
+/* 말풍선 앞의 귀여운 이모지 불릿 */
+.feedback-bubble:nth-child(1)::before { content: '📊'; position: absolute; left: 16px; }
+.feedback-bubble:nth-child(2)::before { content: '💡'; position: absolute; left: 16px; }
+.feedback-bubble:nth-child(3)::before { content: '💖'; position: absolute; left: 16px; }
+
+/* 둥둥 애니메이션 */
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-5px); }
 }

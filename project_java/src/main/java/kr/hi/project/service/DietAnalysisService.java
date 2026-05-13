@@ -1,9 +1,11 @@
 package kr.hi.project.service;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.client.RestTemplate;
 import lombok.RequiredArgsConstructor;
 import kr.hi.project.dao.DietAnalysisDao;
 import kr.hi.project.dto.DietAnalysisResponseDto;
@@ -15,32 +17,32 @@ public class DietAnalysisService {
     private final DietAnalysisDao dietAnalysisDao;
 
     /**
-     * 1. 특정 날짜의 식단 분석 요약 데이터 가져오기
+     * 1. 특정 날짜의 식단 분석 요약 데이터 가져오기 + 파이썬 AI 연동
      */
     @Transactional
     public DietAnalysisResponseDto getDailyAnalysis(Long userNum, String date) {
         
-        // DB에서 데이터 가져오기
+        // 1. DB에서 데이터 가져오기
         Map<String, Object> totals = dietAnalysisDao.selectDailyTotalNutrients(userNum, date);
         Integer targetKcal = dietAnalysisDao.selectUserTargetKcal(userNum);
 
         // 방어 로직 (DB에 입력값이 없거나 계산 결과가 null일 경우 대비)
         int currentKcal = totals != null && totals.get("total_kcal") != null ? ((Number) totals.get("total_kcal")).intValue() : 0;
-        int safeTargetKcal = (targetKcal != null && targetKcal > 0) ? targetKcal : 1800; // 기본값 세팅
+        int safeTargetKcal = (targetKcal != null && targetKcal > 0) ? targetKcal : 1800;
         
         int carbs = totals != null && totals.get("total_carbs") != null ? ((Number) totals.get("total_carbs")).intValue() : 0;
         int protein = totals != null && totals.get("total_protein") != null ? ((Number) totals.get("total_protein")).intValue() : 0;
         int fat = totals != null && totals.get("total_fat") != null ? ((Number) totals.get("total_fat")).intValue() : 0;
         int sodium = totals != null && totals.get("total_sodium") != null ? ((Number) totals.get("total_sodium")).intValue() : 0;
 
-        // 오차율 계산
+        // 2. 오차율 계산
         double errorRate = Math.abs((double)(safeTargetKcal - currentKcal)) / safeTargetKcal * 100;
 
         String grade;
         String gradeMessage;
         int earnedXp = 0;
 
-        // 기획안 기반 등급 및 경험치 부여 로직
+        // 3. 기획안 기반 등급 및 경험치 부여 로직
         if (currentKcal == 0) {
             grade = "F"; gradeMessage = "아직 식단이 기록되지 않았어요!"; earnedXp = 0;
         } else if (errorRate <= 10) {
@@ -55,15 +57,43 @@ public class DietAnalysisService {
             grade = "F"; gradeMessage = "목표와 너무 크게 빗나간 식단 (또는 미기록)"; earnedXp = 0;
         }
 
-        // 캐릭터 경험치(XP) DB 업데이트
+        // 4. 캐릭터 경험치(XP) DB 업데이트
         if (earnedXp > 0) {
             dietAnalysisDao.updateCharacterExp(userNum, earnedXp);
         }
 
-        // 파이썬 연동 전 임시 메시지
-        String aiFeedback = "AI 분석 결과, \n당신은 지금 물을 한 잔 마시는 것이 좋아요!";
+        // 🌟 5. 파이썬 AI 서버로 3줄 요약 피드백 요청하기 🌟
+        String aiFeedback = "";
+        try {
+            RestTemplate restTemplate = new RestTemplate();
+            String pythonUrl = "http://localhost:8000/api/v1/ai/feedback";
 
-        // 결과 DTO 반환
+            // 파이썬으로 보낼 데이터 조립
+            Map<String, Object> requestData = new HashMap<>();
+            requestData.put("userNum", userNum);
+            requestData.put("grade", grade);
+            requestData.put("currentKcal", currentKcal);
+            requestData.put("targetKcal", safeTargetKcal);
+            requestData.put("carbs", carbs);
+            requestData.put("protein", protein);
+            requestData.put("fat", fat);
+            requestData.put("sodium", sodium);
+
+            // 파이썬 서버에 POST 요청 보내기
+            @SuppressWarnings("unchecked")
+            Map<String, Object> aiResponse = restTemplate.postForObject(pythonUrl, requestData, Map.class);
+            
+            if (aiResponse != null && aiResponse.get("feedback") != null) {
+                aiFeedback = (String) aiResponse.get("feedback");
+            } else {
+                aiFeedback = "AI 코치가 식단을 분석 중입니다.";
+            }
+        } catch (Exception e) {
+            System.out.println("❌ 파이썬 AI 서버 연결 실패: " + e.getMessage());
+            aiFeedback = "1. AI 코치 서버와 연결할 수 없습니다.\n2. 파이썬 서버가 켜져 있는지 확인해 주세요.\n3. 계속되면 관리자에게 문의해 주세요.";
+        }
+
+        // 6. 결과 DTO 반환
         return new DietAnalysisResponseDto(
             grade, gradeMessage, currentKcal, safeTargetKcal, earnedXp,
             carbs, protein, fat, sodium, aiFeedback
