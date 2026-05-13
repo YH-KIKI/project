@@ -32,8 +32,14 @@ public class MealService {
         int month = now.getMonthValue();
         int day = now.getDayOfMonth();
         int week = now.get(ChronoField.ALIGNED_WEEK_OF_MONTH);
-
-        // 1. 월간 기록 확인/생성
+        String mealType = request.getMkMealType().trim();
+        int count = mealDAO.checkDuplicateMeal(userNum, mealType, now);
+        if (count > 0) {
+            // 중복 시 예외 발생 -> Controller의 catch 블록으로 이동함
+            throw new RuntimeException("이미 오늘의 " + mealType + " 식단이 등록되어 있습니다!");
+        }
+        
+        // 1. Month 확인/생성
         Integer mmNum = mealDAO.findMonthNum(userNum, year, month);
 
         if (mmNum == null) {
@@ -74,16 +80,15 @@ public class MealService {
 
             mdayNum = dayDTO.getMdayNum();
         }
-
-        // 4. 식단 로그 저장
-        MealLogDTO logDTO = new MealLogDTO();
-        logDTO.setMkImage(imageUrl);
-        logDTO.setMkMealType(request.getMkMealType().trim());
-        logDTO.setUserNum(userNum);
-
-        mealDAO.insertMealLog(logDTO);
-
-        // 5. 식단 상세 저장
+        
+        //meal_log 객체 만들어서 저장
+        MealLogDTO log = new MealLogDTO();
+        log.setMkImage(imageUrl);
+        log.setMkMealType(request.getMkMealType().trim());
+        log.setUserNum(request.getUserNum()); // React에서 받아온 user_num
+        
+        mealDAO.insertMealLog(log); 
+        //음식 상세 정보들 저장
         for (String foodName : request.getFoodDetails().keySet()) {
 
             int intakeGram = request.getFoodDetails().get(foodName);

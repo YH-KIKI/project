@@ -88,5 +88,13 @@
 	    )
 	    WHERE mday_num = #{mdayNum}
 	</update>
+	
+	<select id="checkDuplicateMeal" resultType="int">
+	    SELECT COUNT(*) 
+	    FROM meal_log 
+	    WHERE user_num = #{userNum} 
+	      AND mk_meal_type = #{mealType} 
+	      AND mk_diet_date = #{dietDate}
+	</select>
 
 </mapper>
