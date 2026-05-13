@@ -1,9 +1,9 @@
+import axios from "axios";
 import React, { useState, useEffect } from "react";
 import { FiHeart } from "react-icons/fi";
 import "./MealRecordDetail.css";
 import MealRecordModal from "./MealRecordModal";
 import MealDetailModal from "./MealDetailModal";
-import axios from "axios";
 
 const NutrientBar = ({ icon, name, status, type }) => {
   return (

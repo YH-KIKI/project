@@ -101,7 +101,7 @@ public class MealService {
 
             MealDetailDTO detailDTO = new MealDetailDTO();
 
-            detailDTO.setMkNum(logDTO.getMkNum());
+            detailDTO.setMkNum(log.getMkNum());
             detailDTO.setFoNum(food.getFoNum());
 
             // 중요: meal_day FK

@@ -1,7 +1,7 @@
+import axios from "axios";
 import React, { useMemo, useState } from "react";
 import "./MealRecordDetail.css";
 import { FiTrash2 } from "react-icons/fi";
-import axios from "axios";
 
 
 

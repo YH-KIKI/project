@@ -14,4 +14,6 @@ public class MealFavoritesDTO {
     private int totalKcal;      // 해당 식단의 총 칼로리 합계
     private String foodListStr; // 포함된 음식들을 합친 문자열 (예: "닭가슴살, 번티밥")
     private String mkImage;
+    
+    private String mkMealType; //식단 저장 타입
 }

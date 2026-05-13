@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+import axios from "axios";
+import React, { useEffect, useState } from "react";
 import { FiTrash2 } from "react-icons/fi";
 import "./FavoritePage.css";
 
@@ -8,53 +9,8 @@ const FavoritePage = () => {
   const [isMealModalOpen, setIsMealModalOpen] = useState(false);
   const [mealFilter, setMealFilter] = useState("전체");
 
-  const [foodFavorites, setFoodFavorites] = useState([
-    {
-      id: 1,
-      name: "닭가슴살 샐러드",
-      kcal: 320,
-      carbs: 15,
-      protein: 32,
-      fat: 8,
-      image: "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=600",
-    },
-    {
-      id: 2,
-      name: "그릭요거트 볼",
-      kcal: 280,
-      carbs: 32,
-      protein: 20,
-      fat: 6,
-      image: "https://images.unsplash.com/photo-1488477181946-6428a0291777?w=600",
-    },
-  ]);
-
-  const [mealFavorites, setMealFavorites] = useState([
-    {
-      id: 1,
-      type: "아침",
-      title: "그릭요거트 아침 세트",
-      foods: "그릭요거트, 바나나, 삶은 달걀",
-      kcal: 270,
-      carbs: 32,
-      protein: 20,
-      fat: 8,
-      image: "https://images.unsplash.com/photo-1488477181946-6428a0291777?w=600",
-      recent: "2024.05.20",
-    },
-    {
-      id: 2,
-      type: "점심",
-      title: "닭가슴살 점심 세트",
-      foods: "닭가슴살, 현미밥, 샐러드",
-      kcal: 560,
-      carbs: 45,
-      protein: 35,
-      fat: 10,
-      image: "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=600",
-      recent: "2024.05.18",
-    },
-  ]);
+  const [foodFavorites, setFoodFavorites] = useState([]);
+  const [mealFavorites, setMealFavorites] = useState([]);
 
   const [newFood, setNewFood] = useState({
     name: "",
@@ -76,36 +32,81 @@ const FavoritePage = () => {
     image: "",
   });
 
-  const addFoodFavorite = () => {
-    if (!newFood.name.trim()) {
-      alert("음식 이름을 입력해주세요.");
-      return;
-    }
+  useEffect(() => {
+  fetchFoodFavorites();
+  fetchMealFavorites();
+}, []);
 
-    setFoodFavorites([
-      ...foodFavorites,
-      {
-        id: Date.now(),
-        name: newFood.name,
-        kcal: newFood.kcal || 0,
-        carbs: newFood.carbs || 0,
-        protein: newFood.protein || 0,
-        fat: newFood.fat || 0,
-        image: newFood.image,
-      },
-    ]);
+const fetchMealFavorites = async () => {
+  try {
+    const userNum = 1;
 
-    setNewFood({
-      name: "",
-      kcal: "",
-      carbs: "",
-      protein: "",
-      fat: "",
-      image: "",
+    const res = await axios.get(
+      `http://localhost:8080/api/favorite/meal?userNum=${userNum}`
+    );
+
+    const converted = res.data.map((meal) => ({
+      id: meal.mfNum,
+      mkNum: meal.mkNum,
+      type: meal.mkMealType,
+      title: meal.mfName,
+      foods: meal.foodListStr,
+      kcal: meal.totalKcal,
+      image: meal.mkImage,
+      recent: "-",
+    }));
+
+    setMealFavorites(converted);
+
+  } catch (err) {
+    console.error("식단 즐겨찾기 조회 실패:", err);
+  }
+};
+
+const fetchFoodFavorites = async () => {
+  try {
+    const userNum = 1;
+
+    const res = await axios.get(
+      `http://localhost:8080/api/favorite/single-food?userNum=${userNum}`
+    );
+
+    const converted = res.data.map((food) => ({
+      id: food.sfNum,
+      foNum: food.foNum,
+      name: food.foName,
+      kcal: food.foKcal,
+      carbs: food.foCarbs,
+      protein: food.foProtein,
+      fat: food.foFat,
+      image: food.foImage,
+      portion: food.sfPortion,
+    }));
+
+    setFoodFavorites(converted);
+
+  } catch (err) {
+    console.error("음식 즐겨찾기 조회 실패:", err);
+  }
+};
+
+const addFoodFavorite = async (foNum) => {
+  try {
+    const userNum = 1;
+
+    await axios.post("http://localhost:8080/api/favorite/single-food", {
+      userNum,
+      foNum,
+      sfPortion: 100,
     });
 
-    setIsFoodModalOpen(false);
-  };
+    alert("음식 즐겨찾기 저장 완료!");
+    fetchFoodFavorites();
+  } catch (err) {
+    console.error("음식 즐겨찾기 저장 실패:", err);
+    alert("음식 즐겨찾기 저장 실패!");
+  }
+};
 
   const addMealFavorite = () => {
     if (!newMeal.title.trim()) {
@@ -142,6 +143,24 @@ const FavoritePage = () => {
 
     setIsMealModalOpen(false);
   };
+
+  const deleteFoodFavorite = async (sfNum) => {
+  try {
+    const userNum = 1;
+
+    await axios.delete(
+      `http://localhost:8080/api/favorite/single-food?userNum=${userNum}&sfNum=${sfNum}`
+    );
+
+    setFoodFavorites((prev) =>
+      prev.filter((food) => food.id !== sfNum)
+    );
+
+  } catch (err) {
+    console.error("음식 즐겨찾기 삭제 실패:", err);
+    alert("삭제 실패!");
+  }
+};
 
   const filteredMealFavorites =
   mealFilter === "전체"
@@ -201,7 +220,9 @@ const FavoritePage = () => {
 
                   <div className="food-actions">
                     <button className="pink-btn">식단 추가</button>
-                    <button className="meal-delete-btn"><FiTrash2 /></button>
+                    <button 
+                      className="meal-delete-btn"
+                       onClick={() => deleteFoodFavorite(food.id)}><FiTrash2 /></button>
                   </div>
                 </div>
               </div>
