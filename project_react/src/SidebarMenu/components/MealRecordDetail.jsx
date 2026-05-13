@@ -23,13 +23,20 @@ const NutrientBar = ({ icon, name, status, type }) => {
 };
 
 const MealRecordDetail = () => {
+  const userNum = 1;
+
   const [activeMeal, setActiveMeal] = useState("아침");
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [isCalendarOpen, setIsCalendarOpen] = useState(false);
   const [isRecordModalOpen, setIsRecordModalOpen] = useState(false);
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
+
+  // mkNum 기준으로 관리
+  // 예: { 12: { mfNum: 3, mkNum: 12 } }
   const [favoriteRecords, setFavoriteRecords] = useState({});
+
   const [mealRecords, setMealRecords] = useState({});
+  const [recordedDates, setRecordedDates] = useState([]);
 
   const meals = ["아침", "점심", "저녁"];
 
@@ -51,48 +58,101 @@ const MealRecordDetail = () => {
   const dateKey = formatDateKey(selectedDate);
   const recordKey = `${dateKey}_${activeMeal}`;
   const mealData = mealRecords[recordKey] || null;
-  const isFavorite = favoriteRecords[recordKey] || false;
 
-  useEffect(() => {
-    const userNum = 1;
+  const favoriteInfo = mealData?.mkNum ? favoriteRecords[mealData.mkNum] : null;
+  const isFavorite = !!favoriteInfo;
 
-    axios
-      .get(`http://localhost:8080/api/meal/today?userNum=${userNum}&date=${dateKey}`)
-      .then((res) => {
-        console.log("오늘 식단 조회 성공:", res.data);
+  const loadRecordedDates = async () => {
+    try {
+      const res = await axios.get(
+        `http://localhost:8080/api/meal/recorded-dates?userNum=${userNum}`
+      );
 
-        const converted = {};
+      console.log("기록 날짜:", res.data);
+      setRecordedDates(res.data);
+    } catch (err) {
+      console.error("기록 날짜 조회 실패:", err);
+    }
+  };
 
-        res.data.forEach((item) => {
-          const key = `${dateKey}_${item.mkMealType}`;
+  const loadFavoriteMeals = async () => {
+    try {
+      const res = await axios.get(
+        `http://localhost:8080/api/favorite/meal?userNum=${userNum}`
+      );
 
-          if (!converted[key]) {
-            converted[key] = {
-              totalKcal: 0,
-              foods: [],
-              imageUrl: null,
-            };
-          }
+      console.log("즐겨찾기 식단 조회:", res.data);
 
-          converted[key].foods.push({
-            name: item.foName,
-            kcal: item.mdKcal,
-            portion: item.mdPortion,
-          });
+      const favoriteMap = {};
 
-          converted[key].totalKcal += item.mdKcal;
+      res.data.forEach((meal) => {
+        if (meal.mkNum) {
+          favoriteMap[meal.mkNum] = {
+            mfNum: meal.mfNum,
+            mkNum: meal.mkNum,
+          };
+        }
+      });
+
+      setFavoriteRecords(favoriteMap);
+    } catch (err) {
+      console.error("즐겨찾기 식단 조회 실패:", err);
+    }
+  };
+
+  const loadMealsByDate = async (targetDateKey) => {
+    try {
+      const res = await axios.get(
+        `http://localhost:8080/api/meal/today?userNum=${userNum}&date=${targetDateKey}`
+      );
+
+      console.log("식단 조회 성공:", res.data);
+
+      const converted = {};
+
+      res.data.forEach((item) => {
+        const key = `${targetDateKey}_${item.mkMealType}`;
+
+        if (!converted[key]) {
+          converted[key] = {
+            mkNum: item.mkNum,
+            mkMealType: item.mkMealType,
+            totalKcal: 0,
+            foods: [],
+            imageUrl: null,
+          };
+        }
+
+        converted[key].foods.push({
+          id: item.foNum,
+          foNum: item.foNum,
+          name: item.foName,
+          kcal: item.mdKcal,
+          portion: item.mdPortion,
+          count: item.mdPortion,
+          carbs: item.foCarbs || 0,
+          protein: item.foProtein || 0,
+          fat: item.foFat || 0,
+          image: item.foImage || null,
         });
 
-        setMealRecords(converted);
-      })
-      .catch((err) => {
-        console.error("오늘 식단 조회 실패:", err);
+        converted[key].totalKcal += item.mdKcal;
       });
-  }, [dateKey]);
 
-  const recordedDates = [
-    ...new Set(Object.keys(mealRecords).map((key) => key.split("_")[0])),
-  ];
+      setMealRecords(converted);
+    } catch (err) {
+      console.error("식단 조회 실패:", err);
+    }
+  };
+
+  useEffect(() => {
+    loadRecordedDates();
+    loadFavoriteMeals();
+  }, []);
+
+  useEffect(() => {
+    loadMealsByDate(dateKey);
+  }, [dateKey]);
 
   const dailyTotalKcal = Object.entries(mealRecords)
     .filter(([key]) => key.startsWith(dateKey))
@@ -123,11 +183,11 @@ const MealRecordDetail = () => {
 
   const handleSaveMeal = async (data) => {
     try {
-      const userNum = 1;
-
       const requestData = {
-        userNum: userNum,
+        userNum,
+        mkNum: mealData?.mkNum || null,
         mkMealType: data.mealType,
+
         foods: data.foods.map((food) => ({
           foNum: food.id,
           mdPortion: food.count,
@@ -137,16 +197,17 @@ const MealRecordDetail = () => {
 
       console.log("DB 저장 요청:", requestData);
 
-      await axios.post("http://localhost:8080/api/meal/record", requestData);
+      const res = await axios.post(
+        "http://localhost:8080/api/meal/record",
+        requestData
+      );
 
-      setMealRecords({
-        ...mealRecords,
-        [recordKey]: {
-          totalKcal: data.total.kcal,
-          foods: data.foods,
-          imageUrl: null,
-        },
-      });
+      console.log("식단 저장 응답:", res.data);
+
+      // 저장 직후 mkNum 문제 방지용:
+      // 응답 믿지 말고 DB에서 해당 날짜 식단 다시 조회
+      await loadMealsByDate(dateKey);
+      await loadRecordedDates();
 
       setIsRecordModalOpen(false);
       alert("식단 기록 저장 완료!");
@@ -154,14 +215,6 @@ const MealRecordDetail = () => {
       console.error("식단 저장 실패:", err);
       alert("식단 저장 실패!");
     }
-  };
-  
-
-  const toggleFavorite = () => {
-    setFavoriteRecords({
-      ...favoriteRecords,
-      [recordKey]: !isFavorite,
-    });
   };
 
   const getFoodSummary = () => {
@@ -175,6 +228,54 @@ const MealRecordDetail = () => {
     const extraCount = mealData.foods.length - 3;
 
     return extraCount > 0 ? `${names} 외 ${extraCount}개` : names;
+  };
+
+  const toggleFavorite = async () => {
+    if (!mealData?.mkNum) {
+      alert("저장된 식단만 즐겨찾기 가능해요!");
+      return;
+    }
+
+    try {
+      if (isFavorite) {
+        const mfNum = favoriteRecords[mealData.mkNum]?.mfNum;
+
+        if (!mfNum) {
+          alert("즐겨찾기 번호를 찾을 수 없어서 다시 조회할게요!");
+          await loadFavoriteMeals();
+          return;
+        }
+
+        await axios.delete(
+          `http://localhost:8080/api/favorite/meal?userNum=${userNum}&mfNum=${mfNum}`
+        );
+
+        setFavoriteRecords((prev) => {
+          const next = { ...prev };
+          delete next[mealData.mkNum];
+          return next;
+        });
+
+        alert("식단 즐겨찾기를 해제했어요!");
+        return;
+      }
+
+      const res = await axios.post("http://localhost:8080/api/favorite/meal", {
+        userNum,
+        mkNum: mealData.mkNum,
+        mfName: `${activeMeal} - ${getFoodSummary()}`,
+      });
+
+      console.log("식단 즐겨찾기 저장 응답:", res.data);
+
+      // 저장 후 mfNum까지 얻기 위해 다시 조회
+      await loadFavoriteMeals();
+
+      alert("식단 즐겨찾기에 저장했어요!");
+    } catch (err) {
+      console.error("식단 즐겨찾기 처리 실패:", err);
+      alert("즐겨찾기 처리 실패!");
+    }
   };
 
   return (
@@ -255,9 +356,9 @@ const MealRecordDetail = () => {
                   return (
                     <button
                       key={key}
-                      className={`calendar-day ${isSelected ? "selected" : ""} ${
-                        hasRecord ? "recorded" : ""
-                      }`}
+                      className={`calendar-day ${
+                        isSelected ? "selected" : ""
+                      } ${hasRecord ? "recorded" : ""}`}
                       onClick={() => {
                         setSelectedDate(date);
                         setIsCalendarOpen(false);
@@ -383,6 +484,7 @@ const MealRecordDetail = () => {
 
         {isRecordModalOpen && (
           <MealRecordModal
+            key={`${recordKey}-${isRecordModalOpen}`}
             mealType={activeMeal}
             selectedDate={formatDateText(selectedDate)}
             initialData={mealData}

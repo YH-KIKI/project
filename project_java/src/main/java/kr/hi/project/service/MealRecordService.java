@@ -74,43 +74,80 @@ public class MealRecordService {
             mdayNum = dayDTO.getMdayNum();
         }
 
-        // 4. meal_log 저장
-        MealLogDTO mealLog = new MealLogDTO();
-        mealLog.setUserNum(userNum);
-        mealLog.setMkMealType(request.getMkMealType());
-        mealLog.setMkImage(null);
-        mealLog.setMkUserMemo(null);
+	     // 4. 같은 날짜 + 같은 식사타입 기존 기록 전체 삭제 후 새로 저장
+	        int mkNum;
+	
+	        // 기존에 같은 날짜/식사타입으로 저장된 meal_log 번호들 찾기
+	        List<Integer> oldMkNums = mealRecordDao.findMealLogNumsForUpdate(
+	                userNum,
+	                request.getMkMealType(),
+	                mdayNum
+	        );
+	
+	        // 기존 기록이 있으면 detail 먼저 삭제 후 log 삭제
+	        if (oldMkNums != null && !oldMkNums.isEmpty()) {
+	            mealRecordDao.deleteMealDetailsByMkNums(oldMkNums);
+	            mealRecordDao.deleteMealLogsByMkNums(oldMkNums);
+	        }
+	
+	        // 새 meal_log 생성
+	        MealLogDTO mealLog = new MealLogDTO();
+	        mealLog.setUserNum(userNum);
+	        mealLog.setMkMealType(request.getMkMealType());
+	        mealLog.setMkImage(request.getMkImage());
+	        mealLog.setMkUserMemo(request.getMkUserMemo());
+	
+	        mealRecordDao.insertMealLog(mealLog);
+	
+	        mkNum = mealLog.getMkNum();
+	        request.setMkNum(mkNum);
 
-        mealRecordDao.insertMealLog(mealLog);
+     // 5. 음식 상세 저장
+        if (request.getFoods() != null && !request.getFoods().isEmpty()) {
 
-        int mkNum = mealLog.getMkNum();
+            // 새 방식: foods 배열 기반 저장
+            for (MealDetailDTO food : request.getFoods()) {
 
-        // 5. foodDetails 반복 저장
-        for (String foodName : request.getFoodDetails().keySet()) {
+                MealDetailDTO detail = new MealDetailDTO();
+                detail.setMkNum(mkNum);
+                detail.setFoNum(food.getFoNum());
+                detail.setMdayNum(mdayNum);
 
-            int portion = request.getFoodDetails().get(foodName);
+                detail.setMdPortion(food.getMdPortion());
+                detail.setMdKcal(food.getMdKcal());
 
-            FoodDTO food = mealRecordDao.findFoodByName(foodName);
-
-            if (food == null) {
-                throw new RuntimeException("존재하지 않는 음식입니다: " + foodName);
+                mealRecordDao.insertMealDetail(detail);
             }
 
-            int calculatedKcal = Math.round(
-                    food.getFoKcal() * portion / food.getFoBaseGram()
-            );
+        } else if (request.getFoodDetails() != null && !request.getFoodDetails().isEmpty()) {
 
-            MealDetailDTO detail = new MealDetailDTO();
-            detail.setMkNum(mkNum);
-            detail.setFoNum(food.getFoNum());
+            // 기존 방식: 음식명 Map 기반 저장
+            for (String foodName : request.getFoodDetails().keySet()) {
 
-            // 이게 빠져서 터진 거!
-            detail.setMdayNum(mdayNum);
+                int portion = request.getFoodDetails().get(foodName);
 
-            detail.setMdPortion(portion);
-            detail.setMdKcal(calculatedKcal);
+                FoodDTO food = mealRecordDao.findFoodByName(foodName);
 
-            mealRecordDao.insertMealDetail(detail);
+                if (food == null) {
+                    throw new RuntimeException("존재하지 않는 음식입니다: " + foodName);
+                }
+
+                int calculatedKcal = Math.round(
+                        food.getFoKcal() * portion / food.getFoBaseGram()
+                );
+
+                MealDetailDTO detail = new MealDetailDTO();
+                detail.setMkNum(mkNum);
+                detail.setFoNum(food.getFoNum());
+                detail.setMdayNum(mdayNum);
+                detail.setMdPortion(portion);
+                detail.setMdKcal(calculatedKcal);
+
+                mealRecordDao.insertMealDetail(detail);
+            }
+
+        } else {
+            throw new RuntimeException("저장할 음식 정보가 없습니다.");
         }
 
         // 6. 하루 총 칼로리 업데이트
@@ -120,6 +157,11 @@ public class MealRecordService {
     public List<MealDetailDTO> getTodayMealRecord(int userNum, String date) {
         return mealRecordDao.getTodayMealRecord(userNum, date);
     }
+
+    // 날짜 불러오기
+	public List<String> getRecordedDates(int userNum) {
+		 return mealRecordDao.findRecordedDates(userNum);
+	}
     
     
 }
