@@ -1,5 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
 import Sidebar from '../Main/Sidebar';
 import '../Main/MainLayout.css';
 
@@ -8,8 +9,10 @@ const TargetGoals = () => {
   const [userGoal, setUserGoal] = useState({ userDailyKcal: 0, userDailyCarbs: 0, userDailyProtein: 0, userDailyFat: 0 });
   const [loading, setLoading] = useState(true);
 
-  // 🌟 [핵심] 애니메이션을 위한 별도의 퍼센트 상태
+  //애니메이션을 위한 별도의 퍼센트 상태
   const [aniPercent, setAniPercent] = useState({ kcal: 0, carbs: 0, protein: 0, fat: 0 });
+  const hasAlerted = useRef(false);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchData = async () => {
@@ -27,11 +30,21 @@ const TargetGoals = () => {
           })
         ]);
 
+        const goals = goalRes.data;
+        if (!goals || goals.userDailyKcal === 0 || !goals.userDailyKcal) {
+          if (!hasAlerted.current) {
+            alert("개인정보에 키, 몸무게, 목표 몸무게, 나이, 활동량을 입력해야 목표치를 보여줄 수 있어요! 정보 입력 페이지로 이동합니다. 🏃‍♂️");
+            hasAlerted.current = true;
+            navigate('/information');
+          }
+          return;
+        }
+
         setTodayTotal(nutritionRes.data);
         setUserGoal(goalRes.data);
         setLoading(false);
 
-        // 🌟 [핵심] 데이터를 다 받은 후, 0.1초 뒤에 바가 차오르도록 설정
+        //데이터를 다 받은 후, 0.1초 뒤에 바가 차오르도록 설정
         setTimeout(() => {
           setAniPercent({
             kcal: getCalc(nutritionRes.data.totalKcal, goalRes.data.userDailyKcal),
@@ -47,7 +60,7 @@ const TargetGoals = () => {
       }
     };
     fetchData();
-  }, []);
+  }, [navigate]);
 
   // 퍼센트 계산용 헬퍼 함수
   const getCalc = (cur, goal) => {
@@ -55,7 +68,7 @@ const TargetGoals = () => {
     return Math.min(Math.round((cur / goal) * 100), 100);
   };
 
-  // 🌟 [핵심] 목표 초과 시 색상을 결정하는 함수
+  //목표 초과 시 색상을 결정하는 함수
   const getSafeColor = (cur, goal, baseColor) => {
     return cur > goal ? '#ff5252' : baseColor; // 초과하면 빨간색, 아니면 기본색
   };
