@@ -1,4 +1,4 @@
-/* 전체 컨테이너: 이중 여백 제거, 투명 배경, 양옆 24px 들여쓰기 */
+/* 전체 컨테이너 */
 .analysis-container {
   padding: 0 24px;
   box-sizing: border-box;
@@ -8,7 +8,7 @@
   font-family: 'Pretendard', sans-serif; 
 }
 
-/* 상단 헤더: 제목과 날짜 */
+/* 상단 헤더: 제목과 달력 */
 .analysis-header {
   display: flex;
   justify-content: space-between;
@@ -23,16 +23,73 @@
   color: #333333;
 }
 
-.date-badge {
+/* 🌟 날짜 선택기(Datepicker) 스타일 */
+.date-picker-wrapper {
+  position: relative;
+}
+
+.date-badge-input {
   background-color: #F3E5DF;
   padding: 6px 14px;
   border-radius: 20px;
   font-size: 14px;
   font-weight: 600;
   color: #6B5B54;
+  border: none;
+  outline: none;
+  text-align: center;
+  cursor: pointer;
+  width: 130px; 
+  font-family: inherit; 
+  transition: background-color 0.2s;
 }
 
-/* 메인 카드 영역 (냠냠 감성 테마 적용) */
+.date-badge-input:hover {
+  background-color: #e8d5cc; 
+}
+
+/* react-datepicker 기본 달력 팝업 스타일 수정 */
+.react-datepicker {
+  border-color: #FFEDEA !important;
+  border-radius: 12px !important;
+  font-family: 'Pretendard', sans-serif !important;
+  box-shadow: 0 4px 12px rgba(255, 182, 163, 0.3) !important;
+}
+
+.react-datepicker__header {
+  background-color: #FFFAF9 !important;
+  border-bottom-color: #FFEDEA !important;
+  border-top-left-radius: 12px !important;
+  border-top-right-radius: 12px !important;
+}
+
+.react-datepicker__current-month, 
+.react-datepicker-time__header, 
+.react-datepicker-year-header {
+  color: #4A3B32 !important;
+}
+
+.react-datepicker__day--selected, 
+.react-datepicker__day--keyboard-selected {
+  background-color: #FF7B89 !important;
+  color: white !important;
+  border-radius: 50% !important; 
+}
+
+/* 🌟 식단이 기록된 날짜(Highlight) 커스텀 스타일 🌟 */
+.react-datepicker__day--highlighted-custom {
+  background-color: #FFEDEA !important; 
+  color: #FF7B89 !important;            
+  font-weight: 800 !important;          
+  border-radius: 50% !important;        
+}
+
+.react-datepicker__day--selected.react-datepicker__day--highlighted-custom {
+  background-color: #FF7B89 !important;
+  color: white !important;
+}
+
+/* 메인 카드 영역 */
 .analysis-card {
   background-color: #FFFAF9; 
   border: 2px solid #FFEDEA; 
@@ -43,7 +100,74 @@
   box-sizing: border-box; 
   display: flex;
   flex-direction: column;
-  gap: 30px; 
+  gap: 20px; 
+  height: fit-content; 
+  justify-content: flex-start !important; 
+}
+
+/* 로딩 & 에러 메시지 */
+.analysis-card.loading, .analysis-card.error {
+  justify-content: center;
+  align-items: center;
+  height: 300px;
+  text-align: center;
+  color: #8C7B74;
+  font-weight: 500;
+}
+
+/* 🌟 빈 화면(Empty State) 스타일 🌟 */
+.analysis-card.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 60px 20px;
+  gap: 15px;
+}
+
+.empty-character {
+  font-size: 60px;
+  margin-bottom: 10px;
+  animation: bounce 2s infinite ease-in-out;
+}
+
+.empty-state h3 {
+  margin: 0;
+  font-size: 20px;
+  color: #4A3B32;
+  font-weight: 800;
+}
+
+.empty-state p {
+  margin: 0;
+  font-size: 15px;
+  color: #8C7B74;
+  line-height: 1.6;
+}
+
+.go-record-btn {
+  margin-top: 20px;
+  background-color: #FF7B89;
+  color: white;
+  border: none;
+  border-radius: 20px;
+  padding: 14px 28px;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 6px 16px rgba(255, 123, 137, 0.3);
+  transition: transform 0.2s, background-color 0.2s;
+}
+
+.go-record-btn:hover {
+  background-color: #FF6675;
+  transform: translateY(-3px);
+}
+
+@keyframes bounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
 }
 
 /* 1. 칼로리 요약 구역 */
@@ -72,9 +196,9 @@
   font-weight: 500;
 }
 
-/* 2. AI 등급 평가 구역 (둥근 박스) */
+/* 2. AI 등급 평가 구역 */
 .grade-section {
-  background-color: #FFFFFF; /* 카드 배경과 살짝 구분되게 흰색 유지 */
+  background-color: #FFFFFF; 
   border: 1px solid #FFEDEA;
   border-radius: 20px;
   padding: 20px 25px;
@@ -112,20 +236,27 @@
 .macro-section {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 15px; 
+  margin-bottom: auto; 
+  width: 100%;
 }
-.macro-item {
+
+.ai-macro-item {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 8px; 
+  width: 100%;
 }
+
 .macro-label {
   display: flex;
   justify-content: space-between;
-  font-size: 15px;
+  width: 100%; 
+  font-size: 14px; 
   font-weight: 600;
   color: #5C4D45;
 }
+
 .progress-bar {
   width: 100%;
   height: 12px;
