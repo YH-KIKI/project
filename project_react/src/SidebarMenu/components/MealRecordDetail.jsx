@@ -37,6 +37,7 @@ const MealRecordDetail = () => {
 
   const [mealRecords, setMealRecords] = useState({});
   const [recordedDates, setRecordedDates] = useState([]);
+  const [aiFeedback, setAiFeedback] = useState("");
 
   const meals = ["아침", "점심", "저녁"];
 
@@ -163,6 +164,12 @@ const MealRecordDetail = () => {
     loadMealsByDate(dateKey);
   }, [dateKey]);
 
+  useEffect(() => {
+    if (mealData) {
+      loadAiFeedback(mealData);
+    }
+  }, [mealData]);
+
   const dailyTotalKcal = Object.entries(mealRecords)
     .filter(([key]) => key.startsWith(dateKey))
     .reduce((sum, [, record]) => sum + record.totalKcal, 0);
@@ -286,6 +293,51 @@ const MealRecordDetail = () => {
       alert("즐겨찾기 처리 실패!");
     }
   };
+
+  const loadAiFeedback = async (mealData) => {
+  if (!mealData?.foods?.length) return;
+
+  try {
+    const totalCarbs = mealData.foods.reduce(
+      (sum, food) => sum + (food.carbs || 0) * (food.count || 1),
+      0
+    );
+
+    const totalProtein = mealData.foods.reduce(
+      (sum, food) => sum + (food.protein || 0) * (food.count || 1),
+      0
+    );
+
+    const totalFat = mealData.foods.reduce(
+      (sum, food) => sum + (food.fat || 0) * (food.count || 1),
+      0
+    );
+
+    const totalSodium = mealData.foods.reduce(
+      (sum, food) => sum + (food.sodium || 0) * (food.count || 1),
+      0
+    );
+
+    const res = await axios.post(
+      "http://localhost:8000/api/v1/ai/meal-feedback",
+      {
+        mealType: activeMeal,
+        kcal: mealData.totalKcal,
+        carbs: totalCarbs,
+        protein: totalProtein,
+        fat: totalFat,
+        sodium: totalSodium,
+      }
+    );
+
+    console.log("AI 피드백:", res.data);
+
+    setAiFeedback(res.data.feedback);
+
+  } catch (err) {
+    console.error("AI 피드백 실패:", err);
+  }
+};
 
   return (
     <div className="meal-analysis-card">
@@ -477,8 +529,7 @@ const MealRecordDetail = () => {
             <div className="ai-comment-box">
               <div className="ai-icon">🤖</div>
               <p>
-                단백질 섭취가 충분해요! 섬유질이 조금 부족하니 채소나 과일을
-                추가해보는 건 어떨까요?
+                {aiFeedback || "AI가 식단을 분석하고 있어요 🤖"}
               </p>
             </div>
 
