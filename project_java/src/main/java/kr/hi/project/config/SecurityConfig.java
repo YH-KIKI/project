@@ -32,14 +32,14 @@ public class SecurityConfig {
                 .requestMatchers("/", 
                         		 "/favicon.ico",
                 				 "/uploads/**", 
-                                 "/images/**",  // 🌟 [추가] 캐릭터 이미지 등 정적 리소스 접근 허용
+                                 "/images/**",  // [추가/재근] 캐릭터 이미지 등 정적 리소스 접근 허용
                                  "/error",    
                                  "/api/signup", 
                                  "/api/login", 
                                  "/api/user/info",
                                  "/api/information_updata",
                                  "/api/information_select",
-                                 "/api/v1/diet/**",  
+                                 "/api/v1/diet/**",  // [추가/재근] AI식단추천
                                  "/api/record",
                                  "/api/community/**", // 추가했음(박하)
                                  "/api/comments/**", // [박하/추가] 댓글 API 허용 추가
@@ -47,8 +47,9 @@ public class SecurityConfig {
                                  "/api/meal/**",
                                  "/api/food/**", //[연희/추가] food 테이블 불러오는 API
                                  "/api/character/**" ,
-                                 "/api/v1/bodycheck/**",
-                                 "/api/v1/user/verify-password"
+                                 "/api/v1/bodycheck/**", // [추가/재근] 눈바디
+                                 "/api/v1/user/verify-password" // [추가/재근] 눈바디 비밀번호
+                                 "/api/favorite/**" //[연희/추가] 즐찾들
                                  ).permitAll() 
                 .anyRequest().authenticated() 
             );

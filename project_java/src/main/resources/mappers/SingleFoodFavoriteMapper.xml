@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="kr.hi.project.dao.SingleFoodFavoriteDao">
+
+    <select id="getSingleFoodFavorites"
+            resultType="kr.hi.project.dto.SingleFoodFavoriteDTO">
+
+        SELECT
+            sf.sf_num AS sfNum,
+            sf.sf_portion AS sfPortion,
+            sf.fo_num AS foNum,
+            sf.user_num AS userNum,
+
+            f.fo_name AS foName,
+            f.fo_base_gram AS foBaseGram,
+            f.fo_kcal AS foKcal,
+            f.fo_carbs AS foCarbs,
+            f.fo_protein AS foProtein,
+            f.fo_fat AS foFat,
+            f.fo_natrium AS foNatrium,
+            f.fo_type AS foType
+            <!-- f.fo_image AS foImage -->
+
+        FROM singlefood_favorites sf
+        JOIN food f
+            ON sf.fo_num = f.fo_num
+
+        WHERE sf.user_num = #{userNum}
+
+        ORDER BY sf.sf_num DESC
+
+    </select>
+
+    <select id="existsSingleFoodFavorite"
+            resultType="int">
+        SELECT COUNT(*)
+        FROM singlefood_favorites
+        WHERE user_num = #{userNum}
+          AND fo_num = #{foNum}
+    </select>
+
+    <insert id="insertSingleFoodFavorite"
+            parameterType="kr.hi.project.dto.SingleFoodFavoriteDTO">
+
+        INSERT INTO singlefood_favorites (
+            sf_portion,
+            fo_num,
+            user_num
+        )
+        VALUES (
+            #{sfPortion},
+            #{foNum},
+            #{userNum}
+        )
+
+    </insert>
+
+    <delete id="deleteSingleFoodFavorite">
+        DELETE FROM singlefood_favorites
+        WHERE user_num = #{userNum}
+          AND sf_num = #{sfNum}
+    </delete>
+
+</mapper>
