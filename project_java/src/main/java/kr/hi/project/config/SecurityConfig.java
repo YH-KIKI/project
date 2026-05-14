@@ -29,7 +29,9 @@ public class SecurityConfig {
             .cors(cors -> cors.configurationSource(corsConfigurationSource())) 
             .csrf(csrf -> csrf.disable()) 
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/uploads/**", 
+                .requestMatchers("/", 
+                        		 "/favicon.ico",
+                				 "/uploads/**", 
                                  "/images/**",  // 🌟 [추가] 캐릭터 이미지 등 정적 리소스 접근 허용
                                  "/error",    
                                  "/api/signup", 
@@ -45,9 +47,9 @@ public class SecurityConfig {
                                  "/api/meal/**",
                                  "/api/food/**", //[연희/추가] food 테이블 불러오는 API
                                  "/api/character/**" ,
-                                 "/api/v1/bodycheck/**"
+                                 "/api/v1/bodycheck/**",
+                                 "/api/v1/user/verify-password"
                                  ).permitAll() 
-                .requestMatchers("/api/v1/user/verify-password").permitAll()
                 .anyRequest().authenticated() 
             );
         
