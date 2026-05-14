@@ -522,6 +522,173 @@
   cursor: pointer;
 }
 
+/* =========================
+   재료 입력 개선 버전
+========================= */
+
+.input-step-row {
+  align-items: start;
+}
+
+.ingredient-input-area {
+  display: grid;
+  grid-template-columns: 1fr 76px;
+  gap: 10px;
+  width: 100%;
+}
+
+.input-wrap {
+  position: relative;
+  width: 100%;
+}
+
+.input-wrap input {
+  width: 100%;
+}
+
+.add-btn {
+  width: 76px;
+  height: 42px;
+  border: none;
+  border-radius: 12px;
+  background: #ff7d97;
+  color: white;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.suggestion-box {
+  position: absolute;
+  top: 48px;
+  left: 0;
+  right: 0;
+  z-index: 20;
+  background: #fff;
+  border: 1px solid #f0dede;
+  border-radius: 14px;
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.09);
+  padding: 8px;
+}
+
+.suggestion-box button {
+  width: 100%;
+  border: none;
+  background: transparent;
+  padding: 10px 12px;
+  text-align: left;
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #3f3434;
+  cursor: pointer;
+}
+
+.suggestion-box button:hover {
+  background: #fff2f4;
+}
+
+.quick-add-box {
+  grid-column: 2 / 4;
+  margin-top: 10px;
+}
+
+.quick-add-box p {
+  margin: 0 0 8px;
+  font-size: 12px;
+  font-weight: 700;
+  color: #6d5c5c;
+}
+
+.quick-add-box div {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.quick-add-box button {
+  border: 1px solid #f0dede;
+  background: #fff;
+  color: #4a3b3b;
+  padding: 8px 13px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.quick-add-box button:hover {
+  background: #fff2f4;
+  border-color: #ffb9c7;
+}
+
+.success-msg {
+  grid-column: 2 / 4;
+  margin-top: 10px;
+  padding: 10px 14px;
+  border-radius: 12px;
+  background: #f0fff4;
+  color: #2f8f46;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.ingredient-list-row {
+  align-items: start;
+}
+
+.ingredient-list-header {
+  grid-column: 2 / 4;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.ingredient-list-header span {
+  font-size: 13px;
+  font-weight: 700;
+  color: #8a7474;
+}
+
+.ingredient-list-header button {
+  border: none;
+  background: transparent;
+  color: #ff5d84;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.empty-ingredient-text {
+  margin: 0;
+  font-size: 13px;
+  color: #9a8787;
+  font-weight: 500;
+}
+
+/* 기존 .step-row > button 스타일이 add-btn에 간섭할 경우 방어 */
+.step-row > .ingredient-input-area button {
+  width: auto;
+}
+
+/* 630px 화면 대응 */
+@media (max-width: 700px) {
+  .ingredient-input-area {
+    grid-template-columns: 1fr;
+  }
+
+  .add-btn {
+    width: 100%;
+  }
+
+  .quick-add-box,
+  .success-msg,
+  .ingredient-list-header {
+    grid-column: auto;
+  }
+}
+
 /* 반응형 */
 @media (max-width: 1200px) {
   .goal-layout {

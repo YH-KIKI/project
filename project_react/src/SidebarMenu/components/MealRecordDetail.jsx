@@ -127,15 +127,24 @@ const MealRecordDetail = () => {
           id: item.foNum,
           foNum: item.foNum,
           name: item.foName,
-          kcal: item.mdKcal,
-          portion: item.mdPortion,
-          count: item.mdPortion,
-          carbs: item.foCarbs || 0,
-          protein: item.foProtein || 0,
-          fat: item.foFat || 0,
+
+          // 기준 칼로리
+          kcal: Number(item.foKcal || 0),
+
+          // 수량
+          portion: Number(item.mdPortion || 1),
+          count: Number(item.mdPortion || 1),
+
+          carbs: Number(item.foCarbs || 0),
+          protein: Number(item.foProtein || 0),
+          fat: Number(item.foFat || 0),
+          sodium: Number(item.foNatrium || 0),
+
+          // 저장된 총칼로리는 따로 보관
+          mdKcal: Number(item.mdKcal || 0),
+
           image: item.foImage || null,
         });
-
         converted[key].totalKcal += item.mdKcal;
       });
 
