@@ -13,8 +13,36 @@ const Analyze = () => {
   const [showModal, setShowModal] = useState(false); // 입력 팝업 노출 여부
   const [mealType, setMealType] = useState('아침');   // 아침, 점심, 저녁
   const [foodDetails, setFoodDetails] = useState({}); // { '제육볶음': 200, '냉면': 450 } 형식
+  const [customFoodName, setCustomFoodName] = useState("");//입력한 인증실패음식이름
 
   const navigate = useNavigate(); //이동 함수 생성
+
+  const handleReportFail = async () => {
+    if (!customFoodName) {
+        alert("음식 이름을 입력해주세요!");
+        return;
+    }
+
+    const formData = new FormData();
+    formData.append('file', selectedFile);
+    
+    const user = JSON.parse(localStorage.getItem('user') || '{}');
+    const data = {
+        userNum: user.user_num,
+        userInputName: customFoodName
+    };
+    formData.append('data', JSON.stringify(data));
+
+    try {
+        await axios.post('http://localhost:8080/api/report-fail', formData, {
+            headers: { 'Content-Type': 'multipart/form-data' }
+        });
+        alert("감사합니다! 입력하신 '" + customFoodName + "' 데이터가 수집되었습니다.");
+        setCustomFoodName(""); // 입력창 초기화
+    } catch (error) {
+        alert("제보 전송 중 오류가 발생했습니다.");
+    }
+};
 
   //사진 선택 시 처리
   const handleFileChange = (e) => {
@@ -188,7 +216,6 @@ const Analyze = () => {
 
           {/* 하단: 결과 리스트 */}
           <div style={{ textAlign: 'center' }}>
-            <h3 style={{ color: '#5d4037' }}>찾으시는 게 없나요?</h3>
             <p style={{ fontSize: '13px', color: '#888', marginBottom: '30px' }}>
               AI가 사진에서 분석한 결과입니다. 먹은 음식을 **모두** 클릭해주세요!
             </p>
@@ -223,6 +250,25 @@ const Analyze = () => {
               })}
             </div>
 
+            <div style={{ marginTop: '30px', padding: '20px', backgroundColor: '#fff3e0', borderRadius: '15px' }}>
+              <p style={{ fontWeight: 'bold' }}>🧐 찾는 음식이 결과에 없나요?</p>
+              <input 
+                type="text" 
+                placeholder="음식 이름을 직접 입력해주세요"
+                value={customFoodName}
+                onChange={(e) => setCustomFoodName(e.target.value)}
+                style={{ padding: '10px', borderRadius: '10px', border: '1px solid #ddd', marginRight: '10px' }}
+              />
+              <button 
+                onClick={handleReportFail}
+                style={{ 
+                padding: '10px 20px', backgroundColor: '#ff9800', color: 'white', 
+                border: 'none', borderRadius: '10px', cursor: 'pointer', fontWeight: 'bold' 
+            }}>
+                정답 제보하기
+              </button>
+            </div>
+
             {selectedFoods.length > 0 && (
               <button 
                 onClick={handleRecommend}
@@ -235,6 +281,7 @@ const Analyze = () => {
               >
                 {selectedFoods.length}개 선택됨 - 기록하기
               </button>
+              
             )}
             {/* --- 중량 및 식사 종류 입력 모달 --- */}
             {showModal && (
