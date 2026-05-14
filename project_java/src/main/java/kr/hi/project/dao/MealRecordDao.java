@@ -48,4 +48,16 @@ public interface MealRecordDao {
     int updateDailyKcal(@Param("mdayNum") Integer mdayNum);
 
 	List<MealDetailDTO> getTodayMealRecord(@Param("userNum") int userNum, @Param("date") String date);
+	
+	List<String> findRecordedDates(@Param("userNum") int userNum);
+	
+	void deleteMealDetails(@Param("mkNum") int mkNum);
+
+	void deleteMealLog(@Param("mkNum") int mkNum);
+	
+	List<Integer> findMealLogNumsForUpdate(@Param("userNum") int userNum, @Param("mkMealType") String mkMealType, @Param("mdayNum") int mdayNum);
+
+	void deleteMealDetailsByMkNums(List<Integer> mkNums);
+
+	void deleteMealLogsByMkNums(List<Integer> mkNums);
 }

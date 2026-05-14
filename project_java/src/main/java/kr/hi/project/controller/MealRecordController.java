@@ -22,13 +22,14 @@ public class MealRecordController {
     
     private final MealRecordService mealRecordService;
     
+
     @PostMapping("/record")
     public ResponseEntity<?> saveMealRecord(
             @RequestBody MealRecordRequestDTO request) {
 
         mealRecordService.saveMealRecord(request);
 
-        return ResponseEntity.ok("식단 기록 저장 완료");
+        return ResponseEntity.ok(request);
     }
 
     @GetMapping("/today")
@@ -40,4 +41,12 @@ public class MealRecordController {
 
         return ResponseEntity.ok(result);
     }
+    
+    
+    // 날짜 불러오기
+    @GetMapping("/recorded-dates")
+    public List<String> getRecordedDates(@RequestParam("userNum") int userNum) {
+        return mealRecordService.getRecordedDates(userNum);
+    }
+    
 }

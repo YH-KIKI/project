@@ -185,5 +185,47 @@
 	      AND DATE(ml.mk_created_at) = #{date}
 	    ORDER BY ml.mk_created_at DESC, md.md_num DESC
 	</select>
+	
+	<select id="findRecordedDates" resultType="string">
+	    SELECT DATE_FORMAT(mk_created_at, '%Y-%m-%d') AS recordedDate
+	    FROM meal_log
+	    WHERE user_num = #{userNum}
+	    GROUP BY DATE_FORMAT(mk_created_at, '%Y-%m-%d')
+	    ORDER BY recordedDate
+	</select>
+	
+	<delete id="deleteMealDetails">
+	    DELETE FROM meal_detail
+	    WHERE mk_num = #{mkNum}
+	</delete>
+	<delete id="deleteMealLog">
+	    DELETE FROM meal_log
+	    WHERE mk_num = #{mkNum}
+	</delete>
+	
+	<select id="findMealLogNumsForUpdate" resultType="int">
+	    SELECT DISTINCT ml.mk_num
+	    FROM meal_log ml
+	    JOIN meal_detail md ON ml.mk_num = md.mk_num
+	    WHERE ml.user_num = #{userNum}
+	      AND ml.mk_meal_type = #{mkMealType}
+	      AND md.mday_num = #{mdayNum}
+	</select>
+	
+	<delete id="deleteMealDetailsByMkNums">
+	    DELETE FROM meal_detail
+	    WHERE mk_num IN
+	    <foreach collection="list" item="mkNum" open="(" separator="," close=")">
+	        #{mkNum}
+	    </foreach>
+	</delete>
+	
+	<delete id="deleteMealLogsByMkNums">
+	    DELETE FROM meal_log
+	    WHERE mk_num IN
+	    <foreach collection="list" item="mkNum" open="(" separator="," close=")">
+	        #{mkNum}
+	    </foreach>
+	</delete>
 
 </mapper>

@@ -45,7 +45,8 @@ public class SecurityConfig {
                                  "/api/meal/**",
                                  "/api/food/**", //[연희/추가] food 테이블 불러오는 API
                                  "/api/character/**" ,
-                                 "/api/v1/bodycheck/**"
+                                 "/api/v1/bodycheck/**",
+                                 "/api/favorite/**" //[연희/추가] 즐찾들
                                  ).permitAll() 
                 .requestMatchers("/api/v1/user/verify-password").permitAll()
                 .anyRequest().authenticated() 
