@@ -23,7 +23,7 @@
 
     <insert id="insertMealDetail">
         INSERT INTO meal_detail (md_kcal, md_portion, mk_num, fo_num, mday_num)
-        VALUES (#{mdKcal}, #{mdPortion}, #{mkNum}, #{foNum}, #{mdNum})
+        VALUES (#{mdKcal}, #{mdPortion}, #{mkNum}, #{foNum}, #{mdayNum})
     </insert>
     
     <select id="findMdayNumByToday" resultType="Integer">

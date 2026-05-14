@@ -1,4 +1,3 @@
-# ai_service.py
 import pandas as pd
 from sklearn.neighbors import NearestNeighbors
 from sqlalchemy import create_engine
@@ -6,6 +5,17 @@ from sqlalchemy import create_engine
 import cv2
 import numpy as np
 import base64
+
+# ==========================================
+# 🌟 [새로 추가됨] KoBART AI 피드백 생성용 라이브러리
+# ==========================================
+try:
+    from transformers import PreTrainedTokenizerFast, BartForConditionalGeneration
+    import torch
+    TRANSFORMERS_AVAILABLE = True
+except ImportError:
+    TRANSFORMERS_AVAILABLE = False
+    print("⚠️ [AI] transformers 라이브러리가 없습니다. 'pip install transformers torch'를 실행해주세요.")
 
 # ==========================================
 # 🌟 [긴급 처방] Mediapipe 안전 모드 (Try-Except)
@@ -20,6 +30,21 @@ try:
 except Exception as e:
     print(f"⚠️ [AI] Mediapipe 로드 실패 (자세 분석은 임시 비활성화됩니다): {e}")
     USE_MEDIAPIPE = False
+
+# ==========================================
+# 🌟 [새로 추가됨] KoBART 모델 전역 로드 (서버 켜질 때 1번만)
+# ==========================================
+model = None
+tokenizer = None
+if TRANSFORMERS_AVAILABLE:
+    print("⏳ [Python] KoBART 요약 모델 로딩 중... (최초 1회 다운로드)")
+    try:
+        model_name = "digit82/kobart-summarization"
+        tokenizer = PreTrainedTokenizerFast.from_pretrained(model_name)
+        model = BartForConditionalGeneration.from_pretrained(model_name)
+        print("✅ [Python] KoBART 모델 로딩 완료!")
+    except Exception as e:
+        print(f"❌ [Python] 모델 로딩 실패: {e}")
 
 # ==========================================
 # 1. MySQL 데이터베이스 연결 설정
@@ -38,7 +63,7 @@ try:
     else:
         print(f"✅ MySQL에서 음식 데이터 {len(df_food)}개 불러옴!")
         features = df_food[['fo_kcal', 'fo_carbs', 'fo_protein', 'fo_fat']]
-        model = NearestNeighbors(n_neighbors=1, algorithm='auto').fit(features)
+        knn_model = NearestNeighbors(n_neighbors=1, algorithm='auto').fit(features)
         print("✅ 식단 AI 모델 실전 데이터 학습 완료!")
 except Exception as e:
     print(f"🚨 DB 연결 실패: {e}")
@@ -76,7 +101,6 @@ def get_best_diet(target_kcal, target_carbs, target_protein, target_fat, diet_ty
 # 4. 눈바디 AI 함수 (뼈대 그리기 / 실루엣 따기)
 # ==========================================
 def analyze_pose(image_bytes):
-    # 🌟 안전 모드: Mediapipe가 고장 났다면 일단 원본을 돌려보내서 에러를 막습니다!
     if not USE_MEDIAPIPE:
         print("⚠️ 자세 분석 기능을 건너뛰고 원본 이미지를 반환합니다.")
         nparr = np.frombuffer(image_bytes, np.uint8)
@@ -102,8 +126,6 @@ def analyze_pose(image_bytes):
     _, buffer = cv2.imencode('.jpg', img)
     return base64.b64encode(buffer).decode('utf-8')
 
-
-# 🌟 실루엣 기능은 OpenCV만 사용하므로 무조건 정상 작동합니다!
 def extract_outline(image_bytes):
     nparr = np.frombuffer(image_bytes, np.uint8)
     img = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
@@ -117,3 +139,39 @@ def extract_outline(image_bytes):
     
     _, buffer = cv2.imencode('.jpg', img_bgr)
     return base64.b64encode(buffer).decode('utf-8')
+
+# ==========================================
+# 🌟 5. [새로 추가됨] 3줄 요약 코칭 피드백 생성 함수
+# ==========================================
+def generate_daily_feedback(grade, current_kcal, target_kcal, carbs, protein, fat, sodium):
+    
+    # 1. 1줄차: 칼로리 분석 및 공감
+    kcal_diff = target_kcal - current_kcal
+    if kcal_diff > 300:
+        line1 = f"목표보다 {kcal_diff}kcal 덜 드셨네요! 오늘은 속이 조금 가벼운 하루였겠어요. 😊"
+    elif kcal_diff < -300:
+        line1 = f"목표보다 {abs(kcal_diff)}kcal 더 드셨네요! 에너지가 넘치는 하루였군요. 💪"
+    else:
+        line1 = "목표 칼로리에 아주 근접하게 드셨어요! 양 조절을 정말 기가 막히게 하셨네요. 👏"
+
+    # 2. 2줄차: 영양소 기반 액션 플랜 (전문가 조언)
+    # 기획에 맞게 기준 수치는 자유롭게 변경하세요!
+    if protein < 50:
+        line2 = "단백질 섭취가 조금 부족해요. 다음 끼니엔 두부, 계란, 닭가슴살을 곁들여 근육을 지켜볼까요? 🥚"
+    elif carbs < 100:
+        line2 = "탄수화물이 부족하면 뇌가 금방 지칠 수 있어요. 통밀빵이나 현미밥으로 건강한 에너지를 채워주세요! 🍞"
+    elif fat > 60:
+        line2 = "지방 섭취가 꽤 높은 편이에요! 내일은 튀긴 음식보다는 찌거나 굽는 조리법을 선택해 보는 건 어떨까요? 🥗"
+    elif sodium > 2000:
+        line2 = "나트륨 섭취량이 높아요! 몸이 붓지 않도록 오늘은 물을 한 잔 더 마시고 주무시는 걸 추천해요. 💧"
+    else:
+        line2 = "탄단지 균형이 꽤 훌륭해요! 지금처럼만 골고루 챙겨 드시면 완벽한 건강 식단입니다. ✨"
+
+    # 3. 3줄차: 등급 기반 다정한 동기부여
+    if grade in ['A', 'B']:
+        line3 = f"{grade}등급 달성을 축하해요! 냠냠플래닛 코치가 항상 응원할게요. 💖"
+    else:
+        line3 = "조금만 더 신경 쓰면 훨씬 좋아질 거예요. 내일은 더 건강하게 챙겨 먹어봐요! 화이팅! 🌈"
+
+    # 3줄을 합쳐서 반환
+    return f"{line1}\n{line2}\n{line3}"
