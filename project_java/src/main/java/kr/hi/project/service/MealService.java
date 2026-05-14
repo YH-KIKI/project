@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import kr.hi.project.dao.MealDao;
+import kr.hi.project.dto.FailedPredictDTO;
 import kr.hi.project.dto.FoodDTO;
 import kr.hi.project.dto.MealDayDTO;
 import kr.hi.project.dto.MealDetailDTO;
@@ -120,4 +121,10 @@ public class MealService {
         // 6. 하루 총 칼로리 업데이트
         mealDAO.updateDailyKcal(mdayNum);
     }
+
+	public void insertFailedRecord(FailedPredictDTO dto) {
+		mealDAO.insertFailedRecord(dto);
+		
+	}
+
 }

@@ -96,5 +96,17 @@
 	      AND mk_meal_type = #{mealType} 
 	      AND mk_diet_date = #{dietDate}
 	</select>
+	
+	<insert id="insertFailedRecord" parameterType="kr.hi.project.dto.FailedPredictDTO">
+        INSERT INTO failed_predict (
+            fp_image, 
+            user_input_name, 
+            user_num
+        ) VALUES (
+            #{fpImage}, 
+            #{userInputName}, 
+            #{userNum}
+        )
+    </insert>
 
 </mapper>
