@@ -41,6 +41,7 @@
 	        p.up_target_weight AS userTargetweight,
 	        p.up_age AS userAge,
 	        p.up_act AS userAct,
+	        p.up_model AS userModel,
 	        <!-- 목표가져오기 -->
 	        p.up_daily_kcal AS userDailyKcal,
 	        p.up_daily_carbs AS userDailyCarbs,
@@ -75,6 +76,7 @@
 	        p.up_target_weight = #{userTargetweight},
 	        p.up_age = #{userAge},
 	        p.up_act = #{userAct},
+	        p.up_model = #{userModel},
 	
 	        p.up_daily_kcal = #{userDailyKcal},
 	        p.up_daily_carbs = #{userDailyCarbs},

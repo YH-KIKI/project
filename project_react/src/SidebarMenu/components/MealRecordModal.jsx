@@ -1,7 +1,8 @@
 import axios from "axios";
 import React, { useMemo, useState } from "react";
-import "./MealRecordDetail.css";
 import { FiTrash2, FiHeart } from "react-icons/fi";
+import MealFavoriteDetailModal from "./MealFavoriteDetailModal";
+import "./MealRecordDetail.css";
 
 function MealRecordModal({
   mealType = "저녁",
@@ -18,23 +19,23 @@ function MealRecordModal({
   const [searchResults, setSearchResults] = useState([]);
   const [favoriteFoods, setFavoriteFoods] = useState([]);
   const [favoriteMeals, setFavoriteMeals] = useState([]);
+  const [selectedMeal, setSelectedMeal] = useState(null);
 
   const userNum = 1;
 
-  const foodImage = (image) =>
-    image || "https://via.placeholder.com/80x80.png?text=Food";
-
   const makeUid = () =>
     `${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
+
+  const foodImage = (image) => image || null;
 
   const makeFoodItem = (food) => ({
     uid: makeUid(),
     id: food.id || food.foNum,
     name: food.name || food.foName,
-    kcal: food.kcal || food.mdKcal || food.foKcal || 0,
-    carbs: food.carbs || food.foCarbs || 0,
-    protein: food.protein || food.foProtein || 0,
-    fat: food.fat || food.foFat || 0,
+    kcal: Number(food.kcal ?? food.foKcal ?? 0),
+    carbs: Number(food.carbs ?? food.foCarbs ?? 0),
+    protein: Number(food.protein ?? food.foProtein ?? 0),
+    fat: Number(food.fat ?? food.foFat ?? 0),
     image: foodImage(food.image || food.foImage),
     count: food.count || food.portion || food.mdPortion || food.mfPortion || 1,
   });
@@ -50,7 +51,6 @@ function MealRecordModal({
 
       if (exists) {
         exists.count += item.count;
-        exists.kcal += item.kcal;
       } else {
         merged.push(item);
       }
@@ -93,6 +93,39 @@ function MealRecordModal({
     };
   }, [foods]);
 
+  const getMealTotalKcal = (meal) => {
+    if (!meal) return 0;
+    if (meal.totalKcal) return meal.totalKcal;
+    if (meal.mfKcal) return meal.mfKcal;
+    return 0;
+  };
+
+  const formatCreatedAt = (meal) => {
+    const dateValue =
+      meal.mfCreatedAt ||
+      meal.mf_created_at ||
+      meal.createdAt ||
+      meal.mkCreatedAt ||
+      meal.mk_created_at;
+
+    return dateValue ? String(dateValue).split("T")[0] : "정보 없음";
+  };
+
+  const openMealFavoriteDetail = async (meal) => {
+    try {
+      const res = await axios.get(
+        `http://localhost:8080/api/favorite/meal/detail?userNum=${userNum}&mfNum=${meal.mfNum}`
+      );
+
+      console.log("즐겨찾기 상세:", res.data);
+
+      setSelectedMeal(res.data);
+    } catch (err) {
+      console.error("즐겨찾기 상세 조회 실패:", err);
+      alert("식단 상세 조회 실패!");
+    }
+  };
+
   const clearAllFoods = () => {
     setFoods([]);
   };
@@ -124,13 +157,14 @@ function MealRecordModal({
 
       if (exists) {
         return prev.map((item) =>
-          item.id === food.id
-            ? { ...item, count: item.count + 1 }
-            : item
+          item.id === food.id ? { ...item, count: item.count + 1 } : item
         );
       }
 
-      return [...prev, { ...food, uid: food.uid || makeUid(), count: food.count || 1 }];
+      return [
+        ...prev,
+        { ...food, uid: food.uid || makeUid(), count: food.count || 1 },
+      ];
     });
   };
 
@@ -189,8 +223,6 @@ function MealRecordModal({
 
       setFavoriteFoods((prev) => prev.filter((food) => food.sfNum !== sfNum));
       setFavorites((prev) => prev.filter((id) => id !== foNum));
-
-      alert("음식 즐겨찾기에서 삭제했어요!");
     } catch (err) {
       console.error("음식 즐겨찾기 삭제 실패:", err);
       alert("음식 즐겨찾기 삭제 실패!");
@@ -217,8 +249,6 @@ function MealRecordModal({
       );
 
       setFavoriteMeals((prev) => prev.filter((meal) => meal.mfNum !== mfNum));
-
-      alert("즐겨찾기 식단에서 삭제했어요!");
     } catch (err) {
       console.error("즐겨찾기 식단 삭제 실패:", err);
       alert("즐겨찾기 삭제 실패!");
@@ -276,6 +306,21 @@ function MealRecordModal({
 
     if (onSave) onSave(payload);
   };
+
+  const handleMealFavoriteUpdated = (updatedMeal) => {
+  setSelectedMeal(updatedMeal);
+
+  setFavoriteMeals((prev) =>
+    prev.map((meal) =>
+      meal.mfNum === updatedMeal.mfNum
+        ? {
+            ...meal,
+            ...updatedMeal,
+          }
+        : meal
+    )
+  );
+};
 
   return (
     <div className="modal-backdrop">
@@ -388,27 +433,30 @@ function MealRecordModal({
 
               {tab === "mealFav" &&
                 favoriteMeals.map((meal) => (
-                  <div className="mr-food-row mr-meal-row" key={meal.mfNum}>
-                    <div className="mr-meal-icon">🍱</div>
+                  <div
+                    className="mr-food-row mr-meal-row"
+                    key={meal.mfNum}
+                    onClick={() => openMealFavoriteDetail(meal)}
+                  >
+                    <MealThumb image={meal.mfImage || meal.image} />
 
                     <div className="mr-food-info">
                       <strong>{meal.mfName || "즐겨찾기 식단"}</strong>
 
-                      <span>
-                        {meal.foods && meal.foods.length > 0
-                          ? meal.foods.map((food) => food.foName).join(" · ")
-                          : "음식 정보 없음"}
-                      </span>
+                      <span>등록일 {formatCreatedAt(meal)}</span>
 
                       <b className="mr-meal-kcal">
-                        {meal.totalKcal || meal.mfKcal || 0} kcal
+                        {getMealTotalKcal(meal)} kcal
                       </b>
                     </div>
 
                     <button
                       type="button"
                       className="mr-heart-btn active"
-                      onClick={() => deleteMealFavorite(meal.mfNum)}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        deleteMealFavorite(meal.mfNum);
+                      }}
                     >
                       <FiHeart />
                     </button>
@@ -416,7 +464,10 @@ function MealRecordModal({
                     <button
                       type="button"
                       className="mr-add-btn"
-                      onClick={() => loadFavoriteMeal(meal)}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        loadFavoriteMeal(meal);
+                      }}
                     >
                       불러오기
                     </button>
@@ -462,7 +513,11 @@ function MealRecordModal({
             <div className="mr-added-list">
               {foods.map((food) => (
                 <div className="mr-added-item" key={food.uid}>
-                  <img src={food.image} alt={food.name} />
+                  {food.image ? (
+                    <img src={food.image} alt={food.name} />
+                  ) : (
+                    <div className="food-no-image">🍽️</div>
+                  )}
 
                   <div className="mr-added-info">
                     <strong>{food.name}</strong>
@@ -553,8 +608,31 @@ function MealRecordModal({
             AI 분석하고 저장하기 ✨
           </button>
         </div>
+        {selectedMeal && (
+          <MealFavoriteDetailModal
+            meal={selectedMeal}
+            onUpdated={handleMealFavoriteUpdated}
+            onClose={() => setSelectedMeal(null)}
+            onLoad={() => {
+              loadFavoriteMeal(selectedMeal);
+              setSelectedMeal(null);
+            }}
+            onDelete={() => {
+              deleteMealFavorite(selectedMeal.mfNum);
+              setSelectedMeal(null);
+            }}
+          />
+        )}
       </div>
     </div>
+  );
+}
+
+function MealThumb({ image }) {
+  return image ? (
+    <img src={image} alt="식단 이미지" />
+  ) : (
+    <div className="meal-default-thumb">🍽️</div>
   );
 }
 

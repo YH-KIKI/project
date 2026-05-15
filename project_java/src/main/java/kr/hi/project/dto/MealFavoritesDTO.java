@@ -1,5 +1,8 @@
 package kr.hi.project.dto;
 
+import java.time.LocalDateTime;
+import java.util.List;
+
 import lombok.Data;
 
 @Data
@@ -16,4 +19,8 @@ public class MealFavoritesDTO {
     private String mkImage;
     
     private String mkMealType; //식단 저장 타입
+    private LocalDateTime mfCreatedAt; // 식단 즐겨찾기 등록일
+    private String mfMemo; // 즐겨찾기 식단 메모
+    
+    private List<MealDetailDTO> foods;
 }

@@ -17,10 +17,10 @@ public class DietAnalysisController {
 
     private final DietAnalysisService dietAnalysisService;
 
-    /**
-     * 1. 특정 날짜의 식단 분석 데이터 반환 API
-     * 호출 예시: GET http://localhost:8080/api/v1/diet/analyze/daily?userNum=1&date=2026-05-13
-     */
+    
+     // 1. 특정 날짜의 식단 분석 데이터 반환 API
+     // 호출 예시: GET http://localhost:8080/api/v1/diet/analyze/daily?userNum=1&date=2026-05-13
+     
     @GetMapping("/analyze/daily")
     public ResponseEntity<DietAnalysisResponseDto> getDailyAnalysis(
             @RequestParam(name = "userNum") Long userNum, 
@@ -30,10 +30,10 @@ public class DietAnalysisController {
         return ResponseEntity.ok(response);
     }
 
-    /**
-     * 2. 달력 도장 찍기용 기록 날짜 목록 반환 API
-     * 호출 예시: GET http://localhost:8080/api/v1/diet/recorded-dates?userNum=1
-     */
+    
+     // 2. 달력 도장 찍기용 기록 날짜 목록 반환 API
+     // 호출 예시: GET http://localhost:8080/api/v1/diet/recorded-dates?userNum=1
+     
     @GetMapping("/recorded-dates")
     public ResponseEntity<List<String>> getRecordedDates(
             @RequestParam(name = "userNum") Long userNum) {

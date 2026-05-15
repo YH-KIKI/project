@@ -22,4 +22,5 @@ public class UserPrivacyDTO {
     private float userDailyFat;
     private float userDailyNatrium;
     private List<String> userAllergies;
+    private String userModel;
 }

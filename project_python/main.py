@@ -1,12 +1,25 @@
 # main.py
 from fastapi import FastAPI, UploadFile, File, Form
 from pydantic import BaseModel # 🌟 새로 추가됨: 데이터 모델링용
+from fastapi.middleware.cors import CORSMiddleware # 식단 피드백용
 
 # 🌟 눈바디 분석 함수(analyze_pose, extract_outline) 및 피드백 함수(generate_daily_feedback) 불러오기
 from schemas import UserInfo
 from ai_service import get_best_diet, analyze_pose, extract_outline, generate_daily_feedback
 
+# 대빵 - 식단 피드백 함수 
+from meal_feedback import generate_meal_feedback
+
 app = FastAPI()
+
+# 대빵 - 식단 피드백용 
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:3000"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 # ==========================================
 # 🌟 [새로 추가됨] AI 피드백을 받기 위한 데이터 형식
@@ -20,6 +33,18 @@ class DietFeedbackRequest(BaseModel):
     protein: int
     fat: int
     sodium: int
+
+
+# ==========================================
+# 대빵 - 식단피드백용 리퀘스트
+# ==========================================
+class MealFeedbackRequest(BaseModel):
+    mealType: str
+    kcal: int
+    carbs: float
+    protein: float
+    fat: float
+    sodium: float
 
 # ==========================================
 # 1. AI 식단 추천 엔드포인트 (기존)
@@ -115,6 +140,28 @@ async def daily_feedback_service(data: DietFeedbackRequest):
     return {
         "status": "success",
         "feedback": feedback_result
+    }
+
+
+
+# ==========================================
+# 대빵 - 밀피드백(식단기록용)
+# ==========================================
+@app.post("/api/v1/ai/meal-feedback")
+async def meal_feedback_service(data: MealFeedbackRequest):
+
+    feedback = generate_meal_feedback(
+        meal_type=data.mealType,
+        kcal=data.kcal,
+        carbs=data.carbs,
+        protein=data.protein,
+        fat=data.fat,
+        sodium=data.sodium
+    )
+
+    return {
+        "status": "success",
+        "feedback": feedback
     }
 
 if __name__ == "__main__":
