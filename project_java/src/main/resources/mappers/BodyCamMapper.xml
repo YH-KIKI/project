@@ -7,5 +7,21 @@
         INSERT INTO body_cam (bc_image_path, bc_type, bc_ai_result, user_num)
         VALUES (#{bcImagePath}, #{bcType}, #{bcAiResult}, #{userNum})
     </insert>
+    
+    <select id="selectBodyCamList" resultType="kr.hi.project.dto.BodyCamDTO" parameterType="int">
+	    SELECT 
+	        bc_num AS bcNum,
+	        bc_image_path AS bcImagePath,
+	        bc_type AS bcType,
+	        bc_ai_result AS bcAiResult,
+	        user_num AS userNum,
+	        bc_date AS bcDate
+	    FROM body_cam 
+	    WHERE user_num = #{userNum}
+	    ORDER BY bc_num DESC
+	</select>
 
+	<delete id="deleteBodyCamRecord" parameterType="int">
+        DELETE FROM body_cam WHERE bc_num = #{bcNum}
+    </delete>
 </mapper>

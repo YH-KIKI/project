@@ -11,7 +11,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 @Configuration
 public class WebConfig implements WebMvcConfigurer {
 
-    @Value("${spring.web.resources.static-locations:C:/project_uploads/}")
+    @Value("${spring.web.resources.static-locations:C:/uploads/}")
     private String uploadPath;
 
     @Override
