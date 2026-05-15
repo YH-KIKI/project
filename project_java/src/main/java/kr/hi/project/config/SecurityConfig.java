@@ -36,22 +36,24 @@ public class SecurityConfig {
                                  "/error",    
                                  "/api/signup", 
                                  "/api/login", 
-                                 "/api/user/info",
                                  "/api/information_updata",
                                  "/api/information_select",
                                  "/api/v1/diet/**",  // [추가/재근] AI식단추천
-                                 "/api/record",
                                  "/api/community/**", // 추가했음(박하)
                                  "/api/comments/**", // [박하/추가] 댓글 API 허용 추가
                                  "/api/likes/**",    // [박하/추가] 추천 API 허용 추가
-                                 "/api/meal/**",
                                  "/api/food/**", //[연희/추가] food 테이블 불러오는 API
                                  "/api/character/**" ,
                                  "/api/v1/bodycheck/**", // [추가/재근] 눈바디
                                  "/api/v1/user/verify-password", // [추가/재근] 눈바디 비밀번호
                                  "/api/favorite/**", //[연희/추가] 즐찾들
-                                 "/api/report-fail"//[준성/추가] 음식사진인증실패
+                                 "/api/report-fail",//[준성/추가] 음식사진인증실패
+                                 "/api/user/info"
+//                               "/api/record",
+//                               "/api/meal/**",
                                  ).permitAll() 
+                // 유효한 토큰이 있어야 들어갈수있는 페이지
+                .requestMatchers("/api/meal/**", "/api/record").authenticated()
                 .anyRequest().authenticated() 
             );
         

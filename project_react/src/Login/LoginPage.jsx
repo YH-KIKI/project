@@ -12,20 +12,40 @@ const LoginPage = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
 
-  const handleProtectedFeature = () => {
-  // 방법 1: isLoggedIn 변수로 확인하기
-  if (!isLoggedIn) {
-    alert("🛑 로그인이 필요한 기능입니다. 먼저 로그인해 주세요!");
-    return; // 여기서 함수를 끝내버림 (기능 실행 안 됨)
+  const handleProtectedFeature = async () => {
+  // 1. 토큰 가져오기
+  const token = localStorage.getItem('login_token') || sessionStorage.getItem('login_token');
+  
+  if (!token) {
+    alert("🛑 토큰이 없습니다. 로그인해주세요.");
+    setIsLoggedIn(false);
+    return;
   }
 
-  // 로그인 된 경우에만 아래 코드가 실행됨
-  alert("✅ 회원 인증 성공! 비밀 기능을 실행합니다.");
-  // 여기에 진짜 하고 싶은 기능(AI 상담 열기 등)을 넣으세요.
-  };
+  try {
+    // 2. 서버에 "이 토큰 아직 쓸 수 있어?"라고 물어보기 (가장 확실한 방법)
+    await axios.get('http://localhost:8080/api/user/info', {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+
+    // 3. 서버가 200(OK)를 주면 그제야 기능 실행
+    alert("✅ 실제 서버 인증 완료! 비밀 기능을 실행합니다.");
+    
+  } catch (error) {
+    // 4. 서버가 401(만료)을 주면 여기서 걸러짐!
+    if (error.response && error.response.status === 401) {
+      alert("⏰ 인증 시간이 만료되었습니다. 자동으로 로그아웃됩니다.");
+    } else {
+      alert("❌ 인증에 실패했습니다.");
+    }
+    handleLogout(); // 👈 여기서 false로 바꿔야 화면이 로그인창으로 돌아감!
+  }
+};
 
     const fetchUserInfo = async () => {
     const token = localStorage.getItem('login_token') || sessionStorage.getItem('login_token'); // 저장된 토큰 꺼내기
+    if (!token) return;
+
     try {
       const response = await axios.get('http://localhost:8080/api/user/info', {
         headers: {
@@ -33,8 +53,14 @@ const LoginPage = () => {
         }
       });
       alert(`서버 응답: ${response.data.username}님, 환영합니다!`);
+      navigate('/');
     } catch (error) {
-      alert("인증에 실패했습니다. 다시 로그인하세요.");
+      if (error.response && error.response.status === 401) {
+            handleLogout(); // 👈 강제 로그아웃 함수 호출!
+        } else {
+            alert("인증 오류가 발생했습니다.");
+            handleLogout();
+        }
     }
   };
   
@@ -59,7 +85,7 @@ const LoginPage = () => {
           password: password
         });
   
-        const token = response.data.token;
+        const { token, refreshToken, user } = response.data;
         
         if (rememberMe) {
         // 받은 토큰을 브라우저에 저장
@@ -69,6 +95,8 @@ const LoginPage = () => {
         sessionStorage.setItem('login_token', token);
       }
 
+        // [준성] refreshToken 추가
+        localStorage.setItem('refresh_token', refreshToken);
         // 🌟🌟🌟 [박하] 커뮤니티 게시판에서 사용자 식별을 위해 서버에서 받은 사용자 정보를 'user' 키로 저장
         localStorage.setItem('user', JSON.stringify(response.data.user));
 
@@ -122,7 +150,7 @@ const LoginPage = () => {
             <button onClick={() => alert("누구나 누를 수 있는 버튼")}>일반 기능</button>
           </div>
 
-          {isLoggedIn ? (
+          {/* {isLoggedIn ? (
             // 로그인 성공 시 보여줄 화면
             <div>
               <h2>🎉 환영합니다! 로그인 상태입니다.</h2>
@@ -164,7 +192,41 @@ const LoginPage = () => {
             로그인
           </button>
         </div>//실험
-          )}
+          )} */}
+
+          <div>
+          <div style={{ margin: '20px 20px' }}>
+            <input type="text" placeholder="아이디" 
+            style={{ padding: '10px', width: '200px', marginBottom: '10px' }} 
+            onChange={(e) => setUserid(e.target.value)}
+            /><br/>
+            <input type="password" placeholder="비밀번호" 
+            style={{ padding: '10px', width: '200px' }}
+            onChange={(e) => setPassword(e.target.value)}
+            />
+          </div>
+          <div style={{ marginBottom: '10px', textAlign: 'left' }}>
+            <input 
+              type="checkbox" 
+              id="rememberMe" 
+              checked={rememberMe} 
+              onChange={(e) => setRememberMe(e.target.checked)} 
+            />
+            <label htmlFor="rememberMe" style={{ marginLeft: '5px' }}>빠른 로그인 (로그인 유지)</label>
+          </div>
+          
+          <button onClick={handleLogin} 
+          style={{ 
+            padding: '10px 30px', 
+            backgroundColor: '#d1b8a0', 
+            color: 'white', 
+            border: 'none', 
+            borderRadius: '5px',
+            cursor: 'pointer'
+          }}>
+            로그인
+          </button>
+        </div>
 
           <hr></hr>
           {/*회원가입 링크*/}
