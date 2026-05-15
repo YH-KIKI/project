@@ -25,7 +25,7 @@ jobs:
           context: ./frontend
           file: ./frontend/Dockerfile
           push: true
-          tags: ${{ secrets.DOCKER_USERNAME }}/frontend:latest
+          tags: ${{ secrets.DOCKER_USERNAME }}/yummyplanet-frontend:latest
       
       # 2. 백엔드(Spring) 이미지 빌드/푸시
       - name: Build Backend Image
@@ -79,8 +79,8 @@ jobs:
             # Nginx(React) 실행 (80 포트 개방)
             sudo docker stop frontend-server || true
             sudo docker rm frontend-server || true
-            sudo docker pull ${{ secrets.DOCKER_USERNAME }}/frontend:latest
-            sudo docker run -d --name frontend-server --network app-network \
+            sudo docker pull ${{ secrets.DOCKER_USERNAME }}/yummyplanet-frontend:latest
+            sudo docker run -d --name yummyplanet-frontend-server --network app-network \
               -p 80:80 \
               ${{ secrets.DOCKER_USERNAME }}/frontend:latest
 
