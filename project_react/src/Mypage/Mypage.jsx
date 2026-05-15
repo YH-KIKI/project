@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import Sidebar from '../Main/Sidebar';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
@@ -9,6 +9,7 @@ const Mypage = () => {
   const [username, setUsername] = useState('');
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [charInfo, setCharInfo] = useState(null);
+  const hasAlerted = useRef(false);
 
   const navigate = useNavigate();
 
@@ -45,14 +46,21 @@ const Mypage = () => {
           headers: { Authorization: `Bearer ${token}` }
         });
         setCharInfo(charResponse.data);
-      } else {
-        console.error("유저 번호(usernum)를 찾을 수 없습니다.", userData);
-      }
-
-    } catch (error) {
+      } 
+    }catch (error) {
+      //이 부분을 수정합니다!
       console.error("데이터 로딩 실패:", error);
+
+      // 만약 서버에서 401(인증안됨) 혹은 500(서버에러-토큰파싱실패)이 오면 쫓아냅니다.
+      if (error.response && (error.response.status === 401 || error.response.status === 500)) {
+        if (!hasAlerted.current) {
+          alert("인증 시간이 만료되었습니다. 다시 로그인해주세요! 🏃‍♂️");
+          hasAlerted.current = true;
+          handleLogout(); // 👈 이미 만들어두신 로그아웃 함수 실행!
+        }
     }
   }
+}
 
   useEffect(() => {
     const token = localStorage.getItem('login_token') || sessionStorage.getItem('login_token');
@@ -65,7 +73,7 @@ const Mypage = () => {
   const handleLogout = () => {
     localStorage.removeItem('login_token');
     setIsLoggedIn(false);
-    navigate('/');
+    navigate('/login');
   }
 
   return (
