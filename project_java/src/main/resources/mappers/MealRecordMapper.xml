@@ -166,7 +166,7 @@
 	
 	
 	<select id="getTodayMealRecord"
-	        resultType="kr.hi.project.dto.MealDetailDTO">
+        resultType="kr.hi.project.dto.MealDetailDTO">
 	    SELECT
 	        md.md_num AS mdNum,
 	        md.md_kcal AS mdKcal,
@@ -174,7 +174,14 @@
 	        md.mk_num AS mkNum,
 	        md.fo_num AS foNum,
 	        md.mday_num AS mdayNum,
+	
 	        f.fo_name AS foName,
+	        f.fo_kcal AS foKcal,
+	        f.fo_carbs AS foCarbs,
+	        f.fo_protein AS foProtein,
+	        f.fo_fat AS foFat,
+	        f.fo_natrium AS foNatrium,
+	
 	        ml.mk_meal_type AS mkMealType
 	    FROM meal_detail md
 	    JOIN meal_log ml
@@ -191,7 +198,7 @@
 	    FROM meal_log
 	    WHERE user_num = #{userNum}
 	    GROUP BY DATE_FORMAT(mk_created_at, '%Y-%m-%d')
-	    ORDER BY recordedDate
+	    ORDER BY recordedDate DESC
 	</select>
 	
 	<delete id="deleteMealDetails">
@@ -227,5 +234,6 @@
 	        #{mkNum}
 	    </foreach>
 	</delete>
+
 
 </mapper>

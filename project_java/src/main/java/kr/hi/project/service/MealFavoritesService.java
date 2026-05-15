@@ -35,4 +35,26 @@ public class MealFavoritesService {
     public void deleteMealFavorite(int userNum, int mfNum) {
         mealFavoritesDao.deleteMealFavorite(userNum, mfNum);
     }
+    
+    
+    public MealFavoritesDTO getMealFavoriteDetail(int userNum, int mfNum) {
+        MealFavoritesDTO meal = mealFavoritesDao.getMealFavoriteDetail(userNum, mfNum);
+
+        if (meal == null) {
+            throw new RuntimeException("즐겨찾기 식단을 찾을 수 없습니다.");
+        }
+
+        meal.setFoods(mealFavoritesDao.getMealFavoriteFoods(meal.getMkNum()));
+
+        return meal;
+    };
+
+    public void updateMealFavoriteMemo(MealFavoritesDTO dto) {
+        mealFavoritesDao.updateMealFavoriteMemo(dto);
+    }
+    
+    public void updateMealFavoriteName(MealFavoritesDTO dto) {
+        mealFavoritesDao.updateMealFavoriteName(dto);
+    }
+    
 }

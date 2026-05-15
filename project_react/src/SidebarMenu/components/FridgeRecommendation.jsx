@@ -4,7 +4,9 @@ import "./FridgeRecommendation.css";
 const MacroItem = ({ name, icon, goal, intake, percent, type }) => {
   return (
     <div className="macro-item">
-      <b>{name} <span>{icon}</span></b>
+      <b>
+        {name} <span>{icon}</span>
+      </b>
       <p>목표: {goal}</p>
       <p>섭취: {intake}</p>
 
@@ -28,6 +30,40 @@ const FridgeRecommendation = () => {
     "버터",
   ]);
   const [isRecommended, setIsRecommended] = useState(false);
+  const [showSuccess, setShowSuccess] = useState(false);
+
+  const ingredientSuggestions = [
+    "계란",
+    "우유",
+    "식빵",
+    "토마토",
+    "치즈",
+    "버터",
+    "양파",
+    "감자",
+    "당근",
+    "오이",
+    "닭가슴살",
+    "두부",
+    "김치",
+    "햄",
+    "참치",
+    "고구마",
+  ];
+
+  const quickIngredients = [
+    "계란",
+    "우유",
+    "식빵",
+    "토마토",
+    "양파",
+    "치즈",
+    "닭가슴살",
+  ];
+
+  const filteredSuggestions = ingredientSuggestions.filter(
+    (item) => ingredient.trim() !== "" && item.includes(ingredient.trim())
+  );
 
   const recipes = [
     {
@@ -72,8 +108,8 @@ const FridgeRecommendation = () => {
     },
   ];
 
-  const addIngredient = () => {
-    const value = ingredient.trim();
+  const addIngredient = (selectedValue) => {
+    const value = (selectedValue || ingredient).trim();
 
     if (value === "") {
       alert("재료명을 입력해주세요.");
@@ -82,15 +118,25 @@ const FridgeRecommendation = () => {
 
     if (ingredients.includes(value)) {
       alert("이미 추가된 재료예요.");
+      setIngredient("");
       return;
     }
 
     setIngredients([...ingredients, value]);
     setIngredient("");
+    setShowSuccess(true);
+
+    setTimeout(() => {
+      setShowSuccess(false);
+    }, 1400);
   };
 
   const removeIngredient = (item) => {
     setIngredients(ingredients.filter((ing) => ing !== item));
+  };
+
+  const clearIngredients = () => {
+    setIngredients([]);
   };
 
   const handleRecommend = () => {
@@ -168,40 +214,94 @@ const FridgeRecommendation = () => {
 
       <section className="ingredient-section">
         <h3>내 냉장고 음식 추가</h3>
-        <p>보유한 재료를 입력하고 추천받아보세요!</p>
+        <p>냠냠이가 냉장고를 열어봤어요! 지금 있는 재료를 알려주세요 🍳</p>
 
         <div className="step-box">
-          <div className="step-row">
+          <div className="step-row input-step-row">
             <div className="step-label">
               <span>1</span>
               <b>재료 입력</b>
             </div>
 
-            <input
-              type="text"
-              placeholder="재료명을 입력하세요 (예: 계란, 우유, 양파)"
-              value={ingredient}
-              onChange={(e) => setIngredient(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === "Enter") addIngredient();
-              }}
-            />
+            <div className="ingredient-input-area">
+              <div className="input-wrap">
+                <input
+                  type="text"
+                  placeholder="재료명을 입력하세요 (예: 계란, 우유, 양파)"
+                  value={ingredient}
+                  onChange={(e) => setIngredient(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") addIngredient();
+                  }}
+                />
 
-            <button onClick={addIngredient}>추가</button>
+                {ingredient && filteredSuggestions.length > 0 && (
+                  <div className="suggestion-box">
+                    {filteredSuggestions.map((item) => (
+                      <button
+                        key={item}
+                        type="button"
+                        onMouseDown={() => addIngredient(item)}
+                      >
+                        🧺 {item}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              <button className="add-btn" onClick={() => addIngredient()}>
+                추가
+              </button>
+            </div>
+
+            <div className="quick-add-box">
+              <p>자주 사용하는 재료</p>
+              <div>
+                {quickIngredients.map((item) => (
+                  <button
+                    key={item}
+                    type="button"
+                    onClick={() => addIngredient(item)}
+                  >
+                    {item}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {showSuccess && (
+              <div className="success-msg">✅ 재료가 추가되었어요!</div>
+            )}
           </div>
 
-          <div className="step-row">
+          <div className="step-row ingredient-list-row">
             <div className="step-label">
               <span>2</span>
               <b>추가된 재료</b>
             </div>
 
-            <div className="ingredient-tags">
-              {ingredients.map((item) => (
-                <button key={item} onClick={() => removeIngredient(item)}>
-                  {item} ×
+            <div className="ingredient-list-header">
+              <span>{ingredients.length}/20</span>
+              {ingredients.length > 0 && (
+                <button type="button" onClick={clearIngredients}>
+                  전체 삭제
                 </button>
-              ))}
+              )}
+            </div>
+
+            <div className="ingredient-tags">
+              {ingredients.length === 0 ? (
+                <p className="empty-ingredient-text">
+                  아직 추가된 재료가 없어요.
+                </p>
+              ) : (
+                ingredients.map((item) => (
+                  <button key={item} onClick={() => removeIngredient(item)}>
+                    {item} ×
+                  </button>
+                ))
+              )}
             </div>
           </div>
 

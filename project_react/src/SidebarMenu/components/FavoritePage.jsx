@@ -1,6 +1,7 @@
 import axios from "axios";
 import React, { useEffect, useState } from "react";
 import { FiTrash2 } from "react-icons/fi";
+import MealFavoriteDetailModal from "./MealFavoriteDetailModal";
 import "./FavoritePage.css";
 
 const FavoritePage = () => {
@@ -11,6 +12,7 @@ const FavoritePage = () => {
 
   const [foodFavorites, setFoodFavorites] = useState([]);
   const [mealFavorites, setMealFavorites] = useState([]);
+  const [selectedMeal, setSelectedMeal] = useState(null);
 
   const [newFood, setNewFood] = useState({
     name: "",
@@ -87,6 +89,22 @@ const fetchFoodFavorites = async () => {
 
   } catch (err) {
     console.error("음식 즐겨찾기 조회 실패:", err);
+  }
+};
+
+const openMealFavoriteDetail = async (meal) => {
+  try {
+    const userNum = 1;
+
+    const res = await axios.get(
+      `http://localhost:8080/api/favorite/meal/detail?userNum=${userNum}&mfNum=${meal.id}`
+    );
+
+    setSelectedMeal(res.data);
+
+  } catch (err) {
+    console.error("식단 상세 조회 실패:", err);
+    alert("식단 상세 조회 실패!");
   }
 };
 
@@ -253,7 +271,11 @@ const addFoodFavorite = async (foNum) => {
           </div>
           <div className="meal-list">
             {filteredMealFavorites.map((meal) => (
-              <div className="fav-meal-card" key={meal.id}>
+              <div
+                className="fav-meal-card"
+                key={meal.id}
+                onClick={() => openMealFavoriteDetail(meal)}
+              >
                 <div className={`meal-type-badge ${meal.type}`}>
                   {meal.type}
                 </div>
@@ -277,8 +299,25 @@ const addFoodFavorite = async (foNum) => {
                 </div>
 
                 <div className="meal-buttons">
-                  <button className="pink-btn">오늘 {meal.type} 불러오기</button>
-                  <button className="white-btn">다른 날짜 식단으로 저장</button>
+                  <button
+                    className="pink-btn"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      alert("오늘 식단 불러오기!");
+                    }}
+                  >
+                    오늘 {meal.type} 불러오기
+                  </button>
+
+                  <button
+                    className="white-btn"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      alert("다른 날짜 저장!");
+                    }}
+                  >
+                    다른 날짜 식단으로 저장
+                  </button>
                 </div>
               </div>
             ))}
@@ -420,6 +459,36 @@ const addFoodFavorite = async (foNum) => {
             </div>
           </div>
         </div>
+      )}
+      {selectedMeal && (
+        <MealFavoriteDetailModal
+          meal={selectedMeal}
+          onUpdated={(updatedMeal) => {
+            setSelectedMeal(updatedMeal);
+
+            setMealFavorites((prev) =>
+              prev.map((meal) =>
+                meal.id === updatedMeal.mfNum
+                  ? {
+                      ...meal,
+                      title: updatedMeal.mfName,
+                    }
+                  : meal
+              )
+            );
+          }}
+          onClose={() => setSelectedMeal(null)}
+          onLoad={() => {
+            alert("불러오기 연결 예정!");
+          }}
+          onDelete={() => {
+            setMealFavorites((prev) =>
+              prev.filter((meal) => meal.id !== selectedMeal.mfNum)
+            );
+
+            setSelectedMeal(null);
+          }}
+        />
       )}
     </div>
   );
