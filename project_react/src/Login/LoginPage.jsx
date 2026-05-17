@@ -8,7 +8,7 @@ import axios from 'axios';
 const LoginPage = () => {
 
   // --- 여기부터 카카오톡 ---
-  const KAKAO_REST_API_KEY = "0451c49dbaddf549adcc022da2f0e318"; // 👈 여기에 아까 복사한 진짜 키를 붙여넣으세요!
+  const KAKAO_REST_API_KEY = "진짜 키"; // 여기에 아까 복사한 진짜 키를 붙여넣으세요!
   const KAKAO_REDIRECT_URI = "http://localhost:3000/kakao-callback";
   const KAKAO_AUTH_URL = `https://kauth.kakao.com/oauth/authorize?client_id=${KAKAO_REST_API_KEY}&redirect_uri=${KAKAO_REDIRECT_URI}&response_type=code`;
 
