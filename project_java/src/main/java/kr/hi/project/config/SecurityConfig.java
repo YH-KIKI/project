@@ -50,7 +50,11 @@ public class SecurityConfig {
                                  "/api/report-fail",//[준성/추가] 음식사진인증실패
                                  "/api/user/info",
 	                             "/api/record",
-	                             "/api/meal/**"
+	                             "/api/meal/**",
+	                             "/api/login/**", 
+	                             "/login/**",
+	                             "/kakao", 
+	                             "/api/login/kakao/register"
                                  ).permitAll() 
                 // 유효한 토큰이 있어야 들어갈수있는 페이지
                 //.requestMatchers("/api/record").authenticated()
