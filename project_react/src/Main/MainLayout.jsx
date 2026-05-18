@@ -12,7 +12,7 @@ const MainLayout = () => {
 
   // 화면이 켜질 때나, 주소(경로)가 바뀔 때마다 토큰 체크
   useEffect(() => {
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem('login_token') || localStorage.getItem('refresh_token') || sessionStorage.getItem('login_token');
     if (token) {
       setIsLoggedIn(true);
     } else {
