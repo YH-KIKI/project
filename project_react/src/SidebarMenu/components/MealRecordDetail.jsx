@@ -1,9 +1,10 @@
 import axios from "axios";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { FiHeart } from "react-icons/fi";
-import "./MealRecordDetail.css";
+import { useLocation } from "react-router-dom";
 import MealRecordModal from "./MealRecordModal";
 import MealDetailModal from "./MealDetailModal";
+import "./MealRecordDetail.css";
 
 const NutrientBar = ({ icon, name, status, type }) => {
   return (
@@ -24,6 +25,7 @@ const NutrientBar = ({ icon, name, status, type }) => {
 
 const MealRecordDetail = () => {
   const userNum = 1;
+  const location = useLocation();
 
   const [activeMeal, setActiveMeal] = useState("아침");
   const [selectedDate, setSelectedDate] = useState(new Date());
@@ -38,7 +40,9 @@ const MealRecordDetail = () => {
   const [mealRecords, setMealRecords] = useState({});
   const [recordedDates, setRecordedDates] = useState([]);
   const [aiFeedback, setAiFeedback] = useState("");
+  const [modalInitialData, setModalInitialData] = useState(null);
 
+  const favoriteAddDoneRef = useRef(false);
   const meals = ["아침", "점심", "저녁"];
 
   const formatDateKey = (date) => {
@@ -148,9 +152,14 @@ const MealRecordDetail = () => {
         });
         converted[key].totalKcal += item.mdKcal;
       });
+      setMealRecords((prev) => ({
+        ...prev,
+        ...converted,
+      }));
 
-      setMealRecords(converted);
+      return converted;
     } catch (err) {
+      return {};
       console.error("식단 조회 실패:", err);
     }
   };
@@ -169,6 +178,68 @@ const MealRecordDetail = () => {
       loadAiFeedback(mealData);
     }
   }, [mealData]);
+
+  useEffect(() => {
+    const food = location.state?.selectedFood;
+    const mealType = location.state?.mealType;
+
+    if (!food || !mealType) return;
+
+    if (favoriteAddDoneRef.current) return;
+    favoriteAddDoneRef.current = true;
+
+    const addFavoriteFood = async () => {
+      setActiveMeal(mealType);
+
+      const latestRecords = await loadMealsByDate(dateKey);
+      const key = `${dateKey}_${mealType}`;
+
+      setMealRecords((prev) => {
+        const baseRecord =
+          latestRecords[key] ||
+          prev[key] || {
+            mkMealType: mealType,
+            totalKcal: 0,
+            foods: [],
+            imageUrl: null,
+          };
+
+        const newRecord = {
+          ...baseRecord,
+          totalKcal: Number(baseRecord.totalKcal || 0) + Number(food.kcal || 0),
+          foods: [
+            ...(baseRecord.foods || []),
+            {
+              id: food.foNum,
+              foNum: food.foNum,
+              name: food.name,
+              kcal: Number(food.kcal || 0),
+              portion: 1,
+              count: 1,
+              carbs: Number(food.carbs || 0),
+              protein: Number(food.protein || 0),
+              fat: Number(food.fat || 0),
+              sodium: Number(food.natrium || 0),
+            },
+          ],
+        };
+
+        setModalInitialData(newRecord);
+
+        return {
+          ...prev,
+          [key]: newRecord,
+        };
+      });
+
+      setTimeout(() => {
+        setIsRecordModalOpen(true);
+      }, 0);
+    };
+
+    addFavoriteFood();
+  }, [location.state, dateKey]);
+  
 
   const dailyTotalKcal = Object.entries(mealRecords)
     .filter(([key]) => key.startsWith(dateKey))
@@ -295,49 +366,49 @@ const MealRecordDetail = () => {
   };
 
   const loadAiFeedback = async (mealData) => {
-  if (!mealData?.foods?.length) return;
+    if (!mealData?.foods?.length) return;
 
-  try {
-    const totalCarbs = mealData.foods.reduce(
-      (sum, food) => sum + (food.carbs || 0) * (food.count || 1),
-      0
-    );
+    try {
+      const totalCarbs = mealData.foods.reduce(
+        (sum, food) => sum + (food.carbs || 0) * (food.count || 1),
+        0
+      );
 
-    const totalProtein = mealData.foods.reduce(
-      (sum, food) => sum + (food.protein || 0) * (food.count || 1),
-      0
-    );
+      const totalProtein = mealData.foods.reduce(
+        (sum, food) => sum + (food.protein || 0) * (food.count || 1),
+        0
+      );
 
-    const totalFat = mealData.foods.reduce(
-      (sum, food) => sum + (food.fat || 0) * (food.count || 1),
-      0
-    );
+      const totalFat = mealData.foods.reduce(
+        (sum, food) => sum + (food.fat || 0) * (food.count || 1),
+        0
+      );
 
-    const totalSodium = mealData.foods.reduce(
-      (sum, food) => sum + (food.sodium || 0) * (food.count || 1),
-      0
-    );
+      const totalSodium = mealData.foods.reduce(
+        (sum, food) => sum + (food.sodium || 0) * (food.count || 1),
+        0
+      );
 
-    const res = await axios.post(
-      "http://localhost:8000/api/v1/ai/meal-feedback",
-      {
-        mealType: activeMeal,
-        kcal: mealData.totalKcal,
-        carbs: totalCarbs,
-        protein: totalProtein,
-        fat: totalFat,
-        sodium: totalSodium,
-      }
-    );
+      const res = await axios.post(
+        "http://localhost:8000/api/v1/ai/meal-feedback",
+        {
+          mealType: activeMeal,
+          kcal: mealData.totalKcal,
+          carbs: totalCarbs,
+          protein: totalProtein,
+          fat: totalFat,
+          sodium: totalSodium,
+        }
+      );
 
-    console.log("AI 피드백:", res.data);
+      console.log("AI 피드백:", res.data);
 
-    setAiFeedback(res.data.feedback);
+      setAiFeedback(res.data.feedback);
 
-  } catch (err) {
-    console.error("AI 피드백 실패:", err);
-  }
-};
+    } catch (err) {
+      console.error("AI 피드백 실패:", err);
+    }
+  };
 
   return (
     <div className="meal-analysis-card">
@@ -544,11 +615,14 @@ const MealRecordDetail = () => {
 
         {isRecordModalOpen && (
           <MealRecordModal
-            key={`${recordKey}-${isRecordModalOpen}`}
+            key={`${recordKey}-${mealData?.foods?.length || 0}-${isRecordModalOpen}`}
             mealType={activeMeal}
             selectedDate={formatDateText(selectedDate)}
-            initialData={mealData}
-            onClose={() => setIsRecordModalOpen(false)}
+            initialData={modalInitialData || mealData}
+            onClose={() => {
+              setIsRecordModalOpen(false);
+              setModalInitialData(null);
+            }}
             onSave={handleSaveMeal}
           />
         )}

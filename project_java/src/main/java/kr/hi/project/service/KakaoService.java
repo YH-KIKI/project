@@ -19,7 +19,7 @@ import kr.hi.project.dto.UserDTO;
 @Service
 public class KakaoService {
 
-    private final String KAKAO_REST_API_KEY = "b4cc1448ae63974d811c00aa509952ee"; // 본인의 진짜 API 키 유지하기
+    private final String KAKAO_REST_API_KEY = "진짜 API 키"; // 본인의 진짜 API 키 유지하기
     private final String KAKAO_REDIRECT_URI = "http://localhost:3000/kakao-callback";
 
     @Autowired
