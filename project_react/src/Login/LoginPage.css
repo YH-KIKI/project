@@ -1,0 +1,93 @@
+/* 로그인 콘텐츠를 담는 메인 흰색 박스 */
+.login-box {
+  background-color: rgba(255, 255, 255, 0.9);
+  padding: 40px;
+  border-radius: 20px;
+  text-align: center;
+  border: 2px solid #d1b8a0;
+  position: relative;
+  height: 800px;
+  width: 62%;
+  top: 20px;
+}
+
+/* 냠냠플래닛 타이틀 텍스트 */
+.login-subtitle {
+  color: #5d4037;
+}
+
+/* 기능 테스트 버튼들을 감싸는 박스 */
+.test-button-container {
+  margin-bottom: 20px;
+  border: 1px solid #ccc;
+  padding: 10px;
+}
+
+/* 아이디, 비밀번호 입력창을 감싸는 박스 */
+.input-group {
+  margin: 20px 20px;
+}
+
+/* 아이디 및 비밀번호 인풋 스타일 */
+.login-input {
+  padding: 10px;
+  width: 200px;
+}
+
+.login-input.mb-10 {
+  margin-bottom: 10px;
+}
+
+/* 로그인 유지 체크박스 영역 */
+.remember-me-container {
+  margin-bottom: 10px;
+  text-align: left;
+}
+
+.remember-me-label {
+  margin-left: 5px;
+}
+
+/* 일반 로그인 버튼 */
+.btn-login {
+  padding: 10px 30px;
+  background-color: #d1b8a0;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+/* 카카오 로그인 버튼 컨테이너 */
+.kakao-btn-container {
+  margin-top: 20px;
+}
+
+/* 카카오 로그인 버튼 */
+.btn-kakao {
+  width: 220px;
+  height: 45px;
+  background-color: #fee500;
+  color: #191919;
+  border: none;
+  border-radius: 5px;
+  font-size: 15px;
+  font-weight: bold;
+  cursor: pointer;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* 하단 회원가입 안내 영역 */
+.signup-link-container {
+  margin-top: 20px;
+  font-size: 14px;
+  color: #5d4037;
+}
+
+/* 회원가입 링크 텍스트 (a 태그) */
+.link-signup {
+  color: #d1b8a0;
+  font-weight: bold;
+  text-decoration: none;
+  margin-left: 5px;
+}

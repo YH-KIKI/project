@@ -8,17 +8,28 @@ const SignupPage = () => {
 
   const [userid, setUserid] = useState('');
   const [password, setPassword] = useState('');
+  const [passwordConfirm, setPasswordConfirm] = useState('');
   const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
   const navigate = useNavigate(); // 페이지 이동 함수
 
   const handleSignup = async () => {
 
+    if (!userid || !password || !passwordConfirm || !username || !email) {
+      alert("모든 항목을 입력해주세요.");
+      return;
+    }
+
     if (password.length > 10) {
     alert("비밀번호는 10자 이하만 가능합니다.");
     return;
     }
 
+    if (password !== passwordConfirm) {
+      alert("비밀번호와 비밀번호 확인이 일치하지 않습니다.");
+      return;
+    }
+    
     //이메일 형식 검사 (정규표현식)
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
@@ -76,6 +87,8 @@ const SignupPage = () => {
             /><br/>
             <input type="password" placeholder="비밀번호확인" 
             style={{ padding: '10px', width: '200px' }} 
+            value={passwordConfirm}
+            onChange={(e) => setPasswordConfirm(e.target.value)}
             /><br/>
             <input type="text" placeholder="닉네임" 
             style={{ padding: '10px', width: '200px' }} 

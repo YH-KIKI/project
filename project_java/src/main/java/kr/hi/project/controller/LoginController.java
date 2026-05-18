@@ -34,7 +34,8 @@ public class LoginController {
 		
 		if(user != null) {
 			// 성공하면 토큰 생성
-			String token = jwtService.createToken(userid);
+			String accessToken = jwtService.createToken(userid);
+	        String refreshToken = jwtService.createRefreshToken(userid);
 
 //			int usernum = userService.findUsernumByUserid(userid);
 //			Map<String, Object> response = new HashMap<>();
@@ -49,8 +50,8 @@ public class LoginController {
 			int usernum = userService.findUsernumByUserid(userid);
 			
 			Map<String, Object> response = new HashMap<>();
-			response.put("token", token);
-			response.put("usernum", usernum);
+			response.put("token", accessToken);
+	        response.put("refreshToken", refreshToken); // [준성/추가]새로 추가
 			
 			// *** [박하/추가] 리액트의 localStorage.setItem('user', ...) 형식에 맞게 user 키 안에 유저 정보를 객체로 담아 보냄
 			Map<String, Object> userInfo = new HashMap<>();
