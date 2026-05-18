@@ -48,12 +48,16 @@ public class SecurityConfig {
                                  "/api/v1/user/verify-password", // [추가/재근] 눈바디 비밀번호
                                  "/api/favorite/**", //[연희/추가] 즐찾들
                                  "/api/report-fail",//[준성/추가] 음식사진인증실패
-                                 "/api/user/info"
-//                               "/api/record",
-//                               "/api/meal/**",
+                                 "/api/user/info",
+	                             "/api/record",
+	                             "/api/meal/**",
+	                             "/api/login/**", 
+	                             "/login/**",
+	                             "/kakao", 
+	                             "/api/login/kakao/register"
                                  ).permitAll() 
                 // 유효한 토큰이 있어야 들어갈수있는 페이지
-                .requestMatchers("/api/meal/**", "/api/record").authenticated()
+                //.requestMatchers("/api/record").authenticated()
                 .anyRequest().authenticated() 
             );
         

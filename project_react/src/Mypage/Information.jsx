@@ -16,6 +16,7 @@ const Information = () => {
   const [targetweight, settargetweight] = useState('0.0');
   const [age, setage] = useState('0');
   const [act, setact] = useState('0');
+  const [model, setmodel] = useState('0');
   const [allergies, setallergies] = useState([]);
 
   const navigate = useNavigate(); // 페이지 이동 함수
@@ -50,6 +51,10 @@ const Information = () => {
       alert("활동량을 선택해 주세요!");
       return;
     }
+    if (model === '0') {
+      alert("모드을 선택해 주세요!");
+      return;
+    }
 
     try {
       const token = localStorage.getItem('login_token') || sessionStorage.getItem('login_token');
@@ -64,6 +69,7 @@ const Information = () => {
         userTargetweight: targetweight,
         userAge: age,
         userAct: act,
+        userModel: model,
         userAllergies: allergies
       },
       {
@@ -86,7 +92,7 @@ const Information = () => {
 			const response = await axios.get('http://localhost:8080/api/information_select', {
 				headers:{
 					Authorization: `Bearer ${token}`
-				}
+				} 
 			});
       setUsernum(response.data.userNum);
       setUserid(response.data.userId);
@@ -101,6 +107,7 @@ const Information = () => {
 
       setage(response.data.userAge);
       setact(response.data.userAct);
+      setmodel(response.data.userModel);
 
       setallergies(response.data.userAllergies || []);
 		}catch(error){
@@ -198,6 +205,19 @@ const Information = () => {
               <option value="1.55">보통 (적당한 운동 주 3~5회)</option>
               <option value="1.725">높음 (격렬한 운동 주 6~7회)</option>
               <option value="1.9">매우 높음 (선수급, 육체노동)</option>
+            </select>
+
+            선택한 모드 : 
+            <select 
+              value={model} 
+              onChange={(e) => setmodel(e.target.value)}
+              style={{ padding: '10px', width: '220px', marginBottom: '10px' }}
+            >
+              <option value="0">원한 모드를 선택하세요</option>
+              <option value="1">다이어트</option>
+              <option value="2">건강유지</option>
+              <option value="3">근육증량</option>
+              <option value="4">저탄고지</option>
             </select>
             
             <div style={{ marginBottom: '20px' }}>

@@ -41,6 +41,7 @@
 	        p.up_target_weight AS userTargetweight,
 	        p.up_age AS userAge,
 	        p.up_act AS userAct,
+	        p.up_model AS userModel,
 	        <!-- 목표가져오기 -->
 	        p.up_daily_kcal AS userDailyKcal,
 	        p.up_daily_carbs AS userDailyCarbs,
@@ -75,6 +76,7 @@
 	        p.up_target_weight = #{userTargetweight},
 	        p.up_age = #{userAge},
 	        p.up_act = #{userAct},
+	        p.up_model = #{userModel},
 	
 	        p.up_daily_kcal = #{userDailyKcal},
 	        p.up_daily_carbs = #{userDailyCarbs},
@@ -122,5 +124,32 @@
 	    
 	    WHERE mm.user_num = #{userNum}          AND mday.mday_created_at = CURDATE() 
     </select>
+    
+    <!-- 카카오톡 -->
+    <select id="findUserNumByKakaoId" parameterType="string" resultType="java.lang.Integer">
+        SELECT user_num 
+        FROM user_social_accounts
+        WHERE usa_provider = '카톡' AND usa_provider_user_id = #{kakaoId}
+    </select>
+    
+    <insert id="insertSocialUser" parameterType="kr.hi.project.dto.UserDTO" useGeneratedKeys="true" keyProperty="userNum">
+        INSERT INTO user (user_id, user_password, user_email, user_name, user_is_social)
+        VALUES (#{userId}, null, #{userEmail}, #{userName}, 1)
+    </insert>
+    
+    <insert id="insertSocialAccount" parameterType="map">
+        INSERT INTO user_social_accounts (usa_provider, usa_provider_user_id, user_num)
+        VALUES ('카톡', #{kakaoId}, #{userNum})
+    </insert>
+    
+    <select id="findUserByEmail" parameterType="string" resultType="int">
+        SELECT COUNT(*) FROM user WHERE user_email = #{userEmail}
+    </select>
+
+    <insert id="insertSocialUserWithEmail" parameterType="kr.hi.project.dto.UserDTO" useGeneratedKeys="true" keyProperty="userNum">
+        INSERT INTO user (user_id, user_password, user_email, user_name, user_is_social)
+        VALUES (#{userId}, null, #{userEmail}, #{userName}, 1)
+    </insert>
+    <!-- 카카오톡 -->
 
 </mapper>

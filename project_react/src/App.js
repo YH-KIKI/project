@@ -26,6 +26,7 @@ import PostWrite from "./community/PostWrite"; //요고 추가해따잉~
 import PostDetail from "./community/PostDetail"; //요고 추가해따잉~
 import TargetGoals from "./Mypage/TargetGoals";
 import Evaluation from "./ImageAnalyze/Evaluation";
+import KakaoCallback from "./Login/KakaoCallback";
 
 import { Navigate, Outlet } from 'react-router-dom';
 
@@ -47,7 +48,9 @@ function App() {
                     {/* 🔓 누구나 접근 가능한 페이지 */}
                     <Route path="/login" element={<LoginPage />} />
                     <Route path="/signup" element={<SignUp />} />
-
+                    {/*카카오톡 주소(/kakaocallback)*/}
+                    <Route path="/kakao-callback" element={<KakaoCallback />} />
+                    
                     {/* 🔒 로그인이 필요한 페이지 그룹 */}
                     <Route element={<ProtectedRoute />}>
 
@@ -95,7 +98,7 @@ function App() {
                     <Route path="/mypage" element={<Mypage />} />
                     {/*식단기록 주소(/meallogpage)*/}
                     <Route path="/meallogpage" element={<MealLogPage />} />
-
+                    
                     </Route>
                 </Routes>
             </div>

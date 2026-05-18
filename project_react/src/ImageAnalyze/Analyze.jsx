@@ -125,16 +125,42 @@ const Analyze = () => {
     formData.append('data', JSON.stringify(data));
 
     try {
+      const token = localStorage.getItem('login_token') || sessionStorage.getItem('login_token');
+
+      // 🚨 토큰이 없을 경우를 대비한 안전장치 (이게 있어야 튕기는 걸 막아요)
+      if (!token) {
+        alert("로그인 정보가 만료되었습니다. 다시 로그인해주세요! 🏃‍♂️");
+        navigate('/login');
+        return;
+      }
+
       const response = await axios.post('http://localhost:8080/api/record', formData, {
         headers: { 
           'Content-Type': 'multipart/form-data',
-          'Authorization': `Bearer ${localStorage.getItem('login_token')}`
-        }
+          // 🌟 수정된 부분: 저장된 위치가 어디든 토큰을 실어 보냅니다.
+          'Authorization': `Bearer ${token}`
+          }
       });
       alert("식단 기록중...");
       console.log(response)
       setShowModal(false);
-      navigate('/'); // 기록 후 메인 페이지로 이동
+      // 서버가 문자열만 주더라도, React가 계산한 mealData를 직접 넘깁니다!
+      // mealData는 아마 [{foodName: '제육', kcal: 500...}] 이런 식
+      // 이걸 합산한 total을 만들어서 넘겨야 합니다.
+      const totalNutrients = selectedFoods.reduce((acc, food) => ({
+        kcal: acc.kcal + (food.kcal * (food.amount / 100)), // 100g당 기준일 때
+        carbs: acc.carbs + (food.carbs * (food.amount / 100)),
+        protein: acc.protein + (food.protein * (food.amount / 100)),
+        fat: acc.fat + (food.fat * (food.amount / 100)),
+        sodium: acc.sodium + (food.sodium * (food.amount / 100)),
+      }), { kcal: 0, carbs: 0, protein: 0, fat: 0, sodium: 0 });
+
+    navigate('/evaluation', { 
+      state: { 
+        mealResult: totalNutrients, // 👈 여기서 계산해서 넘김!
+        mealType: mealType       // '아침', '점심' 등 종류
+      } 
+    });
     } catch (error) {
       console.error("기록 실패", error);
     // 중복식사 알림 등를 alert으로 띄웁니다.
