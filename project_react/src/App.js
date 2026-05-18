@@ -51,13 +51,13 @@ function App() {
                     {/*카카오톡 주소(/kakaocallback)*/}
                     <Route path="/kakao-callback" element={<KakaoCallback />} />
                     
-                    {/* 🔒 로그인이 필요한 페이지 그룹 */}
-                    <Route element={<ProtectedRoute />}>
 
                     {/* 🌟 배경과 사이드바가 유지되는 그룹 */}
                     <Route element={<MainLayout />}>
                         {/* 기본 화면 (대시보드) */}
                         <Route path="/" element={<Dashboard />} />
+                    {/* 🔒 로그인이 필요한 페이지 그룹 */}
+                    <Route element={<ProtectedRoute />}>
                         {/* 식단 추천 화면 */}
                         <Route path="/recommend" element={<DietRecommendation />} />
                         {/* 식단 기록 관리 */}

@@ -72,7 +72,7 @@ public class UserService {
 
     //영양소 계산 전용 내부 메서드
     private void calculateAndSetGoals(UserPrivacyDTO dto) {
-        //기초대사량(BMR) 계산
+        //1.기초대사량(BMR) 계산
         double bmr;
         if ("M".equals(dto.getUserGender())) {
             bmr = (10 * dto.getUserWeight()) + (6.25 * dto.getUserHeight()) - (5 * dto.getUserAge()) + 5;
@@ -84,24 +84,23 @@ public class UserService {
         double tdee = bmr * dto.getUserAct();
 
         //목표 칼로리 설정 (감량/유지/증량 판단 로직)
-        // 2. 목표 유형(up_model)에 따른 칼로리 조정 및 탄/단/지 비율 설정
+        // 2.목표 유형(up_model)에 따른 칼로리 조정 및 탄/단/지 비율 설정
         int targetKcal = (int) Math.round(tdee);
         double carbsRatio = 0.5, proteinRatio = 0.3, fatRatio = 0.2; // 기본값 (건강유지)
 
         String model = dto.getUserModel(); // up_model 값 (1, 2, 3, 4)
         if ("1".equals(model)) { // 다이어트 (4:4:2)
-            targetKcal -= 500;
+            // targetKcal -= 500;
             carbsRatio = 0.4; proteinRatio = 0.4; fatRatio = 0.2;
         } else if ("2".equals(model)) { // 건강 유지 (5:3:2)
             carbsRatio = 0.5; proteinRatio = 0.3; fatRatio = 0.2;
-        } else if ("3".equals(model)) { // 근육 증량 (5:3:2 이지만 칼로리 +300)
-            targetKcal += 300;
+        } else if ("3".equals(model)) { // 근육 증량 (5:3:2)
             carbsRatio = 0.5; proteinRatio = 0.3; fatRatio = 0.2;
         } else if ("4".equals(model)) { // 저탄고지 (1:2:7)
             carbsRatio = 0.1; proteinRatio = 0.2; fatRatio = 0.7;
         }
 
-        // 3. 하루 총 목표 영양소 저장
+        // 3.하루 총 목표 영양소 저장
         dto.setUserDailyKcal(targetKcal);
         dto.setUserDailyCarbs((int) Math.round((targetKcal * carbsRatio) / 4));
         dto.setUserDailyProtein((int) Math.round((targetKcal * proteinRatio) / 4));
@@ -120,6 +119,11 @@ public class UserService {
 	/* 오늘 목표보기 */
 	public Map<String, Object> getTodayNutrition(int userNum) {
 	    return userDAO.getTodayTotalNutrition(userNum);
+	}
+
+	// 한끼의 영양성분
+	public Map<String, Object> getMealNutrition(int userNum, String mealType) {
+		return userDAO.getMealNutrition(userNum, mealType);
 	}
     
 }
