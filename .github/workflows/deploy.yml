@@ -82,6 +82,6 @@ jobs:
             sudo docker pull ${{ secrets.DOCKER_USERNAME }}/yummyplanet-frontend:latest
             sudo docker run -d --name yummyplanet-frontend-server --network app-network \
               -p 80:80 \
-              ${{ secrets.DOCKER_USERNAME }}/frontend:latest
+              ${{ secrets.DOCKER_USERNAME }}/yummyplanet-frontend:latest
 
             sudo docker image prune -f
