@@ -22,7 +22,7 @@ jobs:
       - name: Build Frontend Image
         uses: docker/build-push-action@v5
         with:
-          context: ./frontend
+          context: ./project_react
           file: ./project_react/Dockerfile
           push: true
           tags: ${{ secrets.DOCKER_USERNAME }}/yummyplanet-frontend:latest
@@ -31,7 +31,7 @@ jobs:
       - name: Build Backend Image
         uses: docker/build-push-action@v5
         with:
-          context: ./backend
+          context: ./project_java
           file: ./project_java/Dockerfile
           push: true
           tags: ${{ secrets.DOCKER_USERNAME }}/backend:latest
@@ -40,7 +40,7 @@ jobs:
       - name: Build FastAPI Image
         uses: docker/build-push-action@v5
         with:
-          context: ./ai_server # FastAPI 소스 경로
+          context: ./project_python # FastAPI 소스 경로
           file: ./project_python/Dockerfile # Dockerfile의 정확한 경로
           push: true
           tags: ${{ secrets.DOCKER_USERNAME }}/ai_server:latest
