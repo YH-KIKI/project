@@ -6,7 +6,17 @@ import MealRecordModal from "./MealRecordModal";
 import MealDetailModal from "./MealDetailModal";
 import "./MealRecordDetail.css";
 
-const NutrientBar = ({ icon, name, status, type }) => {
+const NutrientBar = ({ icon, name, status, type, ratio = 0, valueText }) => {
+  const safeRatio = Math.min(Math.max(Number(ratio) || 0, 0), 100);
+
+  const colorMap = {
+    carb: "#f8c15d",
+    protein: "#9fcaf4",
+    fat: "#ee8fa2",
+  };
+
+  const barColor = colorMap[type] || "#ffbd4a";
+
   return (
     <div className="nutrient-row">
       <div className={`nutrient-icon ${type}`}>{icon}</div>
@@ -15,13 +25,25 @@ const NutrientBar = ({ icon, name, status, type }) => {
         <p>
           {name} <span className={type}>{status}</span>
         </p>
-        <div className="bar-bg">
-          <div className={`bar-fill ${type}`}></div>
-        </div>
+
+        {type !== "sodium" && (
+          <div className="nutrient-bar-line">
+            <div
+              className="macro-bar-bg"
+              style={{
+                background: `linear-gradient(to right, ${barColor} 0%, ${barColor} ${safeRatio}%, #ececf2 ${safeRatio}%, #ececf2 100%)`,
+              }}
+            />
+            <b>{safeRatio}%</b>
+          </div>
+        )}
+
+        {type === "sodium" && <b className="sodium-value">{valueText}</b>}
       </div>
     </div>
   );
 };
+
 
 const MealRecordDetail = () => {
   const userNum = 1;
@@ -42,6 +64,7 @@ const MealRecordDetail = () => {
   const [aiFeedback, setAiFeedback] = useState("");
   const [modalInitialData, setModalInitialData] = useState(null);
 
+  const [userTargets, setUserTargets] = useState(null);
   const favoriteAddDoneRef = useRef(false);
   const meals = ["아침", "점심", "저녁"];
 
@@ -63,9 +86,10 @@ const MealRecordDetail = () => {
   const dateKey = formatDateKey(selectedDate);
   const recordKey = `${dateKey}_${activeMeal}`;
   const mealData = mealRecords[recordKey] || null;
-
   const favoriteInfo = mealData?.mkNum ? favoriteRecords[mealData.mkNum] : null;
   const isFavorite = !!favoriteInfo;
+
+  
 
   const loadRecordedDates = async () => {
     try {
@@ -164,10 +188,107 @@ const MealRecordDetail = () => {
     }
   };
 
+  // user_privecy 조회
+  const loadUserPrivacy = async () => {
+    try {
+      const res = await axios.get(
+        `http://localhost:8080/api/user/privacy?userNum=${userNum}`
+      );
+
+      setUserTargets(res.data);
+    } catch (err) {
+      console.error("사용자 목표 영양소 조회 실패:", err);
+    }
+  };
+  //계산
+  const getStatusByMealTarget = (current, dailyTarget) => {
+    if (!dailyTarget || dailyTarget <= 0) return "-";
+
+    const mealTarget = dailyTarget / 3;
+    const percent = (current / mealTarget) * 100;
+
+    if (percent < 50) return "부족";
+
+    if (percent < 80) return "주의";
+
+    if (percent <= 120) return "적정";
+
+    if (percent <= 150) return "주의";
+
+    return "과다";
+  };
+
+  const getSodiumStatus = (todaySodium) => {
+  const percent = (todaySodium / 2000) * 100;
+
+  if (percent <= 60) return "적정";
+  if (percent <= 90) return "주의";
+  if (percent <= 100) return "높음";
+
+  return "과다";
+};
+
+  const getMealNutrition = (record) => {
+  const foods = record?.foods || [];
+
+  const carbs = foods.reduce((sum, food) => sum + Number(food.carbs || 0) * Number(food.count || 1), 0);
+  const protein = foods.reduce((sum, food) => sum + Number(food.protein || 0) * Number(food.count || 1), 0);
+  const fat = foods.reduce((sum, food) => sum + Number(food.fat || 0) * Number(food.count || 1), 0);
+  const sodium = foods.reduce((sum, food) => sum + Number(food.sodium || 0) * Number(food.count || 1), 0);
+
+  return { carbs, protein, fat, sodium };
+};
+
+const getTodaySodium = () => {
+  return Object.entries(mealRecords)
+    .filter(([key]) => key.startsWith(dateKey))
+    .reduce((sum, [, record]) => {
+      return sum + getMealNutrition(record).sodium;
+    }, 0);
+};
+
+const getNutritionAnalysis = () => {
+  const mealNutrition = getMealNutrition(mealData);
+  const todaySodium = getTodaySodium();
+
+  const carbKcal = mealNutrition.carbs * 4;
+  const proteinKcal = mealNutrition.protein * 4;
+  const fatKcal = mealNutrition.fat * 9;
+  const totalMacroKcal = carbKcal + proteinKcal + fatKcal;
+
+  const carbRatio = totalMacroKcal ? Math.round((carbKcal / totalMacroKcal) * 100) : 0;
+  const proteinRatio = totalMacroKcal ? Math.round((proteinKcal / totalMacroKcal) * 100) : 0;
+  const fatRatio = totalMacroKcal ? 100 - carbRatio - proteinRatio : 0;
+
+  return {
+    carb: {
+      ratio: carbRatio,
+      status: getStatusByMealTarget(mealNutrition.carbs, userTargets?.upDailyCarbs),
+    },
+    protein: {
+      ratio: proteinRatio,
+      status: getStatusByMealTarget(mealNutrition.protein, userTargets?.upDailyProtein),
+    },
+    fat: {
+      ratio: fatRatio,
+      status: getStatusByMealTarget(mealNutrition.fat, userTargets?.upDailyFat),
+    },
+    sodium: {
+      mealMg: Math.round(mealNutrition.sodium),
+      todayMg: Math.round(todaySodium),
+      percent: Math.round((todaySodium / 2000) * 100),
+      status: getSodiumStatus(todaySodium),
+    },
+  };
+};
+
+const analysis = mealData ? getNutritionAnalysis() : null;
+
   useEffect(() => {
-    loadRecordedDates();
-    loadFavoriteMeals();
-  }, []);
+  loadRecordedDates();
+  loadFavoriteMeals();
+  loadUserPrivacy();
+}, []);
 
   useEffect(() => {
     loadMealsByDate(dateKey);
@@ -553,7 +674,7 @@ const MealRecordDetail = () => {
               <FiHeart />
             </button>
 
-            <div className="meal-main-info">
+            <div className="meal-food-preview-card">
               <div
                 className="meal-photo-box clickable"
                 onClick={() => setIsDetailModalOpen(true)}
@@ -563,18 +684,91 @@ const MealRecordDetail = () => {
                 ) : (
                   <div className="no-img">등록 사진 없음</div>
                 )}
-
-                <div className="photo-click-label">상세보기</div>
               </div>
 
-              <div className="nutrition-area">
-                <h4>AI 영양분석</h4>
+              <div className="meal-food-preview-info">
+                <div className="food-preview-title">
+                  <span>🍴</span>
+                  <strong>등록 음식 {mealData.foods.length}개</strong>
+                </div>
 
-                <NutrientBar icon="🌾" name="탄수화물" status="적정" type="carb" />
-                <NutrientBar icon="🥩" name="단백질" status="충분" type="protein" />
-                <NutrientBar icon="🥑" name="지방" status="적정" type="fat" />
-                <NutrientBar icon="🧂" name="나트륨" status="주의" type="sodium" />
+                <div className="food-chip-row">
+                  {mealData.foods.slice(0,2).map((food)=>(
+                    <span
+                      className="food-chip"
+                      key={food.foNum}
+                    >
+                      {food.name}
+                    </span>
+                  ))}
+
+                  {mealData.foods.length > 2 && (
+                    <span className="food-chip more">
+                      +{mealData.foods.length - 2}개
+                    </span>
+                  )}
+                </div>
               </div>
+            </div>
+
+            <div className="nutrition-area">
+              <h4>AI 영양분석 ✨</h4>
+
+              {analysis && (
+                <>
+                  <NutrientBar
+                    icon="🌽"
+                    name="탄수화물"
+                    status={analysis.carb.status}
+                    type="carb"
+                    ratio={analysis.carb.ratio}
+                  />
+
+                  <NutrientBar
+                    icon="🥩"
+                    name="단백질"
+                    status={analysis.protein.status}
+                    type="protein"
+                    ratio={analysis.protein.ratio}
+                  />
+
+                  <NutrientBar
+                    icon="🥑"
+                    name="지방"
+                    status={analysis.fat.status}
+                    type="fat"
+                    ratio={analysis.fat.ratio}
+                  />
+
+                  <NutrientBar
+                    icon="🧂"
+                    name="나트륨"
+                    status={analysis.sodium.status}
+                    type="sodium"
+                    valueText={`${analysis.sodium.mealMg}mg`}
+                  />
+
+                  <div className="sodium-total-box">
+                    <span>
+                      오늘 누적 {analysis.sodium.todayMg}/2000mg
+                    </span>
+
+                    <div className="sodium-total-bar">
+                      <div
+                        style={{
+                          width:
+                            `${Math.min(
+                              analysis.sodium.percent,
+                              100
+                            )}%`
+                        }}
+                      />
+                    </div>
+
+                    <b>{analysis.sodium.percent}%</b>
+                  </div>
+                </>
+              )}
             </div>
 
             <div className="meal-summary-row">
