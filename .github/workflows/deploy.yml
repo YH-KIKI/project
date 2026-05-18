@@ -80,7 +80,7 @@ jobs:
             sudo docker stop frontend-server || true
             sudo docker rm frontend-server || true
             sudo docker pull ${{ secrets.DOCKER_USERNAME }}/yummyplanet-frontend:latest
-            sudo docker run -d --name yummyplanet-frontend-server --network app-network \
+            sudo docker run -d --name frontend-server --network app-network \
               -p 80:80 \
               ${{ secrets.DOCKER_USERNAME }}/yummyplanet-frontend:latest
 
