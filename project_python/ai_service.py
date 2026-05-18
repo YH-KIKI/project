@@ -22,20 +22,6 @@ except Exception as e:
     print(f"⚠️ [AI] Mediapipe 로드 실패 (자세 분석은 임시 비활성화됩니다): {e}")
     USE_MEDIAPIPE = False
 
-# ==========================================
-# KoBART 모델 전역 로드 (서버 켜질 때 1번만)
-# ==========================================
-model = None
-tokenizer = None
-if TRANSFORMERS_AVAILABLE:
-    print("⏳ [Python] KoBART 요약 모델 로딩 중... (최초 1회 다운로드)")
-    try:
-        model_name = "digit82/kobart-summarization"
-        tokenizer = PreTrainedTokenizerFast.from_pretrained(model_name)
-        model = BartForConditionalGeneration.from_pretrained(model_name)
-        print("✅ [Python] KoBART 모델 로딩 완료!")
-    except Exception as e:
-        print(f"❌ [Python] 모델 로딩 실패: {e}")
 
 # ==========================================
 # MySQL 데이터베이스 연결 설정
