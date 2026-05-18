@@ -55,5 +55,14 @@ public class UserInformation {
 	    // 마이페이지 대시보드용 오늘 섭취량 합계 반환
 	    return userService.getTodayNutrition(userNum);
 	}
+	
+	// 한끼의 영양성분
+	@GetMapping("/api/meal/current-nutrition")
+	public Map<String, Object> getCurrentNutrition(
+	    @RequestParam("userNum") int userNum, 
+	    @RequestParam("mealType") String mealType) {
+	    
+	    return userService.getMealNutrition(userNum, mealType); 
+	}
 
 }

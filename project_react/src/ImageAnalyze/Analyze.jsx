@@ -142,25 +142,23 @@ const Analyze = () => {
           }
       });
       alert("식단 기록중...");
-      console.log(response)
-      setShowModal(false);
-      // 서버가 문자열만 주더라도, React가 계산한 mealData를 직접 넘깁니다!
-      // mealData는 아마 [{foodName: '제육', kcal: 500...}] 이런 식
-      // 이걸 합산한 total을 만들어서 넘겨야 합니다.
-      const totalNutrients = selectedFoods.reduce((acc, food) => ({
-        kcal: acc.kcal + (food.kcal * (food.amount / 100)), // 100g당 기준일 때
-        carbs: acc.carbs + (food.carbs * (food.amount / 100)),
-        protein: acc.protein + (food.protein * (food.amount / 100)),
-        fat: acc.fat + (food.fat * (food.amount / 100)),
-        sodium: acc.sodium + (food.sodium * (food.amount / 100)),
-      }), { kcal: 0, carbs: 0, protein: 0, fat: 0, sodium: 0 });
+      // 그 한 끼'의 데이터만 백엔드에 요청
+      const nutritionRes = await axios.get(
+        //Controller : UserInformation
+        `http://localhost:8080/api/meal/current-nutrition?userNum=${user.user_num}&mealType=${mealType}`,
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
 
-    navigate('/evaluation', { 
-      state: { 
-        mealResult: totalNutrients, // 👈 여기서 계산해서 넘김!
-        mealType: mealType       // '아침', '점심' 등 종류
-      } 
-    });
+      alert("식단 기록 완료! 평가 리포트로 이동합니다. 📊");
+      setShowModal(false);
+
+      // 자바가 쿼리문으로 완벽하게 뽑아다 준 한 끼 데이터(nutritionRes.data)를 들고 이동
+      navigate('/evaluation', { 
+        state: { 
+          mealResult: nutritionRes.data, // { kcal, carbs, protein, fat, sodium }
+          mealType: mealType 
+        } 
+      });
     } catch (error) {
       console.error("기록 실패", error);
     // 중복식사 알림 등를 alert으로 띄웁니다.
