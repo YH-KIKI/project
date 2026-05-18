@@ -43,7 +43,7 @@ jobs:
           context: ./project_python # FastAPI 소스 경로
           file: ./project_python/Dockerfile # Dockerfile의 정확한 경로
           push: true
-          tags: ${{ secrets.DOCKER_USERNAME }}/ai_server:latest
+          tags: ${{ secrets.DOCKER_USERNAME }}/ai-server:latest
 
       # 4. EC2 접속 및 배포
       - name: Deploy to EC2
