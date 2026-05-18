@@ -672,6 +672,146 @@
   width: auto;
 }
 
+/* =========================
+   임시 추천 결과 카드 예쁘게 수정
+========================= */
+
+.recipe-section {
+  padding: 18px;
+  margin-bottom: 18px;
+}
+
+.recipe-header {
+  margin-bottom: 14px;
+}
+
+.recipe-header h3 {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 800;
+}
+
+.recipe-header span {
+  font-size: 13px;
+  color: #8a7474;
+}
+
+/* 카드 3단 → 1단으로 변경 */
+.recipe-card {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+
+  padding: 14px;
+  border: 1px solid #f2dddd;
+  border-radius: 22px;
+  background: #fffdfc;
+  box-shadow: 0 8px 22px rgba(255, 150, 170, 0.12);
+}
+
+/* 이미지 꽉 차게 */
+.recipe-card img {
+  width: 100%;
+  height: 190px;
+  border-radius: 18px;
+  object-fit: cover;
+}
+
+/* 제목 영역 */
+.recipe-info h4 {
+  margin: 0 0 8px;
+  font-size: 22px;
+  font-weight: 850;
+  line-height: 1.25;
+  color: #241717;
+}
+
+.recipe-info h4 span {
+  display: inline-block;
+  margin-left: 8px;
+  padding: 5px 9px;
+  border-radius: 999px;
+  background: #ffe6eb;
+  color: #ff5d84;
+  font-size: 12px;
+  font-weight: 800;
+  vertical-align: middle;
+}
+
+.recipe-items {
+  margin: 0 0 8px;
+  font-size: 14px;
+  font-weight: 700;
+  color: #4b3b3b;
+  line-height: 1.45;
+}
+
+.recipe-desc {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 500;
+  color: #6b5959;
+  line-height: 1.55;
+}
+
+/* 영양 정보 박스 */
+.recipe-nutrients {
+  border: 1px solid #f4dcdc;
+  border-radius: 18px;
+  padding: 14px;
+  background: #fff7f8;
+}
+
+.nutrient-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.nutrient-grid p {
+  margin: 0;
+  padding: 8px 10px;
+  border-radius: 12px;
+  background: #ffffff;
+  font-size: 13px;
+  font-weight: 700;
+  color: #3f3030;
+}
+
+.recipe-kcal {
+  margin: 12px 0;
+  padding: 16px;
+  background: #fff0f3;
+  border-radius: 16px;
+  text-align: center;
+}
+
+.recipe-kcal span {
+  display: block;
+  margin-bottom: 4px;
+  font-size: 12px;
+  font-weight: 700;
+  color: #8a7474;
+}
+
+.recipe-kcal strong {
+  font-size: 24px;
+  font-weight: 900;
+  color: #241717;
+}
+
+.recipe-nutrients button {
+  width: 100%;
+  height: 44px;
+  border: 1px solid #ffb8c4;
+  border-radius: 14px;
+  background: #fff0f3;
+  color: #3d2d2d;
+  font-size: 15px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
 /* 630px 화면 대응 */
 @media (max-width: 700px) {
   .ingredient-input-area {
