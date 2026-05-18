@@ -48,8 +48,8 @@ public class SecurityConfig {
                                  "/api/food/**", //[연희/추가] food 테이블 불러오는 API
                                  "/api/character/**" ,
                                  "/api/v1/bodycheck/**", // [추가/재근] 눈바디
-                                 "/api/v1/user/verify-password" // [추가/재근] 눈바디 비밀번호
-                                 "/api/favorite/**" //[연희/추가] 즐찾들
+                                 "/api/v1/user/verify-password", // [추가/재근] 눈바디 비밀번호
+                                 "/api/favorite/**", //[연희/추가] 즐찾들
                                  "/api/report-fail"//[준성/추가] 음식사진인증실패
                                  ).permitAll() 
                 .anyRequest().authenticated() 
