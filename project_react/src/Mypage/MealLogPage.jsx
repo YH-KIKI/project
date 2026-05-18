@@ -34,7 +34,7 @@ import axios from 'axios';
   // 내부 스타일 정의
   const styles = {
     container: { display: 'flex', backgroundColor: '#FDF7F5', minHeight: '100vh' },
-    main: { flex: 1, padding: '30px', overflow: 'hidden' },
+    main: { flex: 1, overflow: 'hidden' },
     header: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' },
     grid: { 
       display: 'grid', 
@@ -62,9 +62,6 @@ import axios from 'axios';
   };
 
   return (
-    <div className="page-background">
-      <div className="app-wrapper">
-      <Sidebar />
       <div style={styles.main}>
         <div style={styles.header}>
           <h2 style={{fontSize: '22px', fontWeight: 'bold'}}>요즘의 식단 기록</h2>
@@ -89,8 +86,6 @@ import axios from 'axios';
           ))}
         </div>
       </div>
-    </div>
-	</div>
   );
 };
 

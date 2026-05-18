@@ -38,19 +38,46 @@ const SignupPage = () => {
     }
 
     try {
+      // 1. 먼저 회원가입 API를 정상적으로 호출합니다.
       await axios.post('http://localhost:8080/api/signup', {
         userId: userid,
         userPassWord: password,
         userName: username,
         userEmail: email,
       });
-      alert("회원가입 성공! 로그인 페이지로 이동합니다.");
-      navigate('/login'); // 가입 성공하면 자동으로 로그인 페이지로 슝!
-    } catch (error) {
-      alert("가입 실패! 이미 있는 아이디일 수 있어요.");
-    }
-  };  
 
+      // 2. 🌟 [여기서부터 치트키] 가입 성공 직후, 방금 가입한 아이디/비번으로 로그인 API를 연달아 강제 호출합니다!
+      // (사용자님 LoginPage.jsx에 있던 보낼 데이터 규격과 완벽하게 맞췄습니다.)
+      const loginResponse = await axios.post('http://localhost:8080/api/login', {
+        username: username, // 혹시 자바가 username을 요구할까봐 닉네임도 같이 토스
+        userid: userid,     // 로그인용 아이디
+        password: password  // 로그인용 비밀번호
+      });
+
+      // 3. 로그인 API가 돌려준 진짜 완벽한 토큰과 유저 정보를 가로챕니다!
+      const { token, refreshToken, user } = loginResponse.data;
+
+      // 4. 브라우저 로컬스토리지에 영혼까지 끌어모아 완벽하게 구워버립니다.
+      if (token) {
+        localStorage.setItem('login_token', token);
+      }
+      if (refreshToken) {
+        localStorage.setItem('refresh_token', refreshToken);
+      }
+      if (user) {
+        localStorage.setItem('user', JSON.stringify(user));
+      }
+
+      alert("회원가입 및 인증 완료! 개인정보 입력 페이지로 이동합니다. 🏃‍♂️");
+      
+      // 5. 이제 완벽한 진짜 토큰을 가진 상태이므로, 보안 필터에 안 튕기고 다이렉트로 통과합니다!
+      navigate('/information'); 
+
+    } catch (error) {
+      console.error("가입 및 자동 로그인 실패 상세:", error);
+      alert("가입 처리는 되었으나 인증 연동에 실패했습니다. 이미 존재하는 아이디인지 확인해주세요.");
+    }
+  };
   return (
     /* 🌟 page-background 클래스를 주면 전체 배경 이미지가 나타납니다! */
     <div className="page-background">
