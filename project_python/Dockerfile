@@ -25,6 +25,7 @@ RUN pip install --no-cache-dir --upgrade pip setuptools wheel && \
 # 2단계: 실행 스테이지 (경량화 환경)
 # ---------------------------------------
 FROM python:3.12-slim
+RUN apt-get update && apt-get install -y libgl1-mesa-glx libglib2.0-0 libsm6 libxext6 libxrender-dev
 
 WORKDIR /project_python
 

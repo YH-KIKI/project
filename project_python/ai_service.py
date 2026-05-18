@@ -7,16 +7,6 @@ import numpy as np
 import base64
 import math
 
-# ==========================================
-# 🌟 KoBART AI 피드백 생성용 라이브러리
-# ==========================================
-try:
-    from transformers import PreTrainedTokenizerFast, BartForConditionalGeneration
-    import torch
-    TRANSFORMERS_AVAILABLE = True
-except ImportError:
-    TRANSFORMERS_AVAILABLE = False
-    print("⚠️ [AI] transformers 라이브러리가 없습니다. 'pip install transformers torch'를 실행해주세요.")
 
 # ==========================================
 #  Mediapipe 안전 모드 (Try-Except)
