@@ -59,11 +59,11 @@ jobs:
             # AI 서버 실행
             sudo docker stop ai-server || true
             sudo docker rm ai-server || true
-            sudo docker pull ${{ secrets.DOCKER_USERNAME }}/ai_server:latest
+            sudo docker pull ${{ secrets.DOCKER_USERNAME }}/ai-server:latest
             sudo docker run -d --name ai-server --network app-network \
               -p 8000:8000 \
               -e GOOGLE_AI_API_KEY="${{ secrets.GOOGLE_AI_API_KEY }}" \
-              ${{ secrets.DOCKER_USERNAME }}/ai_server:latest
+              ${{ secrets.DOCKER_USERNAME }}/ai-server:latest
 
             # Spring Boot 실행 (포트 개방 안함, 내부망에만 존재)
             sudo docker stop backend-server || true
