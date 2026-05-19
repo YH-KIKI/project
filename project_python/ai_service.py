@@ -27,7 +27,7 @@ except Exception as e:
 # ==========================================
 # MySQL 데이터베이스 연결 설정
 # ==========================================
-DB_URL = os.environ.get("DB_URL")
+DB_URL = os.environ.get("DB_URL") or "mysql+pymysql://root:root@localhost:3306/yummy"
 engine = create_engine(DB_URL)
 
 # ==========================================
