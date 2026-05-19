@@ -70,11 +70,13 @@ jobs:
             sudo docker rm backend-server || true
             sudo docker pull ${{ secrets.DOCKER_USERNAME }}/backend:latest
             sudo docker run -d --name backend-server --network app-network \
-              -e AI_SERVER_URL="http://ai-server:8000" \
+              -p 8080:8080 \
               -e DB_URL="${{ secrets.DB_URL }}" \
               -e DB_USERNAME="${{ secrets.DB_USERNAME }}" \
               -e DB_PASSWORD="${{ secrets.DB_PASSWORD }}" \
-              ${{ secrets.DOCKER_USERNAME }}/backend:latest
+              -e AI_SERVER_URL="${{ secrets.AI_SERVER_URL }}" \  
+              ${{ secrets.DOCKER_USERNAME }}/backend:latest \
+              java -Xmx512m -Dspring.profiles.active=prod -jar /app.jar
 
             # Nginx(React) 실행 (80 포트 개방)
             sudo docker stop frontend-server || true
