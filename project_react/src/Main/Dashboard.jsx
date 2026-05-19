@@ -25,7 +25,7 @@ const Dashboard = () => {
 
           console.log("1. [React] 스프링부트로 보낼 준비 완료 👇");
           
-          const response = await axios.post('/api/v1/ai/api/detect/proxy', formData, {
+          const response = await axios.post('/api/detect/proxy', formData, {
               headers: { 'Content-Type': 'multipart/form-data' }
           });
           

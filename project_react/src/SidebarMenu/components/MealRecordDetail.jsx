@@ -390,7 +390,7 @@ const MealRecordDetail = () => {
       );
 
       const res = await axios.post(
-        "http://localhost:8000/api/v1/ai/meal-feedback",
+        "http://localhost:8000/api/ai/meal-feedback",
         {
           mealType: activeMeal,
           kcal: mealData.totalKcal,

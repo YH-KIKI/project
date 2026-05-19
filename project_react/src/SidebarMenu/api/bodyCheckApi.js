@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 // 스프링부트 주소 (포트 8080)
-const API_BASE_URL = 'http://localhost:8080/api/v1/bodycheck';
+const API_BASE_URL = '/api/bodycheck';
 
 // 스프링부트로 눈바디 사진과 분석 타입을 쏘는 함수
 export const uploadBodyCheckImage = async (imageFile, analyzeType) => {

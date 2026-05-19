@@ -72,7 +72,7 @@ const BodyCheck = ({ userNum = 1 }) => {
   // =====================================================================
   const fetchAlbumRecords = useCallback(async () => {
     try {
-      const response = await axios.get(`${SERVER_URL}/api/v1/bodycheck/list`, {
+      const response = await axios.get(`${SERVER_URL}/api/bodycheck/list`, {
         params: { userNum: userNum } 
       });
       // DB에서 가져온 데이터 형태: [{bcNum, bcImagePath, bcType, bcAiResult, bcDate}]
@@ -94,7 +94,7 @@ const BodyCheck = ({ userNum = 1 }) => {
   const handleDeleteRecord = async (bcNum) => {
     if (window.confirm("정말로 이 기록을 삭제하시겠습니까?")) {
       try {
-        await axios.delete(`${SERVER_URL}/api/v1/bodycheck/${bcNum}`);
+        await axios.delete(`${SERVER_URL}/api/bodycheck/${bcNum}`);
         // 화면에서도 지우기
         setAlbumRecords(albumRecords.filter(record => record.bcNum !== bcNum));
         alert("삭제되었습니다. 🗑️");
@@ -118,7 +118,7 @@ const BodyCheck = ({ userNum = 1 }) => {
   const handlePasswordSubmit = async () => {
     if (!passwordInput.trim()) return;
     try {
-      const response = await axios.post(`${SERVER_URL}/api/v1/user/verify-password?userNum=${userNum}`, { password: passwordInput }, { withCredentials: true });
+      const response = await axios.post(`${SERVER_URL}/api/user/verify-password?userNum=${userNum}`, { password: passwordInput }, { withCredentials: true });
       if (response.data === true) { 
         setIsUnlocked(true); 
       } else { 
