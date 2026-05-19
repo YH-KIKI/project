@@ -8,6 +8,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import kr.hi.project.dao.UserDao;
+import kr.hi.project.dto.FoodDTO;
 import kr.hi.project.dto.UserDTO;
 import kr.hi.project.dto.UserPrivacyDTO;
 
@@ -68,6 +69,25 @@ public class UserService {
                 userDAO.insertUserAllergy(dto.getUserNum(), alName);
             }
         }
+        int userNum = dto.getUserNum();
+        // 기존 선호도 테이블(food_favorite) 초기화
+        userDAO.deleteFoodFavorites(userNum);
+
+	    // 좋아하는 음식 리스트 순회하며 INSERT (ff_favorite_food = 1)
+	    if (dto.getFavoriteFoods() != null && !dto.getFavoriteFoods().isEmpty()) {
+	        for (int foNum : dto.getFavoriteFoods()) {
+	        	userDAO.insertFoodFavorite(userNum, foNum, 1);
+	        }
+	    }
+
+	    // 싫어하는 음식 리스트 순회하며 INSERT (ff_favorite_food = 0)
+	    if (dto.getDislikeFoods() != null && !dto.getDislikeFoods().isEmpty()) {
+	        for (int foNum : dto.getDislikeFoods()) {
+	        	userDAO.insertFoodFavorite(userNum, foNum, 0);
+	        }
+	    }
+        
+        
     }
 
     //영양소 계산 전용 내부 메서드
@@ -124,6 +144,11 @@ public class UserService {
 	// 한끼의 영양성분
 	public Map<String, Object> getMealNutrition(int userNum, String mealType) {
 		return userDAO.getMealNutrition(userNum, mealType);
+	}
+	
+	// 음식검색
+	public List<FoodDTO> searchFoodByKeyword(String keyword) {
+		return userDAO.searchFoodByKeyword(keyword);
 	}
     
 }

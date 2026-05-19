@@ -155,20 +155,63 @@
     <!-- 한끼영양성분 -->
     <select id="getMealNutrition" resultType="map">
 	    SELECT 
+	      mk.mk_num AS mkNum,  
+	      md.mday_num AS mdayNum,
 	      IFNULL(SUM(md.md_kcal), 0) AS kcal,
-	      
-	      /* f.fo_carbs, f.fo_protein, f.fo_fat, f.fo_natrium 컬럼명은 */
-	      /* 기존 대시보드 쿼리와 동일하게 food(f) 테이블 기준으로 합산합니다. */
-	      IFNULL(ROUND(SUM(f.fo_carbs * (md.md_portion / 100.0)), 1), 0) AS carbs,
-	      IFNULL(ROUND(SUM(f.fo_protein * (md.md_portion / 100.0)), 1), 0) AS protein,
-	      IFNULL(ROUND(SUM(f.fo_fat * (md.md_portion / 100.0)), 1), 0) AS fat,
-	      IFNULL(ROUND(SUM(f.fo_natrium * (md.md_portion / 100.0)), 1), 0) AS sodium
-	      
+	      IFNULL(ROUND(SUM(f.fo_carbs * md.md_portion), 1), 0) AS carbs,
+	      IFNULL(ROUND(SUM(f.fo_protein * md.md_portion), 1), 0) AS protein,
+	      IFNULL(ROUND(SUM(f.fo_fat * md.md_portion), 1), 0) AS fat,
+	      IFNULL(ROUND(SUM(f.fo_natrium * md.md_portion), 1), 0) AS sodium
 	  FROM meal_detail md
 	  JOIN food f ON md.fo_num = f.fo_num
-	  JOIN meal_log mk ON md.mk_num = mk.mk_num  WHERE mk.user_num = #{userNum} 
-	    AND mk.mk_diet_date = CURDATE() 
-	    AND mk.mk_meal_type = #{mealType}  
+	  JOIN meal_log mk ON md.mk_num = mk.mk_num
+	  
+	  WHERE mk.user_num = #{userNum} 
+	    AND DATE(mk.mk_created_at) = CURDATE() 
+	    AND mk.mk_meal_type = #{mealType}
+	    
+	  GROUP BY mk.mk_num, md.mday_num
+  	</select>
+  	
+  	<!-- 음식검색 -->
+  	<select id="searchFoodByKeyword" resultType="kr.hi.project.dto.FoodDTO">
+        SELECT 
+            fo_num        AS foNum,
+            fo_name       AS foName,
+            fo_base_gram  AS foBaseGram,
+            fo_type       AS foType
+        FROM food 
+        WHERE fo_name LIKE CONCAT('%', #{keyword}, '%')
     </select>
-
+    
+	<!-- 좋아하는 음식, 싫어하는 음식초기화 -->
+    <delete id="deleteFoodFavorites">
+        DELETE FROM food_favorite 
+        WHERE user_num = #{userNum}
+    </delete>
+    
+	<!-- 좋아하는 음식, 싫어하는 음식입력 -->
+    <insert id="insertFoodFavorite">
+        INSERT INTO food_favorite (ff_favorite_food, user_num, fo_num)
+        VALUES (#{isFavorite}, #{userNum}, #{foNum})
+    </insert>
+  	
+  	<select id="findFavoriteFoodsBySub" resultType="kr.hi.project.dto.FoodDTO">
+	    SELECT 
+	        f.fo_num  AS foNum,
+	        f.fo_name AS foName
+	    FROM food_favorite ff
+	    JOIN food f ON ff.fo_num = f.fo_num
+	    WHERE ff.user_num = #{userNum} AND ff.ff_favorite_food = 1
+	</select>
+	
+	<select id="findDislikeFoodsBySub" resultType="kr.hi.project.dto.FoodDTO">
+	    SELECT 
+	        f.fo_num  AS foNum,
+	        f.fo_name AS foName
+	    FROM food_favorite ff
+	    JOIN food f ON ff.fo_num = f.fo_num
+	    WHERE ff.user_num = #{userNum} AND ff.ff_favorite_food = 0
+	</select>
+	
 </mapper>

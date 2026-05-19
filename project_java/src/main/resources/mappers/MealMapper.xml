@@ -108,5 +108,13 @@
             #{userNum}
         )
     </insert>
+    <!-- 사진인식하고 식단 상세 파일과 로그를 지우기 -->
+    <delete id="deleteMealDetailByMkNum">
+	    DELETE FROM meal_detail WHERE mk_num = #{mkNum}
+	</delete>
+	<!-- 사진인식하고 식단 상세 파일과 로그를 지우기 -->
+	<delete id="deleteMealLogByMkNum">
+	    DELETE FROM meal_log WHERE mk_num = #{mkNum}
+	</delete>
 
 </mapper>

@@ -54,7 +54,8 @@ public class SecurityConfig {
 	                             "/api/login/**", 
 	                             "/login/**",
 	                             "/kakao", 
-	                             "/api/login/kakao/register"
+	                             "/api/login/kakao/register",
+	                             "/api/user/food/search"
                                  ).permitAll() 
                 // 유효한 토큰이 있어야 들어갈수있는 페이지
                 //.requestMatchers("/api/record").authenticated()
