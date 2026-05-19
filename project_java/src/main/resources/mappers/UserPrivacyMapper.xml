@@ -15,5 +15,22 @@
         WHERE 
             user_num = #{userNum}
     </select>
+    
+    
+    <!-- 프라이버시 정보 조회 [대빵님//추가]-->
+    <select id="findNutritionTargetByUserNum"
+        parameterType="int"
+        resultType="kr.hi.project.dto.UserPrivacyDTO">
+
+	    SELECT
+	        user_num AS userNum,
+	        up_daily_kcal AS userDailyKcal,
+	        up_daily_carbs AS userDailyCarbs,
+	        up_daily_protein AS userDailyProtein,
+	        up_daily_fat AS userDailyFat,
+	        up_daily_natrium AS userDailyNatrium
+	    FROM user_privacy
+	    WHERE user_num = #{userNum}
+	</select>
 
 </mapper>

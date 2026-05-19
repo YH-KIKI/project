@@ -2,16 +2,18 @@ package kr.hi.project.controller;
 
 import java.util.List;
 
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
-import kr.hi.project.dto.MealRecordRequestDTO;
 import kr.hi.project.dto.MealDetailDTO;
+import kr.hi.project.dto.MealRecordRequestDTO;
 import kr.hi.project.service.MealRecordService;
 import lombok.RequiredArgsConstructor;
 
@@ -22,12 +24,15 @@ public class MealRecordController {
     
     private final MealRecordService mealRecordService;
     
-
-    @PostMapping("/record")
+    @PostMapping(
+        value = "/record",
+        consumes = MediaType.MULTIPART_FORM_DATA_VALUE
+    )
     public ResponseEntity<?> saveMealRecord(
-            @RequestBody MealRecordRequestDTO request) {
+            @RequestPart("mealData") MealRecordRequestDTO request,
+            @RequestPart(value = "mkImageFile", required = false) MultipartFile mealImageFile) {
 
-        mealRecordService.saveMealRecord(request);
+        mealRecordService.saveMealRecord(request, mealImageFile);
 
         return ResponseEntity.ok(request);
     }
@@ -48,5 +53,4 @@ public class MealRecordController {
     public List<String> getRecordedDates(@RequestParam("userNum") int userNum) {
         return mealRecordService.getRecordedDates(userNum);
     }
-    
 }

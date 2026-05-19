@@ -89,7 +89,7 @@ const MealRecordDetail = () => {
   const favoriteInfo = mealData?.mkNum ? favoriteRecords[mealData.mkNum] : null;
   const isFavorite = !!favoriteInfo;
 
-  
+   
 
   const loadRecordedDates = async () => {
     try {
@@ -140,6 +140,8 @@ const MealRecordDetail = () => {
       const converted = {};
 
       res.data.forEach((item) => {
+        console.log("백엔드 item:", item);
+console.log("item.mkImage:", item.mkImage);
         const key = `${targetDateKey}_${item.mkMealType}`;
 
         if (!converted[key]) {
@@ -148,9 +150,13 @@ const MealRecordDetail = () => {
             mkMealType: item.mkMealType,
             totalKcal: 0,
             foods: [],
-            imageUrl: null,
+            imageUrl: item.mkImage
+              ? `http://localhost:8080${item.mkImage}`
+              : null,
           };
         }
+
+        console.log("converted imageUrl:", converted[key].imageUrl);
 
         converted[key].foods.push({
           id: item.foNum,
@@ -194,7 +200,6 @@ const MealRecordDetail = () => {
       const res = await axios.get(
         `http://localhost:8080/api/user/privacy?userNum=${userNum}`
       );
-
       setUserTargets(res.data);
     } catch (err) {
       console.error("사용자 목표 영양소 조회 실패:", err);
@@ -213,7 +218,7 @@ const MealRecordDetail = () => {
 
     if (percent <= 120) return "적정";
 
-    if (percent <= 150) return "주의";
+    if (percent <= 150) return "과다";
 
     return "과다";
   };
@@ -260,25 +265,45 @@ const getNutritionAnalysis = () => {
   const proteinRatio = totalMacroKcal ? Math.round((proteinKcal / totalMacroKcal) * 100) : 0;
   const fatRatio = totalMacroKcal ? 100 - carbRatio - proteinRatio : 0;
 
+  // 디버깅용 삭제예정
+  console.log(
+  "목표값 확인",
+  userTargets?.userDailyCarbs,
+  userTargets?.userDailyProtein,
+  userTargets?.userDailyFat
+  );
+  
   return {
     carb: {
       ratio: carbRatio,
-      status: getStatusByMealTarget(mealNutrition.carbs, userTargets?.upDailyCarbs),
+      status: getStatusByMealTarget(
+        mealNutrition.carbs,
+        userTargets?.userDailyCarbs
+      ),
     },
+
     protein: {
       ratio: proteinRatio,
-      status: getStatusByMealTarget(mealNutrition.protein, userTargets?.upDailyProtein),
+      status: getStatusByMealTarget(
+        mealNutrition.protein,
+        userTargets?.userDailyProtein
+      ),
     },
+
     fat: {
       ratio: fatRatio,
-      status: getStatusByMealTarget(mealNutrition.fat, userTargets?.upDailyFat),
+      status: getStatusByMealTarget(
+        mealNutrition.fat,
+        userTargets?.userDailyFat
+      ),
     },
+
     sodium: {
       mealMg: Math.round(mealNutrition.sodium),
       todayMg: Math.round(todaySodium),
       percent: Math.round((todaySodium / 2000) * 100),
       status: getSodiumStatus(todaySodium),
-    },
+    }
   };
 };
 
@@ -391,23 +416,46 @@ const analysis = mealData ? getNutritionAnalysis() : null;
 
   const handleSaveMeal = async (data) => {
     try {
-      const requestData = {
+      const foods = data.foods.map((food) => ({
+        foNum: food.id,
+        mdPortion: food.count,
+        mdKcal: Math.round(food.kcal * food.count),
+      }));
+
+      const mealJson = {
         userNum,
         mkNum: mealData?.mkNum || null,
         mkMealType: data.mealType,
-
-        foods: data.foods.map((food) => ({
-          foNum: food.id,
-          mdPortion: food.count,
-          mdKcal: Math.round(food.kcal * food.count),
-        })),
+        foods
       };
 
-      console.log("DB 저장 요청:", requestData);
+      const formData = new FormData();
+
+      formData.append(
+        "mealData",
+        new Blob(
+          [JSON.stringify(mealJson)],
+          { type: "application/json" }
+        )
+      );
+
+      if (data.mealImageFile) {
+        formData.append(
+          "mkImageFile",
+          data.mealImageFile
+        );
+      }
+
+      console.log("저장 data:", data);
+      console.log("mealImageFile:", data.mealImageFile);
+
+      for (let pair of formData.entries()) {
+        console.log(pair[0], pair[1]);
+      }
 
       const res = await axios.post(
         "http://localhost:8080/api/meal/record",
-        requestData
+        formData
       );
 
       console.log("식단 저장 응답:", res.data);
@@ -809,7 +857,13 @@ const analysis = mealData ? getNutritionAnalysis() : null;
 
         {isRecordModalOpen && (
           <MealRecordModal
-            key={`${recordKey}-${mealData?.foods?.length || 0}-${isRecordModalOpen}`}
+            key={`${recordKey}-${
+              mealData?.foods?.length || 0
+            }-${
+              mealData?.imageUrl || "none"
+            }-${
+              isRecordModalOpen
+            }`}
             mealType={activeMeal}
             selectedDate={formatDateText(selectedDate)}
             initialData={modalInitialData || mealData}

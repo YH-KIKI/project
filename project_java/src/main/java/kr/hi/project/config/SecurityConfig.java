@@ -47,6 +47,7 @@ public class SecurityConfig {
                                  "/api/v1/bodycheck/**", // [추가/재근] 눈바디
                                  "/api/v1/user/verify-password", // [추가/재근] 눈바디 비밀번호
                                  "/api/favorite/**", //[연희/추가] 즐찾들
+                                 "/api/user/privacy/**", //[연희/추가] 프라이버시 영양성분 조회
                                  "/api/report-fail",//[준성/추가] 음식사진인증실패
                                  "/api/user/info",
 	                             "/api/record",

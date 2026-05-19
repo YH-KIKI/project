@@ -181,7 +181,8 @@
 	        f.fo_protein AS foProtein,
 	        f.fo_fat AS foFat,
 	        f.fo_natrium AS foNatrium,
-	
+			
+			ml.mk_image AS mkImage,
 	        ml.mk_meal_type AS mkMealType
 	    FROM meal_detail md
 	    JOIN meal_log ml

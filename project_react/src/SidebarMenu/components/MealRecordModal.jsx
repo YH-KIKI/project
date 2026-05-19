@@ -1,5 +1,5 @@
 import axios from "axios";
-import React, { useMemo, useState } from "react";
+import React, { useMemo, useState, useEffect } from "react";
 import { FiTrash2, FiHeart } from "react-icons/fi";
 import MealFavoriteDetailModal from "./MealFavoriteDetailModal";
 import "./MealRecordDetail.css";
@@ -16,12 +16,62 @@ function MealRecordModal({
   const [keyword, setKeyword] = useState("");
 
   const [favorites, setFavorites] = useState([]);
-  const [searchResults, setSearchResults] = useState([]);
   const [favoriteFoods, setFavoriteFoods] = useState([]);
   const [favoriteMeals, setFavoriteMeals] = useState([]);
+  const [searchResults, setSearchResults] = useState([]);
   const [selectedMeal, setSelectedMeal] = useState(null);
 
   const userNum = 1;
+
+  //사진 업로드
+  const [dragActive,setDragActive]=useState(false);
+  const [mealImageFile, setMealImageFile] = useState(null);
+  const getImageUrl = (url) => {
+    if (!url) return null;
+
+    if (url.startsWith("blob:")) return url;
+    if (url.startsWith("http")) return url;
+
+    return `http://localhost:8080${url}`;
+  };
+
+  const [mealImagePreview, setMealImagePreview] = useState(
+    getImageUrl(initialData?.imageUrl || initialData?.mkImage)
+  );
+
+  useEffect(() => {
+    setMealImagePreview(
+      getImageUrl(
+        initialData?.imageUrl ||
+        initialData?.mkImage
+      )
+    );
+  }, [initialData]);
+
+  //AI사진인식
+  const [aiPhotoFile, setAiPhotoFile] = useState(null);
+  const [aiPhotoPreview, setAiPhotoPreview] = useState(null);
+
+  const handleAiPhotoChange = (e) => {
+  const file = e.target.files?.[0];
+    if (!file) return;
+
+    setAiPhotoFile(file);
+    setAiPhotoPreview(URL.createObjectURL(file));
+  };
+
+  const handleMealImageChange = (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setMealImageFile(file);
+    setMealImagePreview(URL.createObjectURL(file));
+  };
+
+  const removeMealImage = () => {
+    setMealImageFile(null);
+    setMealImagePreview(null);
+  };
 
   const makeUid = () =>
     `${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
@@ -291,36 +341,72 @@ function MealRecordModal({
     });
   };
 
+  
+
   const handleSave = () => {
     if (foods.length === 0) {
       alert("음식을 1개 이상 추가해주세요!");
       return;
     }
 
-    const payload = {
-      mealType,
-      selectedDate,
-      foods,
-      total,
-    };
+  const payload = {
+    mealType,
+    selectedDate,
+    foods,
+    total,
+    mealImageFile,
+  };
 
     if (onSave) onSave(payload);
   };
 
   const handleMealFavoriteUpdated = (updatedMeal) => {
-  setSelectedMeal(updatedMeal);
+    setSelectedMeal(updatedMeal);
 
-  setFavoriteMeals((prev) =>
-    prev.map((meal) =>
-      meal.mfNum === updatedMeal.mfNum
-        ? {
-            ...meal,
-            ...updatedMeal,
-          }
-        : meal
-    )
+    setFavoriteMeals((prev) =>
+      prev.map((meal) =>
+        meal.mfNum === updatedMeal.mfNum
+          ? {
+              ...meal,
+              ...updatedMeal,
+            }
+          : meal
+      )
+    );
+  };
+
+  const handleDrag=(e)=>{
+  e.preventDefault();
+  e.stopPropagation();
+
+  if(
+    e.type==="dragenter"||
+    e.type==="dragover"
+  ){
+    setDragActive(true);
+  }
+
+  if(e.type==="dragleave"){
+    setDragActive(false);
+  }
+  };
+
+  const handleDrop=(e)=>{
+  e.preventDefault();
+  e.stopPropagation();
+
+  setDragActive(false);
+
+  if(!e.dataTransfer.files[0]) return;
+
+  const file=e.dataTransfer.files[0];
+
+  setMealImageFile(file);
+
+  setMealImagePreview(
+    URL.createObjectURL(file)
   );
-};
+  };
 
   return (
     <div className="modal-backdrop">
@@ -485,10 +571,31 @@ function MealRecordModal({
               AI가 음식을 분석해드려요!
             </p>
 
-            <label className="upload-label">
-              사진 업로드
-              <input type="file" accept="image/*" hidden />
-            </label>
+            {aiPhotoPreview ? (
+              <div className="photo-ai-preview-box">
+                <img src={aiPhotoPreview} alt="AI 분석용 사진" />
+
+                <label className="upload-label">
+                  사진 다시 선택
+                  <input
+                    type="file"
+                    accept="image/*"
+                    hidden
+                    onChange={handleAiPhotoChange}
+                  />
+                </label>
+              </div>
+            ) : (
+              <label className="upload-label">
+                클릭 혹은 이미지를 드래그 하세요
+                <input
+                  type="file"
+                  accept="image/*"
+                  hidden
+                  onChange={handleAiPhotoChange}
+                />
+              </label>
+            )}
 
             <small>JPG, PNG 파일을 등록할 수 있어요.</small>
           </div>
@@ -589,6 +696,92 @@ function MealRecordModal({
             <strong>{total.fat}g</strong>
           </div>
         </section>
+
+      <section className="meal-cover-section">
+        <div className="meal-cover-header">
+          <h3>
+            대표 사진 <span>선택</span>
+          </h3>
+
+          <p>식단 대표 이미지로 사용돼요.</p>
+        </div>
+
+
+        <div className="meal-cover-body">
+          {mealImagePreview ? (
+            <div className="meal-cover-preview-box">
+              <img
+                src={mealImagePreview}
+                alt="대표 사진 미리보기"
+              />
+
+              <button
+                type="button"
+                onClick={removeMealImage}
+              >
+                ×
+              </button>
+
+              <label className="meal-cover-change-btn">
+                사진 변경
+
+                <input
+                  type="file"
+                  hidden
+                  accept="image/*"
+                  onChange={handleMealImageChange}
+                />
+              </label>
+            </div>
+
+          ) : (
+
+            <div
+              className={`meal-cover-upload-box ${
+                dragActive ? "dragging" : ""
+              }`}
+              onDragEnter={handleDrag}
+              onDragOver={handleDrag}
+              onDragLeave={handleDrag}
+              onDrop={handleDrop}
+              onClick={() =>
+                document
+                  .getElementById("mealImageInput")
+                  .click()
+              }
+            >
+
+              <input
+                id="mealImageInput"
+                type="file"
+                hidden
+                accept="image/*"
+                onChange={handleMealImageChange}
+              />
+
+              <div className="meal-cover-upload-icon">
+                {dragActive ? "📥" : "🖼️"}
+              </div>
+
+              <strong>
+                {dragActive
+                  ? "여기에 놓으세요!"
+                  : "사진 추가하기"}
+              </strong>
+
+              <small>
+                클릭 또는 이미지를 드래그 하세요
+              </small>
+
+            </div>
+          )}
+        </div>
+
+        <p className="meal-cover-help">
+          JPG, PNG 파일을 등록할 수 있어요.
+        </p>
+
+      </section>
 
         <div className="modal-ai-tip mr-ai-tip">
           <span>🤖</span>

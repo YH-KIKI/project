@@ -2202,6 +2202,159 @@ gap: 30px;
   background: #ececf2;
 }
 
+.meal-cover-section{
+ border:1.5px solid #ffd0da;
+ border-radius:18px;
+
+ background:#fff8fa;
+
+ padding:16px;
+ margin-bottom:14px;
+}
+
+.meal-cover-header h3 {
+  margin: 0 0 5px;
+  font-size: 15px;
+  font-weight: 900;
+  color: #2f2424;
+}
+
+.meal-cover-header h3 span {
+  margin-left: 6px;
+  padding: 3px 8px;
+  border-radius: 999px;
+  background: #fff0f3;
+  color: #ff6686;
+  font-size: 11px;
+}
+
+.meal-cover-header p {
+  margin: 0 0 12px;
+  font-size: 13px;
+  color: #7b6a6a;
+  font-weight: 600;
+}
+
+.meal-cover-body{
+ display:flex;
+ flex-direction:column;
+ gap:12px;
+}
+
+.meal-cover-upload-box{
+ width:100%;
+ min-height:120px;
+
+ border:1.5px dashed #ffb5c2;
+ border-radius:16px;
+
+ background:linear-gradient(
+   180deg,
+   #fffafb 0%,
+   #fff1f5 100%
+ );
+
+ display:flex;
+ flex-direction:column;
+ align-items:center;
+ justify-content:center;
+
+ gap:8px;
+
+ cursor:pointer;
+
+ transition:.2s;
+}
+
+.meal-cover-upload-box:hover{
+ background:#ffeef3;
+ transform:translateY(-2px);
+}
+
+.meal-cover-upload-box strong{
+ color:#ff4f78;
+ font-size:18px;
+ font-weight:900;
+}
+
+.meal-cover-upload-icon{
+ font-size:30px;
+ color:#ff6686;
+}
+
+.meal-cover-upload-icon{
+ font-size:30px;
+}
+
+.meal-cover-preview-box{
+ width:100%;
+ height:180px;
+
+ position:relative;
+
+ border-radius:16px;
+
+ overflow:hidden;
+}
+
+.meal-cover-preview-box img{
+ width:100%;
+ height:100%;
+ object-fit:cover;
+}
+
+.meal-cover-preview-box button{
+ position:absolute;
+
+ top:10px;
+ right:10px;
+
+ width:30px;
+ height:30px;
+
+ border:none;
+
+ border-radius:50%;
+
+ background:rgba(255,255,255,.9);
+
+ cursor:pointer;
+}
+
+.meal-cover-help {
+  margin: 10px 0 0;
+  text-align: center;
+  font-size: 12px;
+  color: #9a8787;
+}
+
+.meal-cover-upload-box.dragging{
+ border-color:#ff6686;
+
+ background:#fff0f4;
+
+ transform:scale(1.02);
+
+ box-shadow:
+ 0 8px 22px
+ rgba(255,102,134,.18);
+}
+
+.photo-ai-preview-box {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+}
+
+.photo-ai-preview-box img {
+  width: 100%;
+  height: 180px;
+  object-fit: cover;
+  border-radius: 18px;
+}
+
 @media (max-width: 1100px) {
   .meal-fav-drawer {
     right: 12px;
