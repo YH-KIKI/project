@@ -53,7 +53,6 @@ const TargetGoals = () => {
             fat: getCalc(nutritionRes.data.totalFat, goalRes.data.userDailyFat)
           });
         }, 100);
-
       } catch (error) {
         console.error("데이터 로딩 실패", error);
         setLoading(false);

@@ -77,9 +77,9 @@ const Mypage = () => {
   }
 
   return (
-    <div className="page-background">
-      <div className="app-wrapper">
-        <Sidebar />
+    // <div className="page-background">
+    //   <div className="app-wrapper">
+    //     <Sidebar />
 
         <main style={{ 
           backgroundColor: 'rgba(255, 255, 255, 0.9)', 
@@ -187,8 +187,8 @@ const Mypage = () => {
           </div>
           </div>
         </main>
-      </div>
-    </div>
+//       </div>
+//     </div>
   );
 };
 

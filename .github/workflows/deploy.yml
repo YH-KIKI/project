@@ -43,7 +43,7 @@ jobs:
           context: ./project_python # FastAPI 소스 경로
           file: ./project_python/Dockerfile # Dockerfile의 정확한 경로
           push: true
-          tags: ${{ secrets.DOCKER_USERNAME }}/ai_server:latest
+          tags: ${{ secrets.DOCKER_USERNAME }}/ai-server:latest
 
       # 4. EC2 접속 및 배포
       - name: Deploy to EC2
@@ -59,11 +59,11 @@ jobs:
             # AI 서버 실행
             sudo docker stop ai-server || true
             sudo docker rm ai-server || true
-            sudo docker pull ${{ secrets.DOCKER_USERNAME }}/ai_server:latest
+            sudo docker pull ${{ secrets.DOCKER_USERNAME }}/ai-server:latest
             sudo docker run -d --name ai-server --network app-network \
               -p 8000:8000 \
               -e GOOGLE_AI_API_KEY="${{ secrets.GOOGLE_AI_API_KEY }}" \
-              ${{ secrets.DOCKER_USERNAME }}/ai_server:latest
+              ${{ secrets.DOCKER_USERNAME }}/ai-server:latest
 
             # Spring Boot 실행 (포트 개방 안함, 내부망에만 존재)
             sudo docker stop backend-server || true
@@ -80,8 +80,8 @@ jobs:
             sudo docker stop frontend-server || true
             sudo docker rm frontend-server || true
             sudo docker pull ${{ secrets.DOCKER_USERNAME }}/yummyplanet-frontend:latest
-            sudo docker run -d --name yummyplanet-frontend-server --network app-network \
+            sudo docker run -d --name frontend-server --network app-network \
               -p 80:80 \
-              ${{ secrets.DOCKER_USERNAME }}/frontend:latest
+              ${{ secrets.DOCKER_USERNAME }}/yummyplanet-frontend:latest
 
             sudo docker image prune -f

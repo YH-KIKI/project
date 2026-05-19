@@ -50,4 +50,8 @@ public interface UserDao {
 	
 	void insertSocialUserWithEmail(UserDTO userDTO);
 	//--------------------------------------
+
+	// 한끼의 영양성분
+	Map<String, Object> getMealNutrition(@Param("userNum") int userNum, 
+		    							@Param("mealType") String mealType);
 }
