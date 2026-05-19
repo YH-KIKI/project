@@ -61,4 +61,8 @@ public interface MealDao {
             				@Param("dietDate") java.time.LocalDate dietDate);
 
 	void insertFailedRecord(FailedPredictDTO dto);
+	
+	// 사진인식하고 식단 상세 파일과 로그를 지우기 위한 메서드 2개 추가
+	void deleteMealDetailByMkNum(@Param("mkNum") int mkNum);
+	void deleteMealLogByMkNum(@Param("mkNum") int mkNum);
 }

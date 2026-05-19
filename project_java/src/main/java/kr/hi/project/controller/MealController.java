@@ -69,5 +69,17 @@ public class MealController {
 	        return ResponseEntity.status(500).body("오류: " + e.getMessage());
 	    }
 	}
+	
+	// 사진인식하고 식단 상세 파일과 로그를 지우기
+	@PostMapping("/api/meal/cancel")
+	public ResponseEntity<?> cancelMeal(@RequestParam("mkNum") int mkNum,
+										@RequestParam("mdayNum") int mdayNum) {
+	    try {
+	        mealService.cancelMealRecord(mkNum, mdayNum);
+	        return ResponseEntity.ok("식단 기록이 성공적으로 취소(삭제)되었습니다.");
+	    } catch (Exception e) {
+	        return ResponseEntity.status(500).body("취소 실패: " + e.getMessage());
+	    }
+	}
 
 }

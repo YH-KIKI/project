@@ -23,4 +23,7 @@ public class UserPrivacyDTO {
     private float userDailyNatrium;
     private List<String> userAllergies;
     private String userModel;
+    
+    private List<Integer> favoriteFoods;
+    private List<Integer> dislikeFoods;
 }

@@ -19,7 +19,40 @@ const Information = () => {
   const [model, setmodel] = useState('0');
   const [allergies, setallergies] = useState([]);
 
+  const [favoriteFoods, setFavoriteFoods] = useState([]); // 좋아하는 음식 리스트
+  const [dislikeFoods, setDislikeFoods] = useState([]);   // 싫어하는 음식 리스트
+
+  // 검색용 임시 상태
+  const [searchKeyword, setSearchKeyword] = useState('');
+  const [searchResults, setSearchResults] = useState([]);
+  const [activeModal, setActiveModal] = useState(null); // 'favorite', 'dislike', null
+
   const navigate = useNavigate(); // 페이지 이동 함수
+
+  // 음식 검색
+  const handleSearchFood = async () => {
+    if (!searchKeyword.trim()) return;
+    try {
+      const token = localStorage.getItem('login_token') || sessionStorage.getItem('login_token');
+      const response = await axios.get(`http://localhost:8080/api/user/food/search?keyword=${searchKeyword}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      setSearchResults(response.data); // 백엔드에서 검색된 FoodDTO 리스트 반환
+    } catch (error) {
+      console.error("음식 검색 실패", error);
+    }
+  };
+
+  // 음식 리스트에 추가하는 헬퍼
+  const addFoodToList = (food, type) => {
+    if (type === 'favorite') {
+      if (favoriteFoods.some(f => f.foNum === food.foNum)) return;
+      setFavoriteFoods([...favoriteFoods, food]);
+    } else {
+      if (dislikeFoods.some(f => f.foNum === food.foNum)) return;
+      setDislikeFoods([...dislikeFoods, food]);
+    }
+  };
 
   const handleUpdata = async () => {
 
@@ -70,7 +103,9 @@ const Information = () => {
         userAge: age,
         userAct: act,
         userModel: model,
-        userAllergies: allergies
+        userAllergies: allergies,
+        favoriteFoods: favoriteFoods.map(f => f.foNum), 
+        dislikeFoods: dislikeFoods.map(f => f.foNum)
       },
       {
         headers: {
@@ -110,6 +145,8 @@ const Information = () => {
       setmodel(response.data.userModel);
 
       setallergies(response.data.userAllergies || []);
+      setFavoriteFoods(response.data.favoriteFoods || []);
+      setDislikeFoods(response.data.dislikeFoods || []);
 		}catch(error){
 			alert("인증에 실패했습니다. 다시 로그인하세요")
 		}
@@ -285,18 +322,61 @@ const Information = () => {
 
           </div>
           
-          <button style={{ 
-            padding: '10px 30px', 
-            backgroundColor: 'red', 
-            color: 'white', 
-            border: 'none', 
-            borderRadius: '5px',
-            cursor: 'pointer'
-          }}
-          onClick={handleUpdata}>
+          <hr style={{ border: '0.5px solid #ddd', margin: '30px 0' }} />
+
+          {/* [추가] 선호 음식 설정 UI 구역 */}
+          <div style={{ display: 'flex', gap: '40px', justifyContent: 'center', marginBottom: '30px' }}>
+            {/* 좋아하는 음식 블록 */}
+            <div style={{ flex: 1, textAlign: 'left', padding: '20px', backgroundColor: '#e8f5e9', borderRadius: '15px' }}>
+              <h3 style={{ color: '#2e7d32', margin: '0 0 10px 0' }}>❤️ 좋아하는 음식</h3>
+              <button onClick={() => { setActiveModal('favorite'); setSearchResults([]); setSearchKeyword(''); }} style={{ marginBottom: '10px', padding: '5px 10px', cursor: 'pointer' }}>+ 음식 추가</button>
+              <div>
+                {favoriteFoods.map(f => (
+                  <span key={f.foNum} style={{ display: 'inline-block', backgroundColor: '#fff', padding: '5px 10px', borderRadius: '20px', marginRight: '5px', marginBottom: '5px', fontSize: '14px', border: '1px solid #a5d6a7' }}>
+                    {f.foName} <b style={{ color: 'red', cursor: 'pointer' }} onClick={() => setFavoriteFoods(favoriteFoods.filter(item => item.foNum !== f.foNum))}>x</b>
+                  </span>
+                ))}
+              </div>
+            </div>
+
+            {/* 싫어하는 음식 블록 */}
+            <div style={{ flex: 1, textAlign: 'left', padding: '20px', backgroundColor: '#ffebee', borderRadius: '15px' }}>
+              <h3 style={{ color: '#c62828', margin: '0 0 10px 0' }}>🥦 싫어하는 음식</h3>
+              <button onClick={() => { setActiveModal('dislike'); setSearchResults([]); setSearchKeyword(''); }} style={{ marginBottom: '10px', padding: '5px 10px', cursor: 'pointer' }}>+ 음식 추가</button>
+              <div>
+                {dislikeFoods.map(f => (
+                  <span key={f.foNum} style={{ display: 'inline-block', backgroundColor: '#fff', padding: '5px 10px', borderRadius: '20px', marginRight: '5px', marginBottom: '5px', fontSize: '14px', border: '1px solid #ef9a9a' }}>
+                    {f.foName} <b style={{ color: 'red', cursor: 'pointer' }} onClick={() => setDislikeFoods(dislikeFoods.filter(item => item.foNum !== f.foNum))}>x</b>
+                  </span>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* 음식 검색 모달 팝업 */}
+          {activeModal && (
+            <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', backgroundColor: 'rgba(0,0,0,0.4)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 2000 }}>
+              <div style={{ backgroundColor: '#fff', padding: '25px', borderRadius: '20px', width: '350px' }}>
+                <h3>{activeModal === 'favorite' ? '좋아하는' : '싫어하는'} 음식 검색</h3>
+                <input type="text" placeholder="음식명 입력" value={searchKeyword} onChange={(e) => setSearchKeyword(e.target.value)} style={{ padding: '8px', width: '180px', marginRight: '5px' }} />
+                <button onClick={handleSearchFood} style={{ padding: '8px 15px', cursor: 'pointer' }}>검색</button>
+                
+                <div style={{ maxHeight: '200px', overflowY: 'auto', marginTop: '15px', border: '1px solid #eee', padding: '10px', textAlign: 'left' }}>
+                  {searchResults.map(food => (
+                    <div key={food.foNum} style={{ display: 'flex', justifyContent: 'space-between', padding: '5px 0', borderBottom: '1px solid #f5f5f5' }}>
+                      <span>{food.foName}</span>
+                      <button onClick={() => addFoodToList(food, activeModal)} style={{ padding: '2px 8px', backgroundColor: '#d1b8a0', border: 'none', borderRadius: '5px', cursor: 'pointer' }}>추가</button>
+                    </div>
+                  ))}
+                </div>
+                <button onClick={() => setActiveModal(null)} style={{ marginTop: '20px', width: '100%', padding: '10px', backgroundColor: '#eee', border: 'none', borderRadius: '10px', cursor: 'pointer' }}>닫기</button>
+              </div>
+            </div>
+          )}
+
+          <button style={{ padding: '10px 30px', backgroundColor: 'red', color: 'white', border: 'none', borderRadius: '5px', cursor: 'pointer' }} onClick={handleUpdata}>
             수정하기
           </button>
-          <hr></hr>
         </div>
   );
 };
