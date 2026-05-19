@@ -110,6 +110,9 @@ const LoginPage = () => {
       // 🌟🌟🌟 [박하] 커뮤니티 게시판에서 사용자 식별을 위해 서버에서 받은 사용자 정보를 'user' 키로 저장
       localStorage.setItem('user', JSON.stringify(response.data.user));
 
+      // [재근]눈바디(BodyCheck) 등에서 바로 꺼내 쓸 수 있도록 userNum만 따로 저장.
+      localStorage.setItem('userNum', user.user_num);
+
       // 2. 로그인 상태를 '참'으로 변경
       setIsLoggedIn(true);
       alert("로그인 성공!");
