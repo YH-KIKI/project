@@ -114,7 +114,7 @@ function MealRecordModal({
   const openMealFavoriteDetail = async (meal) => {
     try {
       const res = await axios.get(
-        `http://localhost:8080/api/favorite/meal/detail?userNum=${userNum}&mfNum=${meal.mfNum}`
+        `/api/favorite/meal/detail?userNum=${userNum}&mfNum=${meal.mfNum}`
       );
 
       console.log("즐겨찾기 상세:", res.data);
@@ -138,7 +138,7 @@ function MealRecordModal({
 
     try {
       const res = await axios.get(
-        `http://localhost:8080/api/food/search?keyword=${encodeURIComponent(
+        `/api/food/search?keyword=${encodeURIComponent(
           keyword
         )}`
       );
@@ -187,7 +187,7 @@ function MealRecordModal({
 
   const addSingleFoodFavorite = async (foNum) => {
     try {
-      await axios.post("http://localhost:8080/api/favorite/single-food", {
+      await axios.post("/api/favorite/single-food", {
         userNum,
         foNum,
         sfPortion: 100,
@@ -204,7 +204,7 @@ function MealRecordModal({
   const loadSingleFoodFavorites = async () => {
     try {
       const res = await axios.get(
-        `http://localhost:8080/api/favorite/single-food?userNum=${userNum}`
+        `/api/favorite/single-food?userNum=${userNum}`
       );
 
       setFavoriteFoods(res.data);
@@ -218,7 +218,7 @@ function MealRecordModal({
   const deleteSingleFoodFavorite = async (sfNum, foNum) => {
     try {
       await axios.delete(
-        `http://localhost:8080/api/favorite/single-food?userNum=${userNum}&sfNum=${sfNum}`
+        `/api/favorite/single-food?userNum=${userNum}&sfNum=${sfNum}`
       );
 
       setFavoriteFoods((prev) => prev.filter((food) => food.sfNum !== sfNum));
@@ -232,7 +232,7 @@ function MealRecordModal({
   const loadMealFavorites = async () => {
     try {
       const res = await axios.get(
-        `http://localhost:8080/api/favorite/meal?userNum=${userNum}`
+        `/api/favorite/meal?userNum=${userNum}`
       );
 
       setFavoriteMeals(res.data);
@@ -245,7 +245,7 @@ function MealRecordModal({
   const deleteMealFavorite = async (mfNum) => {
     try {
       await axios.delete(
-        `http://localhost:8080/api/favorite/meal?userNum=${userNum}&mfNum=${mfNum}`
+        `/api/favorite/meal?userNum=${userNum}&mfNum=${mfNum}`
       );
 
       setFavoriteMeals((prev) => prev.filter((meal) => meal.mfNum !== mfNum));

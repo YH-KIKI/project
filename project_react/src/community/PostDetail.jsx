@@ -27,7 +27,7 @@ const PostDetail = () => {
       try {
         const userNum = getStoredUserNum() || '';
         // [수정] 백엔드 컨트롤러 파라미터 명칭 userNum 에 맞춰 수정
-        const response = await axios.get(`http://localhost:8080/api/community/post/${id}?userNum=${userNum}`, {
+        const response = await axios.get(`/api/community/post/${id}?userNum=${userNum}`, {
           withCredentials: true
         });
         setPost(response.data);
@@ -50,7 +50,7 @@ const PostDetail = () => {
   const handleDelete = async () => {
     if (window.confirm("정말로 이 게시글을 삭제하시겠습니까?")) {
       try {
-        const response = await axios.delete(`http://localhost:8080/api/community/delete/${id}`);
+        const response = await axios.delete(`/api/community/delete/${id}`);
         if (response.data === "success") {
           alert("게시글이 삭제되었습니다.");
           navigate('/community');
@@ -72,7 +72,7 @@ const PostDetail = () => {
     // [수정] 백엔드에서 이미 전체 URL을 주므로 중복 방지 로직 추가
     const imgSrc = post.postImgPath.startsWith('http') 
                    ? post.postImgPath 
-                   : `http://localhost:8080/uploads/${post.postImgPath}`;
+                   : `/uploads/${post.postImgPath}`;
 
     return (
       <div className="post-image-box" style={{ margin: '20px 0', textAlign: 'center' }}>

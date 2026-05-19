@@ -35,14 +35,14 @@ const Mypage = () => {
     if (!token) return;
 
     try {
-      const userResponse = await axios.get('http://localhost:8080/api/user/info', {
+      const userResponse = await axios.get('/api/user/info', {
         headers: { Authorization: `Bearer ${token}` }
       });
       const userData = userResponse.data;
       setUsername(userData.username);
 
       if (userData && userData.usernum) {
-        const charResponse = await axios.get(`http://localhost:8080/api/character/info?userNum=${userData.usernum}`, {
+        const charResponse = await axios.get(`/api/character/info?userNum=${userData.usernum}`, {
           headers: { Authorization: `Bearer ${token}` }
         });
         setCharInfo(charResponse.data);

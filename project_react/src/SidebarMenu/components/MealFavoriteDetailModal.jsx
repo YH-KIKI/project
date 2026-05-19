@@ -26,7 +26,7 @@ function MealFavoriteDetailModal({
   }
 
   try {
-    await axios.put("http://localhost:8080/api/favorite/meal/name", {
+    await axios.put("/api/favorite/meal/name", {
       mfNum: meal.mfNum,
       mfName: name,
     });
@@ -84,7 +84,7 @@ function MealFavoriteDetailModal({
   const saveMemo = async () => {
     try {
       await axios.put(
-        `http://localhost:8080/api/favorite/meal/memo`,
+        `/api/favorite/meal/memo`,
         {
           mfNum: meal.mfNum,
           mfMemo: memo,

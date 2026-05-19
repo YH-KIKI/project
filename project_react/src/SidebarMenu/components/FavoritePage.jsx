@@ -52,7 +52,7 @@ const FavoritePage = () => {
       const userNum = 1;
 
       const res = await axios.get(
-        `http://localhost:8080/api/favorite/single-food?userNum=${userNum}`
+        `/api/favorite/single-food?userNum=${userNum}`
       );
 
       const converted = res.data.map((food) => ({
@@ -78,7 +78,7 @@ const FavoritePage = () => {
       const userNum = 1;
 
       const res = await axios.get(
-        `http://localhost:8080/api/favorite/meal?userNum=${userNum}`
+        `/api/favorite/meal?userNum=${userNum}`
       );
 
       const converted = res.data.map((meal) => ({
@@ -103,7 +103,7 @@ const FavoritePage = () => {
       const userNum = 1;
 
       const res = await axios.get(
-        `http://localhost:8080/api/favorite/meal/detail?userNum=${userNum}&mfNum=${meal.id}`
+        `/api/favorite/meal/detail?userNum=${userNum}&mfNum=${meal.id}`
       );
 
       setSelectedMeal(res.data);
@@ -117,7 +117,7 @@ const FavoritePage = () => {
     try {
       const userNum = 1;
 
-      await axios.post("http://localhost:8080/api/favorite/single-food", {
+      await axios.post("/api/favorite/single-food", {
         userNum,
         foNum,
         sfPortion: 100,
@@ -172,7 +172,7 @@ const FavoritePage = () => {
       const userNum = 1;
 
       await axios.delete(
-        `http://localhost:8080/api/favorite/single-food?userNum=${userNum}&sfNum=${sfNum}`
+        `/api/favorite/single-food?userNum=${userNum}&sfNum=${sfNum}`
       );
 
       setFoodFavorites((prev) => prev.filter((food) => food.id !== sfNum));
@@ -220,7 +220,7 @@ const FavoritePage = () => {
         const userNum = 1;
 
         const res = await axios.get(
-          `http://localhost:8080/api/favorite/meal/detail?userNum=${userNum}&mfNum=${selectedLoadMeal.id}`
+          `/api/favorite/meal/detail?userNum=${userNum}&mfNum=${selectedLoadMeal.id}`
         );
 
         navigate("/record", {

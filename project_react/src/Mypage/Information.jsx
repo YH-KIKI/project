@@ -58,7 +58,7 @@ const Information = () => {
 
     try {
       const token = localStorage.getItem('login_token') || sessionStorage.getItem('login_token');
-      await axios.post('http://localhost:8080/api/information_updata', {
+      await axios.post('/api/information_updata', {
 				userNum: usernum,
         userId: userid,
         userName: username,
@@ -89,7 +89,7 @@ const Information = () => {
 		const fetchUserInfo = async () => {
 		const token = localStorage.getItem('login_token') || sessionStorage.getItem('login_token');
 		try{
-			const response = await axios.get('http://localhost:8080/api/information_select', {
+			const response = await axios.get('/api/information_select', {
 				headers:{
 					Authorization: `Bearer ${token}`
 				} 

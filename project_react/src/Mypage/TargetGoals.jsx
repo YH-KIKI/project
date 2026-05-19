@@ -24,8 +24,8 @@ const TargetGoals = () => {
         if (!userNum) return;
 
         const [nutritionRes, goalRes] = await Promise.all([
-          axios.get(`http://localhost:8080/api/meal/today-nutrition?userNum=${userNum}`),
-          axios.get(`http://localhost:8080/api/information_select`, {
+          axios.get(`/api/meal/today-nutrition?userNum=${userNum}`),
+          axios.get(`/api/information_select`, {
             headers: { Authorization: `Bearer ${token}` }
           })
         ]);

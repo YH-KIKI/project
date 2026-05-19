@@ -65,7 +65,7 @@ const CharacterSection = ({ charInfo, onUpdate }) => {
   const changeCharacter = async (typeNum) => {
     const token = localStorage.getItem('login_token') || sessionStorage.getItem('login_token');
     try {
-      const response = await axios.post(`http://localhost:8080/api/character/update`, 
+      const response = await axios.post(`/api/character/update`, 
         { userNum: charInfo.userNum, type: typeNum },
         { headers: { Authorization: `Bearer ${token}` } }
       );

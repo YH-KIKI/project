@@ -17,7 +17,7 @@ import kr.hi.project.service.DietAnalysisService; // 🌟 추가됨
 import lombok.RequiredArgsConstructor;
 
 @RestController
-@RequestMapping("/api/v1/diet") 
+@RequestMapping("/api/diet") 
 @RequiredArgsConstructor
 public class DietController {
 

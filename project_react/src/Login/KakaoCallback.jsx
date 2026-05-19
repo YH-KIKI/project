@@ -14,7 +14,7 @@ const KakaoCallback = () => {
         if (code) {
             console.log("🔄 카카오 인가 코드로 백엔드 요청 중...");
             
-            axios.post("http://localhost:8080/api/login/kakao", { code: code })
+            axios.post("/api/login/kakao", { code: code })
                 .then((res) => {
                     console.log("📥 백엔드 응답 데이터 수신:", res.data);
 
@@ -54,7 +54,7 @@ const KakaoCallback = () => {
             return;
         }
 
-        axios.post("http://localhost:8080/api/login/kakao/register", {
+        axios.post("/api/login/kakao/register", {
             userId: socialInfo.userId,
             userName: socialInfo.userName,
             userEmail: email,

@@ -13,7 +13,7 @@ const Evaluation = () => {
     const fetchGoal = async () => {
       try {
         const token = localStorage.getItem('login_token') || sessionStorage.getItem('login_token');
-        const response = await axios.get('http://localhost:8080/api/information_select', {
+        const response = await axios.get('/api/information_select', {
           headers: { Authorization: `Bearer ${token}` }
         });
         setUserGoal(response.data);
