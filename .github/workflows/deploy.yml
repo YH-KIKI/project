@@ -2,7 +2,7 @@ name: CI/CD with Docker (Spring + FastAPI)
 
 on:
   push:
-    branches: [ "sjk_test" ]
+    branches: [ "main" ]
 
 jobs:
   build-and-deploy:
