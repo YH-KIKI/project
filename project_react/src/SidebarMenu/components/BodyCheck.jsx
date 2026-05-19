@@ -165,7 +165,7 @@ const BodyCheck = ({ userNum = 1 }) => {
       if (uploadTarget === 'album') {
         setIsLoading(true);
         try {
-          await uploadBodyCheckImage(croppedFile, '원본'); 
+          await uploadBodyCheckImage(croppedFile, '원본', userNum); 
           alert("성공적으로 등록되었습니다! 📸");
           fetchAlbumRecords(); 
         } catch (err) {
@@ -190,7 +190,7 @@ const BodyCheck = ({ userNum = 1 }) => {
     if (!pendingFile) return;
     setIsLoading(true); 
     try {
-      const responseData = await uploadBodyCheckImage(pendingFile, type);
+      const responseData = await uploadBodyCheckImage(pendingFile, type, userNum);
       let finalImageUrl = URL.createObjectURL(pendingFile); 
       if (type !== '원본' && responseData.image_base64) {
          finalImageUrl = `data:image/jpeg;base64,${responseData.image_base64}`;

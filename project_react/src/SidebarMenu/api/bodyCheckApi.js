@@ -1,15 +1,14 @@
 import axios from 'axios';
 
 // 스프링부트 주소 (포트 8080)
-const API_BASE_URL = '/api/bodycheck';
+const API_BASE_URL = `${process.env.REACT_APP_API_URL}/api/bodycheck`;
 
 // 스프링부트로 눈바디 사진과 분석 타입을 쏘는 함수
-export const uploadBodyCheckImage = async (imageFile, analyzeType) => {
+export const uploadBodyCheckImage = async (imageFile, analyzeType, userNum) => {
   const formData = new FormData();
   formData.append('file', imageFile); 
-  formData.append('analyzeType', analyzeType); // 'pose', 'outline', 또는 '원본'
-  // 유저 번호는 현재 테스트용으로 1번 고정
-  formData.append('userNum', 1);
+  formData.append('analyzeType', analyzeType); 
+  formData.append('userNum', userNum); // 이제 고정된 1이 아니라, 컴포넌트에서 넘겨준 진짜 번호를 씁니다!
 
   try {
     const response = await axios.post(`${API_BASE_URL}/analyze`, formData, {
