@@ -6,6 +6,7 @@ import cv2
 import numpy as np
 import base64
 import math
+import os
 
 
 # ==========================================
@@ -26,7 +27,7 @@ except Exception as e:
 # ==========================================
 # MySQL 데이터베이스 연결 설정
 # ==========================================
-DB_URL = "mysql+pymysql://root:root@localhost:3306/nnp"
+DB_URL = os.environ.get("DB_URL")
 engine = create_engine(DB_URL)
 
 # ==========================================
