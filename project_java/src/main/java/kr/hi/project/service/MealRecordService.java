@@ -6,6 +6,7 @@ import java.time.temporal.ChronoField;
 import java.util.List;
 import java.util.UUID;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -26,6 +27,11 @@ public class MealRecordService {
 
     private final MealRecordDao mealRecordDao;
     
+    @Value("${meal.upload.path:C:/uploads/meal/}")
+    private String mealUploadPath;
+    
+    
+    
     private String saveMealImage(MultipartFile file) {
 
         if (file == null || file.isEmpty()) {
@@ -34,7 +40,7 @@ public class MealRecordService {
 
         try {
 
-            String uploadDir = "C:/uploads/meal/";
+        	String uploadDir = mealUploadPath;
 
             File dir = new File(uploadDir);
 
