@@ -82,12 +82,12 @@ public class UserInformation {
 	    // 리액트가 그토록 원하던 [{foNum, foName}] 형태의 음식 객체 리스트를 똑같은 키값으로
 	    responseMap.put("favoriteFoods", favoriteList);
 	    responseMap.put("dislikeFoods", dislikeList);
-	    
 	    return ResponseEntity.ok(responseMap);
 	}
 	
 	@PostMapping("/api/information_updata")
 	public Map<String, String> signup(@RequestBody UserPrivacyDTO userPrivacyDTO){
+		System.out.println(userPrivacyDTO);
 	    userService.informationUpdata(userPrivacyDTO);
 	    
 	    Map<String, String> response = new HashMap<>();

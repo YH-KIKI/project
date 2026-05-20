@@ -19,7 +19,7 @@ import Analyze from "./ImageAnalyze/Analyze"
 import FavoritePage from "./SidebarMenu/components/FavoritePage";
 import Stats from "./SidebarMenu/components/Stats";
 import BodyCheck from "./SidebarMenu/components/BodyCheck";
-
+import Goal from "./SidebarMenu/components/Goal";
 
 import Community from "./community/Community"; //요고 추가해따잉~
 import PostWrite from "./community/PostWrite"; //요고 추가해따잉~
@@ -91,6 +91,8 @@ function App() {
                         <Route path="/information" element={<Information />} />
                         {/*마이페이지 목표보기 주소(/targetgoals)*/}
                         <Route path="/targetgoals" element={<TargetGoals />} />
+                        {/*목표관리 주소(/goal)*/}
+                        <Route path="/goal" element={<Goal />} />
                     </Route>
 
                     {/* 배경과 사이드바가 필요 없는 단독 화면들 */}
