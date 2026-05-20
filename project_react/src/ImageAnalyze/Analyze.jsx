@@ -67,11 +67,10 @@ const Analyze = () => {
     formData.append('file', selectedFile);
 
     try {
-      // 파이썬 FastAPI 서버 주소
-      const response = await axios.post('/ai/predict', formData, {
+      const response = await axios.post('/api/ai/predict', formData, {
         headers: { 'Content-Type': 'multipart/form-data' }
       });
-      
+
       // 결과가 있으면 저장
       if (response.data.results) {
         setAiResults(response.data.results);
@@ -127,7 +126,7 @@ const Analyze = () => {
     try {
       const token = localStorage.getItem('login_token') || sessionStorage.getItem('login_token');
 
-      // 🚨 토큰이 없을 경우를 대비한 안전장치 (이게 있어야 튕기는 걸 막아요)
+      // 토큰이 없을 경우를 대비한 안전장치 (이게 있어야 튕기는 걸 막아요)
       if (!token) {
         alert("로그인 정보가 만료되었습니다. 다시 로그인해주세요! 🏃‍♂️");
         navigate('/login');
@@ -137,7 +136,7 @@ const Analyze = () => {
       const response = await axios.post('/api/record', formData, {
         headers: { 
           'Content-Type': 'multipart/form-data',
-          // 🌟 수정된 부분: 저장된 위치가 어디든 토큰을 실어 보냅니다.
+          // 수정된 부분: 저장된 위치가 어디든 토큰을 실어 보냅니다.
           'Authorization': `Bearer ${token}`
           }
       });
