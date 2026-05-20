@@ -30,7 +30,7 @@ public class MealRecordController {
     )
     public ResponseEntity<?> saveMealRecord(
             @RequestPart("mealData") MealRecordRequestDTO request,
-            @RequestPart(value = "mkImageFile", required = false) MultipartFile mealImageFile) {
+            @RequestPart(value = "mealImageFile", required = false) MultipartFile mealImageFile) {
 
         mealRecordService.saveMealRecord(request, mealImageFile);
 

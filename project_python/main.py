@@ -153,7 +153,7 @@ async def daily_feedback_service(data: DietFeedbackRequest):
 # ==========================================
 # 대빵 - 밀피드백(식단기록용)
 # ==========================================
-@app.post("/api/v1/ai/meal-feedback")
+@app.post("/api/ai/meal-feedback")
 async def meal_feedback_service(data: MealFeedbackRequest):
 
     feedback = generate_meal_feedback(
