@@ -455,7 +455,7 @@ const analysis = mealData ? getNutritionAnalysis() : null;
 
       const res = await axios.post(
         "/api/meal/record",
-        requestData
+        formData
       );
 
       console.log("식단 저장 응답:", res.data);
