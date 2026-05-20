@@ -22,7 +22,7 @@ GOOGLE_API_KEY = os.getenv('GOOGLE_API_KEY', '사용자님의_진짜_구글_GEMI
 client = genai.Client(api_key=GOOGLE_API_KEY)
 MODEL_NAME = "gemini-2.5-flash"
 
-@app.post("/ai/evaluate")
+@app.post("/api/ai/evaluate")
 async def evaluate_meal(request: Request):
     payload = await request.json()
     

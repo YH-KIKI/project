@@ -47,7 +47,9 @@ public class SecurityConfig {
                                  "/api/bodycheck/**", // [추가/재근] 눈바디
                                  "/api/user/verify-password", // [추가/재근] 눈바디 비밀번호
                                  "/api/favorite/**", //[연희/추가] 즐찾들
+                                 "/api/user/privacy/**", //[연희/추가] 프라이버시 영양성분 조회
                                  "/api/report-fail",//[준성/추가] 음식사진인증실패
+                                 "/api/ai/**",
                                  "/api/user/info",
 	                             "/api/record",
 	                             "/api/meal/**",
@@ -68,7 +70,10 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(Arrays.asList("http://localhost:3000")); 
+        configuration.setAllowedOrigins(Arrays.asList(
+        		"http://localhost:3000",
+        		"http://54.116.167.5"
+        		)); 
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type"));
         configuration.setAllowCredentials(true);

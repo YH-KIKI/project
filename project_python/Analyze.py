@@ -20,14 +20,17 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+# 파이썬 파일이 있는 현재 위치를 기준으로 모델을 찾도록 설계했습니다.
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
 # --- [모델 1: YOLO 뚱딴지모델 로드] ---
-yolo_model = YOLO(r'C:\Users\C603\Documents\AWS Class\git\aws_class\python\kfood\model\뚱딴지모델.pt')
+yolo_model_path = os.path.join(BASE_DIR, 'model', '뚱딴지모델.pt')
+yolo_model = YOLO(yolo_model_path)
 yolo_names = ['연근조림', '동치미', '잡채', '김치찌개', '김치', '갈비', '육회', '콩나물무침', '우동', '백김치', '잔치국수', '콩나물국', '설렁탕', '도라지무침', '비빔밥', '어묵탕', '부대찌개', '불고기', '총각김치', '오이김치', '컵밥', '북엇국', '양념장어구이', '볶음밥', '파김치', '고등어구이', '장조림', '제육볶음', '메밀소바', '된장국', '비빔밥(혼합밥)', '나박김치', '냉면', '깻잎장아찌', '족발', '삼겹살', '깍두기', '주먹밥', '김밥', '밥', '고사리나물', '애호박볶음', '미역국', '김', '조개탕', '육개장', '시금치나물', '고등어조림', '멸치볶음', '열무김치']
 
 # --- [모델 2: PyTorch 냠냠모델 로드] ---
-nyam_path = r'c:/Users/C603/Documents/AWS Class/git/aws_class/python/testfood/nyamnyam_model.pth'
-checkpoint = torch.load(nyam_path)
+nyam_path = os.path.join(BASE_DIR, 'model', 'nyamnyam_model.pth')
+checkpoint = torch.load(nyam_path, map_location=torch.device('cpu'))
 nyam_classes = checkpoint['class_names'] # ['김밥', '떡볶이', '쌀밥', '짜장면']
 
 nyam_model = models.resnet18()
@@ -42,7 +45,7 @@ nyam_transform = transforms.Compose([
     transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
 ])
 
-@app.post("/ai/predict")
+@app.post("/api/ai/predict")
 async def predict(file: UploadFile = File(...)):
     img_bytes = await file.read()
     img = Image.open(io.BytesIO(img_bytes)).convert('RGB')

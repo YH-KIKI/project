@@ -74,6 +74,10 @@ public class UserInformation {
 	    responseMap.put("userAct", dto.getUserAct());
 	    responseMap.put("userModel", dto.getUserModel());
 	    responseMap.put("userAllergies", dto.getUserAllergies());
+	    responseMap.put("userDailyKcal", dto.getUserDailyKcal());
+	    responseMap.put("userDailyCarbs", dto.getUserDailyCarbs());
+	    responseMap.put("userDailyProtein", dto.getUserDailyProtein());
+	    responseMap.put("userDailyFat", dto.getUserDailyFat());
 	    
 	    // 리액트가 그토록 원하던 [{foNum, foName}] 형태의 음식 객체 리스트를 똑같은 키값으로
 	    responseMap.put("favoriteFoods", favoriteList);

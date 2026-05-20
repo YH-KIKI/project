@@ -22,6 +22,7 @@ public class MealDetailDTO {
     private float foProtein;
     private float foFat;
     private float foNatrium;
-    private String foImage;
+    private String mkImage;
+    
 
 }

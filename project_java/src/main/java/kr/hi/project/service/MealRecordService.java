@@ -1,11 +1,14 @@
 package kr.hi.project.service;
 
+import java.io.File;
 import java.time.LocalDate;
 import java.time.temporal.ChronoField;
 import java.util.List;
+import java.util.UUID;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import kr.hi.project.dao.MealRecordDao;
 import kr.hi.project.dto.FoodDTO;
@@ -22,9 +25,50 @@ import lombok.RequiredArgsConstructor;
 public class MealRecordService {
 
     private final MealRecordDao mealRecordDao;
+    
+    private String saveMealImage(MultipartFile file) {
+
+        if (file == null || file.isEmpty()) {
+            return null;
+        }
+
+        try {
+
+            String uploadDir = "C:/uploads/meal/";
+
+            File dir = new File(uploadDir);
+
+            if (!dir.exists()) {
+                dir.mkdirs();
+            }
+
+            String originalName = file.getOriginalFilename();
+
+            String ext =
+                originalName.substring(
+                    originalName.lastIndexOf(".")
+                );
+
+            String savedName =
+                UUID.randomUUID() + ext;
+
+            File saveFile =
+                new File(uploadDir + savedName);
+
+            file.transferTo(saveFile);
+
+            return "/uploads/meal/" + savedName;
+
+        } catch(Exception e){
+
+            throw new RuntimeException(
+                "이미지 저장 실패", e
+            );
+        }
+    }
 
     @Transactional
-    public void saveMealRecord(MealRecordRequestDTO request) {
+    public void saveMealRecord(MealRecordRequestDTO request, MultipartFile mealImageFile) {
 
         int userNum = request.getUserNum();
 
@@ -94,7 +138,12 @@ public class MealRecordService {
 	        MealLogDTO mealLog = new MealLogDTO();
 	        mealLog.setUserNum(userNum);
 	        mealLog.setMkMealType(request.getMkMealType());
-	        mealLog.setMkImage(request.getMkImage());
+	        
+	        String imagePath =
+	                saveMealImage(mealImageFile);
+
+	        mealLog.setMkImage(imagePath);
+	        
 	        mealLog.setMkUserMemo(request.getMkUserMemo());
 	
 	        mealRecordDao.insertMealLog(mealLog);
