@@ -23,6 +23,10 @@ public class AiProxyController {
     // [AWS 치트키 2] 제미나이 평가 서버 주소
     @Value("${ai.gemini.url:http://localhost:8001}")
     private String geminiServerUrl;
+    
+    // 식단 피드백
+    @Value("${ai.meal.url:http://localhost:8000}")
+    private String mealServerUrl;
 
     @PostMapping("/api/ai/predict")
     public ResponseEntity<String> proxyPredict(@RequestParam("file") MultipartFile file) {
@@ -69,6 +73,39 @@ public class AiProxyController {
         } catch (Exception e) {
             e.printStackTrace();
             return ResponseEntity.status(500).body("자바 제미나이 중계 오류: " + e.getMessage());
+        }
+    }
+    
+    
+    // 식단 피드백용    
+    @PostMapping("/api/ai/meal-feedback")
+    public ResponseEntity<String> proxyMealFeedback(@RequestBody String jsonPayload) {
+        try {
+            RestTemplate restTemplate = new RestTemplate();
+
+            String pythonUrl =
+                    mealServerUrl + "/api/ai/meal-feedback";
+
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+
+            HttpEntity<String> requestEntity =
+                    new HttpEntity<>(jsonPayload, headers);
+
+            ResponseEntity<String> response =
+                    restTemplate.postForEntity(
+                        pythonUrl,
+                        requestEntity,
+                        String.class
+                    );
+
+            return response;
+
+        } catch (Exception e) {
+            e.printStackTrace();
+
+            return ResponseEntity.status(500)
+                    .body("식단 피드백 중계 오류: " + e.getMessage());
         }
     }
 }
