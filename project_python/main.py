@@ -120,7 +120,7 @@ async def detect_service(message: str = Form(...), file: UploadFile = File(...))
 # ==========================================
 # 🌟 4. [새로 추가됨] AI 식단 3줄 요약 피드백 엔드포인트
 # ==========================================
-@app.post("/api/v1/ai/feedback")
+@app.post("/api/ai/feedback")
 async def daily_feedback_service(data: DietFeedbackRequest):
     print(f"📝 [Python] AI 피드백 요청 도착! 유저번호: {data.userNum}, 등급: {data.grade}")
     
@@ -147,7 +147,7 @@ async def daily_feedback_service(data: DietFeedbackRequest):
 # ==========================================
 # 대빵 - 밀피드백(식단기록용)
 # ==========================================
-@app.post("/api/v1/ai/meal-feedback")
+@app.post("/api/ai/meal-feedback")
 async def meal_feedback_service(data: MealFeedbackRequest):
 
     feedback = generate_meal_feedback(
