@@ -34,7 +34,7 @@ const Information = () => {
     if (!searchKeyword.trim()) return;
     try {
       const token = localStorage.getItem('login_token') || sessionStorage.getItem('login_token');
-      const response = await axios.get(`http://localhost:8080/api/user/food/search?keyword=${searchKeyword}`, {
+      const response = await axios.get(`/api/user/food/search?keyword=${searchKeyword}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       setSearchResults(response.data); // 백엔드에서 검색된 FoodDTO 리스트 반환

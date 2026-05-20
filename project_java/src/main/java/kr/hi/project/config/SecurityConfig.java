@@ -49,6 +49,7 @@ public class SecurityConfig {
                                  "/api/favorite/**", //[연희/추가] 즐찾들
                                  "/api/user/privacy/**", //[연희/추가] 프라이버시 영양성분 조회
                                  "/api/report-fail",//[준성/추가] 음식사진인증실패
+                                 "/api/ai/**",
                                  "/api/user/info",
 	                             "/api/record",
 	                             "/api/meal/**",
