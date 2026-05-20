@@ -1,0 +1,338 @@
+/* Information.css */
+
+.info-container {
+  background-color: rgba(255, 255, 255, 0.95);
+  padding: 40px;
+  border-radius: 30px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+  width: 85%;
+  margin: 0 auto;
+  max-width: 850px;
+  box-sizing: border-box;
+}
+
+.info-title {
+  color: #5d4037;
+  margin-bottom: 6px;
+  text-align: left;
+  font-weight: 800;
+}
+
+.info-subtitle {
+  text-align: left;
+  color: #888;
+  font-size: 13px;
+  margin-bottom: 30px;
+}
+
+/* 2단 입력창 그리드 */
+.info-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  margin-bottom: 30px;
+}
+
+.info-label {
+  display: block;
+  text-align: left;
+  font-weight: bold;
+  color: #5d4037;
+  margin-bottom: 8px;
+  font-size: 14px;
+}
+
+.info-input {
+  padding: 11px 15px;
+  border-radius: 12px;
+  border: 1px solid #ddd;
+  font-size: 14px;
+  width: 100%;
+  box-sizing: border-box;
+  outline: none;
+  background-color: #fff;
+  transition: border 0.2s;
+}
+
+.info-input:focus {
+  border-color: #c6465d;
+}
+
+/* 성별 선택 구역 */
+.gender-group {
+  grid-column: 1 / span 2;
+  text-align: left;
+}
+
+.gender-btn-wrapper {
+  display: flex;
+  gap: 12px;
+}
+
+.gender-btn {
+  flex: 1;
+  padding: 12px;
+  border-radius: 12px;
+  font-weight: bold;
+  cursor: pointer;
+  border: 1px solid #ddd;
+  background-color: #fff;
+  color: #555;
+  transition: all 0.2s;
+}
+
+.gender-btn.active {
+  border: 2px solid #c6465d;
+  background-color: #c6465d;
+  color: #fff;
+}
+
+/* 알레르기 섹션 */
+.allergy-section {
+  background-color: #fffcf5;
+  padding: 20px;
+  border-radius: 15px;
+  border: 1px solid #f5e6d3;
+  text-align: left;
+  margin-bottom: 30px;
+}
+
+.allergy-title {
+  font-weight: bold;
+  color: #5d4037;
+  font-size: 14px;
+  display: block;
+  margin-bottom: 12px;
+}
+
+.allergy-flex {
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.allergy-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  font-weight: 500;
+  font-size: 14px;
+  color: #555;
+}
+
+.allergy-checkbox {
+  width: 16px;
+  height: 16px;
+  accent-color: #c6465d;
+}
+
+.info-divider {
+  border: 0.5px solid #eee;
+  margin: 30px 0;
+}
+
+/* ━━━━━━━ ⭕ [성공했던 정렬 고스란히 이식] 음식 섹션 클래스 ━━━━━━━ */
+.food-section-wrapper {
+  display: flex;
+  gap: 20px;
+  justify-content: center;
+  margin-bottom: 40px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.food-card {
+  flex: 1;
+  width: 50%;
+  text-align: left;
+  padding: 24px;
+  border-radius: 20px;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;   /* 🌟 세로 정렬 보장 */
+  gap: 15px;                /* 🌟 요소들 사이의 황금 간격 */
+}
+
+.food-card.favorite {
+  background-color: #f1f8e9;
+  border: 1px solid #d0e7b5;
+}
+
+.food-card.dislike {
+  background-color: #fbe9e7;
+  border: 1px solid #ffccbc;
+}
+
+.food-card-header {
+  width: 100%;
+  box-sizing: border-box;
+  text-align: left;
+}
+
+.food-card-title {
+  margin: 0;
+  font-size: 16px;
+  font-weight: bold;
+}
+.food-card.favorite .food-card-title { color: #2e7d32; }
+.food-card.dislike .food-card-title { color: #c62828; }
+
+.food-add-btn {
+  display: block;
+  width: 100%;
+  padding: 12px;
+  color: white;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: bold;
+  text-align: center;
+  box-sizing: border-box;
+}
+.food-card.favorite .food-add-btn { background-color: #2e7d32; }
+.food-card.dislike .food-add-btn { background-color: #c62828; }
+
+.food-tag-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  min-height: 50px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.food-tag-empty {
+  color: #aaa;
+  font-size: 14px;
+  width: 100%;
+  text-align: left;
+  display: block;
+}
+
+.food-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background-color: #fff;
+  padding: 6px 12px;
+  border-radius: 30px;
+  font-size: 13px;
+  font-weight: 500;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+}
+.food-card.favorite .food-tag { border: 1px solid #c5e1a5; }
+.food-card.dislike .food-tag { border: 1px solid #ffab91; }
+
+.food-tag-delete {
+  color: #ff5252;
+  cursor: pointer;
+  margin-left: 4px;
+}
+
+/* 모달 팝업 구조 */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+  backdrop-filter: blur(3px);
+}
+
+.modal-content {
+  background-color: #fff;
+  padding: 28px;
+  border-radius: 24px;
+  width: 380px;
+  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
+}
+
+.modal-title {
+  margin: 0 0 15px 0;
+  color: #5d4037;
+  font-weight: bold;
+}
+
+.modal-search-box {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 15px;
+}
+
+.modal-search-btn {
+  padding: 10px 20px;
+  background-color: #d1b8a0;
+  color: white;
+  border: none;
+  border-radius: 12px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.modal-result-list {
+  max-height: 220px;
+  overflow-y: auto;
+  border-radius: 12px;
+  border: 1px solid #eee;
+  padding: 8px;
+  text-align: left;
+  background-color: #fafafa;
+}
+
+.modal-result-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 8px;
+  border-bottom: 1px solid #f1f1f1;
+}
+
+.modal-add-btn {
+  padding: 5px 12px;
+  background-color: #e0d0c0;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: bold;
+  color: #5d4037;
+}
+
+.modal-close-btn {
+  margin-top: 20px;
+  width: 100%;
+  padding: 12px;
+  background-color: #f5f5f5;
+  color: #666;
+  border: none;
+  border-radius: 12px;
+  font-weight: bold;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+/* 최종 제출 버튼 */
+.submit-btn {
+  padding: 15px 60px;
+  background-color: #c6465d;
+  color: white;
+  border: none;
+  border-radius: 16px;
+  cursor: pointer;
+  font-size: 16px;
+  font-weight: bold;
+  box-shadow: 0 5px 15px rgba(198, 70, 93, 0.3);
+  transition: transform 0.2s, background-color 0.2s;
+}
+
+.submit-btn:hover {
+  background-color: #b03a50;
+  transform: translateY(-2px);
+}

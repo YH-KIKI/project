@@ -1,4 +1,5 @@
 package kr.hi.project.controller;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -14,6 +15,14 @@ import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 public class AiProxyController {
+	
+	// [AWS 치트키 1] 사진인식주소
+    @Value("${ai.analyze.url:http://localhost:8000}")
+    private String analyzeServerUrl;
+
+    // [AWS 치트키 2] 제미나이 평가 서버 주소
+    @Value("${ai.gemini.url:http://localhost:8001}")
+    private String geminiServerUrl;
 
     @PostMapping("/api/ai/predict")
     public ResponseEntity<String> proxyPredict(@RequestParam("file") MultipartFile file) {
@@ -28,7 +37,7 @@ public class AiProxyController {
 
             // 자바가 백엔드 내부망을 통해 8000번 파이썬 서버로 신호를 패스
             RestTemplate restTemplate = new RestTemplate();
-            String pythonUrl = "http://localhost:8000/api/ai/predict"; 
+            String pythonUrl = analyzeServerUrl + "/api/ai/predict"; 
             
             // 파이썬이 분석해서 되돌려준 맛있는 결과 데이터를 리액트한테 그대로 토스합니다.
             ResponseEntity<String> response = restTemplate.postForEntity(pythonUrl, requestEntity, String.class);
@@ -47,7 +56,7 @@ public class AiProxyController {
             
             // 자바가 백엔드 내부망을 통해 8001번 제미나이 파이썬 서버로 패스
             // 나중에 AWS로 배포할 때 여기 localhost만 AWS 제미나이 EC2 IP로 바꾸기
-            String geminiUrl = "http://localhost:8001/api/ai/evaluate"; 
+            String geminiUrl = geminiServerUrl + "/api/ai/evaluate"; 
 
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);
