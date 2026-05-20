@@ -38,7 +38,7 @@ const getCroppedImg = async (imageSrc, pixelCrop) => {
 
 const BodyCheck = () => {
   // 로그인할 때 저장해둔 유저 번호를 꺼냄. (없으면 임시로 1번)
-  const userNum = localStorage.getItem("userNum") || 1;
+  const userNum = Number(localStorage.getItem("userNum")) || 1;
   const [activeTab, setActiveTab] = useState('album'); 
   
   const [albumRecords, setAlbumRecords] = useState([]);
