@@ -20,7 +20,7 @@ const Stats = ({ userNum = 1 }) => {
   useEffect(() => {
     const fetchRecordedDates = async () => {
       try {
-        const response = await axios.get(`http://localhost:8080/api/v1/diet/recorded-dates`, { params: { userNum } });
+        const response = await axios.get(`/api/diet/recorded-dates`, { params: { userNum } });
         setRecordedDates(response.data.map(dateStr => new Date(dateStr)));
       } catch (err) {
         console.error("기록된 날짜 가져오기 실패:", err);
@@ -36,7 +36,7 @@ const Stats = ({ userNum = 1 }) => {
         const formattedDate = format(selectedDate, 'yyyy-MM-dd');
         const type = activeTab === '주간' ? 'weekly' : 'monthly';
         
-        const response = await axios.get(`http://localhost:8080/api/v1/diet/stats`, {
+        const response = await axios.get(`/api/diet/stats`, {
           params: { userNum: userNum, date: formattedDate, type: type }
         });
         

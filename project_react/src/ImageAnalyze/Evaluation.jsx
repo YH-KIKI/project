@@ -8,27 +8,103 @@ const Evaluation = () => {
   const { mealResult, mealType } = location.state || {}; // Analyze에서 보낸 '한 끼 합계'
 
   const [userGoal, setUserGoal] = useState(null); // 하루 목표치 저장
+  
+  // 🌟 [추가] AI 냥이 평가 상태 관리
+  const [aiComment, setAiComment] = useState('냥이 영양사가 식단을 분석중이다냥... 🐾');
+  const [isAiLoading, setIsAiLoading] = useState(true);
 
-  useEffect(() => {
-    const fetchGoal = async () => {
+  const handleCancel = async () => {
+    const mkNum = mealResult?.mkNum; 
+    const mdayNum = mealResult?.mdayNum;
+
+    if (!mkNum) {
+      alert("식단 고유 번호를 찾을 수 없어 취소할 수 없습니다.");
+      return;
+    }
+
+    if (window.confirm("정말 이 식단 기록을 취소하고 삭제하시겠습니까? 🗑️")) {
       try {
         const token = localStorage.getItem('login_token') || sessionStorage.getItem('login_token');
-        const response = await axios.get('http://localhost:8080/api/information_select', {
+
+        await axios.post(`/api/meal/cancel?mkNum=${mkNum}&mdayNum=${mdayNum}`, null, {
           headers: { Authorization: `Bearer ${token}` }
         });
-        setUserGoal(response.data);
+        alert("식단 기록이 취소되었습니다. 메인 화면으로 이동합니다.");
+        navigate('/'); 
       } catch (error) {
-        console.error("목표치 가져오기 실패, 기본값으로 대체합니다.", error);
-        // 에러 방지용 기본 목적치 강제 세팅
-        setUserGoal({ userDailyKcal: 2000, userDailyCarbs: 300, userDailyProtein: 65, userDailyFat: 55, userModel: '2' });
+        console.error("식단 취소 실패", error);
+        alert("삭제 처리 중 오류가 발생했습니다.");
+      }
+    }
+  };
+
+  const fixNutrient = (val) => {
+    if (val > 0 && val < 5) return val * 100; 
+    return val || 0;
+  };
+
+  useEffect(() => {
+    const fetchGoalAndAiEvaluation = async () => {
+      try {
+        const token = localStorage.getItem('login_token') || sessionStorage.getItem('login_token');
+        
+        // 1. 유저 목표치 먼저 가져오기
+        const response = await axios.get('/api/information_select', {
+
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        const goalData = response.data;
+        setUserGoal(goalData);
+
+        // 2. 가져온 목표치 기반으로 한 끼 목표 수식 계산
+        const safeKcal = goalData?.userDailyKcal || 2000;
+        const safeCarbs = goalData?.userDailyCarbs || 300;
+        const safeProtein = goalData?.userDailyProtein || 65;
+        const safeFat = goalData?.userDailyFat || 55;
+        
+        const ratio = mealType === '점심' ? 0.4 : 0.3;
+        const targetObj = {
+          kcal: safeKcal * ratio,
+          carbs: safeCarbs * ratio,
+          protein: safeProtein * ratio,
+          fat: safeFat * ratio
+        };
+
+        const currentObj = {
+          kcal: mealResult.kcal || 0,
+          carbs: fixNutrient(mealResult.carbs),
+          protein: fixNutrient(mealResult.protein),
+          fat: fixNutrient(mealResult.fat)
+        };
+
+        // [핵심] 조립된 수치를 들고 자바 백엔드의 AI 평가 API 호출
+        setIsAiLoading(true);
+        const aiResponse = await axios.post('http://localhost:8001/ai/evaluate', {
+          mealResult: currentObj,
+          mealTarget: targetObj,
+          mealType: mealType,
+          userModel: goalData?.userModel || '2',
+          userName: goalData?.userName || '회원'
+        }, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+
+        setAiComment(aiResponse.data.aiComment);
+      } catch (error) {
+        console.error("데이터 로딩 또는 AI 호출 실패", error);
+        setAiComment("냥이 영양사가 피곤해서 졸고있다냥! 다음 끼니에 다시 불러달라냥! 😿");
+        // 폴백 기본 목적치 강제 세팅
+        if(!userGoal) setUserGoal({ userDailyKcal: 2000, userDailyCarbs: 300, userDailyProtein: 65, userDailyFat: 55, userModel: '2' });
+      } finally {
+        setIsAiLoading(false);
       }
     };
-    fetchGoal();
+
+    fetchGoalAndAiEvaluation();
   }, []);
 
   if (!mealResult) return <div style={{ padding: '40px', textAlign: 'center' }}>데이터를 불러오는 중...</div>;
 
-  // 하루 권장량 안전하게 가공 (서버 데이터가 비어있으면 표준 권장량 꽂아버리기)
   const safeGoal = {
     userDailyKcal: userGoal?.userDailyKcal || 2000,
     userDailyCarbs: userGoal?.userDailyCarbs || 300,
@@ -37,23 +113,12 @@ const Evaluation = () => {
     userModel: userGoal?.userModel || '2'
   };
 
-  // 이번 한 끼에 먹어야 할 권장량 계산 (비율 곱하기)
   const ratio = mealType === '점심' ? 0.4 : 0.3;
   const mealTarget = {
     kcal: safeGoal.userDailyKcal * ratio,
     carbs: safeGoal.userDailyCarbs * ratio,
     protein: safeGoal.userDailyProtein * ratio,
     fat: safeGoal.userDailyFat * ratio,
-    sodium: 2000 * ratio
-  };
-
-  // 🌟 [중요 보정] 만약 자바가 0.4g 처럼 소수점 쪼그라든 값을 던졌다면 원래 단위로 복구!
-  // 음식 영양소가 너무 작은 값이 들어오면 리액트단에서 물리적으로 100을 곱해 복구하는 안전장치입니다.
-  const fixNutrient = (val) => {
-    if (val > 0 && val < 5) {
-      return val * 100; // 0.6g -> 60g 복구 / 0.4g -> 40g 복구
-    }
-    return val || 0;
   };
 
   const nutrientList = [
@@ -90,12 +155,27 @@ const Evaluation = () => {
           </div>
         );
       })}
-      <button 
-        onClick={() => navigate('/')}
-        style={{ marginTop: '30px', padding: '12px 40px', backgroundColor: '#c6465d', color: 'white', border: 'none', borderRadius: '25px', cursor: 'pointer', fontWeight: 'bold' }}
-      >
-        확인 완료
-      </button>
+
+      {/* 🌟 [추가] 냥이 영양사 AI 평가 뷰어 컴포넌트 구역 */}
+      <div style={{ marginTop: '35px', padding: '20px', backgroundColor: '#fff3e0', borderRadius: '20px', border: '1px solid #ffe0b2', textAlign: 'left', position: 'relative' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '10px' }}>
+          <span style={{ fontSize: '28px' }}>🐱</span>
+          <h4 style={{ margin: 0, color: '#e65100' }}>AI 냥이 영양사의 실시간 한줄평</h4>
+          {isAiLoading && <span style={{ fontSize: '12px', color: '#ff9800', animation: 'spin 1s linear infinite' }}>🔄</span>}
+        </div>
+        <p style={{ margin: 0, fontSize: '15px', lineHeight: '1.6', color: '#5d4037', fontWeight: '500', whiteSpace: 'pre-wrap' }}>
+          {aiComment}
+        </p>
+      </div>
+
+      <div style={{ display: 'flex', gap: '15px', marginTop: '30px', justifyContent: 'center' }}>
+        <button onClick={() => navigate('/')} style={{ padding: '12px 40px', backgroundColor: '#81c784', color: 'white', border: 'none', borderRadius: '25px', cursor: 'pointer', fontWeight: 'bold' }}>
+          기록 저장 (확인)
+        </button>
+        <button onClick={handleCancel} style={{ padding: '12px 40px', backgroundColor: '#ff5252', color: 'white', border: 'none', borderRadius: '25px', cursor: 'pointer', fontWeight: 'bold' }}>
+          기록 취소 (DB 삭제)
+        </button>
+      </div>
     </div>
   );
 };

@@ -10,7 +10,7 @@ const LikeButton = ({ post_num, user_num }) => {
         if (!post_num) return;
 
         try {
-            const response = await axios.get(`http://localhost:8080/api/likes/status`, {
+            const response = await axios.get(`/api/likes/status`, {
                 // [수정] 컨트롤러의 @RequestParam("postNum") 명칭에 맞춤
                 params: { 
                     postNum: parseInt(post_num), 
@@ -36,7 +36,7 @@ const LikeButton = ({ post_num, user_num }) => {
 
         try {
             // [수정] 컨트롤러의 PostLikeDTO 필드명(postNum, userNum)에 맞춤
-            const response = await axios.post('http://localhost:8080/api/likes/toggle', {
+            const response = await axios.post('/api/likes/toggle', {
                 postNum: parseInt(post_num),
                 userNum: parseInt(user_num)
             });

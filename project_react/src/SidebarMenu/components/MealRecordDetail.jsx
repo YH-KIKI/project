@@ -94,7 +94,7 @@ const MealRecordDetail = () => {
   const loadRecordedDates = async () => {
     try {
       const res = await axios.get(
-        `http://localhost:8080/api/meal/recorded-dates?userNum=${userNum}`
+        `/api/meal/recorded-dates?userNum=${userNum}`
       );
 
       console.log("기록 날짜:", res.data);
@@ -107,7 +107,7 @@ const MealRecordDetail = () => {
   const loadFavoriteMeals = async () => {
     try {
       const res = await axios.get(
-        `http://localhost:8080/api/favorite/meal?userNum=${userNum}`
+        `/api/favorite/meal?userNum=${userNum}`
       );
 
       console.log("즐겨찾기 식단 조회:", res.data);
@@ -132,7 +132,7 @@ const MealRecordDetail = () => {
   const loadMealsByDate = async (targetDateKey) => {
     try {
       const res = await axios.get(
-        `http://localhost:8080/api/meal/today?userNum=${userNum}&date=${targetDateKey}`
+        `/api/meal/today?userNum=${userNum}&date=${targetDateKey}`
       );
 
       console.log("식단 조회 성공:", res.data);
@@ -454,8 +454,8 @@ const analysis = mealData ? getNutritionAnalysis() : null;
       }
 
       const res = await axios.post(
-        "http://localhost:8080/api/meal/record",
-        formData
+        "/api/meal/record",
+        requestData
       );
 
       console.log("식단 저장 응답:", res.data);
@@ -503,7 +503,7 @@ const analysis = mealData ? getNutritionAnalysis() : null;
         }
 
         await axios.delete(
-          `http://localhost:8080/api/favorite/meal?userNum=${userNum}&mfNum=${mfNum}`
+          `/api/favorite/meal?userNum=${userNum}&mfNum=${mfNum}`
         );
 
         setFavoriteRecords((prev) => {
@@ -516,7 +516,7 @@ const analysis = mealData ? getNutritionAnalysis() : null;
         return;
       }
 
-      const res = await axios.post("http://localhost:8080/api/favorite/meal", {
+      const res = await axios.post("/api/favorite/meal", {
         userNum,
         mkNum: mealData.mkNum,
         mfName: `${activeMeal} - ${getFoodSummary()}`,
@@ -559,7 +559,7 @@ const analysis = mealData ? getNutritionAnalysis() : null;
       );
 
       const res = await axios.post(
-        "http://localhost:8000/api/v1/ai/meal-feedback",
+        "http://localhost:8000/api/ai/meal-feedback",
         {
           mealType: activeMeal,
           kcal: mealData.totalKcal,

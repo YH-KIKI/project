@@ -34,7 +34,7 @@ const LoginPage = () => {
 
     try {
       // 2. 서버에 "이 토큰 아직 쓸 수 있어?"라고 물어보기 (가장 확실한 방법)
-      await axios.get('http://localhost:8080/api/user/info', {
+      await axios.get('/api/user/info', {
         headers: { Authorization: `Bearer ${token}` }
       });
 
@@ -57,7 +57,7 @@ const LoginPage = () => {
     if (!token) return;
 
     try {
-      const response = await axios.get('http://localhost:8080/api/user/info', {
+      const response = await axios.get('/api/user/info', {
         headers: {
           Authorization: `Bearer ${token}` // 핵심: 헤더에 '나 토큰 가졌어!'라고 증명
         }
@@ -89,7 +89,7 @@ const LoginPage = () => {
       //headers: 서버가 보낸 헤더 정보
       //data: 서버가 진짜로 보내준 핵심 내용물 (JSON)
       //config: 요청 설정 정보
-      const response = await axios.post('http://localhost:8080/api/login', {
+      const response = await axios.post('/api/login', {
         username: username,
         userid: userid,
         password: password
@@ -109,6 +109,9 @@ const LoginPage = () => {
       localStorage.setItem('refresh_token', refreshToken);
       // 🌟🌟🌟 [박하] 커뮤니티 게시판에서 사용자 식별을 위해 서버에서 받은 사용자 정보를 'user' 키로 저장
       localStorage.setItem('user', JSON.stringify(response.data.user));
+
+      // [재근]눈바디(BodyCheck) 등에서 바로 꺼내 쓸 수 있도록 userNum만 따로 저장.
+      localStorage.setItem('userNum', user.user_num);
 
       // 2. 로그인 상태를 '참'으로 변경
       setIsLoggedIn(true);

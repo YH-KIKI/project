@@ -34,7 +34,7 @@ const Analyze = () => {
     formData.append('data', JSON.stringify(data));
 
     try {
-        await axios.post('http://localhost:8080/api/report-fail', formData, {
+        await axios.post('/api/report-fail', formData, {
             headers: { 'Content-Type': 'multipart/form-data' }
         });
         alert("감사합니다! 입력하신 '" + customFoodName + "' 데이터가 수집되었습니다.");
@@ -68,7 +68,7 @@ const Analyze = () => {
 
     try {
       // 파이썬 FastAPI 서버 주소
-      const response = await axios.post('http://localhost:8000/ai/predict', formData, {
+      const response = await axios.post('/ai/predict', formData, {
         headers: { 'Content-Type': 'multipart/form-data' }
       });
       
@@ -134,7 +134,7 @@ const Analyze = () => {
         return;
       }
 
-      const response = await axios.post('http://localhost:8080/api/record', formData, {
+      const response = await axios.post('/api/record', formData, {
         headers: { 
           'Content-Type': 'multipart/form-data',
           // 🌟 수정된 부분: 저장된 위치가 어디든 토큰을 실어 보냅니다.
@@ -145,7 +145,7 @@ const Analyze = () => {
       // 그 한 끼'의 데이터만 백엔드에 요청
       const nutritionRes = await axios.get(
         //Controller : UserInformation
-        `http://localhost:8080/api/meal/current-nutrition?userNum=${user.user_num}&mealType=${mealType}`,
+        `/api/meal/current-nutrition?userNum=${user.user_num}&mealType=${mealType}`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
 

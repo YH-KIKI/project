@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_BASE_URL = 'http://localhost:8080/api/v1/diet';
+const API_BASE_URL = '/api/diet';
 
 // 1. AI 식단 추천 통신 함수 (모든 탭에서 진짜 데이터를 받아옵니다!)
 export const fetchAiRecommendations = async (tabName) => {

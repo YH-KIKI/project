@@ -11,7 +11,7 @@ import kr.hi.project.service.DietAnalysisService;
 import kr.hi.project.dto.DietAnalysisResponseDto;
 
 @RestController
-@RequestMapping("/api/v1/diet")
+@RequestMapping("/api/diet")
 @RequiredArgsConstructor
 public class DietAnalysisController {
 

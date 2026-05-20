@@ -7,7 +7,7 @@ import Cropper from 'react-easy-crop';
 // ==========================================
 // 🌟 스프링부트 서버 주소 설정 (이미지 렌더링에 필수)
 // ==========================================
-const SERVER_URL = 'http://localhost:8080';
+const SERVER_URL = process.env.REACT_APP_API_URL;
 
 // ==========================================
 // ✂️ [도우미 함수] 선택한 영역만큼 사진을 잘라주는 함수
@@ -36,7 +36,9 @@ const getCroppedImg = async (imageSrc, pixelCrop) => {
   });
 };
 
-const BodyCheck = ({ userNum = 1 }) => {
+const BodyCheck = () => {
+  // 로그인할 때 저장해둔 유저 번호를 꺼냄. (없으면 임시로 1번)
+  const userNum = Number(localStorage.getItem("userNum")) || 1;
   const [activeTab, setActiveTab] = useState('album'); 
   
   const [albumRecords, setAlbumRecords] = useState([]);
@@ -72,7 +74,7 @@ const BodyCheck = ({ userNum = 1 }) => {
   // =====================================================================
   const fetchAlbumRecords = useCallback(async () => {
     try {
-      const response = await axios.get(`${SERVER_URL}/api/v1/bodycheck/list`, {
+      const response = await axios.get(`${SERVER_URL}/api/bodycheck/list`, {
         params: { userNum: userNum } 
       });
       // DB에서 가져온 데이터 형태: [{bcNum, bcImagePath, bcType, bcAiResult, bcDate}]
@@ -94,7 +96,7 @@ const BodyCheck = ({ userNum = 1 }) => {
   const handleDeleteRecord = async (bcNum) => {
     if (window.confirm("정말로 이 기록을 삭제하시겠습니까?")) {
       try {
-        await axios.delete(`${SERVER_URL}/api/v1/bodycheck/${bcNum}`);
+        await axios.delete(`${SERVER_URL}/api/bodycheck/${bcNum}`);
         // 화면에서도 지우기
         setAlbumRecords(albumRecords.filter(record => record.bcNum !== bcNum));
         alert("삭제되었습니다. 🗑️");
@@ -118,7 +120,7 @@ const BodyCheck = ({ userNum = 1 }) => {
   const handlePasswordSubmit = async () => {
     if (!passwordInput.trim()) return;
     try {
-      const response = await axios.post(`${SERVER_URL}/api/v1/user/verify-password?userNum=${userNum}`, { password: passwordInput }, { withCredentials: true });
+      const response = await axios.post(`${SERVER_URL}/api/user/verify-password?userNum=${userNum}`, { password: passwordInput }, { withCredentials: true });
       if (response.data === true) { 
         setIsUnlocked(true); 
       } else { 
@@ -165,7 +167,7 @@ const BodyCheck = ({ userNum = 1 }) => {
       if (uploadTarget === 'album') {
         setIsLoading(true);
         try {
-          await uploadBodyCheckImage(croppedFile, '원본'); 
+          await uploadBodyCheckImage(croppedFile, '원본', userNum); 
           alert("성공적으로 등록되었습니다! 📸");
           fetchAlbumRecords(); 
         } catch (err) {
@@ -190,7 +192,7 @@ const BodyCheck = ({ userNum = 1 }) => {
     if (!pendingFile) return;
     setIsLoading(true); 
     try {
-      const responseData = await uploadBodyCheckImage(pendingFile, type);
+      const responseData = await uploadBodyCheckImage(pendingFile, type, userNum);
       let finalImageUrl = URL.createObjectURL(pendingFile); 
       if (type !== '원본' && responseData.image_base64) {
          finalImageUrl = `data:image/jpeg;base64,${responseData.image_base64}`;

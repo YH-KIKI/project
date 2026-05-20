@@ -126,5 +126,16 @@ public class MealService {
 		mealDAO.insertFailedRecord(dto);
 		
 	}
+	// 사진인식하고 식단 상세 파일과 로그를 지우기
+	@Transactional
+	public void cancelMealRecord(int mkNum,int mdayNum) {
+	    // 자식 테이블(상세 내역) 먼저 삭제
+	    mealDAO.deleteMealDetailByMkNum(mkNum);
+	    // 부모 테이블(식단 로그) 삭제
+	    mealDAO.deleteMealLogByMkNum(mkNum);
+	    // 식단이 지워졌으니 오늘 총 칼로리를 다시 계산해서 업데이트
+	    mealDAO.updateDailyKcal(mdayNum);
+
+	}
 
 }

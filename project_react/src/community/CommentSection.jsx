@@ -10,7 +10,7 @@ const CommentSection = ({ post_num, user_num }) => {
     const fetchComments = useCallback(async () => {
         if (!post_num) return;
         try {
-            const response = await axios.get(`http://localhost:8080/api/comments/${post_num}`);
+            const response = await axios.get(`/api/comments/${post_num}`);
             setComments(Array.isArray(response.data) ? response.data : []);
         } catch (error) {
             console.error("댓글 로딩 오류:", error);
@@ -31,7 +31,7 @@ const CommentSection = ({ post_num, user_num }) => {
             return;
         }
         try {
-            await axios.post('http://localhost:8080/api/comments', {
+            await axios.post('/api/comments', {
                 postNum: parseInt(post_num),
                 userNum: parseInt(user_num),
                 pcContent: newComment,

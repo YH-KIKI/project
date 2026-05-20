@@ -15,7 +15,7 @@ import lombok.AllArgsConstructor;
 
 @RestController
 @AllArgsConstructor
-@RequestMapping("/api/v1/ai")
+@RequestMapping("/api/ai")
 public class ProxyController {
 
 	private final WebClient webClient;

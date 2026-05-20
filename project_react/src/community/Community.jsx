@@ -43,7 +43,7 @@ const Community = () => {
           keyword: activeSearch.keyword.trim() === '' ? '' : activeSearch.keyword
         };
 
-        const response = await axios.get(`http://localhost:8080/api/community/posts`, { params });
+        const response = await axios.get(`/api/community/posts`, { params });
         
         if (response.data && response.data.posts) {
           setPosts(response.data.posts);

@@ -39,7 +39,7 @@ const SignupPage = () => {
 
     try {
       // 1. 먼저 회원가입 API를 정상적으로 호출합니다.
-      await axios.post('http://localhost:8080/api/signup', {
+      await axios.post('/api/signup', {
         userId: userid,
         userPassWord: password,
         userName: username,
@@ -48,7 +48,7 @@ const SignupPage = () => {
 
       // 2. 🌟 [여기서부터 치트키] 가입 성공 직후, 방금 가입한 아이디/비번으로 로그인 API를 연달아 강제 호출합니다!
       // (사용자님 LoginPage.jsx에 있던 보낼 데이터 규격과 완벽하게 맞췄습니다.)
-      const loginResponse = await axios.post('http://localhost:8080/api/login', {
+      const loginResponse = await axios.post('/api/login', {
         username: username, // 혹시 자바가 username을 요구할까봐 닉네임도 같이 토스
         userid: userid,     // 로그인용 아이디
         password: password  // 로그인용 비밀번호

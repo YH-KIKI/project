@@ -18,7 +18,7 @@ FROM eclipse-temurin:21-jre
 # WORKDIR은 부트 프로젝트 폴더
 WORKDIR /project_java
 # --from=backend-build는 위 빌드 결과
-COPY --from=backend-build /project_java/build/libs/*.jar app.jar
+COPY --from=backend-build /project_java/build/libs/*-SNAPSHOT.jar app.jar
 
 EXPOSE 8080
 ENTRYPOINT ["java", "-Xmx512m","-jar", "app.jar"]
