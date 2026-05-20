@@ -46,8 +46,12 @@ const NutrientBar = ({ icon, name, status, type, ratio = 0, valueText }) => {
 
 
 const MealRecordDetail = () => {
-  const userNum = 1;
   const location = useLocation();
+
+  const user = JSON.parse(
+    localStorage.getItem("user")
+  );
+  const userNum = user?.user_num;
 
   const [activeMeal, setActiveMeal] = useState("아침");
   const [selectedDate, setSelectedDate] = useState(new Date());
