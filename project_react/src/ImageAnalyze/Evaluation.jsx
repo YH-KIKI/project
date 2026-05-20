@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 
@@ -9,9 +9,12 @@ const Evaluation = () => {
 
   const [userGoal, setUserGoal] = useState(null); // 하루 목표치 저장
   
-  // 🌟 [추가] AI 냥이 평가 상태 관리
+
   const [aiComment, setAiComment] = useState('냥이 영양사가 식단을 분석중이다냥... 🐾');
   const [isAiLoading, setIsAiLoading] = useState(true);
+
+  // 페이지가 몇 번을 재렌더링되어도 절대 변하지 않는 물리적 잠금장치 상자냥!
+  const hasCalledAi = useRef(false);
 
   const handleCancel = async () => {
     const mkNum = mealResult?.mkNum; 
@@ -44,19 +47,24 @@ const Evaluation = () => {
   };
 
   useEffect(() => {
+    // 데이터가 비어있거나, 이미 AI 요청을 한 번 '시작'했다면 즉시 차단
+    if (!mealResult || !mealResult.kcal || hasCalledAi.current) return;
+
     const fetchGoalAndAiEvaluation = async () => {
+      // 진입하자마자 중복 호출 차단
+      hasCalledAi.current = true; 
+
       try {
         const token = localStorage.getItem('login_token') || sessionStorage.getItem('login_token');
         
-        // 1. 유저 목표치 먼저 가져오기
+        // 유저 목표치 먼저 가져오기
         const response = await axios.get('/api/information_select', {
-
           headers: { Authorization: `Bearer ${token}` }
         });
         const goalData = response.data;
         setUserGoal(goalData);
 
-        // 2. 가져온 목표치 기반으로 한 끼 목표 수식 계산
+        // 가져온 목표치 기반으로 한 끼 목표 수식 계산
         const safeKcal = goalData?.userDailyKcal || 2000;
         const safeCarbs = goalData?.userDailyCarbs || 300;
         const safeProtein = goalData?.userDailyProtein || 65;
@@ -78,8 +86,7 @@ const Evaluation = () => {
         };
 
         // [핵심] 조립된 수치를 들고 자바 백엔드의 AI 평가 API 호출
-        setIsAiLoading(true);
-        const aiResponse = await axios.post('http://localhost:8001/ai/evaluate', {
+        const aiResponse = await axios.post('/api/ai/evaluate', {
           mealResult: currentObj,
           mealTarget: targetObj,
           mealType: mealType,
@@ -89,19 +96,19 @@ const Evaluation = () => {
           headers: { Authorization: `Bearer ${token}` }
         });
 
+        // 성공한 피드백 문장을 딱 한 번만 안전하게 저장냥!
         setAiComment(aiResponse.data.aiComment);
       } catch (error) {
         console.error("데이터 로딩 또는 AI 호출 실패", error);
         setAiComment("냥이 영양사가 피곤해서 졸고있다냥! 다음 끼니에 다시 불러달라냥! 😿");
-        // 폴백 기본 목적치 강제 세팅
         if(!userGoal) setUserGoal({ userDailyKcal: 2000, userDailyCarbs: 300, userDailyProtein: 65, userDailyFat: 55, userModel: '2' });
       } finally {
-        setIsAiLoading(false);
+        setIsAiLoading(false); // 통신이 끝나면 로딩 마크 끄기냥!
       }
     };
 
     fetchGoalAndAiEvaluation();
-  }, []);
+  }, [mealResult]);
 
   if (!mealResult) return <div style={{ padding: '40px', textAlign: 'center' }}>데이터를 불러오는 중...</div>;
 
@@ -156,7 +163,7 @@ const Evaluation = () => {
         );
       })}
 
-      {/* 🌟 [추가] 냥이 영양사 AI 평가 뷰어 컴포넌트 구역 */}
+      {/* 냥이 영양사 AI 평가 뷰어 컴포넌트 구역 */}
       <div style={{ marginTop: '35px', padding: '20px', backgroundColor: '#fff3e0', borderRadius: '20px', border: '1px solid #ffe0b2', textAlign: 'left', position: 'relative' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '10px' }}>
           <span style={{ fontSize: '28px' }}>🐱</span>
