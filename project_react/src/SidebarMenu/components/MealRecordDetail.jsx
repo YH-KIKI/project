@@ -441,7 +441,7 @@ const analysis = mealData ? getNutritionAnalysis() : null;
 
       if (data.mealImageFile) {
         formData.append(
-          "mkImageFile",
+          "mealImageFile",
           data.mealImageFile
         );
       }
