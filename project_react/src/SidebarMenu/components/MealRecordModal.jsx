@@ -29,10 +29,14 @@ function MealRecordModal({
   const getImageUrl = (url) => {
     if (!url) return null;
 
+    // 업로드 직후 미리보기
     if (url.startsWith("blob:")) return url;
+
+    // 이미 완전한 주소면 그대로
     if (url.startsWith("http")) return url;
 
-    return `http://localhost:8080${url}`;
+    // 현재 서버 기준 자동
+    return `${window.location.origin}${url}`;
   };
 
   const [mealImagePreview, setMealImagePreview] = useState(

@@ -151,7 +151,7 @@ console.log("item.mkImage:", item.mkImage);
             totalKcal: 0,
             foods: [],
             imageUrl: item.mkImage
-              ? `http://localhost:8080${item.mkImage}`
+              ? `${window.location.origin}${item.mkImage}`
               : null,
           };
         }
@@ -198,7 +198,7 @@ console.log("item.mkImage:", item.mkImage);
   const loadUserPrivacy = async () => {
     try {
       const res = await axios.get(
-        `http://localhost:8080/api/user/privacy?userNum=${userNum}`
+        `/api/user/privacy?userNum=${userNum}`
       );
       setUserTargets(res.data);
     } catch (err) {
@@ -559,7 +559,7 @@ const analysis = mealData ? getNutritionAnalysis() : null;
       );
 
       const res = await axios.post(
-        "http://localhost:8000/api/ai/meal-feedback",
+        "/api/ai/meal-feedback",
         {
           mealType: activeMeal,
           kcal: mealData.totalKcal,
