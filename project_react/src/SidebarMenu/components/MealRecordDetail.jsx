@@ -72,6 +72,16 @@ const MealRecordDetail = () => {
   const favoriteAddDoneRef = useRef(false);
   const meals = ["아침", "점심", "저녁"];
 
+  const getImageUrl = (path) => {
+  if (!path) return null;
+
+  const SERVER_URL =
+    process.env.REACT_APP_SERVER_URL ||
+    window.location.origin;
+
+  return `${SERVER_URL}${path}`;
+};
+
   const formatDateKey = (date) => {
     const y = date.getFullYear();
     const m = String(date.getMonth() + 1).padStart(2, "0");
@@ -145,7 +155,7 @@ const MealRecordDetail = () => {
 
       res.data.forEach((item) => {
         console.log("백엔드 item:", item);
-console.log("item.mkImage:", item.mkImage);
+        console.log("item.mkImage:", item.mkImage);
         const key = `${targetDateKey}_${item.mkMealType}`;
 
         if (!converted[key]) {
@@ -155,7 +165,7 @@ console.log("item.mkImage:", item.mkImage);
             totalKcal: 0,
             foods: [],
             imageUrl: item.mkImage
-              ? `${window.location.origin}${item.mkImage}`
+              ? getImageUrl(item.mkImage)
               : null,
           };
         }
