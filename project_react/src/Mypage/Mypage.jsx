@@ -72,38 +72,14 @@ const Mypage = () => {
 
   const handleLogout = () => {
     localStorage.removeItem('login_token');
+    localStorage.removeItem('refresh_token');
+    sessionStorage.removeItem('login_token');
     setIsLoggedIn(false);
     navigate('/login');
   }
 
   return (
-    // <div className="page-background">
-    //   <div className="app-wrapper">
-    //     <Sidebar />
-
-        <main style={{ 
-          backgroundColor: 'rgba(255, 255, 255, 0.9)', 
-          padding: '40px', 
-          borderRadius: '20px', 
-          textAlign: 'center',
-          border: '2px solid #d1b8a0',
-          position: 'relative',
-          height: 'auto',
-          minHeight: '800px',
-          width: '62%', top: '20px',
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          overflowY: 'auto'
-        }}>
-          <a href="/" style={{ 
-            fontSize: '20px', position: 'absolute', top: '0', right: '80px', width: '20%', 
-          }} onClick={handleLogout}>↪️ 로그아웃</a>
-          
-          <a href="/" style={{ 
-            fontSize: '20px', position: 'absolute', top: '0', right: '30px', width: '10%', 
-          }}>🔔</a>
-
+        <>
           <div style={{ width: '100%', display: 'flex', justifyContent: 'space-between', marginBottom: '20px' }}>
             <span style={{ fontWeight: '600' }}>사용자: {username}</span>
             <span style={{ color: '#999' }}>{formattedDate}</span>
@@ -186,9 +162,7 @@ const Mypage = () => {
             </div>
           </div>
           </div>
-        </main>
-//       </div>
-//     </div>
+        </>
   );
 };
 
