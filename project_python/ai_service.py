@@ -1,3 +1,6 @@
+import os
+import json
+import google.generativeai as genai
 from sklearn.neighbors import NearestNeighbors
 from sqlalchemy import create_engine
 
@@ -24,6 +27,17 @@ except Exception as e:
 
 
 # ==========================================
+# 구글 Gemini AI 설정
+# ==========================================
+GOOGLE_API_KEY = os.getenv("GOOGLE_AI_API_KEY")
+if GOOGLE_API_KEY:
+    genai.configure(api_key=GOOGLE_API_KEY)
+    print("✅ [AI] 구글 Gemini API 연동 완료!")
+else:
+    print("⚠️ [AI] GOOGLE_AI_API_KEY가 없습니다. 텍스트 생성은 건너뜁니다.")
+
+
+# ==========================================
 # MySQL 데이터베이스 연결 설정
 # ==========================================
 DB_URL = "mysql+pymysql://root:root@localhost:3306/yummy"
@@ -46,7 +60,7 @@ except Exception as e:
     print(f"🚨 DB 연결 실패: {e}")
 
 # ==========================================
-# 식단 추천 로직 함수
+# 식단 추천 로직 함수 (기존)
 # ==========================================
 def get_best_diet(target_kcal, target_carbs, target_protein, target_fat, diet_type):
     if diet_type != "맞춤 식단":
@@ -74,6 +88,58 @@ def get_best_diet(target_kcal, target_carbs, target_protein, target_fat, diet_ty
         "tags": [best_food_row['fo_type'], "AI 정밀분석"]
     }
 
+# ==========================================
+# AI 하이브리드 식단 추천 (DB 정확도 + Gemini 센스)
+# ==========================================
+def get_hybrid_diet_recommendation(target_kcal, target_carbs, target_protein, target_fat, diet_type):
+    # 1. DB에서 영양소가 가장 완벽한 음식 찾기
+    best_food = get_best_diet(target_kcal, target_carbs, target_protein, target_fat, diet_type)
+    
+    # 2. AI 실패 시 보여줄 기본값
+    ai_name = best_food['menu']
+    ai_comment = "냠냠플래닛이 추천하는 영양 만점 맞춤 식단입니다!"
+    
+    # 3. 제미나이 AI 호출
+    if GOOGLE_API_KEY:
+        try:
+            model = genai.GenerativeModel('gemini-1.5-flash')
+            prompt = f"""
+            너는 다정하고 전문적인 영양사야. 사용자가 '{diet_type}'을 목표로 하고 있어.
+            내가 영양학적으로 계산해서 찾은 메뉴는 '{best_food['menu']}'야. (칼로리: {best_food['kcal']}kcal)
+            
+            이 메뉴를 바탕으로, 유저가 먹고 싶게 만드는 '센스 있는 식단 이름'과 '짧은 추천 이유(1~2줄)'를 만들어줘.
+            답변은 반드시 아래 JSON 형태로만 해줘. 마크다운이나 다른 설명은 절대 넣지 마.
+            {{
+                "ai_name": "단백질 듬뿍 현미 닭가슴살 덮밥",
+                "ai_comment": "근육 성장에 필수적인 단백질이 가득해요! 든든하게 드시고 득근하세요!"
+            }}
+            """
+            
+            response = model.generate_content(prompt)
+            text = response.text.strip().replace('```json', '').replace('```', '')
+            ai_data = json.loads(text)
+            
+            ai_name = ai_data.get('ai_name', best_food['menu'])
+            ai_comment = ai_data.get('ai_comment', ai_comment)
+            print(f"🤖 [Gemini] 작명 성공: {ai_name}")
+            
+        except Exception as e:
+            print(f"⚠️ [Gemini] 호출 실패 (기본값으로 응답합니다): {e}")
+
+    # 4. 최종 결과 반환
+    return {
+        "id": best_food['id'],
+        "menu": ai_name,
+        "original_menu": best_food['menu'],
+        "kcal": best_food['kcal'],
+        "carbs": best_food['carbs'],
+        "protein": best_food['protein'],
+        "fat": best_food['fat'],
+        "sodium": best_food['sodium'],
+        "tags": best_food['tags'],
+        "ai_comment": ai_comment
+    }
+
 #=======================================
 # 두 좌표 사이의 기울기(각도)를 계산하는 함수
 #=======================================
@@ -93,7 +159,6 @@ def analyze_pose(image_bytes):
         nparr = np.frombuffer(image_bytes, np.uint8)
         img = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
         _, buffer = cv2.imencode('.jpg', img)
-        # 🌟 이제 단순 문자열이 아니라 딕셔너리(JSON 형태)로 반환합니다!
         return {"image_base64": base64.b64encode(buffer).decode('utf-8'), "score_data": None}
 
     nparr = np.frombuffer(image_bytes, np.uint8)
@@ -101,30 +166,23 @@ def analyze_pose(image_bytes):
     img_rgb = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
     
     results = pose.process(img_rgb)
-    score_data = None # 🌟 점수 데이터를 담을 변수
+    score_data = None 
 
     if results.pose_landmarks:
-        # 🌟 1. 랜드마크 좌표 추출
         landmarks = results.pose_landmarks.landmark
         
-        # 어깨 (11: 왼쪽 어깨, 12: 오른쪽 어깨)
         left_shoulder = landmarks[mp_pose.PoseLandmark.LEFT_SHOULDER.value]
         right_shoulder = landmarks[mp_pose.PoseLandmark.RIGHT_SHOULDER.value]
-        
-        # 골반 (23: 왼쪽 골반, 24: 오른쪽 골반)
         left_hip = landmarks[mp_pose.PoseLandmark.LEFT_HIP.value]
         right_hip = landmarks[mp_pose.PoseLandmark.RIGHT_HIP.value]
         
-        # 🌟 2. 비대칭 각도 계산 (0도에 가까울수록 완벽한 대칭)
         shoulder_angle = calculate_angle(left_shoulder, right_shoulder)
         hip_angle = calculate_angle(left_hip, right_hip)
         
-        # 🌟 3. 점수 계산 (100점 만점 기준, 1도 틀어질 때마다 3점씩 감점)
         shoulder_score = max(0, 100 - (shoulder_angle * 3))
         hip_score = max(0, 100 - (hip_angle * 3))
         total_score = (shoulder_score + hip_score) / 2
         
-        # 🌟 4. 맞춤형 피드백 생성
         feedback = "훌륭합니다! 좌우 밸런스가 아주 좋습니다. 👏"
         if shoulder_angle > 3 and hip_angle > 3:
             feedback = "어깨와 골반이 모두 조금 틀어져 있습니다. 전신 교정 스트레칭이 필요해요! 🧘‍♀️"
@@ -133,7 +191,6 @@ def analyze_pose(image_bytes):
         elif hip_angle > 3:
             feedback = "골반이 약간 틀어져 있습니다. 다리를 꼬고 앉는 습관을 피해주세요! 🪑"
 
-        # 프론트엔드로 넘겨줄 점수 묶음(Dictionary) 생성
         score_data = {
             "shoulder_score": round(shoulder_score, 1),
             "hip_score": round(hip_score, 1),
@@ -141,7 +198,6 @@ def analyze_pose(image_bytes):
             "feedback": feedback
         }
 
-        # 기존처럼 뼈대 그리기
         mp_drawing.draw_landmarks(
             img, results.pose_landmarks, mp_pose.POSE_CONNECTIONS,
             mp_drawing.DrawingSpec(color=(245,117,66), thickness=2, circle_radius=2),
@@ -153,11 +209,11 @@ def analyze_pose(image_bytes):
         
     _, buffer = cv2.imencode('.jpg', img)
     
-    # 🌟 이미지와 점수 데이터를 함께 반환
     return {
         "image_base64": base64.b64encode(buffer).decode('utf-8'),
         "score_data": score_data
     }
+
 def extract_outline(image_bytes):
     nparr = np.frombuffer(image_bytes, np.uint8)
     img = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
@@ -177,7 +233,6 @@ def extract_outline(image_bytes):
 # ==========================================
 def generate_daily_feedback(grade, current_kcal, target_kcal, carbs, protein, fat, sodium):
     
-    # 1줄차: 칼로리 분석 및 공감
     kcal_diff = target_kcal - current_kcal
     if kcal_diff > 300:
         line1 = f"목표보다 {kcal_diff}kcal 덜 드셨네요! 오늘은 속이 조금 가벼운 하루였겠어요. 😊"
@@ -186,8 +241,6 @@ def generate_daily_feedback(grade, current_kcal, target_kcal, carbs, protein, fa
     else:
         line1 = "목표 칼로리에 아주 근접하게 드셨어요! 양 조절을 정말 기가 막히게 하셨네요. 👏"
 
-    # 2줄차: 영양소 기반 액션 플랜 (전문가 조언)
-    # 기획에 맞게 기준 수치는 자유롭게 변경하세요!
     if protein < 50:
         line2 = "단백질 섭취가 조금 부족해요. 다음 끼니엔 두부, 계란, 닭가슴살을 곁들여 근육을 지켜볼까요? 🥚"
     elif carbs < 100:
@@ -199,12 +252,9 @@ def generate_daily_feedback(grade, current_kcal, target_kcal, carbs, protein, fa
     else:
         line2 = "탄단지 균형이 꽤 훌륭해요! 지금처럼만 골고루 챙겨 드시면 완벽한 건강 식단입니다. ✨"
 
-    # 3줄차: 등급 기반 다정한 동기부여
     if grade in ['A', 'B']:
         line3 = f"{grade}등급 달성을 축하해요! 냠냠플래닛 코치가 항상 응원할게요. 💖"
     else:
         line3 = "조금만 더 신경 쓰면 훨씬 좋아질 거예요. 내일은 더 건강하게 챙겨 먹어봐요! 화이팅! 🌈"
 
-    # 3줄을 합쳐서 반환
     return f"{line1}\n{line2}\n{line3}"
-

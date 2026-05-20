@@ -5,8 +5,7 @@ from fastapi.middleware.cors import CORSMiddleware # 식단 피드백용
 
 # 🌟 눈바디 분석 함수(analyze_pose, extract_outline) 및 피드백 함수(generate_daily_feedback) 불러오기
 from schemas import UserInfo
-from ai_service import get_best_diet, analyze_pose, extract_outline, generate_daily_feedback
-
+from ai_service import get_hybrid_diet_recommendation, analyze_pose, extract_outline, generate_daily_feedback
 # 대빵 - 식단 피드백 함수 
 from meal_feedback import generate_meal_feedback
 
@@ -47,13 +46,13 @@ class MealFeedbackRequest(BaseModel):
     sodium: float
 
 # ==========================================
-# 1. AI 식단 추천 엔드포인트 (기존)
+# 1. AI 식단 추천 엔드포인트
 # ==========================================
 @app.post("/api/ai/recommend")
 async def ai_recommend(user: UserInfo):
     print(f"🔥 [Python] 식단 추천 요청 도착! 유저번호: {user.userNum}")
     
-    best_food = get_best_diet(
+    best_food = get_hybrid_diet_recommendation(
         target_kcal = user.targetCalorie / 3,
         target_carbs = user.carbs / 3,
         target_protein = user.protein / 3,
@@ -66,12 +65,14 @@ async def ai_recommend(user: UserInfo):
     return [{
         "id": best_food["id"],
         "menu": best_food["menu"],
+        "original_menu": best_food.get("original_menu", ""), # 추가됨
         "kcal": best_food["kcal"],
         "carbs": best_food["carbs"],
         "protein": best_food["protein"],
         "fat": best_food["fat"],
         "sodium": best_food["sodium"],
-        "tags": best_food["tags"] + ["AI 정밀분석"]
+        "tags": best_food["tags"] + ["AI 정밀분석"],
+        "aiComment": best_food.get("ai_comment", "") # 추가됨
     }]
 
 
@@ -86,23 +87,28 @@ async def bodycheck_service(
 ):
     print(f"📸 [Python] 눈바디 사진 도착! 타입: {analyzeType}, 유저: {userNum}")
     
-    # 1. 사진 데이터를 바이트로 읽기
     image_bytes = await file.read()
     
-    # 2. 분석 타입에 따라 ai_service.py의 알맞은 함수 호출
     img_base64 = ""
+    score_data = None # 추가됨
+    
     if analyzeType == 'pose':
-        img_base64 = analyze_pose(image_bytes)
+        result = analyze_pose(image_bytes)
+        # 딕셔너리로 반환된 경우 분기 처리 추가
+        if isinstance(result, dict):
+            img_base64 = result["image_base64"]
+            score_data = result.get("score_data")
+        else:
+            img_base64 = result
     elif analyzeType == 'outline':
         img_base64 = extract_outline(image_bytes)
         
-    # 3. 분석된 이미지를 스프링부트로 반환
     return {
         "status": "success",
         "analyzeType": analyzeType,
-        "image_base64": img_base64
+        "image_base64": img_base64,
+        "score_data": score_data # 추가됨
     }
-
 
 # ==========================================
 # 3. 사진 분석 테스트용 (기존 유지)
@@ -120,7 +126,7 @@ async def detect_service(message: str = Form(...), file: UploadFile = File(...))
 # ==========================================
 # 🌟 4. [새로 추가됨] AI 식단 3줄 요약 피드백 엔드포인트
 # ==========================================
-@app.post("/api/v1/ai/feedback")
+@app.post("/api/ai/feedback")
 async def daily_feedback_service(data: DietFeedbackRequest):
     print(f"📝 [Python] AI 피드백 요청 도착! 유저번호: {data.userNum}, 등급: {data.grade}")
     
