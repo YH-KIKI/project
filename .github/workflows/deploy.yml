@@ -75,10 +75,11 @@ jobs:
               -e DB_USERNAME="${{ secrets.DB_USERNAME }}" \
               -e DB_PASSWORD="${{ secrets.DB_PASSWORD }}" \
               -e AI_SERVER_URL="${{ secrets.AI_SERVER_URL }}" \
-              ${{ secrets.DOCKER_USERNAME }}/backend:latest \
               -e STATIC_PATH="file:///app/uploads/" \
+              -e UPLOAD_PATH="/app/uploads/bodycam/" \
               -e RELEARN_PATH="/app/uploads/relearn/" \
-              java -Xmx512m -Dspring.profiles.active=prod -jar /app.jar
+              ${{ secrets.DOCKER_USERNAME }}/backend:latest \
+              java -Xmx512m -Dspring.profiles.active=prod -jar /app.jar.jar
 
             # Nginx(React) 실행 (80 포트 개방)
             sudo docker stop frontend-server || true
