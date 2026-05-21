@@ -92,7 +92,7 @@ const Evaluation = () => {
         };
 
         // [핵심] 조립된 수치를 들고 자바 백엔드의 AI 평가 API 호출
-        const aiResponse = await axios.post(`${AI_SERVER_URL}/api/ai/evaluate`, {
+        const aiResponse = await axios.post(`/api/ai/evaluate`, {
           mealResult: currentObj,
           mealTarget: targetObj,
           mealType: mealType,

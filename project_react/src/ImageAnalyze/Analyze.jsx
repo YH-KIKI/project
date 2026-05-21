@@ -40,7 +40,7 @@ const Analyze = () => {
     formData.append('data', JSON.stringify(data));
 
     try {
-        await axios.post(`${AI_SERVER_URL}/api/report-fail`, formData, {
+        await axios.post(`/api/report-fail`, formData, {
             headers: { 'Content-Type': 'multipart/form-data' }
         });
         alert("감사합니다! 입력하신 '" + customFoodName + "' 데이터가 수집되었습니다.");
@@ -73,7 +73,7 @@ const Analyze = () => {
     formData.append('file', selectedFile);
 
     try {
-      const response = await axios.post(`${AI_SERVER_URL}/api/ai/predict`, formData, {
+      const response = await axios.post(`/api/ai/predict`, formData, {
         headers: { 'Content-Type': 'multipart/form-data' }
       });
 
