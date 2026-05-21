@@ -8,7 +8,14 @@ from schemas import UserInfo
 from ai_service import get_hybrid_diet_recommendation, analyze_pose, extract_outline, generate_daily_feedback
 # 대빵 - 식단 피드백 함수 
 from meal_feedback import generate_meal_feedback
+import os
+import uvicorn
+from google.genai import types
 
+# Analyze.py 파일에서 필요한 로봇과 함수들을 쏙 뽑아오기!
+from Analyze import get_food_predictions, client, MODEL_NAME
+
+os.environ['KMP_DUPLICATE_LIB_OK'] = 'True'
 app = FastAPI()
 
 # 대빵 - 식단 피드백용 
@@ -169,6 +176,58 @@ async def meal_feedback_service(data: MealFeedbackRequest):
         "status": "success",
         "feedback": feedback
     }
+
+# ==================================================================================
+# [창구 1] 음식 사진 자동 스캔 API
+# ==================================================================================
+@app.post("/api/ai/predict")
+async def predict(file: UploadFile = File(...)):
+    print("📸 [main.py] 사진 요청 도착 -> Analyze.py로 토스한다냥!")
+    img_bytes = await file.read()
+    
+    # Analyze.py에 정의된 사진 인식 함수를 실행해서 결과를 받아옵니다냥!
+    predictions = get_food_predictions(img_bytes)
+    return {"results": predictions}
+
+
+# ==================================================================================
+# [창구 2] 제미나이 냥이 말투 식단 평가 API (422 검사 오류 완벽 방어!)
+# ==================================================================================
+@app.post("/api/ai/evaluate")
+async def evaluate_meal(payload: dict): # 👈 422 억까 방어용 dict 타입 고정!
+    print("🐱 [main.py] 영양 분석 요청 도착 -> 제미나이 소환한다냥!")
+    
+    # 리액트가 쏴준 영양소 상자 데이터 열기
+    meal_result = payload.get("mealResult", {})
+    meal_target = payload.get("mealTarget", {})
+    meal_type = payload.get("mealType", "식사")
+    user_model = payload.get("userModel", "2")
+    user_name = payload.get("userName", "회원")
+
+    model_name_kr = {"1": "다이어트", "2": "건강유지", "3": "근육증량", "4": "저탄고지"}.get(user_model, "건강유지")
+
+    system_instruction = (
+        "당신은 세상에서 가장 친절하고 귀여운 '냥이 영양사'입니다. "
+        "말투는 '~했냥?', '~다냥!', '웅웅!' 같은 고양이 말투를 필수적으로 사용해야 합니다."
+    )
+
+    prompt = f"""
+    [현재 사용자의 식단 상황]
+    - 사용자 이름: {user_name} | 끼니 종류: {meal_type} | 목표 모드: {model_name_kr}
+    [영양소 데이터 (실제 먹은 양 / 권장 목표량)]
+    - 에너지(칼로리): {meal_result.get('kcal', 0)} / {meal_target.get('kcal', 0)} kcal
+    - 탄수화물: {meal_result.get('carbs', 0)} / {meal_target.get('carbs', 0)} g
+    - 단백질: {meal_result.get('protein', 0)} / {meal_target.get('protein', 0)} g
+    - 지방: {meal_result.get('fat', 0)} / {meal_target.get('fat', 0)} g
+    """
+
+    # Analyze.py에서 가져온 client와 MODEL_NAME으로 구글 호출!
+    response = client.models.generate_content(
+        model=MODEL_NAME, contents=[prompt],
+        config=types.GenerateContentConfig(system_instruction=system_instruction, temperature=0.75)
+    )
+
+    return {"aiComment": response.text}
 
 if __name__ == "__main__":
     import uvicorn
