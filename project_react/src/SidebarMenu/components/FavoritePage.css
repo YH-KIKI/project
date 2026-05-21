@@ -94,58 +94,82 @@
   cursor: pointer;
 }
 /* 음식 즐겨찾기 */
+
+/* 음식 즐겨찾기 */
+
 .food-grid {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-.food-card {
-  display: grid;
-  grid-template-columns: 145px 1fr auto;
-  gap: 7px;
-  align-items: center;
-}
-
-.food-left {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  min-width: 0;
-}
-
-.food-main-info h3 {
-  margin: 0 0 6px;
-  font-size: 16px;
-  font-weight: 700;
-  line-height: 1.2;
-  text-align: center;
-}
-
-.food-main-info strong {
-  font-size: 12px;
-  font-weight: 700;
-}
-
-.nutrition-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 2px;
+  gap: 14px;
+}
+.food-card {
+  width: 100%;
   min-width: 0;
+  border: 1px solid #f0dddd;
+  border-radius: 18px;
+
+  padding: 14px;
+
+  background: #fffdfc;
+}
+
+.food-title-area {
+  height: 48px;
+
+  display: flex;
+  align-items: flex-start;
+
+  margin-bottom: 10px;
+}
+
+.food-title-area h3 {
+  margin: 0;
+
+  font-size: 17px;
+  font-weight: 800;
+
+  line-height: 1.3;
+
+  text-align: left;
+
+  color: #2f2424;
+
+  word-break: keep-all;
+
+  display: -webkit-box;
+
+  line-clamp: 2;
+  -webkit-line-clamp: 2;
+
+  -webkit-box-orient: vertical;
+
+  overflow: hidden;
+}
+.nutrition-grid {
+  display: grid;
+
+  grid-template-columns: 1fr 1fr;
+
+  gap: 6px;
+
+  margin-bottom: 14px;
 }
 
 .nutrition-chip {
   height: 30px;
-  padding: 0 2px;
+
   border-radius: 10px;
+
   border: 1px solid rgba(240, 221, 221, 0.7);
+
   display: flex;
   align-items: center;
-  gap: 4px;
+  justify-content: center;
+
   font-size: 11px;
   font-weight: 700;
+
   white-space: nowrap;
-  overflow: hidden;
 }
 
 .nutrition-chip.carb {
@@ -164,62 +188,86 @@
   background: #f6f9ff;
 }
 
-.food-card-actions{
- display:flex;
- align-items:center;
- justify-content:flex-end;
- gap:8px;
+.food-bottom-row {
+  display: flex;
+
+  align-items: center;
+  justify-content: space-between;
+
+  margin-top: auto;
 }
 
-.food-card-actions .pink-btn{
-  height:42px;
+.food-kcal {
+  display: flex;
+  flex-direction: column;
 
-  display:flex;
-  flex-direction:column;
+  justify-content: center;
 
-  align-items:center;
-  justify-content:center;
+  min-width: 72px;
 
-  line-height:1.1;
-
-  border-radius:12px;
-  font-size:12px;
-  gap:2px;
+  gap: 2px;
 }
 
-.food-card-actions .meal-delete-btn{
- width:38px;
- height:42px;
-}
-
-.pink-btn {
-  height: 44px;
-  border-radius: 13px;
-  border: none;
-  background: #ff6686;
-  color: #fff;
-  font-size: 14px;
+.food-kcal div {
+  font-size: 11px;
   font-weight: 700;
+
+  color: #7b6d6d;
+}
+
+.food-kcal {
+  font-size: 18px;
+  font-weight: 800;
+
+  line-height: 1.1;
+
+  color: #2f2424;
+}
+
+.food-card-actions {
+  display: flex;
+  align-items: center;
+
+  gap: 8px;
+}
+
+.food-card-actions .pink-btn {
+  height: 38px;
+
+  padding: 0 14px;
+
+  border-radius: 12px;
+
+  border: none;
+
+  background: #ff6686;
+
+  color: white;
+
+  font-size: 12px;
+  font-weight: 800;
+
   cursor: pointer;
+
+  transition: 0.2s ease;
 }
 
-.food-card-actions .pink-btn span:first-child{
-   font-size:18px;
-   font-weight:800;
+.food-card-actions .pink-btn:hover {
+  background: #ff4f78;
 }
 
-.food-card-actions .pink-btn span:last-child{
-   font-size:11px;
+.food-card-actions .meal-delete-btn {
+  width: 38px;
+  height: 38px;
 }
 
 .meal-delete-btn {
-  height: 38px;
-  width: 38px;
-  font-size: 18px;
-  border-radius: 13px;
+  border-radius: 12px;
+
   border: 1px solid #f0dede;
+
   background: #fff;
-  
+
   display: flex;
   align-items: center;
   justify-content: center;
@@ -227,7 +275,8 @@
   color: #9a8a8a;
 
   cursor: pointer;
-  transition: all 0.2s ease;
+
+  transition: 0.2s ease;
 }
 
 .meal-delete-btn:hover {

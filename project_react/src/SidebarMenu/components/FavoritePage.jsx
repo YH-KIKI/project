@@ -9,6 +9,22 @@ import "./FavoritePage.css";
 const FavoritePage = () => {
   const navigate = useNavigate();
 
+  const user = JSON.parse(
+    localStorage.getItem("user")
+  );
+  const userNum = user?.user_num;
+
+  const SERVER_URL =
+    process.env.REACT_APP_API_URL ||
+    window.location.origin;
+
+  const getImageUrl = (path) => {
+    if (!path) return null;
+
+    return `${SERVER_URL}${path}`;
+  };
+
+
   const [activeTab, setActiveTab] = useState("food");
   const [isFoodModalOpen, setIsFoodModalOpen] = useState(false);
   const [isMealModalOpen, setIsMealModalOpen] = useState(false);
@@ -49,7 +65,6 @@ const FavoritePage = () => {
 
   const fetchFoodFavorites = async () => {
     try {
-      const userNum = 1;
 
       const res = await axios.get(
         `/api/favorite/single-food?userNum=${userNum}`
@@ -75,7 +90,6 @@ const FavoritePage = () => {
 
   const fetchMealFavorites = async () => {
     try {
-      const userNum = 1;
 
       const res = await axios.get(
         `/api/favorite/meal?userNum=${userNum}`
@@ -88,7 +102,7 @@ const FavoritePage = () => {
         title: meal.mfName,
         foods: meal.foodListStr,
         kcal: meal.totalKcal,
-        image: meal.mkImage,
+        image: getImageUrl(meal.mkImage),
         recent: "-",
       }));
 
@@ -100,7 +114,6 @@ const FavoritePage = () => {
 
   const openMealFavoriteDetail = async (meal) => {
     try {
-      const userNum = 1;
 
       const res = await axios.get(
         `/api/favorite/meal/detail?userNum=${userNum}&mfNum=${meal.id}`
@@ -115,8 +128,6 @@ const FavoritePage = () => {
 
   const addFoodFavorite = async (foNum) => {
     try {
-      const userNum = 1;
-
       await axios.post("/api/favorite/single-food", {
         userNum,
         foNum,
@@ -169,8 +180,6 @@ const FavoritePage = () => {
 
   const deleteFoodFavorite = async (sfNum) => {
     try {
-      const userNum = 1;
-
       await axios.delete(
         `/api/favorite/single-food?userNum=${userNum}&sfNum=${sfNum}`
       );
@@ -217,7 +226,6 @@ const FavoritePage = () => {
 
     if (selectedLoadMeal) {
       try {
-        const userNum = 1;
 
         const res = await axios.get(
           `/api/favorite/meal/detail?userNum=${userNum}&mfNum=${selectedLoadMeal.id}`
@@ -274,14 +282,13 @@ const FavoritePage = () => {
           <div className="food-grid">
             {foodFavorites.map((food) => (
               <div className="food-card" key={food.id}>
-                <div className="food-main-info">
+                <div className="food-title-area">
                   <h3>{food.name}</h3>
-                  <strong>🔥 {food.kcal} kcal</strong>
                 </div>
 
                 <div className="nutrition-grid">
                   <div className="nutrition-chip carb">
-                    🍞 탄수 {food.carbs}g
+                    🍞 탄수화물 {food.carbs}g
                   </div>
 
                   <div className="nutrition-chip protein">
@@ -297,23 +304,33 @@ const FavoritePage = () => {
                   </div>
                 </div>
 
-                <div className="food-card-actions">
-                  <button
-                    className="pink-btn"
-                    onClick={() => openMealTypeModal(food)}
-                  >
-                    <span>+</span>
-                    <span>식단추가</span>
-                  </button>
+                <div className="food-bottom-row">
 
-                  <button
-                    className="meal-delete-btn"
-                    onClick={() => deleteFoodFavorite(food.id)}
-                  >
-                    <FiTrash2 />
-                  </button>
+                  <div className="food-kcal">
+                    <div>🔥 칼로리</div>
+                     {food.kcal} kcal
+                  </div>
+
+                  <div className="food-card-actions">
+                    <button
+                      className="pink-btn"
+                      onClick={() => openMealTypeModal(food)}
+                    >
+                      + 식단추가
+                    </button>
+
+                    <button
+                      className="meal-delete-btn"
+                      onClick={() => deleteFoodFavorite(food.id)}
+                    >
+                      <FiTrash2 />
+                    </button>
+                  </div>
+
                 </div>
+
               </div>
+
             ))}
           </div>
 
