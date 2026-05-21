@@ -8,6 +8,8 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestTemplate;
@@ -28,7 +30,7 @@ public class AiProxyController {
     @Value("${ai.meal.url:http://localhost:8000}")
     private String mealServerUrl;
 
-    @PostMapping("/api/ai/predict")
+    @RequestMapping(value = "/api/ai/predict", method = {RequestMethod.POST, RequestMethod.GET})
     public ResponseEntity<String> proxyPredict(@RequestParam("file") MultipartFile file) {
         try {
             // 리액트가 자바로 보낸 이미지 파일을 그대로 가로챕니다.
