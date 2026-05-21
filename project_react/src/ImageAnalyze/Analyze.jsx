@@ -17,6 +17,12 @@ const Analyze = () => {
 
   const navigate = useNavigate(); //이동 함수 생성
 
+  // 기존에 적혀있던 자동 주소 선택 스위치냥
+  const SERVER_URL = process.env.REACT_APP_API_URL || window.location.origin;
+
+  // 주소에서 자바 포트(:8080)를 싹 지우고, 파이썬 포트(:8000)를 붙인
+  const AI_SERVER_URL = SERVER_URL.replace(':8080', '') + ':8000';
+
   const handleReportFail = async () => {
     if (!customFoodName) {
         alert("음식 이름을 입력해주세요!");
@@ -34,7 +40,7 @@ const Analyze = () => {
     formData.append('data', JSON.stringify(data));
 
     try {
-        await axios.post('http://54.116.167.5:8000/api/report-fail', formData, {
+        await axios.post(`/api/report-fail`, formData, {
             headers: { 'Content-Type': 'multipart/form-data' }
         });
         alert("감사합니다! 입력하신 '" + customFoodName + "' 데이터가 수집되었습니다.");
@@ -67,7 +73,7 @@ const Analyze = () => {
     formData.append('file', selectedFile);
 
     try {
-      const response = await axios.post('http://54.116.167.5:8000/api/ai/predict', formData, {
+      const response = await axios.post(`/api/ai/predict`, formData, {
         headers: { 'Content-Type': 'multipart/form-data' }
       });
 
