@@ -1,5 +1,5 @@
-import google.generativeai as genai
 import os
+from google import genai
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -13,13 +13,13 @@ api_key = (
 )
 
 if USE_GEMINI and api_key:
-    genai.configure(api_key=api_key)
-    model = genai.GenerativeModel("gemini-2.5-flash")
+    client = genai.Client(api_key=api_key)
 else:
-    model = None
+    client = None
 
 
 def generate_rule_feedback(meal_type, kcal, carbs, protein, fat, sodium):
+
     if kcal < 300:
         return f"{meal_type}은 조금 가볍게 드셨네요! 단백질 반찬을 더해보는 건 어떨까요? 🍳"
 
@@ -39,10 +39,18 @@ def generate_rule_feedback(meal_type, kcal, carbs, protein, fat, sodium):
 
 
 def generate_meal_feedback(meal_type, kcal, carbs, protein, fat, sodium):
+
     print("🔥 meal_feedback 실행됨")
 
-    if not USE_GEMINI or model is None:
-        return generate_rule_feedback(meal_type, kcal, carbs, protein, fat, sodium)
+    if not USE_GEMINI or client is None:
+        return generate_rule_feedback(
+            meal_type,
+            kcal,
+            carbs,
+            protein,
+            fat,
+            sodium
+        )
 
     prompt = f"""
 너는 냠냠플래닛 AI 식단 코치야.
@@ -61,9 +69,22 @@ def generate_meal_feedback(meal_type, kcal, carbs, protein, fat, sodium):
 """
 
     try:
-        response = model.generate_content(prompt)
+
+        response = client.models.generate_content(
+            model="gemini-2.5-flash",
+            contents=prompt
+        )
+
         return response.text
 
     except Exception as e:
-        print(e)
-        return generate_rule_feedback(meal_type, kcal, carbs, protein, fat, sodium)
+        print("Gemini 오류:", e)
+
+        return generate_rule_feedback(
+            meal_type,
+            kcal,
+            carbs,
+            protein,
+            fat,
+            sodium
+        )
