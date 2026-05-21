@@ -16,6 +16,12 @@ const Evaluation = () => {
   // 페이지가 몇 번을 재렌더링되어도 절대 변하지 않는 물리적 잠금장치 상자냥!
   const hasCalledAi = useRef(false);
 
+  // 기존에 적혀있던 자동 주소 선택 스위치냥
+  const SERVER_URL = process.env.REACT_APP_API_URL || window.location.origin;
+
+  // 주소에서 자바 포트(:8080)를 싹 지우고, 파이썬 포트(:8000)를 붙인
+  const AI_SERVER_URL = SERVER_URL.replace(':8080', '') + ':8000';
+
   const handleCancel = async () => {
     const mkNum = mealResult?.mkNum; 
     const mdayNum = mealResult?.mdayNum;
@@ -86,7 +92,7 @@ const Evaluation = () => {
         };
 
         // [핵심] 조립된 수치를 들고 자바 백엔드의 AI 평가 API 호출
-        const aiResponse = await axios.post('http://54.116.167.5:8000/api/ai/evaluate', {
+        const aiResponse = await axios.post(`${AI_SERVER_URL}/api/ai/evaluate`, {
           mealResult: currentObj,
           mealTarget: targetObj,
           mealType: mealType,
