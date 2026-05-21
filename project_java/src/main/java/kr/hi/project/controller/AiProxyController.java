@@ -23,7 +23,7 @@ public class AiProxyController {
     private String analyzeServerUrl;
 
     // [AWS 치트키 2] 제미나이 평가 서버 주소
-    @Value("${ai.gemini.url:http://localhost:8001}")
+    @Value("${ai.gemini.url:http://localhost:8000}")
     private String geminiServerUrl;
     
     // 식단 피드백
