@@ -77,6 +77,7 @@ jobs:
               -e DB_USERNAME="${{ secrets.DB_USERNAME }}" \
               -e DB_PASSWORD="${{ secrets.DB_PASSWORD }}" \
               -e AI_SERVER_URL="${{ secrets.AI_SERVER_URL }}" \
+              -e AI_MEAL_URL="http://ai-server:8000" \
               -e STATIC_PATH="file:///app/uploads/" \
               -e UPLOAD_PATH="/app/uploads/bodycam/" \
               -e RELEARN_PATH="/app/uploads/relearn/" \
