@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+import axios from "axios";
+import React, { useEffect, useState } from "react";
 import "./FridgeRecommendation.css";
 
 const MacroItem = ({ name, icon, goal, intake, percent, type }) => {
@@ -20,6 +21,29 @@ const MacroItem = ({ name, icon, goal, intake, percent, type }) => {
 };
 
 const FridgeRecommendation = () => {
+
+  const SERVER_URL =
+    process.env.REACT_APP_API_URL ||
+    window.location.origin;
+
+  const getImageUrl = (path) => {
+    if (!path) return null;
+
+    if (path.startsWith("http")) return path;
+
+    return `${SERVER_URL}${path}`;
+  };
+
+  const [summary, setSummary] = useState(null);
+  
+
+  const today = new Date().toLocaleDateString("ko-KR", {
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    weekday: "short",
+  });
+
   const [ingredient, setIngredient] = useState("");
   const [ingredients, setIngredients] = useState([
     "계란",
@@ -148,6 +172,39 @@ const FridgeRecommendation = () => {
     setIsRecommended(true);
   };
 
+  const kcalPercent = summary?.targetKcal
+  ? Math.min(
+      (summary.currentKcal / summary.targetKcal) * 100,
+      100
+    )
+  : 0;
+
+  useEffect(() => {
+    const fetchSummary = async () => {
+
+      try {
+        const user =
+          JSON.parse(localStorage.getItem("user"));
+
+        const userNum = user?.user_num;
+
+        const res = await axios.get(
+          `/api/fridge/summary?userNum=${userNum}`
+        );
+
+        setSummary(res.data);
+
+      } catch (err) {
+
+        console.error(err);
+
+      }
+    };
+
+    fetchSummary();
+
+  }, []);
+
   return (
     <div className="fridge-container">
       <div className="fridge-top">
@@ -157,7 +214,7 @@ const FridgeRecommendation = () => {
             보유한 재료를 입력하고 추천받아보세요!
           </div>
         </div>
-        <span className="today">2024.05.20 월</span>
+        <span className="today">{today}</span>
       </div>
 
       <section className="goal-summary-card">
@@ -168,26 +225,36 @@ const FridgeRecommendation = () => {
             <MacroItem
               name="탄수화물"
               icon="🍞"
-              goal="225g"
-              intake="120g"
-              percent={53}
+              goal={`${summary?.targetCarbs || 0}g`}
+              intake={`${summary?.currentCarbs || 0}g`}
+              percent={summary?.carbsPercent || 0}
               type="carb"
             />
             <MacroItem
               name="지방"
               icon="🥑"
-              goal="50g"
-              intake="32g"
-              percent={64}
+              goal={`${summary?.targetFat || 0}g`}
+              intake={`${summary?.currentFat || 0}g`}
+              percent={summary?.fatPercent || 0}
               type="fat"
             />
           </div>
 
-          <div className="calorie-circle">
+          <div 
+            className="calorie-circle"
+              style={{
+              background: `conic-gradient(
+                #ff7f9d 0% ${kcalPercent}%,
+                #f3e9ea ${kcalPercent}% 100%
+              )`
+            }}
+            >
             <div className="circle-inner">
-              <strong>1,350</strong>
+              <strong>{summary?.currentKcal || 0}</strong>
               <span>kcal</span>
-              <p>목표 1,980 kcal</p>
+              <p>
+                목표 {summary?.targetKcal || 0} kcal
+              </p>
             </div>
           </div>
 
@@ -195,17 +262,17 @@ const FridgeRecommendation = () => {
             <MacroItem
               name="단백질"
               icon="🥩"
-              goal="113g"
-              intake="80g"
-              percent={71}
+              goal={`${summary?.targetProtein || 0}g`}
+              intake={`${summary?.currentProtein || 0}g`}
+              percent={summary?.proteinPercent || 0}
               type="protein"
             />
             <MacroItem
               name="나트륨"
               icon="🧂"
-              goal="2,000mg"
-              intake="1,200mg"
-              percent={60}
+              goal={`${summary?.targetNatrium || 0}mg`}
+              intake={`${summary?.currentNatrium || 0}mg`}
+              percent={summary?.natriumPercent || 0}
               type="sodium"
             />
           </div>
@@ -345,8 +412,10 @@ const FridgeRecommendation = () => {
           <div className="recipe-list">
             {recipes.map((recipe) => (
               <div className="recipe-card" key={recipe.id}>
-                <img src={recipe.imageUrl} alt={recipe.title} />
-
+                <img
+                  src={getImageUrl(recipe.imageUrl)}
+                  alt={recipe.title}
+                />
                 <div className="recipe-info">
                   <h4>
                     {recipe.title}
