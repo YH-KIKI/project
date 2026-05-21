@@ -57,7 +57,8 @@ public class SecurityConfig {
 	                             "/login/**",
 	                             "/kakao", 
 	                             "/api/login/kakao/register",
-	                             "/api/user/food/search"
+	                             "/api/user/food/search",
+                                 "/api/fridge/**" //[연희//추가] 냉장고 정보
                                  ).permitAll() 
                 // 유효한 토큰이 있어야 들어갈수있는 페이지
                 //.requestMatchers("/api/record").authenticated()
