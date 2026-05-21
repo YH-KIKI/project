@@ -21,7 +21,14 @@ function MealRecordModal({
   const [searchResults, setSearchResults] = useState([]);
   const [selectedMeal, setSelectedMeal] = useState(null);
 
-  const userNum = 1;
+  const user = JSON.parse(
+    localStorage.getItem("user")
+  );
+  const userNum = user?.user_num;
+
+  const SERVER_URL =
+    process.env.REACT_APP_API_URL ||
+    window.location.origin;
 
   //사진 업로드
   const [dragActive,setDragActive]=useState(false);
@@ -36,7 +43,7 @@ function MealRecordModal({
     if (url.startsWith("http")) return url;
 
     // 현재 서버 기준 자동
-    return `${window.location.origin}${url}`;
+    return `${SERVER_URL}${url}`;
   };
 
   const [mealImagePreview, setMealImagePreview] = useState(
@@ -314,7 +321,6 @@ function MealRecordModal({
       alert("불러올 음식 정보가 없어요!");
       return;
     }
-
     const mealFoods = meal.foods.map((food) =>
       makeFoodItem({
         id: food.foNum,
@@ -345,7 +351,20 @@ function MealRecordModal({
     });
   };
 
-  
+  const loadFavoriteMealDetail = async (meal) => {
+    try {
+      const res = await axios.get(
+        `/api/favorite/meal/detail?userNum=${userNum}&mfNum=${meal.mfNum}`
+      );
+
+      loadFavoriteMeal(res.data);
+
+    } catch (err) {
+      console.error(err);
+      alert("식단 불러오기 실패!");
+    }
+    };
+ 
 
   const handleSave = () => {
     if (foods.length === 0) {
@@ -556,7 +575,7 @@ function MealRecordModal({
                       className="mr-add-btn"
                       onClick={(e) => {
                         e.stopPropagation();
-                        loadFavoriteMeal(meal);
+                        loadFavoriteMealDetail(meal);
                       }}
                     >
                       불러오기
