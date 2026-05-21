@@ -76,7 +76,7 @@ const MealRecordDetail = () => {
   if (!path) return null;
 
   const SERVER_URL =
-    process.env.REACT_APP_SERVER_URL ||
+    process.env.REACT_APP_API_URL ||
     window.location.origin;
 
   return `${SERVER_URL}${path}`;
