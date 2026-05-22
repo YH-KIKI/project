@@ -1,9 +1,9 @@
 # main.py
 from fastapi import FastAPI, UploadFile, File, Form
-from pydantic import BaseModel # 🌟 새로 추가됨: 데이터 모델링용
+from pydantic import BaseModel 
 from fastapi.middleware.cors import CORSMiddleware # 식단 피드백용
 
-# 🌟 눈바디 분석 함수(analyze_pose, extract_outline) 및 피드백 함수(generate_daily_feedback) 불러오기
+# 눈바디 분석 함수(analyze_pose, extract_outline) 및 피드백 함수(generate_daily_feedback) 불러오기
 from schemas import UserInfo
 from ai_service import get_hybrid_diet_recommendation, analyze_pose, extract_outline, generate_daily_feedback
 # 대빵 - 식단 피드백 함수 
@@ -28,7 +28,7 @@ app.add_middleware(
 )
 
 # ==========================================
-# 🌟 [새로 추가됨] AI 피드백을 받기 위한 데이터 형식
+# AI 피드백을 받기 위한 데이터 형식 (personaMode 추가)
 # ==========================================
 class DietFeedbackRequest(BaseModel):
     userNum: int
@@ -39,8 +39,7 @@ class DietFeedbackRequest(BaseModel):
     protein: int
     fat: int
     sodium: int
-
-
+    personaMode: str = "다정" # 기본값은 '다정'
 # ==========================================
 # 대빵 - 식단피드백용 리퀘스트
 # ==========================================
@@ -131,13 +130,13 @@ async def detect_service(message: str = Form(...), file: UploadFile = File(...))
     }
 
 # ==========================================
-# 🌟 4. [새로 추가됨] AI 식단 3줄 요약 피드백 엔드포인트
+# AI 식단 3줄 요약 피드백 엔드포인트
 # ==========================================
 @app.post("/api/ai/feedback")
 async def daily_feedback_service(data: DietFeedbackRequest):
-    print(f"📝 [Python] AI 피드백 요청 도착! 유저번호: {data.userNum}, 등급: {data.grade}")
+    print(f"📝 [Python] AI 피드백 요청 도착! 유저번호: {data.userNum}, 등급: {data.grade}, 모드: {data.personaMode}")
     
-    # ai_service.py의 텍스트 생성 모델 호출
+    # ai_service.py의 텍스트 생성 모델 호출 시 페르소나 모드(persona_mode) 함께 전달
     feedback_result = generate_daily_feedback(
         grade=data.grade, 
         current_kcal=data.currentKcal, 
@@ -145,17 +144,18 @@ async def daily_feedback_service(data: DietFeedbackRequest):
         carbs=data.carbs, 
         protein=data.protein, 
         fat=data.fat, 
-        sodium=data.sodium
+        sodium=data.sodium,
+        persona_mode=data.personaMode
     )
     
-    print(f"🤖 AI 생성 피드백:\n{feedback_result}")
+    print(f"🤖 AI 생성 다이내믹 피드백:\n{feedback_result}")
     
+    # 제미나이가 만들어준 딕셔너리(JSON)에서 타이틀과 3줄 요약을 각각 꺼내서 스프링부트로 전송
     return {
         "status": "success",
-        "feedback": feedback_result
+        "gradeMessage": feedback_result.get("grade_message", f"{data.grade}등급: 분석 완료!"),
+        "feedback": feedback_result.get("ai_feedback", "피드백을 불러오는 데 문제가 발생했습니다.")
     }
-
-
 
 # ==========================================
 # 대빵 - 밀피드백(식단기록용)

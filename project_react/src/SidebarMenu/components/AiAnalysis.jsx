@@ -12,7 +12,7 @@ import roroIcon from '../../images/로봇2.png';
 const AiAnalysis = () => {
   const navigate = useNavigate(); 
 
-  // 🌟 핵심 해결: 식단 기록 페이지와 동일하게 '진짜 로그인한 유저 번호'를 가져옵니다!
+  // 식단 기록 페이지와 동일하게 '진짜 로그인한 유저 번호'를 가져옵니다!
   const userString = localStorage.getItem("user");
   const user = userString && userString !== "undefined" ? JSON.parse(userString) : null;
   const userNum = user?.user_num || Number(localStorage.getItem("userNum")) || 1;
@@ -115,22 +115,43 @@ const AiAnalysis = () => {
             </div>
           </div>
 
+          {/* 🌟 수정된 탄단지 프로그레스 바 영역: 하드코딩 제거 및 동적 데이터 연결 */}
           <div className="macro-section">
             <div className="ai-macro-item">
-              <div className="macro-label"><span>탄수화물</span> <span>{analysisData.currentCarbs}/200g</span></div>
-              <div className="progress-bar"><div className="progress-fill carbs" style={{ width: calculateWidth(analysisData.currentCarbs, 200) }}></div></div>
+              <div className="macro-label">
+                <span>탄수화물</span> 
+                <span>{analysisData.currentCarbs}/{analysisData.targetCarbs || 0}g</span>
+              </div>
+              <div className="progress-bar">
+                <div className="progress-fill carbs" style={{ width: calculateWidth(analysisData.currentCarbs, analysisData.targetCarbs) }}></div>
+              </div>
             </div>
             <div className="ai-macro-item">
-              <div className="macro-label"><span>단백질</span> <span>{analysisData.currentProtein}/100g</span></div>
-              <div className="progress-bar"><div className="progress-fill protein" style={{ width: calculateWidth(analysisData.currentProtein, 100) }}></div></div>
+              <div className="macro-label">
+                <span>단백질</span> 
+                <span>{analysisData.currentProtein}/{analysisData.targetProtein || 0}g</span>
+              </div>
+              <div className="progress-bar">
+                <div className="progress-fill protein" style={{ width: calculateWidth(analysisData.currentProtein, analysisData.targetProtein) }}></div>
+              </div>
             </div>
             <div className="ai-macro-item">
-              <div className="macro-label"><span>지방</span> <span>{analysisData.currentFat}/50g</span></div>
-              <div className="progress-bar"><div className="progress-fill fat" style={{ width: calculateWidth(analysisData.currentFat, 50) }}></div></div>
+              <div className="macro-label">
+                <span>지방</span> 
+                <span>{analysisData.currentFat}/{analysisData.targetFat || 0}g</span>
+              </div>
+              <div className="progress-bar">
+                <div className="progress-fill fat" style={{ width: calculateWidth(analysisData.currentFat, analysisData.targetFat) }}></div>
+              </div>
             </div>
             <div className="ai-macro-item">
-              <div className="macro-label"><span>나트륨</span> <span>{analysisData.currentSodium}/2000mg</span></div>
-              <div className="progress-bar"><div className="progress-fill sodium" style={{ width: calculateWidth(analysisData.currentSodium, 2000) }}></div></div>
+              <div className="macro-label">
+                <span>나트륨</span> 
+                <span>{analysisData.currentSodium}/{analysisData.targetSodium || 2000}mg</span>
+              </div>
+              <div className="progress-bar">
+                <div className="progress-fill sodium" style={{ width: calculateWidth(analysisData.currentSodium, analysisData.targetSodium || 2000) }}></div>
+              </div>
             </div>
           </div>
 

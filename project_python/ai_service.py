@@ -3,6 +3,7 @@ import json
 from google import genai
 from sklearn.neighbors import NearestNeighbors
 from sqlalchemy import create_engine
+from google.genai import types
 
 import pandas as pd
 import cv2
@@ -525,94 +526,62 @@ def extract_outline(image_bytes):
 
 
 # ==========================================
-# 3줄 요약 코칭 피드백 생성 함수
+# 🌟 AI 3줄 요약 + 다이내믹 페르소나 피드백 생성 (Gemini)
 # ==========================================
 
-def generate_daily_feedback(
-    grade,
-    current_kcal,
-    target_kcal,
-    carbs,
-    protein,
-    fat,
-    sodium
-):
+def generate_daily_feedback(grade, current_kcal, target_kcal, carbs, protein, fat, sodium, persona_mode="다정"):
+    if USE_GEMINI and client:
+        try:
+            # 🌟 1. 모드별 페르소나(말투) 설정
+            persona_instruction = ""
+            if persona_mode == "다정":
+                persona_instruction = "당신은 다정하고 따뜻한 천사 영양 코치 '로로'입니다. 유저를 항상 응원하고 칭찬하며, 예쁜 이모지를 많이 사용하세요. (~해요, ~해볼까요?)"
+            elif persona_mode == "팩폭":
+                persona_instruction = "당신은 수치(팩트)를 기반으로 뼈를 때리는 엄격한 호랑이 코치입니다. 유저의 변명을 차단하고, 식단의 문제점을 냉정하고 날카롭게 지적하세요. 위로보다는 채찍질을 합니다. (~입니다, ~하세요.)"
+            elif persona_mode == "열혈":
+                persona_instruction = "당신은 근성장과 운동을 사랑하는 열혈 헬스 트레이너입니다. 유저를 '회원님!'이라고 부르며, 단백질 섭취와 에너지를 강조하는 파이팅 넘치는 말투를 사용하세요. 불타는 이모지를 즐겨 씁니다. (~하십쇼!, ~가보자고!)"
+            elif persona_mode == "츤데레":
+                persona_instruction = "당신은 무심하고 틱틱대지만 속으로는 유저를 챙기는 츤데레 코치입니다. 귀찮은 척하면서도 영양학적으로 완벽한 조언을 해줍니다. 칭찬할 때도 퉁명스럽게 말하세요. (~든가, ~하든지. 딱히 널 위해 말하는 건 아니야.)"
+            else:
+                persona_instruction = "당신은 다정하고 친절한 영양 코치입니다."
 
-    kcal_diff = target_kcal - current_kcal
+            # 🌟 2. 제미나이에게 던질 프롬프트 구성
+            prompt = f"""
+{persona_instruction}
+사용자의 식단 기록을 분석하여, 당신의 페르소나에 완벽하게 빙의해서 평가를 작성해주세요.
 
-    if kcal_diff > 300:
+[오늘의 식단 데이터]
+- 달성 등급: {grade}
+- 섭취 칼로리: {current_kcal} kcal (목표: {target_kcal} kcal)
+- 탄수화물: {carbs}g, 단백질: {protein}g, 지방: {fat}g, 나트륨: {sodium}mg
 
-        line1 = (
-            f"목표보다 {kcal_diff}kcal 덜 드셨네요! "
-            "오늘은 속이 조금 가벼운 하루였겠어요. 😊"
-        )
+[작성 가이드]
+결과를 반드시 아래 JSON 형식으로만 출력하세요. (마크다운 기호 없이 순수 JSON만)
+{{
+  "grade_message": "(당신의 페르소나 말투로 작성한 1줄짜리 등급 총평. {grade}등급에 대한 직관적인 반응)",
+  "ai_feedback": "(당신의 페르소나 말투로 작성한 상세 피드백. 줄바꿈 \\n 을 사용해 2~3줄로 작성. 칼로리와 탄단지 수치에 대한 구체적인 언급 필수)"
+}}
+"""
+            response = client.models.generate_content(
+                model="gemini-1.5-flash",
+                contents=prompt,
+                config=types.GenerateContentConfig(
+                    response_mime_type="application/json", 
+                    temperature=0.8
+                )
+            )
+            
+            # JSON 텍스트 파싱
+            text = response.text.strip().replace("```json", "").replace("```", "")
+            result_data = json.loads(text)
+            print(f"🤖 [Gemini] {persona_mode} 모드 피드백 생성 성공!")
+            return result_data
+            
+        except Exception as e:
+            print(f"⚠️ [Gemini] 피드백 생성 실패 (기본값 대체): {e}")
 
-    elif kcal_diff < -300:
-
-        line1 = (
-            f"목표보다 {abs(kcal_diff)}kcal 더 드셨네요! "
-            "에너지가 넘치는 하루였군요. 💪"
-        )
-
-    else:
-
-        line1 = (
-            "목표 칼로리에 아주 근접하게 드셨어요! "
-            "양 조절을 정말 기가 막히게 하셨네요. 👏"
-        )
-
-    if protein < 50:
-
-        line2 = (
-            "단백질 섭취가 조금 부족해요. "
-            "다음 끼니엔 두부, 계란, 닭가슴살을 "
-            "곁들여 근육을 지켜볼까요? 🥚"
-        )
-
-    elif carbs < 100:
-
-        line2 = (
-            "탄수화물이 부족하면 뇌가 금방 지칠 수 있어요. "
-            "통밀빵이나 현미밥으로 "
-            "건강한 에너지를 채워주세요! 🍞"
-        )
-
-    elif fat > 60:
-
-        line2 = (
-            "지방 섭취가 꽤 높은 편이에요! "
-            "내일은 튀긴 음식보다는 "
-            "찌거나 굽는 조리법을 선택해 보는 건 어떨까요? 🥗"
-        )
-
-    elif sodium > 2000:
-
-        line2 = (
-            "나트륨 섭취량이 높아요! "
-            "몸이 붓지 않도록 오늘은 물을 한 잔 더 마시고 "
-            "주무시는 걸 추천해요. 💧"
-        )
-
-    else:
-
-        line2 = (
-            "탄단지 균형이 꽤 훌륭해요! "
-            "지금처럼만 골고루 챙겨 드시면 "
-            "완벽한 건강 식단입니다. ✨"
-        )
-
-    if grade in ['A', 'B']:
-
-        line3 = (
-            f"{grade}등급 달성을 축하해요! "
-            "냠냠플래닛 코치가 항상 응원할게요. 💖"
-        )
-
-    else:
-
-        line3 = (
-            "조금만 더 신경 쓰면 훨씬 좋아질 거예요. "
-            "내일은 더 건강하게 챙겨 먹어봐요! 화이팅! 🌈"
-        )
-
-    return f"{line1}\n{line2}\n{line3}"
+    # 3. 🛡️ AI 실패 시 작동하는 안전망(Fallback) 로직
+    return {
+        "grade_message": f"{grade}등급: 데이터 분석 중입니다 ⏳",
+        "ai_feedback": "현재 AI 코치와 연결이 지연되고 있습니다.\n잠시 후 다시 확인해주세요!"
+    }

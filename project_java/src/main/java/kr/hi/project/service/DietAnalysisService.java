@@ -24,7 +24,7 @@ public class DietAnalysisService {
     private final DietAnalysisDao dietAnalysisDao;
     private final MealRecordDao mealRecordDao; 
 
-    // 🌟 실서버(도커)와 로컬 환경 자동 주소 스위칭 세팅
+    // 실서버(도커)와 로컬 환경 자동 주소 스위칭 세팅
     @Value("${AI_SERVER_URL:http://localhost:8000}")
     private String aiServerUrl;
 
@@ -44,10 +44,8 @@ public class DietAnalysisService {
         int fat = 0;
         int sodium = 0;
 
-        // 🌟 [에러 해결!] 자바의 int(원시타입)는 null이 될 수 없으므로 방어 코드를 수정했습니다.
         if (todayMeals != null && !todayMeals.isEmpty()) {
             for (MealDetailDTO item : todayMeals) {
-                // 섭취량(Portion)이 0으로 들어오는 것을 막기 위해 최소 1.0으로 세팅
                 double portion = item.getMdPortion() <= 0 ? 1.0 : item.getMdPortion();
                 
                 currentKcal += item.getMdKcal();
@@ -58,24 +56,77 @@ public class DietAnalysisService {
             }
         }
 
-        double errorRate = Math.abs((double)(safeTargetKcal - currentKcal)) / safeTargetKcal * 100;
+        // 🌟 [추가] 유저의 식단 목표(Type)를 DB에서 조회 (기본값: 건강유지)
+        // ※ 매퍼에 해당 메서드가 없다면 유저 정보 테이블에서 선택한 type을 가져오도록 매핑해야 합니다.
+        String dietType = dietAnalysisDao.selectUserDietType(userNum);
+        if (dietType == null) dietType = "건강유지";
+
+        // 🌟 [추가] 식단 목표별 탄단지 비율 및 칼로리 보정치 설정
+        double carbRatio = 0.5, proteinRatio = 0.3, fatRatio = 0.2; // 기본 5:3:2
+        double calorieModifier = 1.0;
+
+        switch (dietType) {
+            case "다이어트":
+                carbRatio = 0.4; proteinRatio = 0.4; fatRatio = 0.2;
+                calorieModifier = 0.8; // 칼로리 20% 제한
+                break;
+            case "근육증가":
+                carbRatio = 0.5; proteinRatio = 0.3; fatRatio = 0.2;
+                calorieModifier = 1.2; // 벌크업을 위한 칼로리 20% 상향
+                break;
+            case "저탄고지":
+                carbRatio = 0.2; proteinRatio = 0.3; fatRatio = 0.5;
+                break;
+            case "건강유지":
+            default:
+                carbRatio = 0.5; proteinRatio = 0.3; fatRatio = 0.2;
+                break;
+        }
+
+        // 🌟 [추가] 선택된 식단 목표 유형에 맞춰 최종 권장 타겟 재계산
+        int adjustedTargetKcal = (int) (safeTargetKcal * calorieModifier);
+        int targetCarbs = (int) Math.round((adjustedTargetKcal * carbRatio) / 4.0);
+        int targetProtein = (int) Math.round((adjustedTargetKcal * proteinRatio) / 4.0);
+        int targetFat = (int) Math.round((adjustedTargetKcal * fatRatio) / 9.0);
+
+        // 🌟 [추가] 각 권장 영양소 기준 오차율 계산 (분모가 0이 되는 현상 방지)
+        double kcalError = Math.abs((double)(adjustedTargetKcal - currentKcal)) / adjustedTargetKcal * 100.0;
+        double carbsError = Math.abs((double)(targetCarbs - carbs)) / Math.max(targetCarbs, 1) * 100.0;
+        double proteinError = Math.abs((double)(targetProtein - protein)) / Math.max(targetProtein, 1) * 100.0;
+        double fatError = Math.abs((double)(targetFat - fat)) / Math.max(targetFat, 1) * 100.0;
+
+        // 🌟 [추가] 최종 종합 오차율 반영 (칼로리 가중치 40%, 탄단지 각각 20%씩 총 100%)
+        double totalErrorRate = (kcalError * 0.4) + (carbsError * 0.2) + (proteinError * 0.2) + (fatError * 0.2);
 
         String grade;
         String gradeMessage;
         int earnedXp = 0;
 
+        // AI 피드백 컴포넌트 톤앤매너와 통일성을 갖춘 부드러운 코칭 메시지 구성
         if (currentKcal == 0) {
-            grade = "F"; gradeMessage = "아직 식단이 기록되지 않았어요!"; earnedXp = 0;
-        } else if (errorRate <= 10) {
-            grade = "A"; gradeMessage = "아주 훌륭해요! 현실적으로 완벽에 가까운 식단"; earnedXp = 50;
-        } else if (errorRate <= 20) {
-            grade = "B"; gradeMessage = "좋습니다! 꾸준히 잘 관리하고 있는 식단"; earnedXp = 30;
-        } else if (errorRate <= 30) {
-            grade = "C"; gradeMessage = "무난해요! 조금만 더 신경 쓰면 훨씬 좋아질 거예요"; earnedXp = 15;
-        } else if (errorRate <= 40) {
-            grade = "D"; gradeMessage = "아쉬워요! 다음 끼니엔 목표 비율을 조금 더 의식해 볼까요?"; earnedXp = 5;
+            grade = "-"; 
+            gradeMessage = "아직 오늘의 식단 기록이 없어요! 로로에게 오늘 먹은 냠냠 식단을 알려주세요 🍽️"; 
+            earnedXp = 0;
+        } else if (totalErrorRate <= 15) { // 탄단지 결합으로 조건이 정밀해져 컷오프를 15%로 최적화
+            grade = "A"; 
+            gradeMessage = "목표에 완벽하게 도달했어요! 로로가 강력 추천하는 오늘의 식단 마스터 👑"; 
+            earnedXp = 50;
+        } else if (totalErrorRate <= 25) {
+            grade = "B"; 
+            gradeMessage = "아주 훌륭해요! 탄단지 밸런스도 건강하게 맞춰가고 있어요 🌟"; 
+            earnedXp = 30;
+        } else if (totalErrorRate <= 35) {
+            grade = "C"; 
+            gradeMessage = "잘 하셨어요! 내일은 특정 영양소가 너무 한쪽으로 쏠리지 않게 해볼까요? 😊"; 
+            earnedXp = 15;
+        } else if (totalErrorRate <= 45) {
+            grade = "D"; 
+            gradeMessage = "영양 밸런스가 조금 아쉬운 하루네요! 하지만 로로가 내일도 힘껏 응원할게요 💪"; 
+            earnedXp = 5;
         } else {
-            grade = "F"; gradeMessage = "목표와 너무 크게 빗나간 식단 (또는 미기록)"; earnedXp = 0;
+            grade = "F"; 
+            gradeMessage = "오늘은 에너지가 넘치는 치팅데이였군요! 내일부터 다시 로로와 함께 건강하게 챙겨 먹어봐요 🌈"; 
+            earnedXp = 0;
         }
 
         if (earnedXp > 0) {
@@ -85,14 +136,13 @@ public class DietAnalysisService {
         String aiFeedback = "";
         try {
             RestTemplate restTemplate = new RestTemplate();
-            
-            String pythonUrl = aiServerUrl + "/api/v1/ai/feedback";
+            String pythonUrl = aiServerUrl + "/api/ai/feedback";
 
             Map<String, Object> requestData = new HashMap<>();
             requestData.put("userNum", userNum);
             requestData.put("grade", grade);
             requestData.put("currentKcal", currentKcal);
-            requestData.put("targetKcal", safeTargetKcal);
+            requestData.put("targetKcal", adjustedTargetKcal); // 보정된 목표 칼로리 송신
             requestData.put("carbs", carbs);
             requestData.put("protein", protein);
             requestData.put("fat", fat);
@@ -112,9 +162,21 @@ public class DietAnalysisService {
         }
 
         return new DietAnalysisResponseDto(
-            grade, gradeMessage, currentKcal, safeTargetKcal, earnedXp,
-            carbs, protein, fat, sodium, aiFeedback
-        );
+                grade,                // grade
+                gradeMessage,         // gradeMessage
+                currentKcal,          // currentKcal
+                adjustedTargetKcal,   // 🌟 targetKcal (유저 맞춤 동적 칼로리!)
+                earnedXp,             // earnedXp
+                carbs,                // currentCarbs
+                protein,              // currentProtein
+                fat,                  // currentFat
+                sodium,               // currentSodium
+                targetCarbs,          // 🌟 targetCarbs (유저 맞춤 동적 탄수화물)
+                targetProtein,        // 🌟 targetProtein (유저 맞춤 동적 단백질)
+                targetFat,            // 🌟 targetFat (유저 맞춤 동적 지방)
+                2000,                 // 🌟 targetSodium (나트륨은 보통 2000 고정)
+                aiFeedback            // aiFeedback
+            );
     }
 
     // =========================================================================
