@@ -80,7 +80,6 @@
   border-radius: 50% !important; 
 }
 
-/* 🌟 식단 기록된 날짜(Highlight) 커스텀 스타일 추가! */
 .react-datepicker__day--highlighted-custom {
   background-color: #FFEDEA !important; 
   color: #FF7B89 !important;            
@@ -196,7 +195,7 @@
 }
 
 /* ==============================================
-   4. 바 차트 (칼로리 그래프)
+   🌟 4. 바 차트 (칼로리 그래프) - 에러 해결 구역
    ============================================== */
 .bar-chart-container {
   display: flex; 
@@ -240,22 +239,23 @@
 }
 
 .bar-wrapper {
-  width: 100%; 
-  height: 100%; 
-  display: flex; 
-  align-items: flex-end; 
-  justify-content: center;
-  position: relative; 
+  width: 24px !important; /* 막대 너비 고정 */
+  height: 200px !important; /* 높이 고정 */
   background-color: #F8F9FA; 
   border-radius: 4px 4px 0 0;
+  position: relative;
+  display: block; /* Flex 해제 */
 }
 
 .bar-fill {
-  width: 100%; 
-  max-width: 24px; 
+  width: 100% !important;
   background-color: #D3B8F8; 
   border-radius: 4px 4px 0 0; 
-  transition: height 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  /* height 속성을 제거해서 React가 설정하는 높이만 적용되게 합니다 */
+  transition: height 0.5s ease-in-out;
 }
 
 .bar-group:hover .bar-fill { 
@@ -273,6 +273,8 @@
 .bar-tooltip {
   position: absolute; 
   top: -30px; 
+  left: 50%; /* 🌟 가운데 정렬 추가 */
+  transform: translateX(-50%); /* 🌟 가운데 정렬 추가 */
   background-color: #332B27; 
   color: white;
   font-size: 11px; 
@@ -282,6 +284,7 @@
   visibility: hidden; 
   transition: all 0.2s; 
   z-index: 10;
+  white-space: nowrap; /* 글씨 줄바꿈 방지 */
 }
 
 .bar-group:hover .bar-tooltip { 
@@ -367,7 +370,7 @@
 }
 
 /* ==============================================
-   🌟 6. 가로형 매크로 리스트 (글씨 깨짐 완벽 방어)
+   6. 가로형 매크로 리스트
    ============================================== */
 .macro-list-card {
   background-color: #FFFFFF; 

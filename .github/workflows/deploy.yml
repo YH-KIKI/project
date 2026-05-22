@@ -83,6 +83,7 @@ jobs:
               -e STATIC_PATH="file:///app/uploads/" \
               -e UPLOAD_PATH="/app/uploads/bodycam/" \
               -e RELEARN_PATH="/app/uploads/relearn/" \
+              -e MEAL_UPLOAD_PATH="/app/uploads/meal/" \
               -e SPRING_PROFILES_ACTIVE="prod" \
               ${{ secrets.DOCKER_USERNAME }}/backend:latest
 

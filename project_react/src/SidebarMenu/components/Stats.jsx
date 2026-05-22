@@ -6,17 +6,18 @@ import { format } from 'date-fns';
 import { ko } from 'date-fns/locale'; 
 import './Stats.css';
 
-const Stats = ({ userNum = 1 }) => {
+const Stats = () => {
+  const userString = localStorage.getItem("user");
+  const user = userString && userString !== "undefined" ? JSON.parse(userString) : null;
+  const userNum = user?.user_num || Number(localStorage.getItem("userNum")) || 1;
+
   const [activeTab, setActiveTab] = useState('주간');
   const [selectedDate, setSelectedDate] = useState(new Date());
   
   const [chartData, setChartData] = useState([]);
   const [nutrients, setNutrients] = useState({ carbs: 0, protein: 0, fat: 0, sodium: 0 });
-  
-  // 🌟 식단 기록된 날짜들을 저장할 상태 추가
   const [recordedDates, setRecordedDates] = useState([]); 
 
-  // 🌟 1. 달력 도장(기록된 날짜) 데이터 가져오기 Effect
   useEffect(() => {
     const fetchRecordedDates = async () => {
       try {
@@ -29,7 +30,6 @@ const Stats = ({ userNum = 1 }) => {
     fetchRecordedDates();
   }, [userNum]);
 
-  // 🌟 2. 통계 데이터 가져오기 Effect
   useEffect(() => {
     const fetchStats = async () => {
       try {
@@ -52,11 +52,13 @@ const Stats = ({ userNum = 1 }) => {
   const daysInMonth = new Date(selectedDate.getFullYear(), selectedDate.getMonth() + 1, 0).getDate();
   const divideDays = activeTab === '주간' ? 7 : daysInMonth;
 
-  const totalKcal = chartData.reduce((sum, item) => sum + (item.kcal || 0), 0);
+  // 🌟 데이터가 없는 경우를 0으로 강제 처리
+  const processedChartData = chartData.map(d => ({ ...d, kcal: d.kcal || 0 }));
+  const maxKcal = processedChartData.length > 0 ? Math.max(...processedChartData.map(d => d.kcal), 1) : 1;
+
+  const totalKcal = processedChartData.reduce((sum, item) => sum + item.kcal, 0);
   const avgKcal = Math.round(totalKcal / divideDays) || 0;
   
-  const maxKcal = chartData.length > 0 ? Math.max(...chartData.map(d => d.kcal || 0), 1) : 1; 
-
   const totalMacros = (nutrients.carbs + nutrients.protein + nutrients.fat) || 1;
   const carbsPct = Math.round((nutrients.carbs / totalMacros) * 100) || 0;
   const proteinPct = Math.round((nutrients.protein / totalMacros) * 100) || 0;
@@ -80,7 +82,6 @@ const Stats = ({ userNum = 1 }) => {
             maxDate={new Date()}
             className="date-badge-input"
             showMonthYearPicker={activeTab === '월간'} 
-            // 🌟 3. 달력에 식단 기록일 색칠하기 적용!
             highlightDates={[{ "react-datepicker__day--highlighted-custom": recordedDates }]} 
           />
         </div>
@@ -103,15 +104,27 @@ const Stats = ({ userNum = 1 }) => {
               <span>0</span>
             </div>
             <div className="bars-area">
-              {chartData.map((data, index) => {
-                const pct = (data.kcal / maxKcal) * 100 || 0;
-                const barHeight = `${Math.max(pct, 2)}%`; 
+              {processedChartData.map((data, index) => {
+                // 🌟 막대 높이 계산: 비율 기반 (최소 5% 보장)
+                const pct = (data.kcal / maxKcal) * 100;
+                const safeHeight = Math.max(pct, 5); 
+                
                 return (
                   <div className="bar-group" key={index} style={{ width: activeTab === '주간' ? '12%' : '18%' }}>
+                    
                     <div className="bar-wrapper">
-                      <div className="bar-tooltip">{data.kcal ? data.kcal.toLocaleString() : 0}kcal</div>
-                      <div className="bar-fill" style={{ height: barHeight }}></div>
+                      <div className="bar-tooltip">{data.kcal.toLocaleString()}kcal</div>
+                      
+                      {/* 🌟 중요: !important를 인라인 스타일에 추가하여 CSS 파일보다 우선시함 */}
+                      <div 
+                        className="bar-fill" 
+                        style={{ 
+                          height: `${safeHeight}% !important`,
+                          backgroundColor: data.kcal > 0 ? '#D3B8F8' : '#EEE'
+                        }}
+                      ></div>
                     </div>
+
                     <span className="x-axis-label">{data.day}</span>
                   </div>
                 );

@@ -6,11 +6,14 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.springframework.beans.factory.annotation.Value; 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
 
 import kr.hi.project.dao.DietAnalysisDao;
+import kr.hi.project.dao.MealRecordDao; 
+import kr.hi.project.dto.MealDetailDTO; 
 import kr.hi.project.dto.DietAnalysisResponseDto;
 import lombok.RequiredArgsConstructor;
 
@@ -19,6 +22,11 @@ import lombok.RequiredArgsConstructor;
 public class DietAnalysisService {
 
     private final DietAnalysisDao dietAnalysisDao;
+    private final MealRecordDao mealRecordDao; 
+
+    // 🌟 실서버(도커)와 로컬 환경 자동 주소 스위칭 세팅
+    @Value("${AI_SERVER_URL:http://localhost:8000}")
+    private String aiServerUrl;
 
     // =========================================================================
     // 1. [일일 분석] 특정 날짜의 식단 분석 요약 데이터 가져오기 + 파이썬 AI 연동
@@ -26,16 +34,29 @@ public class DietAnalysisService {
     @Transactional
     public DietAnalysisResponseDto getDailyAnalysis(Long userNum, String date) {
         
-        Map<String, Object> totals = dietAnalysisDao.selectDailyTotalNutrients(userNum, date);
+        List<MealDetailDTO> todayMeals = mealRecordDao.getTodayMealRecord(userNum.intValue(), date);
         Integer targetKcal = dietAnalysisDao.selectUserTargetKcal(userNum);
-
-        int currentKcal = totals != null && totals.get("total_kcal") != null ? ((Number) totals.get("total_kcal")).intValue() : 0;
         int safeTargetKcal = (targetKcal != null && targetKcal > 0) ? targetKcal : 1800;
-        
-        int carbs = totals != null && totals.get("total_carbs") != null ? ((Number) totals.get("total_carbs")).intValue() : 0;
-        int protein = totals != null && totals.get("total_protein") != null ? ((Number) totals.get("total_protein")).intValue() : 0;
-        int fat = totals != null && totals.get("total_fat") != null ? ((Number) totals.get("total_fat")).intValue() : 0;
-        int sodium = totals != null && totals.get("total_sodium") != null ? ((Number) totals.get("total_sodium")).intValue() : 0;
+
+        int currentKcal = 0;
+        int carbs = 0;
+        int protein = 0;
+        int fat = 0;
+        int sodium = 0;
+
+        // 🌟 [에러 해결!] 자바의 int(원시타입)는 null이 될 수 없으므로 방어 코드를 수정했습니다.
+        if (todayMeals != null && !todayMeals.isEmpty()) {
+            for (MealDetailDTO item : todayMeals) {
+                // 섭취량(Portion)이 0으로 들어오는 것을 막기 위해 최소 1.0으로 세팅
+                double portion = item.getMdPortion() <= 0 ? 1.0 : item.getMdPortion();
+                
+                currentKcal += item.getMdKcal();
+                carbs += (int) (item.getFoCarbs() * portion);
+                protein += (int) (item.getFoProtein() * portion);
+                fat += (int) (item.getFoFat() * portion);
+                sodium += (int) (item.getFoNatrium() * portion);
+            }
+        }
 
         double errorRate = Math.abs((double)(safeTargetKcal - currentKcal)) / safeTargetKcal * 100;
 
@@ -64,7 +85,8 @@ public class DietAnalysisService {
         String aiFeedback = "";
         try {
             RestTemplate restTemplate = new RestTemplate();
-            String pythonUrl = "http://localhost:8000/api/v1/ai/feedback";
+            
+            String pythonUrl = aiServerUrl + "/api/v1/ai/feedback";
 
             Map<String, Object> requestData = new HashMap<>();
             requestData.put("userNum", userNum);
@@ -125,7 +147,6 @@ public class DietAnalysisService {
         List<Map<String, Object>> chartData = new ArrayList<>();
         int sumCarbs = 0, sumProtein = 0, sumFat = 0, sumSodium = 0;
         
-        // 🌟 [수정됨] 무조건 7일 혹은 해당 월의 일수(예: 31일)로 나누기 위한 변수 설정
         int divideDays = "weekly".equals(type) ? 7 : selectedDate.lengthOfMonth();
 
         if ("weekly".equals(type)) {
@@ -179,7 +200,6 @@ public class DietAnalysisService {
         Map<String, Object> result = new HashMap<>();
         result.put("chartData", chartData);
         
-        // 🌟 [수정됨] 엄격하게 7일 / 해당 월 일수로 나눔
         Map<String, Integer> nutrients = new HashMap<>();
         nutrients.put("carbs", sumCarbs / divideDays);
         nutrients.put("protein", sumProtein / divideDays);

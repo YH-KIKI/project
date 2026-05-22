@@ -145,38 +145,7 @@ const DietRecommendation = () => {
           이 식단으로 기록하기
         </button>
 
-        <div style={{
-          marginTop: '20px', 
-          padding: '15px', 
-          backgroundColor: '#fff', 
-          borderRadius: '12px', 
-          border: '1px dashed #ff8fa3',
-          display: 'flex',
-          flexDirection: 'column',
-          gap: '10px'
-        }}>
-          <h4 style={{ margin: 0, color: '#ff6b8b', fontSize: '14px' }}>🧪 파이썬 사진 전송 테스트</h4>
-          <input 
-            type="file" 
-            accept="image/*" 
-            onChange={handleFileChange}
-            style={{ fontSize: '13px' }}
-          />
-          <button 
-            onClick={handleTestUploadClick}
-            style={{
-              padding: '8px',
-              backgroundColor: selectedFile ? '#ff8fa3' : '#eee',
-              color: selectedFile ? 'white' : '#888',
-              border: 'none',
-              borderRadius: '8px',
-              cursor: selectedFile ? 'pointer' : 'not-allowed',
-              fontWeight: 'bold'
-            }}
-          >
-            로로(파이썬)에게 사진 보내기! 🚀
-          </button>
-        </div>
+        
 
       </div>
     </div>

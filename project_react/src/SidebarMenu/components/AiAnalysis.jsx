@@ -4,19 +4,25 @@ import DatePicker from 'react-datepicker';
 import "react-datepicker/dist/react-datepicker.css"; 
 import { format } from 'date-fns'; 
 import { ko } from 'date-fns/locale'; 
+import { useNavigate } from 'react-router-dom'; 
 import './AiAnalysis.css';
 
-// 로로 이미지 임포트
 import roroIcon from '../../images/로봇2.png'; 
 
-const AiAnalysis = ({ userNum = 1 }) => {
+const AiAnalysis = () => {
+  const navigate = useNavigate(); 
+
+  // 🌟 핵심 해결: 식단 기록 페이지와 동일하게 '진짜 로그인한 유저 번호'를 가져옵니다!
+  const userString = localStorage.getItem("user");
+  const user = userString && userString !== "undefined" ? JSON.parse(userString) : null;
+  const userNum = user?.user_num || Number(localStorage.getItem("userNum")) || 1;
+
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [analysisData, setAnalysisData] = useState(null);
   const [recordedDates, setRecordedDates] = useState([]); 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // 달력에 칠할 기록된 날짜 가져오기
   useEffect(() => {
     const fetchRecordedDates = async () => {
       try {
@@ -29,7 +35,6 @@ const AiAnalysis = ({ userNum = 1 }) => {
     fetchRecordedDates();
   }, [userNum]);
 
-  // 식단 데이터 가져오기
   useEffect(() => {
     const fetchAnalysisData = async () => {
       try {
@@ -56,24 +61,21 @@ const AiAnalysis = ({ userNum = 1 }) => {
 
   return (
     <div className="analysis-container">
-      {/* 1. 상단 헤더 및 달력 영역 */}
       <div className="analysis-header">
         <h2>AI 분석 요약</h2>
         <div className="date-picker-wrapper">
           <DatePicker
             selected={selectedDate}
             onChange={(date) => setSelectedDate(date)}
-            dateFormat={["yyyy.MM.dd", "yyyyMMdd", "yyyy-MM-dd"]} 
-            dateFormatCalendar="yyyy년 MM월" /* 🌟 버그 없이 깔끔하게 "년 월" 표시 */
+            dateFormat="yyyy.MM.dd" 
             locale={ko}
             maxDate={new Date()}
-            className="date-badge-input"
+            className="date-badge-input" 
             highlightDates={[{ "react-datepicker__day--highlighted-custom": recordedDates }]}
           />
         </div>
       </div>
 
-      {/* 2. 메인 콘텐츠 분기 처리 (로딩/에러/빈화면/데이터있음) */}
       {loading ? (
         <div className="analysis-card loading">데이터를 불러오는 중입니다... ⏳</div>
       ) : error ? (
@@ -82,14 +84,13 @@ const AiAnalysis = ({ userNum = 1 }) => {
         <div className="analysis-card empty-state">
           <div className="empty-character">🍳</div>
           <h3>아직 기록된 식단이 없어요!</h3>
-          <p>이날은 어떤 맛있는 음식을 드셨나요?<br/>식단을 기록하고 AI 분석을 받아보세요.</p>
-          <button className="go-record-btn" onClick={() => alert("식단 기록 페이지로 이동합니다!")}>
+          <p>이날은 어떤 맛있는 음식을 드셨나요?<br />식단을 기록하고 AI 분석을 받아보세요.</p>
+          <button className="go-record-btn" onClick={() => navigate('/record')}>
             식단 기록하러 가기 ✏️
           </button>
         </div>
       ) : (
         <div className="analysis-card">
-          
           <div className="calorie-section">
             <h3>나의 하루</h3>
             <div className="calorie-info">
@@ -133,7 +134,6 @@ const AiAnalysis = ({ userNum = 1 }) => {
             </div>
           </div>
 
-          {/* 하단 로로 코치 피드백 */}
           <div className="feedback-section">
             <div className="feedback-header">
               <div className="roro-icon-wrap">
@@ -151,7 +151,6 @@ const AiAnalysis = ({ userNum = 1 }) => {
               )}
             </div>
           </div>
-
         </div>
       )}
     </div>
