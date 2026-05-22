@@ -21,6 +21,10 @@ COPY requirements.txt .
 RUN pip install --no-cache-dir --upgrade pip setuptools wheel && \
     pip install --no-cache-dir --user -r requirements.txt
 
+# 🌟 [여기 추가됨!] 의존성이 꼬여서 누락되기 쉬운 핵심 AI 라이브러리들 강제 재설치!
+# (--user 옵션을 꼭 붙여야 2단계(실행 스테이지)로 무사히 복사됩니다)
+RUN pip install --no-cache-dir --user --force-reinstall packaging matplotlib ultralytics
+
 # ---------------------------------------
 # 2단계: 실행 스테이지 (경량화 환경)
 # ---------------------------------------
