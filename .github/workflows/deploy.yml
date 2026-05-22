@@ -64,6 +64,8 @@ jobs:
               -p 8000:8000 \
               -v /home/ubuntu/images:/app/uploads \
               -e GOOGLE_AI_API_KEY="${{ secrets.GOOGLE_AI_API_KEY }}" \
+              -e DB_URL="${{ secrets.DB_URL }}" \
+              -e DB_PASSWORD="${{ secrets.DB_PASSWORD }}" \
               ${{ secrets.DOCKER_USERNAME }}/ai-server:latest
 
             # Spring Boot 실행 (포트 개방 안함, 내부망에만 존재)

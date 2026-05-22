@@ -81,7 +81,16 @@ else:
 # MySQL 데이터베이스 연결 설정
 # ==========================================
 
-DB_URL = "mysql+pymysql://root:root@localhost:3306/yummy"
+DB_HOST = os.getenv("DB_URL", "localhost")
+DB_PASS = os.getenv("DB_PASSWORD", "root")
+
+# 로컬(localhost)일 때는 root 계정, 실서버(AWS)일 때는 yummy 계정 사용
+if DB_HOST == "localhost":
+    DB_USER = "root"
+    DB_URL = f"mysql+pymysql://{DB_USER}:{DB_PASS}@{DB_HOST}:3306/yummy"
+else:
+    DB_USER = "yummy"
+    DB_URL = f"mysql+pymysql://{DB_USER}:{DB_PASS}@{DB_HOST}:3306/yummy?charset=utf8mb4"
 
 engine = create_engine(DB_URL)
 
