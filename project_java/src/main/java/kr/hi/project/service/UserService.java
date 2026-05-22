@@ -1,5 +1,6 @@
 package kr.hi.project.service;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -143,7 +144,17 @@ public class UserService {
 
 	// 한끼의 영양성분
 	public Map<String, Object> getMealNutrition(int userNum, String mealType) {
-		return userDAO.getMealNutrition(userNum, mealType);
+		Map<String, Object> result = userDAO.getMealNutrition(userNum, mealType);
+	    
+	    // 만약 오늘 등록된 식단이 없거나 DB 조인 결과가 통틀어 null 이라면?
+	    if (result == null || result.isEmpty() || ((Number)result.get("kcal")).intValue() == 0) {
+	        Map<String, Object> errorMap = new HashMap<>();
+	        errorMap.put("status", "NOT_FOUND");
+	        return errorMap;
+	    }
+	    
+	    result.put("status", "SUCCESS");
+	    return result;
 	}
 	
 	// 음식검색
