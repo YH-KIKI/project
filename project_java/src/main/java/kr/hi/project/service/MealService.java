@@ -1,12 +1,15 @@
 package kr.hi.project.service;
 
+import java.io.File;
 import java.time.LocalDate;
 import java.time.temporal.ChronoField;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import jakarta.servlet.ServletContext;
 import kr.hi.project.dao.MealDao;
 import kr.hi.project.dto.FailedPredictDTO;
 import kr.hi.project.dto.FoodDTO;
@@ -22,6 +25,9 @@ public class MealService {
 
     @Autowired
     private MealDao mealDAO;
+    
+    @Autowired
+    private ServletContext servletContext;
 
     @Transactional
     public void saveMealRecord(MealRecordRequestDTO request, String imageUrl) {
@@ -127,8 +133,46 @@ public class MealService {
 		
 	}
 	// 사진인식하고 식단 상세 파일과 로그를 지우기
-	@Transactional
-	public void cancelMealRecord(int mkNum,int mdayNum) {
+	@Value("${spring.web.resources.static-locations:uploads/}")
+    private String uploadPath;
+
+    public void cancelMealRecord(int mkNum, int mdayNum) {
+        
+        // 1. 🔍 DB에서 사진 주소 꺼내오기 -> 결과: "/uploads/29f98df4-046b-4823...jpg"
+        String imageUrl = mealDAO.findImageUrlByMkNum(mkNum);
+        
+        if (imageUrl != null && !imageUrl.isEmpty()) {
+            try {
+                // 2. 🪓 FileService랑 똑같은 방식으로 베이스 경로를 클린하게 깎아냅니다냥!
+                // file:///C:/uploads/ ➡️ /C:/uploads/ (리눅스든 윈도우든 안전하게 매핑냥)
+                String cleanPath = uploadPath.replace("file:", "").replace("///", "/");
+                
+                // 3. ✂️ DB 주소에서 진짜 파일명만 쏙 발라내기냥!
+                // "/uploads/29f98df4-...jpg" ➡️ "29f98df4-...jpg"
+                String fileName = imageUrl.substring(imageUrl.lastIndexOf("/") + 1);
+                
+                // 4. 🧩 기준 폴더와 파일명을 결합하여 찐 물리 파일 객체 생성!
+                File baseFolder = new File(cleanPath);
+                File fileToDelete = new File(baseFolder, fileName);
+                
+                System.out.println("📂 [File-Cancel] FileService 기준 찐 삭제 조준 경로: " + fileToDelete.getAbsolutePath());
+
+                // 5. 🔥 서버(AWS 또는 로컬 컴퓨터)에서 물리 파일 즉시 완전 소멸 실행!!!
+                if (fileToDelete.exists()) {
+                    boolean isDeleted = fileToDelete.delete();
+                    if (isDeleted) {
+                        System.out.println("🗑️ [File-Cancel] /uploads/ 폴더에서 식단 사진 완전 제거 성공 완료냥! ✨");
+                    } else {
+                        System.out.println("⚠️ [File-Cancel] 파일은 있는데 자바 보안 권한 때문에 못 지웠다냥.");
+                    }
+                } else {
+                    System.out.println("🔍 [File-Cancel] 이미 지워졌거나 해당 경로에 파일이 존재하지 않는다냥. 패스냥!");
+                }
+                
+            } catch (Exception e) {
+                System.out.println("❌ 사진 물리 파일 삭제 중 예외 발생: " + e.getMessage());
+            }
+        }
 	    // 자식 테이블(상세 내역) 먼저 삭제
 	    mealDAO.deleteMealDetailByMkNum(mkNum);
 	    // 부모 테이블(식단 로그) 삭제

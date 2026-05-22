@@ -110,7 +110,9 @@ public class UserInformation {
 	    @RequestParam("userNum") int userNum, 
 	    @RequestParam("mealType") String mealType) {
 	    
-	    return userService.getMealNutrition(userNum, mealType); 
+		Map<String, Object> nutritionResult = userService.getMealNutrition(userNum, mealType);
+	    
+	    return nutritionResult;
 	}
 	
 	// 음식검색
