@@ -55,7 +55,7 @@ public class BodyCheckService {
         String aiResultText = "";
         
         if (!"원본".equals(analyzeType)) {
-            // 🌟 [수정 3] 변경된 pythonUrl 변수를 사용하여 요청을 보냅니다.
+            // pythonUrl 변수를 사용하여 요청을 보냅니다.
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.MULTIPART_FORM_DATA);
             MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
