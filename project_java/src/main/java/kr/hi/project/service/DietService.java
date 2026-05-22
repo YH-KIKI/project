@@ -3,6 +3,7 @@ package kr.hi.project.service;
 import kr.hi.project.dao.UserPrivacyDao;
 import kr.hi.project.dto.DietUserDTO;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value; 
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -17,6 +18,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Collections;
 
 @Service
 @RequiredArgsConstructor
@@ -25,35 +27,43 @@ public class DietService {
     private final UserPrivacyDao userPrivacyMapper;
     private final RestTemplate restTemplate = new RestTemplate();
 
+    @Value("${AI_SERVER_URL:http://localhost:8000}")
+    private String aiServerUrl;
+
+    /**
+     * AI 식단 추천 로직
+     * 1. DB에서 유저 정보를 가져옴
+     * 2. 탭(type)에 따라 탄단지 비율 및 목표 칼로리 재설정
+     * 3. 파이썬 서버로 데이터 전송 및 결과 반환
+     */
     public List<Map<String, Object>> getDietRecommendations(Long userNum, String type) {
         try {
             DietUserDTO userInfo = userPrivacyMapper.findUserByNum(userNum);
             Map<String, Object> aiRequestData = new HashMap<>();
             
+            // 유저 정보가 있을 경우에만 정밀 계산 수행
             if (userInfo != null) {
-                // 1. 기본 칼로리 세팅
                 double targetCalorie = userInfo.getTargetCalorie() != null ? userInfo.getTargetCalorie() : 2000.0;
-                double carbRatio = 0.5, proteinRatio = 0.3, fatRatio = 0.2; // 기본 5:3:2
+                double carbRatio = 0.5, proteinRatio = 0.3, fatRatio = 0.2; // 기본값
 
-                // 2. 🌟 탭(type)에 따른 탄단지 황금 비율 및 칼로리 재조정
+                // 탭별 로직 (요청하신 5가지 탭 기준)
                 switch (type) {
                     case "다이어트":
                         carbRatio = 0.4; proteinRatio = 0.4; fatRatio = 0.2;
-                        targetCalorie *= 0.8; // 칼로리 20% 줄임
+                        targetCalorie *= 0.8;
                         break;
                     case "근육증가":
                         carbRatio = 0.5; proteinRatio = 0.3; fatRatio = 0.2;
-                        targetCalorie *= 1.2; // 칼로리 20% 늘림
+                        targetCalorie *= 1.2;
                         break;
                     case "저탄고지":
-                        carbRatio = 0.2; proteinRatio = 0.3; fatRatio = 0.5;
+                        carbRatio = 0.1; proteinRatio = 0.2; fatRatio = 0.7;
                         break;
                     case "건강유지":
                         carbRatio = 0.5; proteinRatio = 0.3; fatRatio = 0.2;
                         break;
                     case "맞춤 식단":
                     default:
-                        // DB에 저장된 유저 본인의 맞춤 비율 사용
                         if (userInfo.getCarbs() != null && userInfo.getCarbs() > 0) {
                             carbRatio = (userInfo.getCarbs() * 4.0) / targetCalorie;
                             proteinRatio = (userInfo.getProtein() * 4.0) / targetCalorie;
@@ -62,39 +72,39 @@ public class DietService {
                         break;
                 }
                 
-                // 3. 비율을 실제 그램(g)으로 계산 (탄/단은 1g당 4kcal, 지방은 9kcal)
                 int targetCarbs = (int) Math.round((targetCalorie * carbRatio) / 4.0);
                 int targetProtein = (int) Math.round((targetCalorie * proteinRatio) / 4.0);
                 int targetFat = (int) Math.round((targetCalorie * fatRatio) / 9.0);
 
-                // 파이썬으로 보낼 객체 포장
                 aiRequestData.put("userNum", userNum);
                 aiRequestData.put("height", userInfo.getHeight() != null ? userInfo.getHeight() : 170.0);
                 aiRequestData.put("weight", userInfo.getWeight() != null ? userInfo.getWeight() : 65.0);
-                aiRequestData.put("targetCalorie", (int) (targetCalorie / 3));
+                aiRequestData.put("targetCalorie", (int) (targetCalorie / 3)); // 1끼 기준
                 aiRequestData.put("carbs", (int) (targetCarbs / 3));
                 aiRequestData.put("protein", (int) (targetProtein / 3));
                 aiRequestData.put("fat", (int) (targetFat / 3));
-                // 나트륨은 목표 비율이 따로 없으므로 DB값 유지
                 aiRequestData.put("sodium", userInfo.getSodium() != null ? userInfo.getSodium() : 2000); 
                 aiRequestData.put("type", type);
                 
-                System.out.println("✅ 파이썬으로 보낼 데이터: " + aiRequestData.toString());
+                System.out.println("✅ AI 서버 전송 데이터: " + aiRequestData.toString());
             }
 
-            // 4. 파이썬 서버에 계산된 목표치 쏘기!
-            String pythonAiUrl = "http://localhost:8000/api/ai/recommend";
+            String pythonAiUrl = aiServerUrl + "/api/ai/recommend";
             ResponseEntity<List> response = restTemplate.postForEntity(pythonAiUrl, aiRequestData, List.class);
-            return response.getBody();
+            
+            return response.getBody() != null ? response.getBody() : Collections.emptyList();
 
         } catch (Exception e) {
-            e.printStackTrace();
-            return List.of(new HashMap<>());
+            System.err.println("❌ 식단 추천 에러: " + e.getMessage());
+            return Collections.emptyList();
         }
     }
 
+    /**
+     * 사진 분석 기능
+     */
     public String analyzeDietImage(MultipartFile file, String message) {
-        String pythonUrl = "http://localhost:8000/detect";
+        String pythonUrl = aiServerUrl + "/detect";
         try {
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.MULTIPART_FORM_DATA);
@@ -107,9 +117,11 @@ public class DietService {
             body.add("message", message);
 
             HttpEntity<MultiValueMap<String, Object>> requestEntity = new HttpEntity<>(body, headers);
-            return restTemplate.postForEntity(pythonUrl, requestEntity, String.class).getBody();
+            ResponseEntity<String> response = restTemplate.postForEntity(pythonUrl, requestEntity, String.class);
+            return response.getBody();
+            
         } catch (Exception e) {
-            e.printStackTrace();
+            System.err.println("❌ 사진 분석 에러: " + e.getMessage());
             return "{\"status\":\"error\", \"message\":\"파이썬 통신 실패\"}";
         }
     }
