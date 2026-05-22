@@ -440,6 +440,7 @@ const analysis = mealData ? getNutritionAnalysis() : null;
         userNum,
         mkNum: mealData?.mkNum || null,
         mkMealType: data.mealType,
+        mkDietDate: dateKey,
         foods
       };
 

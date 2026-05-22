@@ -1,4 +1,5 @@
 package kr.hi.project.dto;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 
@@ -17,4 +18,5 @@ public class MealRecordRequestDTO {
     private String mkImage;
     private String mkUserMemo;
     private Integer mkNum;
+    private LocalDate mkDietDate;
 }

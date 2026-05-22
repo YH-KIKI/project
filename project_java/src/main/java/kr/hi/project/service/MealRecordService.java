@@ -78,11 +78,16 @@ public class MealRecordService {
 
         int userNum = request.getUserNum();
 
-        LocalDate now = LocalDate.now();
-        int year = now.getYear();
-        int month = now.getMonthValue();
-        int day = now.getDayOfMonth();
-        int week = now.get(ChronoField.ALIGNED_WEEK_OF_MONTH);
+        LocalDate selectedDate =
+        	    request.getMkDietDate();
+        int year = selectedDate.getYear();
+        int month = selectedDate.getMonthValue();
+        int day = selectedDate.getDayOfMonth();
+
+        int week =
+            selectedDate.get(
+                ChronoField.ALIGNED_WEEK_OF_MONTH
+            );
 
         // 1. 월간 기록 확인/생성
         Integer mmNum = mealRecordDao.findMonthNum(userNum, year, month);
@@ -151,6 +156,8 @@ public class MealRecordService {
 	        mealLog.setMkImage(imagePath);
 	        
 	        mealLog.setMkUserMemo(request.getMkUserMemo());
+	        
+	        mealLog.setMkDietDate(request.getMkDietDate());
 	
 	        mealRecordDao.insertMealLog(mealLog);
 	

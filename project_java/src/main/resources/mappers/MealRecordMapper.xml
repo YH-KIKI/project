@@ -15,13 +15,15 @@
             mk_meal_type,
             mk_image,
             mk_usermemo,
-            user_num
+            user_num,
+            mk_diet_date
         )
         VALUES (
             #{mkMealType},
             #{mkImage},
             #{mkUserMemo},
-            #{userNum}
+            #{userNum},
+            #{mkDietDate}
         )
 
     </insert>
@@ -190,15 +192,15 @@
 	    JOIN food f
 	        ON md.fo_num = f.fo_num
 	    WHERE ml.user_num = #{userNum}
-	      AND DATE(ml.mk_created_at) = #{date}
+	      AND ml.mk_diet_date = #{date}
 	    ORDER BY ml.mk_created_at DESC, md.md_num DESC
 	</select>
 	
 	<select id="findRecordedDates" resultType="string">
-	    SELECT DATE_FORMAT(mk_created_at, '%Y-%m-%d') AS recordedDate
+	    SELECT DATE_FORMAT(mk_diet_date, '%Y-%m-%d') AS recordedDate
 	    FROM meal_log
 	    WHERE user_num = #{userNum}
-	    GROUP BY DATE_FORMAT(mk_created_at, '%Y-%m-%d')
+	    GROUP BY DATE_FORMAT(mk_diet_date, '%Y-%m-%d')
 	    ORDER BY recordedDate DESC
 	</select>
 	
