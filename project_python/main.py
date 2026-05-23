@@ -8,8 +8,6 @@ from schemas import UserInfo
 from ai_service import get_hybrid_diet_recommendation, analyze_pose, extract_outline, generate_daily_feedback
 # 대빵 - 식단 피드백 함수 
 from meal_feedback import generate_meal_feedback
-from fridge_ai import generate_ai_info
-
 import os
 import uvicorn
 from google.genai import types
@@ -44,7 +42,7 @@ class DietFeedbackRequest(BaseModel):
 
 
 # ==========================================
-# 대빵 - 식단피드백 / 냉장고용 리퀘스트
+# 대빵 - 식단피드백용 리퀘스트
 # ==========================================
 class MealFeedbackRequest(BaseModel):
     mealType: str
@@ -53,16 +51,6 @@ class MealFeedbackRequest(BaseModel):
     protein: float
     fat: float
     sodium: float
-
-class FridgeRecipeItem(BaseModel):
-    rcpNum: int
-    rcpName: str
-    rcpParts: str
-
-class FridgeRecommendRequest(BaseModel):
-
-    ingredients: list[str]
-    recipes: list[FridgeRecipeItem]
 
 # ==========================================
 # 1. AI 식단 추천 엔드포인트
@@ -133,7 +121,6 @@ async def bodycheck_service(
 # 3. 사진 분석 테스트용 (기존 유지)
 # ==========================================
 @app.post("/detect")
-@app.post("/detect")
 async def detect_service(message: str = Form(...), file: UploadFile = File(...)):
     file_name = file.filename
     print(f"4. [Python] 테스트용 파일명: {file_name}")
@@ -188,42 +175,6 @@ async def meal_feedback_service(data: MealFeedbackRequest):
     return {
         "status": "success",
         "feedback": feedback
-    }
-
-# ==========================================
-# 대빵 - 냉장고 AI 추천
-# ==========================================
-
-@app.post("/api/ai/fridge-recommend")
-async def fridge_recommend_service(
-    data: FridgeRecommendRequest
-):
-
-    results = []
-
-    for recipe in data.recipes:
-
-        ai_data = generate_ai_info(
-            recipe,
-            data.ingredients
-        )
-
-        results.append({
-
-            "rcpNum":
-                recipe.rcpNum,
-
-            "aiReason":
-                ai_data["reason"],
-
-            "hashtags":
-                ai_data["hashtags"]
-
-        })
-
-    return {
-        "status": "success",
-        "results": results
     }
 
 # ==================================================================================
