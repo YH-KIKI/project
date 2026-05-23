@@ -29,4 +29,6 @@ public interface DietAnalysisDao {
         @Param("startDate") String startDate, 
         @Param("endDate") String endDate
     );
+    
+ 	
 }

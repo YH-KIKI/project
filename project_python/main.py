@@ -55,32 +55,33 @@ class MealFeedbackRequest(BaseModel):
 # 1. AI 식단 추천 엔드포인트
 # ==========================================
 @app.post("/api/ai/recommend")
-async def ai_recommend(user: UserInfo):
-    print(f"🔥 [Python] 식단 추천 요청 도착! 유저번호: {user.userNum}")
-    
-    best_food = get_hybrid_diet_recommendation(
-        target_kcal = user.targetCalorie / 3,
-        target_carbs = user.carbs / 3,
-        target_protein = user.protein / 3,
-        target_fat = user.fat / 3,
-        diet_type = user.type 
-    )   
-    
-    print(f"🤖 AI 추천 식단: {best_food['menu']}")
+async def ai_recommend(data: dict):
+    try:
+        user_num = data.get("userNum", 1)
+        # 스프링부트에서 1끼 분량으로 나눈 칼로리가 넘어오므로, 
+        # 하루 3끼 기준을 위해 원래 칼로리로 복구하거나 그대로 사용합니다. (여기선 그대로 사용)
+        target_kcal = data.get("targetCalorie", 600) 
+        carbs = data.get("carbs", 75)
+        protein = data.get("protein", 45)
+        fat = data.get("fat", 13)
+        diet_type = data.get("type", "맞춤 식단")
 
-    return [{
-        "id": best_food["id"],
-        "menu": best_food["menu"],
-        "original_menu": best_food.get("original_menu", ""), # 추가됨
-        "kcal": best_food["kcal"],
-        "carbs": best_food["carbs"],
-        "protein": best_food["protein"],
-        "fat": best_food["fat"],
-        "sodium": best_food["sodium"],
-        "tags": best_food["tags"] + ["AI 정밀분석"],
-        "aiComment": best_food.get("ai_comment", "") # 추가됨
-    }]
+        # 🌟 이제 반환값이 음식 1개가 아니라, 3개가 담긴 '리스트'입니다!
+        best_foods = ai_service.get_hybrid_diet_recommendation(
+            target_kcal, carbs, protein, fat, diet_type
+        )
 
+        # 🌟 리스트 구조에 맞춰서 콘솔 출력(print) 방식도 예쁘게 변경해 줍니다.
+        print(f"📝 [Python] 3끼 오마카세 추천 완료! (유저: {user_num}, 목표: {diet_type})")
+        for food in best_foods:
+            print(f"🤖 [{food.get('meal_time', '식단')}] 추천 메뉴: {food.get('menu')}")
+
+        # 스프링부트가 받기 좋게 리스트를 통째로 리턴합니다! (이미 리스트이므로 [] 로 감쌀 필요 없음)
+        return best_foods
+
+    except Exception as e:
+        print(f"❌ [Python] 추천 시스템 에러 발생: {e}")
+        return []
 
 # ==========================================
 # 2. AI 눈바디 분석 엔드포인트 (기존)

@@ -14,7 +14,7 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 # ⚠️ 중요: 뒤쪽 주석 글자 자리에 구글 AI 스튜디오에서 발급받은 진짜 API 키('AIzaSy...') 문자열을 꼭 넣어주세요냥!
 GOOGLE_API_KEY = os.getenv('GOOGLE_API_KEY', '사용자님의_진짜_구글_GEMINI_API_KEY')
 client = genai.Client(api_key=GOOGLE_API_KEY)
-MODEL_NAME = "gemini-1.5-flash"
+MODEL_NAME = "gemini-2.5-flash"
 
 
 # --- [모델 1: YOLO 뚱딴지모델 로드] ---

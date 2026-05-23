@@ -12,7 +12,6 @@ import roroIcon from '../../images/로봇2.png';
 const AiAnalysis = () => {
   const navigate = useNavigate(); 
 
-  // 식단 기록 페이지와 동일하게 '진짜 로그인한 유저 번호'를 가져옵니다!
   const userString = localStorage.getItem("user");
   const user = userString && userString !== "undefined" ? JSON.parse(userString) : null;
   const userNum = user?.user_num || Number(localStorage.getItem("userNum")) || 1;
@@ -22,6 +21,9 @@ const AiAnalysis = () => {
   const [recordedDates, setRecordedDates] = useState([]); 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  
+  // 🌟 1. 현재 선택된 코치(페르소나) 상태 추가
+  const [persona, setPersona] = useState("다정");
 
   useEffect(() => {
     const fetchRecordedDates = async () => {
@@ -40,9 +42,12 @@ const AiAnalysis = () => {
       try {
         setLoading(true);
         const formattedDate = format(selectedDate, 'yyyy-MM-dd');
+        
+        // 🌟 2. params에 persona를 포함하여 스프링부트로 전송
         const response = await axios.get(`/api/diet/analyze/daily`, {
-          params: { userNum, date: formattedDate }
+          params: { userNum, date: formattedDate, persona }
         });
+        
         setAnalysisData(response.data);
         setError(null); 
       } catch (err) {
@@ -52,27 +57,62 @@ const AiAnalysis = () => {
       }
     };
     fetchAnalysisData();
-  }, [userNum, selectedDate]);
+  }, [userNum, selectedDate, persona]); // 🌟 3. persona가 바뀔 때마다 즉시 새 피드백 요청
 
   const calculateWidth = (current, target) => {
     if (!target || target === 0) return '0%';
     return `${Math.min((current / target) * 100, 100)}%`;
   };
 
+  // 🌟 4. 페르소나에 맞춰 하단 피드백 타이틀을 동적으로 변경하는 함수
+  const getCoachName = () => {
+    switch(persona) {
+      case "팩폭": return "호랑이 코치";
+      case "열혈": return "열혈 트레이너";
+      case "츤데레": return "츤데레 코치";
+      default: return "다정한 로로 코치";
+    }
+  };
+
   return (
     <div className="analysis-container">
       <div className="analysis-header">
         <h2>AI 분석 요약</h2>
-        <div className="date-picker-wrapper">
-          <DatePicker
-            selected={selectedDate}
-            onChange={(date) => setSelectedDate(date)}
-            dateFormat="yyyy.MM.dd" 
-            locale={ko}
-            maxDate={new Date()}
-            className="date-badge-input" 
-            highlightDates={[{ "react-datepicker__day--highlighted-custom": recordedDates }]}
-          />
+        <div className="header-controls" style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+          
+          {/* 🌟 5. AI 코치 선택 드롭다운 UI 추가 */}
+          <div className="persona-selector">
+            <select 
+              value={persona} 
+              onChange={(e) => setPersona(e.target.value)}
+              style={{
+                padding: '8px',
+                borderRadius: '8px',
+                border: '1px solid #ffb6c1',
+                outline: 'none',
+                cursor: 'pointer',
+                fontWeight: 'bold',
+                color: '#555'
+              }}
+            >
+              <option value="다정">👼 다정 모드</option>
+              <option value="팩폭">🐯 팩폭 모드</option>
+              <option value="열혈">🔥 열혈 모드</option>
+              <option value="츤데레">😎 츤데레 모드</option>
+            </select>
+          </div>
+          
+          <div className="date-picker-wrapper">
+            <DatePicker
+              selected={selectedDate}
+              onChange={(date) => setSelectedDate(date)}
+              dateFormat="yyyy.MM.dd" 
+              locale={ko}
+              maxDate={new Date()}
+              className="date-badge-input" 
+              highlightDates={[{ "react-datepicker__day--highlighted-custom": recordedDates }]}
+            />
+          </div>
         </div>
       </div>
 
@@ -110,12 +150,12 @@ const AiAnalysis = () => {
           <div className="grade-section">
             <div className="grade-circle">{analysisData.grade}</div>
             <div className="grade-text">
-              <strong>{analysisData.grade} 등급: {analysisData.gradeMessage}</strong>
+              {/* 🌟 6. 하드코딩 문구 제거, 제미나이가 만든 1줄 타이틀 적용 */}
+              <strong>{analysisData.gradeMessage}</strong>
               <p>획득한 경험치: {analysisData.earnedXp} XP</p>
             </div>
           </div>
 
-          {/* 🌟 수정된 탄단지 프로그레스 바 영역: 하드코딩 제거 및 동적 데이터 연결 */}
           <div className="macro-section">
             <div className="ai-macro-item">
               <div className="macro-label">
@@ -158,9 +198,10 @@ const AiAnalysis = () => {
           <div className="feedback-section">
             <div className="feedback-header">
               <div className="roro-icon-wrap">
-                <img src={roroIcon} alt="Roro AI Coach" className="roro-icon-img" />
+                <img src={roroIcon} alt="AI Coach" className="roro-icon-img" />
               </div>
-              <strong>다정한 로로 코치의 맞춤 피드백</strong>
+              {/* 🌟 7. 선택한 코치에 맞게 이름이 변하는 타이틀 */}
+              <strong>{getCoachName()}의 맞춤 피드백</strong>
             </div>
             <div className="feedback-message-list">
               {analysisData.aiFeedback ? (
@@ -168,7 +209,7 @@ const AiAnalysis = () => {
                   <p key={index} className="feedback-bubble">{line}</p>
                 ))
               ) : (
-                <p className="feedback-bubble">로로 코치가 식단을 분석 중입니다!</p>
+                <p className="feedback-bubble">코치가 식단을 분석 중입니다!</p>
               )}
             </div>
           </div>
