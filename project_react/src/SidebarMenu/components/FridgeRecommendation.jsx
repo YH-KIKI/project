@@ -55,6 +55,8 @@ const FridgeRecommendation = () => {
   ]);
   const [isRecommended, setIsRecommended] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
+  const [selectedRecipe, setSelectedRecipe] = useState(null);
+  const [recipes, setRecipes] = useState([]);
 
   const ingredientSuggestions = [
     "계란",
@@ -89,49 +91,6 @@ const FridgeRecommendation = () => {
     (item) => ingredient.trim() !== "" && item.includes(ingredient.trim())
   );
 
-  const recipes = [
-    {
-      id: 1,
-      title: "계란 샌드위치",
-      badge: "추천!",
-      imageUrl:
-        "https://images.unsplash.com/photo-1528736235302-52922df5c122?w=300",
-      items: "계란, 식빵, 치즈, 버터",
-      desc: "고소하고 든든한 한 끼! 간단하게 만들 수 있는 영양 가득 샌드위치예요.",
-      kcal: 320,
-      carbs: 35,
-      protein: 19,
-      fat: 16,
-      sodium: 620,
-    },
-    {
-      id: 2,
-      title: "우유 빵 푸딩",
-      imageUrl:
-        "https://images.unsplash.com/photo-1606890737304-57a1ca8a5b62?w=300",
-      items: "우유, 식빵, 계란, 설탕",
-      desc: "부드럽고 달콤한 푸딩! 간식이나 디저트로 좋아요.",
-      kcal: 280,
-      carbs: 42,
-      protein: 12,
-      fat: 11,
-      sodium: 350,
-    },
-    {
-      id: 3,
-      title: "토마토 치즈 토스트",
-      imageUrl:
-        "https://images.unsplash.com/photo-1481070555726-e2fe8357725c?w=300",
-      items: "식빵, 토마토, 치즈",
-      desc: "상큼한 토마토와 고소한 치즈의 조화! 간편한 브런치 메뉴예요.",
-      kcal: 290,
-      carbs: 30,
-      protein: 15,
-      fat: 11,
-      sodium: 520,
-    },
-  ];
-
   const addIngredient = (selectedValue) => {
     const value = (selectedValue || ingredient).trim();
 
@@ -163,13 +122,51 @@ const FridgeRecommendation = () => {
     setIngredients([]);
   };
 
-  const handleRecommend = () => {
+  const handleRecommend = async () => {
+
     if (ingredients.length === 0) {
+
       alert("재료를 1개 이상 추가해주세요.");
+
       return;
     }
 
-    setIsRecommended(true);
+    try {
+
+      const res = await axios.post(
+        "/api/fridge/recommend",
+        {
+          ingredients
+        }
+      );
+
+      console.log(
+        "냉장고 추천 결과:",
+        res.data
+      );
+
+      console.log(
+        "recipes:",
+        res.data.recipes
+      );
+
+      setRecipes(
+        res.data.recipes || []
+      );
+
+      setIsRecommended(true);
+
+    } catch (err) {
+
+      console.error(
+        "냉장고 추천 실패:",
+        err
+      );
+
+      alert(
+        "추천 요청에 실패했어요 😢"
+      );
+    }
   };
 
   const kcalPercent = summary?.targetKcal
@@ -178,6 +175,26 @@ const FridgeRecommendation = () => {
       100
     )
   : 0;
+
+  const openRecipeModal = async (recipe) => {
+    try {
+
+      const res = await axios.get(
+        `/api/fridge/recipe/steps?rcpNum=${recipe.rcpNum}`
+      );
+
+      setSelectedRecipe({
+        ...recipe,
+        steps: res.data
+      });
+
+    } catch (err) {
+
+      console.error(err);
+
+      alert("레시피 정보를 불러오지 못했어요 😢");
+    }
+  };
 
   useEffect(() => {
     const fetchSummary = async () => {
@@ -411,10 +428,6 @@ const FridgeRecommendation = () => {
               보유 재료를 활용해 만들 수 있는 추천 메뉴예요!
             </p>
           </div>
-
-          <button className="refresh-btn">
-            새로 추천받기
-          </button>
         </div>
 
         <div className="recipe-list">
@@ -422,7 +435,7 @@ const FridgeRecommendation = () => {
 
             <div
               className="recipe-card-v2"
-              key={recipe.id}
+              key={recipe.rcpNum}
             >
 
               {/* 상단 */}
@@ -435,12 +448,15 @@ const FridgeRecommendation = () => {
                   </div>
 
                   <h4>
-                    {recipe.title}
+                    {recipe.rcpName}
                   </h4>
 
                 </div>
 
-                <button className="recipe-detail-btn">
+                <button 
+                  className="recipe-detail-btn"
+                  onClick={() => openRecipeModal(recipe)}
+                >
                   레시피 보기 →
                 </button>
 
@@ -450,28 +466,25 @@ const FridgeRecommendation = () => {
               <div className="recipe-middle">
 
                 <img
-                  src={getImageUrl(recipe.imageUrl)}
-                  alt={recipe.title}
+                  src={getImageUrl(recipe.rcpImage)}
+                  alt={recipe.rcpName}
                 />
 
                 <div className="recipe-middle-right">
 
                   <p className="recipe-desc">
-                    {recipe.desc}
+                    {recipe.aiReason || recipe.rcpWay}
                   </p>
 
                   <div className="recipe-tags">
 
-                    {recipe.items
-                      .split(", ")
-                      .map((item) => (
+                {recipe.hashtags?.map((tag) => (
 
-                        <span key={item}>
-                          #{item}
-                        </span>
+                  <span key={tag}>
+                    #{tag}
+                  </span>
 
-                      ))}
-
+                ))}
                   </div>
 
                 </div>
@@ -488,7 +501,7 @@ const FridgeRecommendation = () => {
                   </span>
 
                   <strong>
-                    {recipe.kcal} kcal
+                    {recipe.rcpKcal} kcal
                   </strong>
 
                   <p>예상 칼로리</p>
@@ -498,25 +511,25 @@ const FridgeRecommendation = () => {
                 <div className="nutrient-item">
                   <span>🍞</span>
                   <b>탄수화물</b>
-                  <strong>{recipe.carbs}g</strong>
+                  <strong>{recipe.rcpCarbs}g</strong>
                 </div>
 
                 <div className="nutrient-item">
                   <span>🥩</span>
                   <b>단백질</b>
-                  <strong>{recipe.protein}g</strong>
+                  <strong>{recipe.rcpProtein}g</strong>
                 </div>
 
                 <div className="nutrient-item">
                   <span>🥑</span>
                   <b>지방</b>
-                  <strong>{recipe.fat}g</strong>
+                  <strong>{recipe.rcpFat}g</strong>
                 </div>
 
                 <div className="nutrient-item">
                   <span>🧂</span>
                   <b>나트륨</b>
-                  <strong>{recipe.sodium}mg</strong>
+                  <strong>{recipe.rcpNatrium}mg</strong>
                 </div>
 
               </div>
@@ -528,7 +541,158 @@ const FridgeRecommendation = () => {
         </div>
       </section>
       )}
+      {/* 모달 */}
+      {selectedRecipe && (
+      <div
+        className="recipe-modal-overlay"
+        onClick={() => setSelectedRecipe(null)}
+      >
+
+        <div
+          className="recipe-modal"
+          onClick={(e) => e.stopPropagation()}
+        >
+
+          {/* 닫기 */}
+          <button
+            className="recipe-modal-close"
+            onClick={() => setSelectedRecipe(null)}
+          >
+            ✕
+          </button>
+
+          {/* 이미지 */}
+          <img
+            className="recipe-modal-image"
+            src={getImageUrl(selectedRecipe.rcpImage)}
+            alt={selectedRecipe.rcpName}
+          />
+
+          {/* 제목 */}
+          <div className="recipe-modal-header">
+
+            <div className="recipe-modal-title-wrap">
+
+              <div className="recipe-icon">
+                🍮
+              </div>
+
+              <h2>
+                {selectedRecipe.rcpName}
+              </h2>
+
+            </div>
+
+          </div>
+
+          {/* 설명 */}
+          <p className="recipe-modal-desc">
+            {selectedRecipe.aiReason || selectedRecipe.rcpWay}
+          </p>
+
+          {/* 태그 */}
+          <div className="recipe-modal-tags">
+
+            {selectedRecipe.hashtags?.map((tag) => (
+
+              <span key={tag}>
+                #{tag}
+              </span>
+
+            ))}
+
+          </div>
+          {/* 영양소 */}
+          <div className="recipe-modal-nutrients">
+
+            <div>
+              <span>🔥</span>
+              <b>칼로리</b>
+              <strong>{selectedRecipe.rcpKcal} kcal</strong>
+            </div>
+
+            <div>
+              <span>🍞</span>
+              <b>탄수화물</b>
+              <strong>{selectedRecipe.rcpCarbs}g</strong>
+            </div>
+
+            <div>
+              <span>🥩</span>
+              <b>단백질</b>
+              <strong>{selectedRecipe.rcpProtein}g</strong>
+            </div>
+
+            <div>
+              <span>🥑</span>
+              <b>지방</b>
+              <strong>{selectedRecipe.rcpFat}g</strong>
+            </div>
+
+            <div>
+              <span>🧂</span>
+              <b>나트륨</b>
+              <strong>{selectedRecipe.rcpNatrium}mg</strong>
+            </div>
+
+          </div>
+
+          {/* 재료 */}
+          <div className="recipe-modal-section">
+
+            <h4>🧺 사용 재료</h4>
+
+            <ul>
+              {selectedRecipe.rcpParts
+                ?.split(",")
+                .map((item) => (
+                  <li key={item}>
+                    {item}
+                  </li>
+                ))}
+            </ul>
+
+          </div>
+
+          {/* 조리방법 */}
+          <div className="recipe-modal-section">
+
+            <h4>👩‍🍳 조리 방법</h4>
+
+              <div className="recipe-step-list">
+
+                {selectedRecipe.steps
+                  ?.filter((step) => step?.stepText)
+                  .map((step) => (
+
+                    <p key={step.stepNum}>
+                      {step.stepText}
+                    </p>
+                ))}
+              </div>
+
+          </div>
+
+          {/* 하단 버튼 */}
+          <div className="recipe-modal-actions">
+
+            <button className="favorite-btn">
+              ❤️ 즐겨찾기
+            </button>
+
+            <button className="add-meal-btn">
+              🍽 식단으로 추가
+            </button>
+
+          </div>
+
+        </div>
+
+      </div>
+
+    )}
     </div>
+
   );
 };
 
