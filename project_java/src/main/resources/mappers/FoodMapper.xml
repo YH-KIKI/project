@@ -51,4 +51,14 @@
         WHERE fo_num = #{foNum}
     </select>
 
+	<select id="searchFoodByName" resultType="kr.hi.project.dto.FoodDTO" parameterType="string">
+	    SELECT 
+	        fo_num AS foNum,       fo_name AS foName,     fo_kcal AS foKcal,
+	        fo_carbs AS foCarbs,
+	        fo_protein AS foProtein,
+	        fo_fat AS foFat,
+	        fo_natrium AS foNatrium
+	    FROM food 
+	    WHERE fo_name LIKE CONCAT('%', #{foodName}, '%')
+	</select>
 </mapper>
