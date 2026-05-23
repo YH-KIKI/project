@@ -30,7 +30,7 @@ public class KakaoService {
     @Autowired
     private JwtService jwtService;
     
-    @Value("${KAKAO_REDIRECT_URI}")
+    @Value("${KAKAO_REDIRECT_URI:http://localhost:3000/kakao-callback}")
     private String kakaoRedirectUri;
 
     public Map<String, Object> processKakaoLogin(String code) {
