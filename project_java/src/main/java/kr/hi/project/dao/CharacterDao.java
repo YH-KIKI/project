@@ -27,4 +27,23 @@ public class CharacterDao {
 
         sqlSession.update("kr.hi.project.dao.CharacterDao.updateCharacterType", params);
     }
+
+    // 게시글 등록 성공 로직 바로 밑이나 식단 분석 성공 로직 밑에
+    // 5XP 누적 + 자동 레벨업 작동
+    // characterService.addExperience(userNum, 5);
+    public void updateCharacterExpAndLevel(Map<String, Object> params) {
+        sqlSession.update("kr.hi.project.dao.CharacterDao.updateCharacterExpAndLevel", params);
+    }
+    
+    // 오늘출석검사
+    public int checkTodayExpHistory(int userNum, int edNum) {
+        Map<String, Object> params = new HashMap<>();
+        params.put("userNum", userNum);
+        params.put("edNum", edNum);
+        return sqlSession.selectOne("kr.hi.project.dao.CharacterDao.checkTodayExpHistory", params);
+    }
+
+    public void insertExpHistory(Map<String, Object> params) {
+        sqlSession.insert("kr.hi.project.dao.CharacterDao.insertExpHistory", params);
+    }
 }
