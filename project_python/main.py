@@ -58,25 +58,22 @@ class MealFeedbackRequest(BaseModel):
 async def ai_recommend(data: dict):
     try:
         user_num = data.get("userNum", 1)
-        # 스프링부트에서 1끼 분량으로 나눈 칼로리가 넘어오므로, 
-        # 하루 3끼 기준을 위해 원래 칼로리로 복구하거나 그대로 사용합니다. (여기선 그대로 사용)
         target_kcal = data.get("targetCalorie", 600) 
         carbs = data.get("carbs", 75)
         protein = data.get("protein", 45)
         fat = data.get("fat", 13)
         diet_type = data.get("type", "맞춤 식단")
+        
+        # 🌟 자바(스프링)가 보내준 챗봇 말투 받기! (없으면 '비즈니스' 기본값)
+        persona_mode = data.get("personaMode", "비즈니스") 
 
-        # 🌟 이제 반환값이 음식 1개가 아니라, 3개가 담긴 '리스트'입니다!
-        best_foods = ai_service.get_hybrid_diet_recommendation(
-            target_kcal, carbs, protein, fat, diet_type
+        # 🌟 5개 추출 함수로 파라미터 전부 전달!
+        best_foods = get_hybrid_diet_recommendation(
+            target_kcal, carbs, protein, fat, diet_type, persona_mode
         )
 
-        # 🌟 리스트 구조에 맞춰서 콘솔 출력(print) 방식도 예쁘게 변경해 줍니다.
-        print(f"📝 [Python] 3끼 오마카세 추천 완료! (유저: {user_num}, 목표: {diet_type})")
-        for food in best_foods:
-            print(f"🤖 [{food.get('meal_time', '식단')}] 추천 메뉴: {food.get('menu')}")
-
-        # 스프링부트가 받기 좋게 리스트를 통째로 리턴합니다! (이미 리스트이므로 [] 로 감쌀 필요 없음)
+        print(f"📝 [Python] 5가지 식단 추천 완료! (유저: {user_num}, 목표: {diet_type}, 말투: {persona_mode})")
+        
         return best_foods
 
     except Exception as e:

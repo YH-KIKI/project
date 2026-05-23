@@ -180,59 +180,50 @@ def get_best_diets(
 # ==========================================
 # AI 하이브리드 식단 추천 (아침, 점심, 저녁 3끼 오마카세)
 # ==========================================
-
 def get_hybrid_diet_recommendation(
     target_kcal,
     target_carbs,
     target_protein,
     target_fat,
-    diet_type
+    diet_type,
+    persona_mode="비즈니스"  # 🌟 스프링에서 넘어온 말투(페르소나) 받기
 ):
-    # 1. DB에서 영양소가 맞는 후보군 최대 15개 찾기
-    top_foods = get_best_diets(target_kcal, target_carbs, target_protein, target_fat, diet_type, num_samples=15)
+    # 1. DB에서 영양소가 맞는 후보군 최대 20개 찾기 (넉넉하게)
+    top_foods = get_best_diets(target_kcal, target_carbs, target_protein, target_fat, diet_type, num_samples=20)
     
-    # 2. 그중에서 겹치지 않게 무작위로 3개 쏙쏙 뽑기
-    selected_foods = random.sample(top_foods, min(3, len(top_foods)))
-    roles = ["아침", "점심", "저녁"]
+    # 2. 그중에서 겹치지 않게 무작위로 '5개' 쏙쏙 뽑기 🌟
+    selected_foods = random.sample(top_foods, min(5, len(top_foods)))
+    roles = ["옵션 1", "옵션 2", "옵션 3", "옵션 4", "옵션 5"]
     
-    # 기본 역할(태그) 부여
     for i, food in enumerate(selected_foods):
-        food["meal_time"] = roles[i] if i < len(roles) else "간식"
-        food["ai_comment"] = f"건강한 {food['meal_time']} 식단입니다." # AI 실패 시 땜빵용
+        food["meal_time"] = roles[i] if i < len(roles) else f"옵션 {i+1}"
+        food["ai_comment"] = "건강한 식단입니다." # AI 실패 시 땜빵용
+        food["main_ingredient"] = "기본" # 이미지 매핑을 위한 기본값
 
-    # 3. Gemini AI 호출 (3끼 한 방에 처리!)
+    # 3. Gemini AI 호출 (5개 한 방에 처리!)
     if USE_GEMINI and client and len(selected_foods) >= 1:
         try:
             prompt = f"""
-너는 냠냠플래닛의 센스있고 다정한 다이어트 전문 수석 셰프야.
-사용자가 '{diet_type}' 목표를 위해 하루 식단을 짜려고 해.
-내가 영양학적 계산을 통해 아래와 같이 메뉴를 골랐어.
+당신은 '{persona_mode}' 페르소나를 가진 냠냠플래닛의 수석 영양 코치입니다.
+사용자의 목표({diet_type})에 맞춰서 아래 5가지 메뉴를 무작위로 골랐습니다.
 
 [오늘의 선정 메뉴]
 """
             for food in selected_foods:
                 prompt += f"- {food['meal_time']}: {food['original_menu']} ({food['kcal']}kcal)\n"
 
-            prompt += """
-이 메뉴들을 바탕으로 하루 식단 구성을 평가하고, 각 메뉴별로 먹음직스러운 'AI 센스 네이밍(ai_name)'과 짧고 다정한 '추천 멘트(ai_comment, 1줄)'를 작성해줘.
+            prompt += f"""
+이 메뉴들을 바탕으로 각 메뉴별로 먹음직스러운 '메뉴명(menu)', '{persona_mode}' 말투의 '코멘트(ai_comment)', 그리고 이미지 매핑을 위한 '핵심 재료(main_ingredient)'를 작성해주세요.
 
-결과를 반드시 아래 JSON 배열 형식으로만 출력해:
+결과를 반드시 아래 JSON 배열 형식으로만 출력하세요 (5개 전부 작성):
 [
-  {
-    "meal_time": "아침",
-    "ai_name": "(원래 메뉴명을 더 맛있게 포장한 이름)",
-    "ai_comment": "(아침에 이 메뉴가 왜 좋은지 1줄 설명)"
-  },
-  {
-    "meal_time": "점심",
-    "ai_name": "(원래 메뉴명을 더 맛있게 포장한 이름)",
-    "ai_comment": "(점심에 이 메뉴가 왜 좋은지 1줄 설명)"
-  },
-  {
-    "meal_time": "저녁",
-    "ai_name": "(원래 메뉴명을 더 맛있게 포장한 이름)",
-    "ai_comment": "(저녁에 이 메뉴가 왜 좋은지 1줄 설명)"
-  }
+  {{
+    "meal_time": "옵션 1",
+    "menu": "(원래 메뉴명을 더 맛있게 포장한 이름)",
+    "main_ingredient": "(닭가슴살, 연어, 소고기, 돼지고기, 두부, 샐러드, 계란, 고구마 중 가장 가까운 식재료 단어 1개)",
+    "ai_comment": "({persona_mode} 말투로 작성된 1줄 추천 멘트)"
+  }},
+  ... (옵션 5까지 작성) ...
 ]
 """
             response = client.models.generate_content(
@@ -247,19 +238,20 @@ def get_hybrid_diet_recommendation(
             text = response.text.strip().replace("```json", "").replace("```", "")
             ai_data_list = json.loads(text)
 
-            # 4. 생성된 AI 데이터를 3개의 음식 데이터에 각각 덮어씌우기
+            # 4. 생성된 AI 데이터를 5개의 음식 데이터에 각각 덮어씌우기
             for ai_data in ai_data_list:
                 for food in selected_foods:
                     if food["meal_time"] == ai_data.get("meal_time"):
-                        food["menu"] = ai_data.get("ai_name", food["original_menu"])
+                        food["menu"] = ai_data.get("menu", food["original_menu"])
                         food["ai_comment"] = ai_data.get("ai_comment", food["ai_comment"])
+                        food["main_ingredient"] = ai_data.get("main_ingredient", "기본") # 🌟 핵심 재료 저장!
 
-            print(f"🤖 [Gemini] 3끼 오마카세 작명 성공!")
+            print(f"🤖 [Gemini] 5가지 옵션 작명 및 재료 추출 성공!")
 
         except Exception as e:
-            print(f"⚠️ [Gemini] 3끼 호출 실패 (기본값으로 응답합니다): {e}")
+            print(f"⚠️ [Gemini] 5가지 호출 실패 (기본값으로 응답합니다): {e}")
 
-    # 리액트 화면에 예쁘게 띄우기 위해 "아침", "점심", "저녁" 글자를 태그 맨 앞에 추가
+    # 리액트 화면에 예쁘게 띄우기 위해 태그 맨 앞에 추가
     for food in selected_foods:
         if food["meal_time"] not in food["tags"]:
             food["tags"] = [food["meal_time"]] + food["tags"]

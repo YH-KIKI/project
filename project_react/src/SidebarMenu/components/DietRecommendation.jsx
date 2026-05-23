@@ -27,7 +27,7 @@ const DietRecommendation = () => {
       setIsLoading(true); 
       setError(null);
       try {
-        // 🌟 이제 백엔드에서 3개의 객체가 담긴 리스트가 넘어옵니다.
+        // 백엔드에서 이제 5개의 옵션이 담긴 리스트가 넘어옵니다.
         const data = await fetchAiRecommendations(activeTab); 
         setRecommendations(data); 
       } catch (err) {
@@ -39,22 +39,18 @@ const DietRecommendation = () => {
     loadDietData();
   }, [activeTab]); 
 
-  // 🌟 시간대별 아이콘 매칭 함수
-  const getMealIcon = (mealTime) => {
-    switch(mealTime) {
-      case "아침": return "🌅";
-      case "점심": return "☀️";
-      case "저녁": return "🌙";
-      default: return "🍴";
-    }
+  // 🌟 옵션별 아이콘 매칭 (옵션 1~5)
+  const getOptionIcon = (index) => {
+    const icons = ["🥇", "🥈", "🥉", "✨", "🌟"];
+    return icons[index] || "🍴";
   };
 
-  // 🌟 특정 식단을 기록하는 함수 (객체를 통째로 받음)
+  // 🌟 식단 기록 함수
   const handleRecordDiet = (diet) => {
     if (!diet) return;
 
     const payload = {
-      userNum: 1, // 실제 환경에서는 로그인한 유저 번호 연동
+      userNum: 1, 
       menuName: diet.menu,
       kcal: diet.kcal,
       carbs: diet.carbs,
@@ -63,9 +59,8 @@ const DietRecommendation = () => {
       sodium: diet.sodium
     };
     
-    console.log(`🔥 [기록하기] ${diet.meal_time} 식단 데이터:`, payload);
-    alert(`[${diet.meal_time}: ${diet.menu}] 오늘 식단으로 등록되었습니다!`);
-    // 이후 실제 DB 저장 API 호출 로직 추가 가능
+    console.log(`🔥 [기록하기] 선택된 식단 데이터:`, payload);
+    alert(`[${diet.menu}] 오늘 식단으로 등록되었습니다!`);
   };
 
   return (
@@ -92,7 +87,7 @@ const DietRecommendation = () => {
           {isLoading ? (
             <div className="loading-state">
               <span className="spinner">🥗</span>
-              <p>AI 셰프가 오늘의 3끼 오마카세를 구성 중입니다...</p>
+              <p>AI 셰프가 오늘의 5가지 추천 식단을 구성 중입니다...</p>
             </div>
           ) : error ? (
             <div className="error-state">
@@ -101,9 +96,17 @@ const DietRecommendation = () => {
           ) : (
             <div className="meal-grid">
               {recommendations.map((item, index) => (
-                <div className={`diet-card meal-time-${index}`} key={item.id || index}>
-                  <div className="meal-badge">
-                    {getMealIcon(item.meal_time)} {item.meal_time}
+                <div className="diet-card" key={item.id || index}>
+                  {/* 🌟 음식 이미지 영역 추가 */}
+                  <div className="diet-image-area">
+                    <img 
+                      src={item.image_url || '/images/default_meal.jpg'} 
+                      alt={item.menu} 
+                      onError={(e) => e.target.src = '/images/default_meal.jpg'}
+                    />
+                    <div className="meal-badge">
+                      {getOptionIcon(index)} {item.meal_time}
+                    </div>
                   </div>
                   
                   <div className="diet-content">
@@ -132,7 +135,7 @@ const DietRecommendation = () => {
                         className="mini-record-btn"
                         onClick={() => handleRecordDiet(item)}
                       >
-                        기록하기
+                        이 식단으로 기록하기
                       </button>
                     </div>
                   </div>
@@ -144,10 +147,10 @@ const DietRecommendation = () => {
       </div>
 
       <div className="info-footer">
-        <p>💡 탭을 클릭할 때마다 AI가 새로운 메뉴를 무작위로 구성합니다.</p>
+        <p>💡 탭을 클릭할 때마다 AI가 영양 목표에 맞는 5가지 옵션을 새롭게 제안합니다.</p>
       </div>
     </div>
   );
 };
-
+ㅁ
 export default DietRecommendation;
