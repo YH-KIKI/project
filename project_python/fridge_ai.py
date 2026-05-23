@@ -1,8 +1,8 @@
 import os
 import json
 
-import google.generativeai as genai
 from dotenv import load_dotenv
+from google import genai
 
 # =========================
 # 환경변수
@@ -10,19 +10,14 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-# 더미 테스트 여부
 USE_DUMMY = True
 
 # =========================
-# Gemini 설정
+# Gemini Client
 # =========================
 
-genai.configure(
+client = genai.Client(
     api_key=os.getenv("GEMINI_API_KEY")
-)
-
-model = genai.GenerativeModel(
-    "gemini-2.5-flash"
 )
 
 # =========================
@@ -38,7 +33,6 @@ def generate_ai_info(recipe, user_ingredients):
     if USE_DUMMY:
 
         return {
-
             "reason":
                 f"{recipe.rcpName} 만들기 딱 좋은 재료예요 😊",
 
@@ -92,7 +86,10 @@ def generate_ai_info(recipe, user_ingredients):
 
     try:
 
-        response = model.generate_content(prompt)
+        response = client.models.generate_content(
+            model="gemini-2.5-flash",
+            contents=prompt
+        )
 
         text = response.text.strip()
 
@@ -109,7 +106,6 @@ def generate_ai_info(recipe, user_ingredients):
         print("Gemini 오류:", e)
 
         return {
-
             "reason":
                 "집에 있는 재료로 만들 수 있어요 😊",
 
