@@ -1,0 +1,125 @@
+/* SignupPage.css */
+
+/* 전체 배경 및 래퍼는 메인 레이아웃을 따르되 내부 정렬 보정 */
+.signup-box {
+  background-color: rgba(255, 255, 255, 0.95);
+  padding: 50px 40px;
+  border-radius: 24px;
+  text-align: center;
+  border: 1px solid #e6ded7;
+  box-shadow: 0 10px 30px rgba(93, 64, 55, 0.08);
+  position: relative;
+  width: 70%;
+  margin: 20px 0px 20px 0px;
+  box-sizing: border-box;
+}
+
+/* 제목 섹션 */
+.signup-box h1 {
+  font-size: 28px;
+  color: #3e2723;
+  margin-bottom: 8px;
+  font-weight: 700;
+}
+
+.signup-box h2 {
+  font-size: 18px;
+  color: #795548;
+  margin-top: 0;
+  margin-bottom: 6px;
+  font-weight: 500;
+}
+
+.signup-box p {
+  font-size: 14px;
+  color: #a1887f;
+  margin-top: 0;
+  margin-bottom: 35px;
+}
+
+/* 입력 폼 컨테이너 */
+.input-form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin-bottom: 30px;
+  align-items: center;
+}
+
+/* 🌟 입력창 스타일 고급화 */
+.signup-input {
+  padding: 14px 16px;
+  width: 100%;
+  max-width: 340px;
+  border: 1px solid #d7ccc8;
+  border-radius: 12px;
+  font-size: 14px;
+  background-color: #fafafa;
+  color: #3e2723;
+  transition: all 0.2s ease-in-out;
+  box-sizing: border-box;
+}
+
+.signup-input:focus {
+  outline: none;
+  border-color: #b0bec5;
+  background-color: #fff;
+  box-shadow: 0 0 0 3px rgba(187, 222, 251, 0.3);
+}
+
+.signup-input::placeholder {
+  color: #bcaaa4;
+}
+
+/* 🌟 가입하기 버튼 감성 커스텀 */
+.btn-signup-submit {
+  padding: 14px 0;
+  width: 100%;
+  max-width: 340px;
+  background-color: #c6465d; /* 식단 앱 아이덴티티 시그니처 컬러 */
+  color: white;
+  border: none;
+  border-radius: 12px;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.2s;
+  box-shadow: 0 4px 12px rgba(198, 70, 93, 0.2);
+}
+
+.btn-signup-submit:hover {
+  background-color: #b03a4f;
+  transform: translateY(-1px);
+}
+
+.btn-signup-submit:active {
+  transform: translateY(1px);
+}
+
+/* 구분선 */
+.signup-divider {
+  border: none;
+  border-top: 1px solid #f5eedc;
+  margin: 30px auto;
+  width: 100%;
+  max-width: 340px;
+}
+
+/* 하단 로그인 링크 구역 */
+.login-link-text {
+  font-size: 14px;
+  color: #795548;
+}
+
+.login-link-text a {
+  color: #c6465d;
+  font-weight: bold;
+  text-decoration: none;
+  margin-left: 6px;
+  transition: color 0.2s;
+}
+
+.login-link-text a:hover {
+  text-decoration: underline;
+  color: #b03a4f;
+}

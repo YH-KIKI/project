@@ -1,24 +1,37 @@
 package kr.hi.project.dto;
 
 import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
-@Getter
-@Setter
+@Data
+@NoArgsConstructor
 @AllArgsConstructor
 public class DietAnalysisResponseDto {
-    private String grade;           // A, B, C, D, F
-    private String gradeMessage;    // 등급 메시지
-    private int currentKcal;        // 오늘 섭취 칼로리
-    private int targetKcal;         // 목표 칼로리 (user_privacy.up_daily_kcal)
-    private int earnedXp;           // 획득한 경험치
     
-    // 탄단지 영양소 데이터
+    // 1. 등급 및 메시지
+    private String grade;
+    private String gradeMessage;
+    
+    // 2. 🌟 칼로리 데이터 (현재 섭취량 / 동적 목표량)
+    private int currentKcal;
+    private int targetKcal; 
+    
+    // 3. 획득 경험치
+    private int earnedXp;
+    
+    // 4. 현재 섭취한 탄단지 + 나트륨 데이터
     private int currentCarbs;
     private int currentProtein;
     private int currentFat;
     private int currentSodium;
     
-    private String aiFeedback;      // AI 3줄 요약 (추후 연동)
+    // 5. 🌟 유저 맞춤형 목표 탄단지 + 나트륨 데이터 (새로 추가된 부분!)
+    private int targetCarbs;
+    private int targetProtein;
+    private int targetFat;
+    private int targetSodium;
+    
+    // 6. 파이썬 AI 로로의 3줄 요약 피드백
+    private String aiFeedback;
 }

@@ -52,4 +52,17 @@
 	    GROUP BY DATE(ml.mk_created_at)
 	    ORDER BY log_date ASC
 	</select>
+	
+	<select id="selectUserDietType" resultType="string">
+        SELECT 
+            CASE up_model
+                WHEN '1' THEN '다이어트'
+                WHEN '2' THEN '건강유지'
+                WHEN '3' THEN '근육증가'
+                WHEN '4' THEN '저탄고지'
+                ELSE '건강유지'
+            END
+        FROM user_privacy 
+        WHERE user_num = #{userNum}
+    </select>
 </mapper>
