@@ -70,7 +70,7 @@ public class MealController {
 	    }
 	}
 	
-	// 사진인식하고 식단 상세 파일사진과 로그를 지우기
+	// 사진인식하고 식단 상세 파일과 로그를 지우기
 	@PostMapping("/api/meal/cancel")
 	public ResponseEntity<?> cancelMeal(@RequestParam("mkNum") int mkNum,
 										@RequestParam("mdayNum") int mdayNum) {
