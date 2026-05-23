@@ -1,15 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import Sidebar from '../Main/Sidebar';
-import '../Main/MainLayout.css'; // 🌟 배경 이미지가 들어있는 CSS를 가져옵니다!
-import './LoginPage.css';        // 🌟 새롭게 분리한 로그인 페이지 전용 CSS를 가져옵니다!
+import '../Main/MainLayout.css'; // 배경 이미지가 들어있는 CSS를 가져옵니다!
+import './LoginPage.css';        // 새롭게 분리한 로그인 페이지 전용 CSS를 가져옵니다!
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 
 const LoginPage = () => {
 
   // --- 여기부터 카카오톡 ---
-  const KAKAO_REST_API_KEY = "진짜 API 키"; // 여기에 아까 복사한 진짜 키를 붙여넣으세요!
-  const KAKAO_REDIRECT_URI = "http://localhost:3000/kakao-callback";
+  const KAKAO_REST_API_KEY = "b4cc1448ae63974d811c00aa509952ee"; // 여기에 아까 복사한 진짜 키를 붙여넣으세요!
+  const KAKAO_REDIRECT_URI = `${window.location.origin}/kakao-callback`;
   const KAKAO_AUTH_URL = `https://kauth.kakao.com/oauth/authorize?client_id=${KAKAO_REST_API_KEY}&redirect_uri=${KAKAO_REDIRECT_URI}&response_type=code`;
 
   const handleKakaoLogin = () => {
@@ -107,7 +107,7 @@ const LoginPage = () => {
 
       // [준성] refreshToken 추가
       localStorage.setItem('refresh_token', refreshToken);
-      // 🌟🌟🌟 [박하] 커뮤니티 게시판에서 사용자 식별을 위해 서버에서 받은 사용자 정보를 'user' 키로 저장
+      // [박하] 커뮤니티 게시판에서 사용자 식별을 위해 서버에서 받은 사용자 정보를 'user' 키로 저장
       localStorage.setItem('user', JSON.stringify(response.data.user));
 
       // [재근]눈바디(BodyCheck) 등에서 바로 꺼내 쓸 수 있도록 userNum만 따로 저장.
@@ -147,10 +147,10 @@ const LoginPage = () => {
           <p>맛있는 다이어트의 시작! 로그인 해주세요.</p>
           
           {/* 회원 전용 기능 테스트 영역 */}
-          <div className="test-button-container">
+          {/* <div className="test-button-container">
             <button onClick={handleProtectedFeature}>회원 전용 기능 테스트</button>
             <button onClick={() => alert("누구나 누를 수 있는 버튼")}>일반 기능</button>
-          </div>
+          </div> */}
 
           {/* 아이디/비밀번호 입력 폼 영역 */}
           <div>

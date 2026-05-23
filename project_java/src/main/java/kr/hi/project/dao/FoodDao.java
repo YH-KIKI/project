@@ -18,4 +18,6 @@ public interface FoodDao {
 
     // 음식 번호로 조회
     FoodDTO getFoodByNum(@Param("foNum") int foNum);
+
+	List<FoodDTO> searchFoodByName(@Param("foodName") String foodName);
 }

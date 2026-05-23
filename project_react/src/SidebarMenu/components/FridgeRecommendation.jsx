@@ -403,130 +403,47 @@ const FridgeRecommendation = () => {
           </div>
         </section>
       ) : (
-       <section className="recipe-section">
-        <div className="recipe-header">
-          <div>
-            <h3>✨ AI 레시피 추천 결과</h3>
-            <p>
-              보유 재료를 활용해 만들 수 있는 추천 메뉴예요!
-            </p>
+        <section className="recipe-section">
+          <div className="recipe-header">
+            <h3>AI 레시피 추천 결과</h3>
+            <span>추천 결과 예시</span>
           </div>
 
-          <button className="refresh-btn">
-            새로 추천받기
-          </button>
-        </div>
-
-        <div className="recipe-list">
-          {recipes.map((recipe) => (
-
-            <div
-              className="recipe-card-v2"
-              key={recipe.id}
-            >
-
-              {/* 상단 */}
-              <div className="recipe-card-top">
-
-                <div className="recipe-title-wrap">
-
-                  <div className="recipe-icon">
-                    🍮
-                  </div>
-
-                  <h4>
-                    {recipe.title}
-                  </h4>
-
-                </div>
-
-                <button className="recipe-detail-btn">
-                  레시피 보기 →
-                </button>
-
-              </div>
-
-              {/* 중단 */}
-              <div className="recipe-middle">
-
+          <div className="recipe-list">
+            {recipes.map((recipe) => (
+              <div className="recipe-card" key={recipe.id}>
                 <img
                   src={getImageUrl(recipe.imageUrl)}
                   alt={recipe.title}
                 />
+                <div className="recipe-info">
+                  <h4>
+                    {recipe.title}
+                    {recipe.badge && <span>{recipe.badge}</span>}
+                  </h4>
+                  <p className="recipe-items">보유 재료: {recipe.items}</p>
+                  <p className="recipe-desc">{recipe.desc}</p>
+                </div>
 
-                <div className="recipe-middle-right">
-
-                  <p className="recipe-desc">
-                    {recipe.desc}
-                  </p>
-
-                  <div className="recipe-tags">
-
-                    {recipe.items
-                      .split(", ")
-                      .map((item) => (
-
-                        <span key={item}>
-                          #{item}
-                        </span>
-
-                      ))}
-
+                <div className="recipe-nutrients">
+                  <div className="nutrient-grid">
+                    <p>탄: {recipe.carbs}g</p>
+                    <p>단: {recipe.protein}g</p>
+                    <p>지: {recipe.fat}g</p>
+                    <p>나트륨: {recipe.sodium}mg</p>
                   </div>
 
-                </div>
+                  <div className="recipe-kcal">
+                    <span>예상 칼로리</span>
+                    <strong>{recipe.kcal} kcal</strong>
+                  </div>
 
+                  <button>레시피 보기</button>
+                </div>
               </div>
-
-              {/* 하단 영양소 */}
-              <div className="recipe-nutrient-bar">
-
-                <div className="nutrient-item">
-
-                  <span className="nutrient-icon">
-                    🔥
-                  </span>
-
-                  <strong>
-                    {recipe.kcal} kcal
-                  </strong>
-
-                  <p>예상 칼로리</p>
-
-                </div>
-
-                <div className="nutrient-item">
-                  <span>🍞</span>
-                  <b>탄수화물</b>
-                  <strong>{recipe.carbs}g</strong>
-                </div>
-
-                <div className="nutrient-item">
-                  <span>🥩</span>
-                  <b>단백질</b>
-                  <strong>{recipe.protein}g</strong>
-                </div>
-
-                <div className="nutrient-item">
-                  <span>🥑</span>
-                  <b>지방</b>
-                  <strong>{recipe.fat}g</strong>
-                </div>
-
-                <div className="nutrient-item">
-                  <span>🧂</span>
-                  <b>나트륨</b>
-                  <strong>{recipe.sodium}mg</strong>
-                </div>
-
-              </div>
-
-            </div>
-
-          ))}
-
-        </div>
-      </section>
+            ))}
+          </div>
+        </section>
       )}
     </div>
   );

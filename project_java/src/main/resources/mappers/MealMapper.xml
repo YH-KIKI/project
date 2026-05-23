@@ -116,5 +116,11 @@
 	<delete id="deleteMealLogByMkNum">
 	    DELETE FROM meal_log WHERE mk_num = #{mkNum}
 	</delete>
+	
+	<select id="findImageUrlByMkNum" resultType="string">
+	    SELECT mk_image 
+	    FROM meal_log 
+	    WHERE mk_num = #{mkNum}
+	</select>
 
 </mapper>
