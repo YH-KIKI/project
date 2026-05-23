@@ -6,7 +6,6 @@ import torch.nn as nn
 from torchvision import models, transforms
 from PIL import Image
 from ultralytics import YOLO
-import uvicorn
 from google import genai
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -18,8 +17,8 @@ client = genai.Client(api_key=GOOGLE_API_KEY)
 MODEL_NAME = "gemini-2.5-flash"
 
 
-# --- [모델 1: YOLO모델 로드] ---
-yolo_model_path = os.path.join(BASE_DIR, 'model', 'YOLO.pt')
+# --- [모델 1: YOLO 뚱딴지모델 로드] ---
+yolo_model_path = os.path.join(BASE_DIR, 'model', '뚱딴지모델.pt')
 yolo_model = YOLO(yolo_model_path)
 yolo_names = ['연근조림', '동치미', '잡채', '김치찌개', '김치', '갈비', '육회', '콩나물무침', '우동', '백김치', '잔치국수', '콩나물국', '설렁탕', '도라지무침', '비빔밥', '어묵탕', '부대찌개', '불고기', '총각김치', '오이김치', '컵밥', '북엇국', '양념장어구이', '볶음밥', '파김치', '고등어구이', '장조림', '제육볶음', '메밀소바', '된장국', '비빔밥(혼합밥)', '나박김치', '냉면', '깻잎장아찌', '족발', '삼겹살', '깍두기', '주먹밥', '김밥', '밥', '고사리나물', '애호박볶음', '미역국', '김', '조개탕', '육개장', '시금치나물', '고등어조림', '멸치볶음', '열무김치']
 

@@ -25,8 +25,4 @@ public class FoodService {
     public FoodDTO getFoodByNum(int foNum) {
         return foodDao.getFoodByNum(foNum);
     }
-
-	public List<FoodDTO> searchFoodByName(String foodName) {
-		return foodDao.searchFoodByName(foodName);
-	}
 }
