@@ -29,6 +29,8 @@ public class UserInformation {
 	private UserService userService;
 	@Autowired
 	private UserDao userDAO;
+	@Autowired
+	private kr.hi.project.service.CharacterService characterService;
 
 //	@GetMapping("/api/information_select")
 //	public UserPrivacyDTO getUserInfo(@RequestHeader("Authorization") String authHeader) {
@@ -112,6 +114,40 @@ public class UserInformation {
 	    
 		Map<String, Object> nutritionResult = userService.getMealNutrition(userNum, mealType);
 	    
+		// 실시간 오차율 계산 후 경험치 지급 처리하기냥!
+//	    try {
+//	        // 내 하루 권장 칼로리 목표 조회
+//	        kr.hi.project.dto.UserPrivacyDTO goal = userService.getUserInfo(userNum);
+//	        
+//	        if (nutritionResult != null && goal != null && nutritionResult.get("kcal") != null) {
+//	            // 끼니 비율 반영 (점심은 40%, 아침/저녁은 30%)
+//	            double ratio = "점심".equals(mealType) ? 0.4 : 0.3;
+//	            double targetKcal = goal.getUserDailyKcal() * ratio; // 한 끼 목표 칼로리
+//	            
+//	            // 유저가 진짜 먹은 실시간 칼로리
+//	            double ateKcal = Double.parseDouble(nutritionResult.get("kcal").toString());
+//	            
+//	            // 오차율 절대값 계산 공식
+//	            double errorRate = Math.abs((ateKcal - targetKcal) / targetKcal);
+//	            
+//	            int edNum = 5;       // 기본 F등급 (0xp)
+//	            int expAmount = 0;
+//	            String grade = "F";
+//	            
+//	            // 오차율에 따른 단가표 분기 처리
+//	            if (errorRate <= 0.10) {      edNum = 1; expAmount = 50; grade = "A"; }
+//	            else if (errorRate <= 0.20) { edNum = 2; expAmount = 30; grade = "B"; }
+//	            else if (errorRate <= 0.30) { edNum = 3; expAmount = 15; grade = "C"; }
+//	            else if (errorRate <= 0.40) { edNum = 4; expAmount = 5;  grade = "D"; }
+//	            
+//	            // 경험치 적립 함수
+//	            characterService.addExperience(userNum, edNum, expAmount, "식단평가" + grade);
+//	            System.out.println("🤖 식단 평가 실시간 연산 완료! 등급: " + grade + " (" + expAmount + " XP 지급냥!)");
+//	        }
+//	    } catch (Exception e) {
+//	        System.out.println("⚠️ 식단 평가 경험치 연산 중 오류 발생 (리포트 조회는 무사 진행): " + e.getMessage());
+//	        e.printStackTrace();
+//	    }
 	    return nutritionResult;
 	}
 	

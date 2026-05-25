@@ -46,6 +46,15 @@ public class CharacterService {
                 return;
             }
         }
+        
+        // 게시글 작성 보상(8번) 하루 최대 3번만
+        if (edNum == 8) {
+            int alreadyGot = characterDao.checkTodayExpHistory(userNum, edNum);
+            if (alreadyGot >= 3) { // 오늘 쓴 글 영수증이 3개 이상 쌓였다면
+                System.out.println("❌ 오늘 게시글 작성 보상(3회)을 모두 채우셨다냥! 글은 써지지만 경험치는 안 준다냥!");
+                return; // 경험치 안 주고 여기서 튕겨내기
+            }
+        }
 
         CharacterDTO character = characterDao.getCharacterInfo(userNum);
         if (character == null) return;
