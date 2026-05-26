@@ -108,6 +108,7 @@
   border-radius: 18px;
   padding: 14px;
   background: #fffdfc;
+  gap:0 !important;
 }
 
 .food-title-area {
@@ -314,6 +315,23 @@
   font-weight: 800;
   line-height: 1.25;
   color: #171212;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* 메모 */
+.fav-meal-memo {
+  margin-top: 6px;
+
+  font-size: 13px;
+  color: #777;
+
+  width: 100%;
+
+  text-align: left;
+  align-self: flex-start;
+
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -708,6 +726,11 @@
   background: #ff6686;
   border-color: #ff6686;
   color: white;
+}
+
+.recipe-bottom-row .food-kcal{
+  align-items:flex-start;
+  text-align:left;
 }
 
 /* 반응형 */

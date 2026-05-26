@@ -33,12 +33,22 @@ const FavoritePage = () => {
   const [mealFavorites, setMealFavorites] = useState([]);
   const [recipeFavorites, setRecipeFavorites] = useState([]);
 
+  //검색
+  const [foodSearchKeyword, setFoodSearchKeyword] = useState("");
+  const [mealSearchKeyword, setMealSearchKeyword] = useState("");
+  const [recipeSearchKeyword, setRecipeSearchKeyword] = useState("");
+
   const [selectedMeal, setSelectedMeal] = useState(null);
 
   const [isMealTypeModalOpen, setIsMealTypeModalOpen] = useState(false);
   const [selectedFood, setSelectedFood] = useState(null);
   const [selectedLoadMeal, setSelectedLoadMeal] = useState(null);
   const [selectedRecipe, setSelectedRecipe] = useState(null);
+
+  // + 버튼 → 아점저 선택 후, 상세 모달에서 저장할 때 필요한 값
+  const [selectedMealType, setSelectedMealType] = useState(null);
+  const [selectedDate, setSelectedDate] = useState(null);
+  const [isMealSaveMode, setIsMealSaveMode] = useState(false);
 
   const [newFood, setNewFood] = useState({
     name: "",
@@ -102,6 +112,7 @@ const FavoritePage = () => {
         type: meal.mkMealType,
         title: meal.mfName,
         foods: meal.foodListStr,
+        memo: meal.mfMemo || meal.mf_memo || "",
         kcal: meal.totalKcal,
         image: getImageUrl(meal.mkImage),
         recent: "-",
@@ -140,12 +151,11 @@ const FavoritePage = () => {
       setRecipeFavorites(converted);
     } catch (err) {
       console.error("레시피 즐겨찾기 조회 실패:", err);
-
-      // 백엔드 연결 전에도 화면 확인 가능하도록 비워둠
       setRecipeFavorites([]);
     }
   };
 
+  // 카드 클릭 시: 그냥 상세보기 모드
   const openMealFavoriteDetail = async (meal) => {
     try {
       const res = await axios.get(
@@ -153,6 +163,9 @@ const FavoritePage = () => {
       );
 
       setSelectedMeal(res.data);
+      setSelectedMealType(null);
+      setSelectedDate(null);
+      setIsMealSaveMode(false);
     } catch (err) {
       console.error("식단 상세 조회 실패:", err);
       alert("식단 상세 조회 실패!");
@@ -257,7 +270,6 @@ const FavoritePage = () => {
     } catch (err) {
       console.error("레시피 즐겨찾기 삭제 실패:", err);
 
-      // 백엔드 연결 전 임시 삭제
       setRecipeFavorites((prev) =>
         prev.filter((item) => item.id !== recipe.id)
       );
@@ -266,10 +278,27 @@ const FavoritePage = () => {
     }
   };
 
-  const filteredMealFavorites =
-    mealFilter === "전체"
-      ? mealFavorites
-      : mealFavorites.filter((meal) => meal.type === mealFilter);
+  const filteredFoodFavorites = foodFavorites.filter((food) =>
+    food.name
+      ?.toLowerCase()
+      .includes(foodSearchKeyword.trim().toLowerCase())
+  );
+
+  const filteredMealFavorites = mealFavorites
+    .filter((meal) =>
+      mealFilter === "전체" ? true : meal.type === mealFilter
+    )
+    .filter((meal) =>
+      meal.title
+        ?.toLowerCase()
+        .includes(mealSearchKeyword.trim().toLowerCase())
+    );
+
+  const filteredRecipeFavorites = recipeFavorites.filter((recipe) =>
+    recipe.name
+      ?.toLowerCase()
+      .includes(recipeSearchKeyword.trim().toLowerCase())
+  );
 
   const openMealTypeModal = (food) => {
     setSelectedFood(food);
@@ -278,6 +307,7 @@ const FavoritePage = () => {
     setIsMealTypeModalOpen(true);
   };
 
+  // 저장한 식단 + 버튼 클릭
   const openMealLoadModal = (meal) => {
     setSelectedLoadMeal(meal);
     setSelectedFood(null);
@@ -310,6 +340,7 @@ const FavoritePage = () => {
         ? selectedValue?.date
         : null;
 
+    // 음식 즐겨찾기는 기존처럼 기록 페이지로 이동
     if (selectedFood) {
       navigate("/record", {
         state: {
@@ -324,29 +355,28 @@ const FavoritePage = () => {
       return;
     }
 
+    // 저장한 식단은 아점저 선택 후 상세 모달을 열고,
+    // 상세 모달의 "이 식단 저장하기" 버튼에서 DB 저장
     if (selectedLoadMeal) {
       try {
         const res = await axios.get(
           `/api/favorite/meal/detail?userNum=${userNum}&mfNum=${selectedLoadMeal.id}`
         );
 
-        navigate("/record", {
-          state: {
-            fromFavoriteMeal: true,
-            selectedMeal: res.data,
-            mealType,
-            date,
-          },
-        });
+        setSelectedMeal(res.data);
+        setSelectedMealType(mealType);
+        setSelectedDate(date);
+        setIsMealSaveMode(true);
       } catch (err) {
-        console.error("식단 불러오기 실패:", err);
-        alert("식단 불러오기 실패!");
+        console.error("식단 상세 불러오기 실패:", err);
+        alert("식단 상세 불러오기 실패!");
       }
 
       closeMealTypeModal();
       return;
     }
 
+    // 레시피 즐겨찾기는 기존처럼 기록 페이지로 이동
     if (selectedRecipe) {
       navigate("/record", {
         state: {
@@ -362,6 +392,81 @@ const FavoritePage = () => {
     }
   };
 
+  // 상세 모달에서 "이 식단 저장하기" 눌렀을 때 실행
+  const saveFavoriteMealToRecord = async () => {
+    if (!selectedMeal) {
+      alert("저장할 식단 정보가 없어요!");
+      return;
+    }
+
+    if (!selectedMealType) {
+      alert("식사 타입을 먼저 선택해주세요!");
+      return;
+    }
+
+    const foods = selectedMeal.foods || [];
+
+    if (foods.length === 0) {
+      alert("저장할 음식 정보가 없어요!");
+      return;
+    }
+
+    try {
+      const convertedFoods = foods.map((food) => {
+        const portion = Number(
+          food.mdPortion ||
+          food.mfPortion ||
+          food.portion ||
+          food.count ||
+          1
+        );
+
+        const kcal = Number(
+          food.mdKcal ||
+          food.foKcal ||
+          food.kcal ||
+          0
+        );
+
+        return {
+          foNum: food.foNum,
+          mdPortion: portion,
+          mdKcal: kcal,
+        };
+      });
+
+      const mealData = {
+        userNum,
+        mkMealType: selectedMealType,
+        mkUserMemo: selectedMeal.mfMemo || selectedMeal.mf_memo || "",
+        mkDietDate: selectedDate,
+        foods: convertedFoods,
+      };
+
+      const formData = new FormData();
+
+      formData.append(
+        "mealData",
+        new Blob([JSON.stringify(mealData)], {
+          type: "application/json",
+        })
+      );
+
+      console.log("즐겨찾기 식단 저장 mealData:", mealData);
+
+      await axios.post("/api/meal/record", formData);
+
+      alert("식단 저장 완료!");
+
+      setSelectedMeal(null);
+      setSelectedMealType(null);
+      setSelectedDate(null);
+      setIsMealSaveMode(false);
+    } catch (err) {
+      console.error("즐겨찾기 식단 저장 실패:", err);
+      alert("식단 저장 실패!");
+    }
+  };
   return (
     <div className="favorite-container">
       <div className="favorite-header">
@@ -395,12 +500,16 @@ const FavoritePage = () => {
       {activeTab === "food" && (
         <>
           <div className="search-row">
-            <input placeholder="즐겨찾기 음식 검색" />
+            <input
+              placeholder="즐겨찾기 음식 검색"
+              value={foodSearchKeyword}
+              onChange={(e) => setFoodSearchKeyword(e.target.value)}
+            />
             <button>검색</button>
           </div>
 
           <div className="food-grid">
-            {foodFavorites.map((food) => (
+            {filteredFoodFavorites.map((food) => (
               <div className="food-card" key={food.id}>
                 <div className="food-title-area">
                   <h3>{food.name}</h3>
@@ -449,100 +558,102 @@ const FavoritePage = () => {
               </div>
             ))}
           </div>
-
-          <button
-            className="add-large-btn"
-            onClick={() => setIsFoodModalOpen(true)}
-          >
-            + 새 음식 즐겨찾기 추가
-          </button>
         </>
       )}
+     {activeTab === "meal" && (
+      <>
+        <div className="search-row">
+          <input
+            placeholder="저장한 식단 이름 검색"
+            value={mealSearchKeyword}
+            onChange={(e) => setMealSearchKeyword(e.target.value)}
+          />
+          <button type="button">검색</button>
+        </div>
 
-      {activeTab === "meal" && (
-        <>
-          <div className="meal-filter-tabs">
-            {["전체", "아침", "점심", "저녁"].map((type) => (
-              <button
-                key={type}
-                className={mealFilter === type ? "active" : ""}
-                onClick={() => setMealFilter(type)}
-              >
-                {type}
-              </button>
-            ))}
-          </div>
+        <div className="meal-filter-tabs">
+          {["전체", "아침", "점심", "저녁"].map((type) => (
+            <button
+              key={type}
+              className={mealFilter === type ? "active" : ""}
+              onClick={() => setMealFilter(type)}
+            >
+              {type}
+            </button>
+          ))}
+        </div>
 
-          <div className="meal-list">
-            {filteredMealFavorites.map((meal) => (
-              <div
-                className="fav-meal-card"
-                key={meal.id}
-                onClick={() => openMealFavoriteDetail(meal)}
-              >
-                <div className="fav-meal-thumb-wrap">
-                  {meal.image ? (
-                    <img src={meal.image} alt={meal.title} />
-                  ) : (
-                    <div className="fav-meal-thumb-empty">🍱</div>
-                  )}
-                </div>
-
-                <div className="fav-meal-info">
-                  <div className="fav-meal-title-row">
-                    <span className={`meal-type-badge ${meal.type}`}>
-                      {meal.type}
-                    </span>
-
-                    <h3>{meal.title}</h3>
-                  </div>
-
-                  <p>{meal.foods}</p>
-                  <strong>🔥 {meal.kcal} kcal</strong>
-                </div>
-
-                <div className="fav-meal-actions">
-                  <button
-                    className="meal-load-square-btn"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      openMealLoadModal(meal);
-                    }}
-                  >
-                    <span>+</span>
-                  </button>
-
-                  <button
-                    className="meal-delete-btn"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      deleteMealFavorite(meal);
-                    }}
-                  >
-                    <FiTrash2 />
-                  </button>
-                </div>
+        <div className="meal-list">
+          {filteredMealFavorites.map((meal) => (
+            <div
+              className="fav-meal-card"
+              key={meal.id}
+              onClick={() => openMealFavoriteDetail(meal)}
+            >
+              <div className="fav-meal-thumb-wrap">
+                {meal.image ? (
+                  <img src={meal.image} alt={meal.title} />
+                ) : (
+                  <div className="fav-meal-thumb-empty">🍱</div>
+                )}
               </div>
-            ))}
-          </div>
 
-          <button
-            className="add-large-btn"
-            onClick={() => setIsMealModalOpen(true)}
-          >
-            + 새 식단 저장하기
-          </button>
-        </>
-      )}
+              <div className="fav-meal-info">
+                <div className="fav-meal-title-row">
+                  <span className={`meal-type-badge ${meal.type}`}>
+                    {meal.type}
+                  </span>
 
+                  <h3>{meal.title}</h3>
+                </div>
+
+                <p>{meal.foods}</p>
+                  {meal.memo && (
+                    <div className="fav-meal-memo">
+                      💬 {meal.memo}
+                    </div>
+                  )}
+                <strong>🔥 {meal.kcal} kcal</strong>
+              </div>
+
+              <div className="fav-meal-actions">
+                <button
+                  className="meal-load-square-btn"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    openMealLoadModal(meal);
+                  }}
+                >
+                  <span>+</span>
+                </button>
+
+                <button
+                  className="meal-delete-btn"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    deleteMealFavorite(meal);
+                  }}
+                >
+                  <FiTrash2 />
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
+      </>
+    )}
       {activeTab === "recipe" && (
         <>
           <div className="search-row">
-            <input placeholder="즐겨찾기 레시피 검색" />
+            <input
+              placeholder="즐겨찾기 레시피 검색"
+              value={recipeSearchKeyword}
+              onChange={(e) => setRecipeSearchKeyword(e.target.value)}
+            />
             <button>검색</button>
           </div>
 
-          {recipeFavorites.length === 0 ? (
+          {filteredRecipeFavorites.length === 0 ? (
             <div className="recipe-empty-box">
               <div>🍳</div>
               <h3>아직 저장한 레시피가 없어요!</h3>
@@ -554,7 +665,7 @@ const FavoritePage = () => {
             </div>
           ) : (
             <div className="recipe-favorite-grid">
-              {recipeFavorites.map((recipe) => (
+              {filteredRecipeFavorites.map((recipe) => (
                 <div className="recipe-fav-card" key={recipe.id}>
                   <div className="recipe-fav-title-area">
                     <h3>{recipe.name}</h3>
@@ -567,10 +678,6 @@ const FavoritePage = () => {
                       <div className="recipe-fav-empty-img">🍳</div>
                     )}
                   </div>
-
-                  <p className="recipe-fav-desc">
-                    {recipe.aiReason || recipe.way || "저장한 레시피예요 😊"}
-                  </p>
 
                   <div className="nutrition-grid recipe-nutrition-grid">
                     <div className="nutrition-chip carb">
@@ -787,6 +894,7 @@ const FavoritePage = () => {
       {selectedMeal && (
         <MealFavoriteDetailModal
           meal={selectedMeal}
+          isSaveMode={isMealSaveMode}
           onUpdated={(updatedMeal) => {
             setSelectedMeal(updatedMeal);
 
@@ -801,19 +909,22 @@ const FavoritePage = () => {
               )
             );
           }}
-          onClose={() => setSelectedMeal(null)}
-          onLoad={() => {
-            openMealLoadModal({
-              id: selectedMeal.mfNum,
-              title: selectedMeal.mfName,
-            });
+          onClose={() => {
+            setSelectedMeal(null);
+            setSelectedMealType(null);
+            setSelectedDate(null);
+            setIsMealSaveMode(false);
           }}
+          onLoad={saveFavoriteMealToRecord}
           onDelete={() => {
             setMealFavorites((prev) =>
               prev.filter((meal) => meal.id !== selectedMeal.mfNum)
             );
 
             setSelectedMeal(null);
+            setSelectedMealType(null);
+            setSelectedDate(null);
+            setIsMealSaveMode(false);
           }}
         />
       )}
@@ -821,16 +932,17 @@ const FavoritePage = () => {
       {isMealTypeModalOpen &&
         (selectedFood || selectedLoadMeal || selectedRecipe) && (
           <MealTypeSelectModal
-            title={
-              selectedFood
-                ? `${selectedFood.name}을(를) 어디에 추가할까요?`
-                : selectedLoadMeal
-                  ? `${selectedLoadMeal.title} 식단을 어디에 불러올까요?`
-                  : `${selectedRecipe.name} 레시피를 어디에 추가할까요?`
-            }
-            onSelect={handleMealTypeSelect}
-            onClose={closeMealTypeModal}
-          />
+              title={
+                selectedFood
+                  ? `${selectedFood.name}을(를) 어디에 추가할까요?`
+                  : selectedLoadMeal
+                    ? `${selectedLoadMeal.title} 식단을 어디에 추가할까요?`
+                    : `${selectedRecipe.name} 레시피를 어디에 추가할까요?`
+              }
+              onSelect={handleMealTypeSelect}
+              onClose={closeMealTypeModal}
+              showAlert={!selectedLoadMeal}
+            />
         )}
     </div>
   );

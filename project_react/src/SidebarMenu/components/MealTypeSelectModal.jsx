@@ -1,7 +1,12 @@
 import { useState } from "react";
 import "./MealTypeSelectModal.css";
 
-const MealTypeSelectModal = ({ title, onSelect, onClose }) => {
+const MealTypeSelectModal = ({
+  title,
+  onSelect,
+  onClose,
+  showAlert = true,
+}) => {
   const today = new Date().toISOString().slice(0, 10);
 
   const [selectedDate, setSelectedDate] = useState(today);
@@ -13,7 +18,9 @@ const MealTypeSelectModal = ({ title, onSelect, onClose }) => {
       date: selectedDate,
     });
 
-    alert("식단에 추가되었어요!");
+    if (showAlert) {
+      alert("식단에 추가되었어요!");
+    }
   };
 
   return (

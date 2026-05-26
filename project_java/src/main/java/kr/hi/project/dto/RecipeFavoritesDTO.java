@@ -5,7 +5,7 @@ import lombok.Data;
 @Data
 public class RecipeFavoritesDTO {
 
-    private int rfNum;
+    private int rfvNum;
     private int userNum;
     private int rcpNum;
 
@@ -22,5 +22,5 @@ public class RecipeFavoritesDTO {
     private Double rcpFat;
     private Double rcpNatrium;
 
-    private String rfCreatedAt;
+    private String rfvCreatedAt;
 }

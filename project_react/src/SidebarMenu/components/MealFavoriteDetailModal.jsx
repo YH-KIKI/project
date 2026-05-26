@@ -5,6 +5,7 @@ import "./MealFavoriteDetailModal.css";
 
 function MealFavoriteDetailModal({
   meal,
+  isSaveMode,
   onUpdated,
   onClose,
   onLoad,
@@ -150,7 +151,7 @@ function MealFavoriteDetailModal({
               </div>
             )}
             <p className="meal-fav-meta">
-              <span>등록일 {formattedDate}</span>
+              <span>식단 등록일 {formattedDate}</span>
               <span className="meta-divider">|</span>
               <span>총 {totalKcal} kcal</span>
             </p>
@@ -250,7 +251,7 @@ function MealFavoriteDetailModal({
           </button>
 
           <button type="button" className="meal-fav-load-btn" onClick={onLoad}>
-            이 식단 불러오기
+            {isSaveMode ? "이 식단 기록하기" : "식사 타입 선택 후 저장하기"}
           </button>
         </div>
       </div>
