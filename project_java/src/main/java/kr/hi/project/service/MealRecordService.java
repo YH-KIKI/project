@@ -19,6 +19,7 @@ import kr.hi.project.dto.MealLogDTO;
 import kr.hi.project.dto.MealMonthDTO;
 import kr.hi.project.dto.MealRecordRequestDTO;
 import kr.hi.project.dto.MealWeekDTO;
+import kr.hi.project.dto.RecipeMealRecordRequestDTO;
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -224,6 +225,123 @@ public class MealRecordService {
 	public List<String> getRecordedDates(int userNum) {
 		 return mealRecordDao.findRecordedDates(userNum);
 	}
-    
+
+	@Transactional
+	public void saveRecipeMealRecord(RecipeMealRecordRequestDTO request) {
+
+	    int userNum = request.getUserNum();
+
+	    LocalDate selectedDate = request.getMkDietDate();
+
+	    int year = selectedDate.getYear();
+	    int month = selectedDate.getMonthValue();
+	    int day = selectedDate.getDayOfMonth();
+
+	    int week = selectedDate.get(
+	        ChronoField.ALIGNED_WEEK_OF_MONTH
+	    );
+
+	    // 1. 월간 기록 확인/생성
+	    Integer mmNum = mealRecordDao.findMonthNum(userNum, year, month);
+
+	    if (mmNum == null) {
+	        MealMonthDTO monthDTO = new MealMonthDTO();
+	        monthDTO.setUserNum(userNum);
+	        monthDTO.setMmYear(year);
+	        monthDTO.setMmMonth(month);
+
+	        mealRecordDao.insertMonth(monthDTO);
+	        mmNum = monthDTO.getMmNum();
+	    }
+
+	    // 2. 주간 기록 확인/생성
+	    Integer mwNum = mealRecordDao.findWeekNum(mmNum, year, month, week);
+
+	    if (mwNum == null) {
+	        MealWeekDTO weekDTO = new MealWeekDTO();
+	        weekDTO.setMmNum(mmNum);
+	        weekDTO.setMwYear(year);
+	        weekDTO.setMwMonth(month);
+	        weekDTO.setMwWeek(week);
+
+	        mealRecordDao.insertWeek(weekDTO);
+	        mwNum = weekDTO.getMwNum();
+	    }
+
+	    // 3. 일간 기록 확인/생성
+	    Integer mdayNum = mealRecordDao.findDayNum(mwNum, day);
+
+	    if (mdayNum == null) {
+	        MealDayDTO dayDTO = new MealDayDTO();
+	        dayDTO.setMwNum(mwNum);
+	        dayDTO.setMdDay(day);
+	        dayDTO.setMdayKcal(0);
+
+	        mealRecordDao.insertDay(dayDTO);
+	        mdayNum = dayDTO.getMdayNum();
+	    }
+
+	    // 4. 같은 날짜 + 같은 식사타입 기존 기록 삭제
+	    List<Integer> oldMkNums = mealRecordDao.findMealLogNumsForUpdate(
+	        userNum,
+	        request.getMkMealType(),
+	        mdayNum
+	    );
+
+	    if (oldMkNums != null && !oldMkNums.isEmpty()) {
+	        mealRecordDao.deleteMealDetailsByMkNums(oldMkNums);
+	        mealRecordDao.deleteMealLogsByMkNums(oldMkNums);
+	    }
+
+	    // 5. meal_log 저장
+	    MealLogDTO mealLog = new MealLogDTO();
+	    mealLog.setUserNum(userNum);
+	    mealLog.setMkMealType(request.getMkMealType());
+	    mealLog.setMkImage(request.getRcpImage());
+	    mealLog.setMkUserMemo(request.getMkUserMemo());
+	    mealLog.setMkDietDate(request.getMkDietDate());
+
+	    mealRecordDao.insertMealLog(mealLog);
+
+	    int mkNum = mealLog.getMkNum();
+
+	    // 6. 레시피를 food 테이블에서 찾고, 없으면 food로 저장
+	    FoodDTO food = mealRecordDao.findFoodByName(request.getRcpName());
+
+	    if (food == null) {
+	        food = new FoodDTO();
+
+	        food.setFoName(request.getRcpName());
+	        food.setFoBaseGram(1);
+	        food.setFoKcal(request.getRcpKcal());
+	        food.setFoCarbs(request.getRcpCarbs());
+	        food.setFoProtein(request.getRcpProtein());
+	        food.setFoFat(request.getRcpFat());
+	        food.setFoNatrium(request.getRcpNatrium());
+	        food.setFoType("레시피");
+
+	        mealRecordDao.insertRecipeAsFood(food);
+	    }
+
+	    // 7. meal_detail 저장
+	    MealDetailDTO detail = new MealDetailDTO();
+	    detail.setMkNum(mkNum);
+	    detail.setFoNum(food.getFoNum());
+	    detail.setMdayNum(mdayNum);
+	    detail.setMdPortion(1);
+	    detail.setMdKcal(request.getRcpKcal());
+
+	    mealRecordDao.insertMealDetail(detail);
+
+	    // 8. 하루 총 칼로리 업데이트
+	    mealRecordDao.updateDailyKcal(mdayNum);
+	}
+	
+	@Transactional
+	public void deleteMealRecord(int mkNum) {
+		 mealRecordDao.deleteMealDetails(mkNum);
+		 mealRecordDao.deleteMealLog(mkNum);
+		
+	}
     
 }

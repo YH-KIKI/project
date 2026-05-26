@@ -340,11 +340,17 @@ const FavoritePage = () => {
         ? selectedValue?.date
         : null;
 
-    // 음식 즐겨찾기는 기존처럼 기록 페이지로 이동
+    if (!mealType) {
+      alert("식사 타입을 선택해주세요!");
+      return;
+    }
+
+    // 1) 음식 즐겨찾기 → 기록 페이지에서 모달 열기
     if (selectedFood) {
       navigate("/record", {
         state: {
           fromFavorite: true,
+          favoriteType: "food",
           selectedFood,
           mealType,
           date,
@@ -355,43 +361,52 @@ const FavoritePage = () => {
       return;
     }
 
-    // 저장한 식단은 아점저 선택 후 상세 모달을 열고,
-    // 상세 모달의 "이 식단 저장하기" 버튼에서 DB 저장
+    // 2) 저장한 식단 → 상세 조회 후 기록 페이지에서 모달 열기
     if (selectedLoadMeal) {
       try {
         const res = await axios.get(
           `/api/favorite/meal/detail?userNum=${userNum}&mfNum=${selectedLoadMeal.id}`
         );
 
-        setSelectedMeal(res.data);
-        setSelectedMealType(mealType);
-        setSelectedDate(date);
-        setIsMealSaveMode(true);
+        navigate("/record", {
+          state: {
+            fromFavorite: true,
+            favoriteType: "meal",
+            selectedMeal: {
+              ...res.data,
+              mfNum: selectedLoadMeal.id,
+              mfName: selectedLoadMeal.title,
+            },
+            mealType,
+            date,
+          },
+        });
+
+        closeMealTypeModal();
       } catch (err) {
         console.error("식단 상세 불러오기 실패:", err);
         alert("식단 상세 불러오기 실패!");
       }
 
-      closeMealTypeModal();
       return;
     }
 
-    // 레시피 즐겨찾기는 기존처럼 기록 페이지로 이동
+    // 3) 레시피 즐겨찾기 → 기록 페이지에서 모달 열기
     if (selectedRecipe) {
       navigate("/record", {
         state: {
-          fromFavoriteRecipe: true,
+          fromFavorite: true,
+          favoriteType: "recipe",
           selectedRecipe,
           mealType,
           date,
         },
       });
 
-      alert("레시피를 식단으로 추가했어요!");
       closeMealTypeModal();
+      return;
     }
   };
-
   // 상세 모달에서 "이 식단 저장하기" 눌렀을 때 실행
   const saveFavoriteMealToRecord = async () => {
     if (!selectedMeal) {
@@ -465,6 +480,32 @@ const FavoritePage = () => {
     } catch (err) {
       console.error("즐겨찾기 식단 저장 실패:", err);
       alert("식단 저장 실패!");
+    }
+  };
+
+  const saveRecipeToMealRecord = async (recipe, mealType, date) => {
+    try {
+      await axios.post("/api/meal/recipe-record", {
+        userNum,
+        mkMealType: mealType,
+        mkDietDate: date,
+        mkUserMemo: recipe.aiReason || recipe.way || "",
+
+        rcpNum: recipe.rcpNum,
+        rcpName: recipe.name,
+        rcpImage: recipe.null,
+
+        rcpKcal: recipe.kcal || 0,
+        rcpCarbs: recipe.carbs || 0,
+        rcpProtein: recipe.protein || 0,
+        rcpFat: recipe.fat || 0,
+        rcpNatrium: recipe.natrium || 0,
+      });
+
+      alert("레시피를 식단에 추가했어요!");
+    } catch (err) {
+      console.error("레시피 식단 추가 실패:", err);
+      alert("레시피 식단 추가 실패!");
     }
   };
   return (

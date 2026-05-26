@@ -18,9 +18,6 @@ const MealTypeSelectModal = ({
       date: selectedDate,
     });
 
-    if (showAlert) {
-      alert("식단에 추가되었어요!");
-    }
   };
 
   return (
