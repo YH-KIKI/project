@@ -93,11 +93,11 @@ function App() {
                         <Route path="/targetgoals" element={<TargetGoals />} />
                         {/*목표관리 주소(/goal)*/}
                         <Route path="/goal" element={<Goal />} />
-                        {/*마이페이지 주소(/mypage)*/}
-                        <Route path="/mypage" element={<Mypage />} />
                     </Route>
 
                     {/* 배경과 사이드바가 필요 없는 단독 화면들 */}
+                    {/*마이페이지 주소(/mypage)*/}
+                    <Route path="/mypage" element={<Mypage />} />
                     {/*식단기록 주소(/meallogpage)*/}
                     <Route path="/meallogpage" element={<MealLogPage />} />
                     

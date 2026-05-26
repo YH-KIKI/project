@@ -8,49 +8,18 @@ const MainLayout = () => {
   const location = useLocation(); // 로그인 후 헤더 상태를 즉시 반영하기 위한 도구
 
   // 토큰 존재 여부를 체크하는 상태 추가
-  const [isLoggedIn, setIsLoggedIn] = useState(() => {
-    return !!(localStorage.getItem('login_token') || 
-              localStorage.getItem('refresh_token') || 
-              sessionStorage.getItem('login_token'));
-  });
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
 
+  // 화면이 켜질 때나, 주소(경로)가 바뀔 때마다 토큰 체크
   useEffect(() => {
-    const checkAuthStatus = async () => {
-      const loginToken = localStorage.getItem('login_token');
-      const refreshToken = localStorage.getItem('refresh_token');
-      const sessionToken = sessionStorage.getItem('login_token');
-      
-      // 1. 저장소에 토큰 자체가 아예 없는지 확인냥!
-      const hasToken = loginToken || refreshToken || sessionToken;
-
-      if (!hasToken) {
-        setIsLoggedIn(false);
-        return;
-      }
-
-    try{
-      const response = await fetch(`/api/auth/validate`,{
-        method : 'GET',
-        headers: {
-          'Authorization' : `Bearer ${hasToken}`,
-        }
-      });
-      const data = await response.json();
-
-      if(data.isValid){
-        setIsLoggedIn(true);
-      }else{
-        localStorage.clear();
-        sessionStorage.clear();
-        setIsLoggedIn(false);
-      }
-    }catch(error){
-      console.error("토큰 검증 실패: ",error);
+    const token = localStorage.getItem('login_token') || localStorage.getItem('refresh_token') || sessionStorage.getItem('login_token');
+    if (token) {
+      setIsLoggedIn(true);
+    } else {
       setIsLoggedIn(false);
     }
-  };
-    checkAuthStatus();
-  }, [location]);
+  }, [location]); // 로그인 성공해서 메인으로 리다이렉트 되었을 때 글자를 바로 로그아웃으로 바꾸기 위해 location을 추적합니다.
+
   // 버튼 클릭 시 행동 분기
   const handleAuthClick = () => {
     if (isLoggedIn) {

@@ -161,18 +161,5 @@ public class UserService {
 	public List<FoodDTO> searchFoodByKeyword(String keyword) {
 		return userDAO.searchFoodByKeyword(keyword);
 	}
-	
-	public boolean isUserIdTaken(String userid) {
-	    // userDAO에서 가져온 값이 0보다 크면 이미 있는 것냥!
-	    return userDAO.countByUserid(userid) > 0;
-	}
-
-	public boolean isUserNameTaken(String username) {
-	    return userDAO.countByUsername(username) > 0;
-	}
-
-	public boolean isEmailTaken(String email) {
-	    return userDAO.countByEmail(email) > 0;
-	}
     
 }

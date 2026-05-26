@@ -52,30 +52,10 @@ public class JwtService {
 					.parseClaimsJws(token)
 					.getBody()
 					.getSubject(); // 토큰에 담긴 이름(username) 반환
+
 		} catch (Exception e) {
 			System.out.println("토큰 파싱 실패: " + e.getMessage());
 			return null;
 		}
 	}
-	
-	// 로그인버튼 위해 토큰검사하기
-	public boolean validateToken(String token) {
-		try {
-	        // 토큰을 해석해서 서명 검증 및 만료 확인
-	        Jwts.parserBuilder()
-	            .setSigningKey(key) // 우리 비밀키로 해석
-	            .build()
-	            .parseClaimsJws(token); // 여기서 만료되었으면 Exception이 발생
-	        
-	        return true; // 에러가 안 났으면 유효한 토큰냥
-	    } catch (io.jsonwebtoken.ExpiredJwtException e) {
-	        System.out.println("토큰이 만료되었습니다냥!");
-	    } catch (io.jsonwebtoken.JwtException | IllegalArgumentException e) {
-	        System.out.println("토큰이 위조되었거나 잘못되었습니다냥!");
-	    }
-	    return false; // 3. 문제 있으면 가짜/만료 토큰냥!
-	}
 }
-
-		
-	

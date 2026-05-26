@@ -72,4 +72,3 @@ def get_food_predictions(img_bytes):
             })
 
     return all_predictions
-
