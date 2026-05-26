@@ -41,11 +41,18 @@ public class CharacterDao {
     }
 
     /**
-     * 5. 경험치 획득 이력(History) 저장 (수정됨)
+     * 5. 경험치 획득 이력(History) 저장
      * Service에서 넘겨준 Map(userNum, exp, source, isLevelUp)을 그대로 Mapper에 전달합니다.
      */
     public void insertExpHistory(Map<String, Object> params) {
-        // XML에서 parameterType="map"으로 설정했으므로 Map을 직접 넘깁니다.
         sqlSession.insert("kr.hi.project.dao.CharacterDao.insertExpHistory", params);
+    }
+
+    /**
+     * 🛠️ 6. [추가] 오늘 특정 활동으로 경험치를 획득했는지 카운트 체크 (하루 1회 제한용)
+     * Service에서 넘겨준 Map(userNum, source)을 받아 Mapper의 중복 체크 쿼리를 호출합니다.
+     */
+    public int checkTodayExpHistory(Map<String, Object> params) {
+        return sqlSession.selectOne("kr.hi.project.dao.CharacterDao.checkTodayExpHistory", params);
     }
 }

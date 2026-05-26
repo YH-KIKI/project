@@ -16,6 +16,9 @@ const Mypage = () => {
 
   const navigate = useNavigate();
 
+  // 환경 변수 주소를 가져옵니다 (로컬은 localhost:8080 / 배포는 AWS 주소 자동 적용)
+  const apiUrl = process.env.REACT_APP_API_URL || '';
+
   const handlefavoriteClick = () => {
     navigate('/favoritemeal');
   };
@@ -49,14 +52,16 @@ const Mypage = () => {
     if (!token) return;
 
     try {
-      const userResponse = await axios.get('/api/user/info', {
+      // [수정] 유저 정보 조회 API 주소에 환경 변수(apiUrl) 결합
+      const userResponse = await axios.get(`${apiUrl}/api/user/info`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       const userData = userResponse.data;
       setUsername(userData.username);
 
       if (userData && userData.usernum) {
-        const charResponse = await axios.get(`/api/character/info?userNum=${userData.usernum}`, {
+        // [수정] 캐릭터 정보 조회 API 주소에 환경 변수(apiUrl) 결합
+        const charResponse = await axios.get(`${apiUrl}/api/character/info?userNum=${userData.usernum}`, {
           headers: { Authorization: `Bearer ${token}` }
         });
         setCharInfo(charResponse.data);

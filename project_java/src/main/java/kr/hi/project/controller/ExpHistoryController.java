@@ -14,6 +14,7 @@ import kr.hi.project.service.JwtService;
 
 @RestController
 @RequestMapping("/api/history")
+@CrossOrigin(origins = "http://localhost:3000") // 🚀 [박하/추가] 리액트 포트(3000)로부터의 요청 허용!
 public class ExpHistoryController {
 
     @Autowired

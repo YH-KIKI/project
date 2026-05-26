@@ -87,7 +87,8 @@ public class SecurityConfig {
                                  "/kakao", 
                                  "/api/login/kakao/register",
                                  "/api/user/food/search",
-                                 "/api/fridge/**" //[연희//추가] 냉장고 정보
+                                 "/api/fridge/**", //[연희//추가] 냉장고 정보
+                                 "/api/history/**" // 🚀 [추가] 성장 히스토리 내역 조회 허용
                                  ).permitAll() 
                 // 유효한 토큰이 있어야 들어갈수있는 페이지
                 //.requestMatchers("/api/record").authenticated()

@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 import kr.hi.project.dto.UserDTO;
 import kr.hi.project.service.JwtService;
 import kr.hi.project.service.UserService;
-import kr.hi.project.service.CharacterService; // 🔥 추가
+import kr.hi.project.service.CharacterService; // 🔥 주입 완료
 
 @RestController
 @CrossOrigin(origins = "http://localhost:3000")
@@ -27,7 +27,7 @@ public class LoginController {
     private UserService userService;
 
     @Autowired
-    private CharacterService characterService; // 🔥 캐릭터 서비스 주입
+    private CharacterService characterService; // 🔥 캐릭터 서비스 주입 완료
 
 	// *** [박하/수정] 기존에는 문자열만 보냈지만, 숫자가 포함된 객체를 보내기 위해 Object 타입으로 변경
 	@PostMapping("/api/login")
@@ -44,6 +44,26 @@ public class LoginController {
 
 			// *** [박하/추가] 토큰뿐만 아니라 로그인 성공 시 해당 아이디의 고유 번호를 DB에서 가져오는 코드를 추가
 			int usernum = userService.findUsernumByUserid(userid);
+			
+			// ==========================================
+			// 🚀 [경험치 시스템 연동] 로그인 성공 시 경험치 지급
+			// ==========================================
+			try {
+			    // 우선은 정상 연동 테스트를 위해 기본 streakCount를 1로 전달합니다.
+			    // (가이드라인에 따라 기본 5 XP가 캐릭터에 즉시 누적됩니다.)
+			    int streakCount = 1; 
+			    
+			    // 만약 userService나 다른 곳에 연속 출석 계산 메서드가 이미 있다면 아래처럼 바꿀 수 있습니다.
+			    // int streakCount = userService.getLoginStreakCount(usernum);
+			    
+			    characterService.processLoginReward(usernum, streakCount);
+			    System.out.println("🌱 [경험치 알림] " + userid + " 유저 로그인 경험치 정산 완료!");
+			} catch (Exception e) {
+			    // 경험치 지급 중 오류가 나더라도 로그인 자체가 실패하면 안 되므로 예외 처리(try-catch) 적용
+			    System.out.println("❌ [경험치 오류] 로그인 보상 지급 중 에러 발생: " + e.getMessage());
+			    e.printStackTrace();
+			}
+			// ==========================================
 			
 			Map<String, Object> response = new HashMap<>();
 			response.put("token", accessToken);
