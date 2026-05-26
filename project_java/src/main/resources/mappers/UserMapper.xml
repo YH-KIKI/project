@@ -214,4 +214,17 @@
 	    WHERE ff.user_num = #{userNum} AND ff.ff_favorite_food = 0
 	</select>
 	
+	<!-- 가입하기전 중복체크 -->
+	<select id="countByUserid" parameterType="string" resultType="int">
+	    SELECT COUNT(*) FROM user WHERE user_id = #{userid}
+	</select>
+	
+	<select id="countByUsername" parameterType="string" resultType="int">
+	    SELECT COUNT(*) FROM user WHERE user_name = #{username}
+	</select>
+	
+	<select id="countByEmail" parameterType="string" resultType="int">
+	    SELECT COUNT(*) FROM user WHERE user_email = #{userEmail}
+	</select>
+	
 </mapper>
