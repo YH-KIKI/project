@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 import kr.hi.project.dto.UserDTO;
 import kr.hi.project.service.JwtService;
 import kr.hi.project.service.UserService;
+import kr.hi.project.service.CharacterService;
 
 @RestController
 @CrossOrigin(origins = "http://localhost:3000")
@@ -22,7 +23,8 @@ public class LoginController {
 	private JwtService jwtService;
 	@Autowired
 	private UserService userService;
-
+	@Autowired
+	private CharacterService characterService;
 
 	// *** [박하/수정] 기존에는 문자열만 보냈지만, 숫자가 포함된 객체를 보내기 위해 Object 타입으로 변경
 	@PostMapping("/api/login")
@@ -58,6 +60,7 @@ public class LoginController {
 			userInfo.put("user_num", usernum);
 			userInfo.put("user_id", userid);
 			response.put("user", userInfo);
+			characterService.addExperience(usernum, 10, 10, "로그인 출석 보상");
 			
 			return response;
 		}else {
