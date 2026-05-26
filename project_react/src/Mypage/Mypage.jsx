@@ -16,8 +16,9 @@ const Mypage = () => {
 
   const navigate = useNavigate();
 
-  // 환경 변수 주소를 가져옵니다 (로컬은 localhost:8080 / 배포는 AWS 주소 자동 적용)
-  const apiUrl = process.env.REACT_APP_API_URL || '';
+  // 🚀 [보완] 배포 환경 변수가 비어있어도 현재 접속 중인 서버 IP의 8080 포트를 안전하게 조준하도록 변경합니다.
+  const currentHost = window.location.hostname;
+  const apiUrl = process.env.REACT_APP_API_URL || `http://${currentHost}:8080`;
 
   const handlefavoriteClick = () => {
     navigate('/favoritemeal');
@@ -109,7 +110,8 @@ const Mypage = () => {
       {/* 캐릭터 섹션 영역 */}
       <div className="character-container">
         <CharacterSection charInfo={charInfo} onUpdate={fetchUserInfo} />
-        <CharacterInfo /> 
+        {/* 🚀 [교정] 히스토리와 유저 정보 연동을 위해 CharacterInfo에 charInfo 데이터를 Props로 정확히 전달합니다. */}
+        <CharacterInfo charInfo={charInfo} /> 
       </div>
 
       {/* 인사말 문구 */}

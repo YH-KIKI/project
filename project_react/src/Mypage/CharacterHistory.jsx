@@ -44,8 +44,13 @@ const CharacterHistory = ({ isOpen, onClose, userNum }) => {
         }
       }
 
+      // 🚀 [해결 방법] 로컬(localhost)과 배포(54.116.167.5) 환경 모두 유연하게 대응하기 위해
+      // 브라우저가 현재 접속 중인 도메인명(window.location.hostname)을 실시간으로 감지하여 포트 8080에 바인딩합니다.
+      const currentHost = window.location.hostname;
+      const apiBaseUrl = `http://${currentHost}:8080`;
+
       const response = await axios.get(
-        'http://localhost:8080/api/history/list',
+        `${apiBaseUrl}/api/history/list`,
         {
           // params에 확실하게 확인된 유저 고유 번호를 전송합니다.
           params: { 
