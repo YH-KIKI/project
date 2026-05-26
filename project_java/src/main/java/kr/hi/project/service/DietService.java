@@ -17,10 +17,8 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
 
-import kr.hi.project.dao.ChatbotDao;
-import kr.hi.project.dao.DietDao;
 import kr.hi.project.dao.UserPrivacyDao;
-import kr.hi.project.dto.UserPrivacyDTO;
+import kr.hi.project.dto.DietUserDTO;
 import lombok.RequiredArgsConstructor;
 
 @Service
