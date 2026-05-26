@@ -200,27 +200,10 @@ async def fridge_recommend_service(
     data: FridgeRecommendRequest
 ):
 
-    results = []
-
-    for recipe in data.recipes:
-
-        ai_data = generate_ai_info(
-            recipe,
-            data.ingredients
-        )
-
-        results.append({
-
-            "rcpNum":
-                recipe.rcpNum,
-
-            "aiReason":
-                ai_data["reason"],
-
-            "hashtags":
-                ai_data["hashtags"]
-
-        })
+    results = generate_ai_info(
+        data.recipes,
+        data.ingredients
+    )
 
     return {
         "status": "success",
