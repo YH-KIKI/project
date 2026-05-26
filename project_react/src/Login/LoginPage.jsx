@@ -108,25 +108,7 @@ const LoginPage = () => {
       // [준성] refreshToken 추가
       localStorage.setItem('refresh_token', refreshToken);
       // [박하] 커뮤니티 게시판에서 사용자 식별을 위해 서버에서 받은 사용자 정보를 'user' 키로 저장
-      localStorage.setItem('user', JSON.stringify(response.data.user));
-
-        // 2. 로그인 상태를 '참'으로 변경
-        setIsLoggedIn(true);
-        alert("로그인 성공!");
-        fetchUserInfo();
-      } catch (error) {
-        alert("로그인 실패! 아이디와 비밀번호를 확인하세요.");
-      }
-    };
-  
-    const handleLogout = () => {
-      // 로그아웃 시 모든 형태의 토큰 일괄 정렬 삭제
-      localStorage.removeItem('token');
-      localStorage.removeItem('login_token');
-      sessionStorage.removeItem('token');
-      sessionStorage.removeItem('login_token');
-      // [재근]눈바디(BodyCheck) 등에서 바로 꺼내 쓸 수 있도록 userNum만 따로 저장.
-      localStorage.setItem('userNum', user.user_num);
+      localStorage.setItem('user', JSON.stringify(user));
 
       // 2. 로그인 상태를 '참'으로 변경
       setIsLoggedIn(true);
@@ -136,13 +118,20 @@ const LoginPage = () => {
       alert("로그인 실패! 아이디와 비밀번호를 확인하세요.");
     }
   };
-
+  
   const handleLogout = () => {
-    // 로그아웃 시 토큰 삭제 및 상태 변경
+    // 로그아웃 시 모든 형태의 토큰 일괄 정렬 삭제
+    localStorage.removeItem('token');
     localStorage.removeItem('login_token');
+    localStorage.removeItem('refresh_token');
+    sessionStorage.removeItem('token');
+    sessionStorage.removeItem('login_token');
 
     // 🌟🌟🌟 [박하] 로그아웃 시 저장된 사용자 정보도 함께 삭제
     localStorage.removeItem('user');
+    
+    // [재근] 눈바디(BodyCheck) 등에서 바로 꺼내 쓸 수 있도록 필요한 경우 userNum 초기화 처리 하거나 유지 가능
+    // 로그아웃 시 지우는 게 일반적이므로 주석을 원하시면 유지하셔도 무방합니다.
 
     setIsLoggedIn(false);
   };

@@ -42,30 +42,23 @@ public class LoginController {
 			String accessToken = jwtService.createToken(userid);
 	        String refreshToken = jwtService.createRefreshToken(userid);
 
-//			int usernum = userService.findUsernumByUserid(userid);
-//			Map<String, Object> response = new HashMap<>();
-//			response.put("token", token);
-			/* *** [기존 코드 주석 처리] 
-			Map<String, String> response = new HashMap<>();
-			response.put("token", token);
-			return response;
-			*/
-
 			// *** [박하/추가] 토큰뿐만 아니라 로그인 성공 시 해당 아이디의 고유 번호를 DB에서 가져오는 코드를 추가
 			int usernum = userService.findUsernumByUserid(userid);
 			
 			Map<String, Object> response = new HashMap<>();
 			response.put("token", accessToken);
-	        response.put("refreshToken", refreshToken); // [준성/추가]새로 추가
+	        response.put("refreshToken", refreshToken); // [준성/추가] 새로 추가
+	        response.put("usernum", usernum); // 하단 유실 방지 추가
 			
 			// *** [박하/추가] 리액트의 localStorage.setItem('user', ...) 형식에 맞게 user 키 안에 유저 정보를 객체로 담아 보냄
 			Map<String, Object> userInfo = new HashMap<>();
 			userInfo.put("user_num", usernum);
 			userInfo.put("user_id", userid);
+			userInfo.put("token", accessToken); // 하단 유실 방지 추가
 			response.put("user", userInfo);
 			
 			return response;
-		}else {
+		} else {
 			throw new RuntimeException("아이디나 비밀번호가 틀렸어요.");
 		}
 	}
@@ -99,55 +92,5 @@ public class LoginController {
 	    Map<String, String> response = new HashMap<>();
 	    response.put("message", "회원가입이 완료되었습니다!");
 		return response;
-		
 	}
-
-
-}
-
-
-            Map<String, Object> response = new HashMap<>();
-            
-            Map<String, Object> userInfo = new HashMap<>();
-            userInfo.put("user_num", usernum);
-            userInfo.put("user_id", userid);
-            userInfo.put("token", token); 
-            
-            response.put("user", userInfo);
-            response.put("token", token); 
-            response.put("usernum", usernum);
-            
-            return response;
-        } else {
-            throw new RuntimeException("아이디나 비밀번호가 틀렸어요.");
-        }
-    }
-    
-    @GetMapping("/api/user/info")
-    public Map<String, Object> getUserInfo(@RequestHeader("Authorization") String authHeader) {
-        String token = authHeader.replace("Bearer ", "");
-        
-        String userid = jwtService.getUsernameFromToken(token);
-        String username = userService.findUsernameByUserid(userid);
-        String email = userService.findEmailByUserid(userid);
-        int usernum = userService.findUsernumByUserid(userid);
-        
-        Map<String, Object> response = new HashMap<>();
-        response.put("userid", userid);
-        response.put("username", username);
-        response.put("email", email);
-        response.put("usernum", usernum);
-        response.put("message", "당신은 인증된 사용자입니다!");
-        
-        return response;
-    }
-    
-    @PostMapping("/api/signup")
-    public Map<String, String> signup(@RequestBody UserDTO userDTO) {
-        userService.register(userDTO);
-        
-        Map<String, String> response = new HashMap<>();
-        response.put("message", "회원가입이 완료되었습니다!");
-        return response;
-    }
 }

@@ -59,8 +59,8 @@ public class SecurityConfig {
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers("/", 
-                        		 "/favicon.ico",
-                				 "/uploads/**", 
+                                 "/favicon.ico",
+                                 "/uploads/**", 
                                  "/images/**",  // [추가/재근] 캐릭터 이미지 등 정적 리소스 접근 허용
                                  "/error",    
                                  "/api/signup", 
@@ -80,13 +80,13 @@ public class SecurityConfig {
                                  "/api/report-fail",//[준성/추가] 음식사진인증실패
                                  "/api/ai/**",
                                  "/api/user/info",
-	                             "/api/record",
-	                             "/api/meal/**",
-	                             "/api/login/**", 
-	                             "/login/**",
-	                             "/kakao", 
-	                             "/api/login/kakao/register",
-	                             "/api/user/food/search",
+                                 "/api/record",
+                                 "/api/meal/**",
+                                 "/api/login/**", 
+                                 "/login/**",
+                                 "/kakao", 
+                                 "/api/login/kakao/register",
+                                 "/api/user/food/search",
                                  "/api/fridge/**" //[연희//추가] 냉장고 정보
                                  ).permitAll() 
                 // 유효한 토큰이 있어야 들어갈수있는 페이지
@@ -101,15 +101,16 @@ public class SecurityConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
         configuration.setAllowedOrigins(Arrays.asList(
-        		"http://localhost:3000",
-        		"http://54.116.167.5"
-        		)); 
+                "http://localhost:3000",
+                "http://54.116.167.5"
+                )); 
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type"));
         configuration.setAllowCredentials(true);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/**", config);
+        // 🛠️ 에러 수정: config -> configuration 으로 변경하여 변수명 일치시킴
+        source.registerCorsConfiguration("/**", configuration);
         return source;
     }
 

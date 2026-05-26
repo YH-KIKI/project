@@ -11,6 +11,7 @@ const Mypage = () => {
   const [username, setUsername] = useState('');
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [charInfo, setCharInfo] = useState(null);
+  const [isModalOpen, setIsModalOpen] = useState(false); // 🛠️ 에러 수정: 누락된 모달 상태(State) 추가!
   const hasAlerted = useRef(false);
 
   const navigate = useNavigate();
@@ -128,8 +129,8 @@ const Mypage = () => {
           <div className="card-desc">오늘목표 달성도 보러가자!</div>
         </div>
 
-        {/* 내 뱃지 (클릭 이벤트 없음) */}
-        <div className="menu-card">
+        {/* 내 뱃지 (클릭 시 모달이 열리도록 변경) */}
+        <div className="menu-card clickable" onClick={openModal}>
           <div className="card-icon">🏅</div>
           <div className="card-title">내 뱃지</div>
           <div className="card-desc">나의 영광 나의 뱃지</div>
@@ -143,6 +144,9 @@ const Mypage = () => {
         </div>
 
       </div>
+
+      {/* 🛠️ 모달 컴포넌트 연동: 상태가 true일 때만 화면에 Badge 모달이 표시되도록 처리 */}
+      {isModalOpen && <Badge isOpen={isModalOpen} onClose={closeModal} />}
     </>
   );
 };

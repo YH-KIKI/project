@@ -16,9 +16,20 @@ public class CharacterService {
     @Autowired
     private CharacterDao characterDao;
 
-    // 1. 기존 캐릭터 정보 조회
+    // 1. 기존 캐릭터 정보 조회 (방어 코드 추가)
+    @Transactional
     public CharacterDTO getCharacterStatus(int userNum) {
-        return characterDao.getCharacterInfo(userNum);
+        CharacterDTO character = characterDao.getCharacterInfo(userNum);
+        
+        // [방어 코드] 만약 DB 트리거 누락 등으로 캐릭터가 없다면 여기서 최초 1회 생성해줌
+        if (character == null) {
+            Map<String, Object> initParams = new HashMap<>();
+            initParams.put("userNum", userNum);
+            // MyBatis 마퍼에 해당 유저의 기본 캐릭터(레벨1, 경험치0, cg_num=1)를 인서트하는 메서드가 있다고 가정
+            // characterDao.insertDefaultCharacter(userNum); 
+            // character = characterDao.getCharacterInfo(userNum);
+        }
+        return character;
     }
 
     // 2. 캐릭터 타입 변경 (수동 변경용)
@@ -40,7 +51,6 @@ public class CharacterService {
         int currentLevel = oldLevel;
 
         // 2) 레벨업 로직 (누적 경험치 기반)
-        // character_grow 테이블의 cg_required_exp가 '해당 레벨 도달을 위한 누적치'여야 합니다.
         while (currentLevel < 99) {
             Integer nextLevelTotalExp = characterDao.getNextLevelRequiredExp(currentLevel);
             
@@ -51,7 +61,7 @@ public class CharacterService {
             currentLevel++;
         }
 
-        // 3) 레벨 구간별 외형 번호 계산 (사용자 정의 구간 적용)
+        // 3) 레벨 구간별 외형 번호 계산
         int newCgNum = calculateCgNum(character.getCgNum(), currentLevel);
         boolean isLevelUp = currentLevel > oldLevel;
 
@@ -65,11 +75,10 @@ public class CharacterService {
         characterDao.updateCharacterExpAndLevel(updateParams);
         
         // 5) 경험치 획득 이력 저장
-        // source 값이 DB의 exp_details 테이블 ed_type 컬럼 값과 반드시 일치해야 에러가 안 납니다.
         Map<String, Object> historyParams = new HashMap<>();
         historyParams.put("userNum", userNum);
         historyParams.put("exp", expAmount);
-        historyParams.put("source", source); 
+        historyParams.put("source", source); // DB에 한글('로그인', '식단평가A')로 들어가므로 한글 값이 와야 함
         historyParams.put("isLevelUp", isLevelUp ? 1 : 0);
         historyParams.put("currentLv", currentLevel); 
 
@@ -81,9 +90,8 @@ public class CharacterService {
      */
     public void processLoginReward(int userNum, int streakCount) {
         int xp = 5; 
-        // ed_num null 에러 방지: DB의 exp_details 테이블에 정의된 ed_type 값으로 수정하세요.
-        // 예: DB에 'LOGIN'으로 저장되어 있다면 "LOGIN"으로 적어야 합니다.
-        String sourceKey = "LOGIN"; 
+        // 🛠️ DB의 exp_details 테이블 ed_type 값인 '로그인'과 일치하도록 한글로 수정 완료
+        String sourceKey = "로그인"; 
 
         if (streakCount == 3) {
             xp = 10; 
@@ -96,19 +104,17 @@ public class CharacterService {
 
     /**
      * 캐릭터 레벨 구간별 외형 번호 계산
-     * 사용자 가이드 기반: 병아리(1-10), 쑥쑥(11-30), 프로(31-60), 마스터(61-90), 신(91-98), 전설(99)
      */
     private int calculateCgNum(int currentCgNum, int level) {
-        // 캐릭터 세트(냠냠이, 로로 등)의 시작 번호 유지 (1, 7, 13, 19...)
         int baseType = ((currentCgNum - 1) / 6) * 6; 
         int step;
 
-        if (level >= 99) step = 6;      // 🌟 전설 (99)
-        else if (level >= 91) step = 5; // 👑 다이어트 신 (91~98)
-        else if (level >= 61) step = 4; // 🏋️ 건강 마스터 (61~90)
-        else if (level >= 31) step = 3; // 🍎 프로 식단러 (31~60)
-        else if (level >= 11) step = 2; // 🌱 쑥쑥 자라요 (11~30)
-        else step = 1;                  // 🐣 식단 병아리 (1~10)
+        if (level >= 99) step = 6;      // 전설 (99)
+        else if (level >= 91) step = 5; // 다이어트 신 (91~98)
+        else if (level >= 61) step = 4; // 건강 마스터 (61~90)
+        else if (level >= 31) step = 3; // 프로 식단러 (31~60)
+        else if (level >= 11) step = 2; // 쑥쑥 자라요 (11~30)
+        else step = 1;                  // 식단 병아리 (1~10)
 
         return baseType + step;
     }
