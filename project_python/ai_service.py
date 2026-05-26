@@ -48,7 +48,7 @@ except Exception as e:
 
 # 💡 만약 터미널을 껐다 켜도 환경변수 인식이 안 된다면, 
 # 아래 따옴표 안에 새로 발급받은 API 키를 직접 붙여넣으세요! (최후의 수단)
-load_dotenv("password.env") 
+load_dotenv(".env") 
 
 # 불러온 변수들 중에서 GEMINI_API_KEY 값을 찾아서 변수에 쏙 넣습니다.
 GOOGLE_AI_API_KEY = os.getenv("GOOGLE_AI_API_KEY")
