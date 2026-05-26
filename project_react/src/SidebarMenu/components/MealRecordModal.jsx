@@ -1,70 +1,216 @@
-import React, { useMemo, useState } from "react";
-import "./MealRecordDetail.css";
-import { FiTrash2 } from "react-icons/fi";
 import axios from "axios";
-
-
-
-const favoriteMeals = [
-  {
-    id: 101,
-    name: "고단백 아침 식단",
-    foods: ["삶은 달걀", "그릭요거트", "바나나"],
-    kcal: 273,
-  },
-  {
-    id: 102,
-    name: "가벼운 저녁 식단",
-    foods: ["닭가슴살", "오트밀"],
-    kcal: 260,
-  },
-];
+import React, { useMemo, useState, useEffect } from "react";
+import { FiTrash2, FiHeart } from "react-icons/fi";
+import MealFavoriteDetailModal from "./MealFavoriteDetailModal";
+import "./MealRecordDetail.css";
 
 function MealRecordModal({
   mealType = "저녁",
   selectedDate = "2026.05.12 화",
+  initialData = null,
   onClose,
   onSave,
 }) {
   const [mode, setMode] = useState("manual");
   const [tab, setTab] = useState("search");
   const [keyword, setKeyword] = useState("");
-  const [foods, setFoods] = useState([]);
+
   const [favorites, setFavorites] = useState([]);
+  const [favoriteFoods, setFavoriteFoods] = useState([]);
+  const [favoriteMeals, setFavoriteMeals] = useState([]);
   const [searchResults, setSearchResults] = useState([]);
+  const [selectedMeal, setSelectedMeal] = useState(null);
 
+  const user = JSON.parse(
+    localStorage.getItem("user")
+  );
+  const userNum = user?.user_num;
 
+  const SERVER_URL =
+    process.env.REACT_APP_API_URL ||
+    window.location.origin;
 
-  const searchFood = async () => {
-  if (keyword.trim() === "") {
-    alert("음식명을 입력하세요!");
-    return;
-  }
+  //사진 업로드
+  const [dragActive,setDragActive]=useState(false);
+  const [mealImageFile, setMealImageFile] = useState(null);
+  const getImageUrl = (url) => {
+    if (!url) return null;
 
-  try {
-    const res = await axios.get(
-      `http://localhost:8080/api/food/search?keyword=${encodeURIComponent(keyword)}`
+    // 업로드 직후 미리보기
+    if (url.startsWith("blob:")) return url;
+
+    // 이미 완전한 주소면 그대로
+    if (url.startsWith("http")) return url;
+
+    // 현재 서버 기준 자동
+    return `${SERVER_URL}${url}`;
+  };
+
+  const [mealImagePreview, setMealImagePreview] = useState(
+    getImageUrl(initialData?.imageUrl || initialData?.mkImage)
+  );
+
+  useEffect(() => {
+    setMealImagePreview(
+      getImageUrl(
+        initialData?.imageUrl ||
+        initialData?.mkImage
+      )
     );
+  }, [initialData]);
 
-    setSearchResults(res.data);
-  } catch (err) {
-    console.error(err);
-    alert("음식 검색 실패!");
-  }
-};
+  //AI사진인식
+  const [aiPhotoFile, setAiPhotoFile] = useState(null);
+  const [aiPhotoPreview, setAiPhotoPreview] = useState(null);
+
+  const handleAiPhotoChange = (e) => {
+  const file = e.target.files?.[0];
+    if (!file) return;
+
+    setAiPhotoFile(file);
+    setAiPhotoPreview(URL.createObjectURL(file));
+  };
+
+  const handleMealImageChange = (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setMealImageFile(file);
+    setMealImagePreview(URL.createObjectURL(file));
+  };
+
+  const removeMealImage = () => {
+    setMealImageFile(null);
+    setMealImagePreview(null);
+  };
+
+  const makeUid = () =>
+    `${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
+
+  const foodImage = (image) => image || null;
+
+  const makeFoodItem = (food) => ({
+    uid: makeUid(),
+    id: food.id || food.foNum,
+    name: food.name || food.foName,
+    kcal: Number(food.kcal ?? food.foKcal ?? 0),
+    carbs: Number(food.carbs ?? food.foCarbs ?? 0),
+    protein: Number(food.protein ?? food.foProtein ?? 0),
+    fat: Number(food.fat ?? food.foFat ?? 0),
+    image: foodImage(food.image || food.foImage),
+    count: food.count || food.portion || food.mdPortion || food.mfPortion || 1,
+  });
+
+  const normalizeInitialFoods = () => {
+    if (!initialData?.foods) return [];
+
+    const merged = [];
+
+    initialData.foods.forEach((food) => {
+      const item = makeFoodItem(food);
+      const exists = merged.find((m) => m.id === item.id);
+
+      if (exists) {
+        exists.count += item.count;
+      } else {
+        merged.push(item);
+      }
+    });
+
+    return merged;
+  };
+
+  const [foods, setFoods] = useState(normalizeInitialFoods);
+
+  const toFoodItem = (food) => ({
+    uid: makeUid(),
+    id: food.foNum,
+    name: food.foName,
+    kcal: food.foKcal,
+    carbs: food.foCarbs,
+    protein: food.foProtein,
+    fat: food.foFat,
+    image: foodImage(food.foImage),
+    count: 1,
+  });
 
   const total = useMemo(() => {
-    return foods.reduce(
+    const result = foods.reduce(
       (acc, food) => {
-        acc.kcal += food.kcal * food.count;
-        acc.carbs += food.carbs * food.count;
-        acc.protein += food.protein * food.count;
-        acc.fat += food.fat * food.count;
+        acc.kcal += Number(food.kcal || 0) * Number(food.count || 1);
+        acc.carbs += Number(food.carbs || 0) * Number(food.count || 1);
+        acc.protein += Number(food.protein || 0) * Number(food.count || 1);
+        acc.fat += Number(food.fat || 0) * Number(food.count || 1);
         return acc;
       },
       { kcal: 0, carbs: 0, protein: 0, fat: 0 }
     );
+
+    return {
+      kcal: Math.round(result.kcal),
+      carbs: Number(result.carbs.toFixed(1)),
+      protein: Number(result.protein.toFixed(1)),
+      fat: Number(result.fat.toFixed(1)),
+    };
   }, [foods]);
+
+  const getMealTotalKcal = (meal) => {
+    if (!meal) return 0;
+    if (meal.totalKcal) return meal.totalKcal;
+    if (meal.mfKcal) return meal.mfKcal;
+    return 0;
+  };
+
+  const formatCreatedAt = (meal) => {
+    const dateValue =
+      meal.mfCreatedAt ||
+      meal.mf_created_at ||
+      meal.createdAt ||
+      meal.mkCreatedAt ||
+      meal.mk_created_at;
+
+    return dateValue ? String(dateValue).split("T")[0] : "정보 없음";
+  };
+
+  const openMealFavoriteDetail = async (meal) => {
+    try {
+      const res = await axios.get(
+        `/api/favorite/meal/detail?userNum=${userNum}&mfNum=${meal.mfNum}`
+      );
+
+      console.log("즐겨찾기 상세:", res.data);
+
+      setSelectedMeal(res.data);
+    } catch (err) {
+      console.error("즐겨찾기 상세 조회 실패:", err);
+      alert("식단 상세 조회 실패!");
+    }
+  };
+
+  const clearAllFoods = () => {
+    setFoods([]);
+  };
+
+  const searchFood = async () => {
+    if (keyword.trim() === "") {
+      alert("음식명을 입력하세요!");
+      return;
+    }
+
+    try {
+      const res = await axios.get(
+        `/api/food/search?keyword=${encodeURIComponent(
+          keyword
+        )}`
+      );
+
+      setSearchResults(res.data);
+      setTab("search");
+    } catch (err) {
+      console.error("음식 검색 실패:", err);
+      alert("음식 검색 실패!");
+    }
+  };
 
   const addFood = (food) => {
     setFoods((prev) => {
@@ -72,24 +218,25 @@ function MealRecordModal({
 
       if (exists) {
         return prev.map((item) =>
-          item.id === food.id
-            ? { ...item, count: item.count + 1 }
-            : item
+          item.id === food.id ? { ...item, count: item.count + 1 } : item
         );
       }
 
-      return [...prev, { ...food, count: 1 }];
+      return [
+        ...prev,
+        { ...food, uid: food.uid || makeUid(), count: food.count || 1 },
+      ];
     });
   };
 
-  const removeFood = (id) => {
-    setFoods((prev) => prev.filter((food) => food.id !== id));
+  const removeFood = (uid) => {
+    setFoods((prev) => prev.filter((food) => food.uid !== uid));
   };
 
-  const changeCount = (id, type) => {
+  const changeCount = (uid, type) => {
     setFoods((prev) =>
       prev.map((food) => {
-        if (food.id !== id) return food;
+        if (food.uid !== uid) return food;
 
         const nextCount =
           type === "plus" ? food.count + 1 : Math.max(1, food.count - 1);
@@ -99,18 +246,93 @@ function MealRecordModal({
     );
   };
 
-  const toggleFavorite = (id) => {
-    setFavorites((prev) =>
-      prev.includes(id)
-        ? prev.filter((foodId) => foodId !== id)
-        : [...prev, id]
-    );
+  const addSingleFoodFavorite = async (foNum) => {
+    try {
+      await axios.post("/api/favorite/single-food", {
+        userNum,
+        foNum,
+        sfPortion: 100,
+      });
+
+      setFavorites((prev) => (prev.includes(foNum) ? prev : [...prev, foNum]));
+      alert("음식 즐겨찾기에 추가했어요!");
+    } catch (err) {
+      console.error("음식 즐겨찾기 추가 실패:", err);
+      alert("이미 추가된 음식이거나 저장 실패!");
+    }
+  };
+
+  const loadSingleFoodFavorites = async () => {
+    try {
+      const res = await axios.get(
+        `/api/favorite/single-food?userNum=${userNum}`
+      );
+
+      setFavoriteFoods(res.data);
+      setFavorites(res.data.map((food) => food.foNum));
+    } catch (err) {
+      console.error("즐겨찾기 음식 조회 실패:", err);
+      alert("즐겨찾기 음식 조회 실패!");
+    }
+  };
+
+  const deleteSingleFoodFavorite = async (sfNum, foNum) => {
+    try {
+      await axios.delete(
+        `/api/favorite/single-food?userNum=${userNum}&sfNum=${sfNum}`
+      );
+
+      setFavoriteFoods((prev) => prev.filter((food) => food.sfNum !== sfNum));
+      setFavorites((prev) => prev.filter((id) => id !== foNum));
+    } catch (err) {
+      console.error("음식 즐겨찾기 삭제 실패:", err);
+      alert("음식 즐겨찾기 삭제 실패!");
+    }
+  };
+
+  const loadMealFavorites = async () => {
+    try {
+      const res = await axios.get(
+        `/api/favorite/meal?userNum=${userNum}`
+      );
+
+      setFavoriteMeals(res.data);
+    } catch (err) {
+      console.error("즐겨찾기 식단 조회 실패:", err);
+      alert("즐겨찾기 식단 조회 실패!");
+    }
+  };
+
+  const deleteMealFavorite = async (mfNum) => {
+    try {
+      await axios.delete(
+        `/api/favorite/meal?userNum=${userNum}&mfNum=${mfNum}`
+      );
+
+      setFavoriteMeals((prev) => prev.filter((meal) => meal.mfNum !== mfNum));
+    } catch (err) {
+      console.error("즐겨찾기 식단 삭제 실패:", err);
+      alert("즐겨찾기 삭제 실패!");
+    }
   };
 
   const loadFavoriteMeal = (meal) => {
-    const mealFoods = searchResults
-      .filter((food) => meal.foods.includes(food.name))
-      .map((food) => ({ ...food, count: 1 }));
+    if (!meal.foods || meal.foods.length === 0) {
+      alert("불러올 음식 정보가 없어요!");
+      return;
+    }
+    const mealFoods = meal.foods.map((food) =>
+      makeFoodItem({
+        id: food.foNum,
+        name: food.foName,
+        kcal: food.foKcal || food.mdKcal || 0,
+        carbs: food.foCarbs || 0,
+        protein: food.foProtein || 0,
+        fat: food.foFat || 0,
+        image: food.foImage,
+        count: food.count || food.mdPortion || food.mfPortion || 1,
+      })
+    );
 
     setFoods((prev) => {
       const merged = [...prev];
@@ -119,15 +341,30 @@ function MealRecordModal({
         const exists = merged.find((item) => item.id === food.id);
 
         if (exists) {
-          exists.count += 1;
+          exists.count += food.count;
         } else {
           merged.push(food);
         }
       });
 
-      return [...merged];
+      return merged;
     });
   };
+
+  const loadFavoriteMealDetail = async (meal) => {
+    try {
+      const res = await axios.get(
+        `/api/favorite/meal/detail?userNum=${userNum}&mfNum=${meal.mfNum}`
+      );
+
+      loadFavoriteMeal(res.data);
+
+    } catch (err) {
+      console.error(err);
+      alert("식단 불러오기 실패!");
+    }
+    };
+ 
 
   const handleSave = () => {
     if (foods.length === 0) {
@@ -135,16 +372,63 @@ function MealRecordModal({
       return;
     }
 
-    const payload = {
-      mealType,
-      selectedDate,
-      foods,
-      total,
-    };
-
-    console.log("저장 데이터:", payload);
+  const payload = {
+    mealType,
+    selectedDate,
+    foods,
+    total,
+    mealImageFile,
+  };
 
     if (onSave) onSave(payload);
+  };
+
+  const handleMealFavoriteUpdated = (updatedMeal) => {
+    setSelectedMeal(updatedMeal);
+
+    setFavoriteMeals((prev) =>
+      prev.map((meal) =>
+        meal.mfNum === updatedMeal.mfNum
+          ? {
+              ...meal,
+              ...updatedMeal,
+            }
+          : meal
+      )
+    );
+  };
+
+  const handleDrag=(e)=>{
+  e.preventDefault();
+  e.stopPropagation();
+
+  if(
+    e.type==="dragenter"||
+    e.type==="dragover"
+  ){
+    setDragActive(true);
+  }
+
+  if(e.type==="dragleave"){
+    setDragActive(false);
+  }
+  };
+
+  const handleDrop=(e)=>{
+  e.preventDefault();
+  e.stopPropagation();
+
+  setDragActive(false);
+
+  if(!e.dataTransfer.files[0]) return;
+
+  const file=e.dataTransfer.files[0];
+
+  setMealImageFile(file);
+
+  setMealImagePreview(
+    URL.createObjectURL(file)
+  );
   };
 
   return (
@@ -188,7 +472,7 @@ function MealRecordModal({
                 searchFood();
               }}
             >
-             <input
+              <input
                 type="text"
                 placeholder="음식명을 검색하세요 (예: 계란, 바나나, 그릭요거트)"
                 value={keyword}
@@ -196,6 +480,7 @@ function MealRecordModal({
               />
               <button type="submit">검색</button>
             </form>
+
             <div className="mr-content-tabs">
               <button
                 type="button"
@@ -204,17 +489,25 @@ function MealRecordModal({
               >
                 🔍 검색 결과
               </button>
+
               <button
                 type="button"
                 className={tab === "foodFav" ? "active" : ""}
-                onClick={() => setTab("foodFav")}
+                onClick={() => {
+                  setTab("foodFav");
+                  loadSingleFoodFavorites();
+                }}
               >
                 ⭐ 즐겨찾기 음식
               </button>
+
               <button
                 type="button"
                 className={tab === "mealFav" ? "active" : ""}
-                onClick={() => setTab("mealFav")}
+                onClick={() => {
+                  setTab("mealFav");
+                  loadMealFavorites();
+                }}
               >
                 📋 즐겨찾기 식단
               </button>
@@ -225,78 +518,65 @@ function MealRecordModal({
                 searchResults.map((food) => (
                   <FoodRow
                     key={food.foNum}
-                    food={{
-                      id: food.foNum,
-                      name: food.foName,
-                      kcal: food.foKcal,
-                      carbs: food.foCarbs,
-                      protein: food.foProtein,
-                      fat: food.foFat,
-                      image: food.foImage,
-                    }}
+                    food={toFoodItem(food)}
                     isFavorite={favorites.includes(food.foNum)}
-                    onAdd={() =>
-                      addFood({
-                        id: food.foNum,
-                        name: food.foName,
-                        kcal: food.foKcal,
-                        carbs: food.foCarbs,
-                        protein: food.foProtein,
-                        fat: food.foFat,
-                        image:
-                          food.foImage ||
-                          "https://via.placeholder.com/80x80.png?text=Food",
-                      })
-                    }
-                    onFavorite={() => toggleFavorite(food.foNum)}
+                    onAdd={() => addFood(toFoodItem(food))}
+                    onFavorite={() => addSingleFoodFavorite(food.foNum)}
+                    buttonText="+ 추가"
                   />
                 ))}
 
               {tab === "foodFav" &&
-                searchResults
-                  .filter((food) => favorites.includes(food.foNum))
-                  .map((food) => (
-                    <FoodRow
-                      key={food.foNum}
-                      food={{
-                        id: food.foNum,
-                        name: food.foName,
-                        kcal: food.foKcal,
-                        carbs: food.foCarbs,
-                        protein: food.foProtein,
-                        fat: food.foFat,
-                        image:
-                          food.foImage ||
-                          "https://via.placeholder.com/80x80.png?text=Food",
-                      }}
-                      isFavorite={true}
-                      onAdd={() =>
-                        addFood({
-                          id: food.foNum,
-                          name: food.foName,
-                          kcal: food.foKcal,
-                          carbs: food.foCarbs,
-                          protein: food.foProtein,
-                          fat: food.foFat,
-                          image:
-                            food.foImage ||
-                            "https://via.placeholder.com/80x80.png?text=Food",
-                        })
-                      }
-                      onFavorite={() => toggleFavorite(food.foNum)}
-                    />
-                  ))}
+                favoriteFoods.map((food) => (
+                  <FoodRow
+                    key={food.sfNum}
+                    food={toFoodItem(food)}
+                    isFavorite={true}
+                    onAdd={() => addFood(toFoodItem(food))}
+                    onFavorite={() =>
+                      deleteSingleFoodFavorite(food.sfNum, food.foNum)
+                    }
+                    buttonText="+ 추가"
+                  />
+                ))}
+
               {tab === "mealFav" &&
                 favoriteMeals.map((meal) => (
-                  <div className="mr-favorite-meal" key={meal.id}>
-                    <div>
-                      <strong>{meal.name}</strong>
-                      <p>{meal.foods.join(", ")}</p>
-                      <span>{meal.kcal} kcal</span>
+                  <div
+                    className="mr-food-row mr-meal-row"
+                    key={meal.mfNum}
+                    onClick={() => openMealFavoriteDetail(meal)}
+                  >
+                    <MealThumb image={meal.mfImage || meal.image} />
+
+                    <div className="mr-food-info">
+                      <strong>{meal.mfName || "즐겨찾기 식단"}</strong>
+
+                      <span>등록일 {formatCreatedAt(meal)}</span>
+
+                      <b className="mr-meal-kcal">
+                        {getMealTotalKcal(meal)} kcal
+                      </b>
                     </div>
+
                     <button
                       type="button"
-                      onClick={() => loadFavoriteMeal(meal)}
+                      className="mr-heart-btn active"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        deleteMealFavorite(meal.mfNum);
+                      }}
+                    >
+                      <FiHeart />
+                    </button>
+
+                    <button
+                      type="button"
+                      className="mr-add-btn"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        loadFavoriteMealDetail(meal);
+                      }}
                     >
                       불러오기
                     </button>
@@ -314,10 +594,31 @@ function MealRecordModal({
               AI가 음식을 분석해드려요!
             </p>
 
-            <label className="upload-label">
-              사진 업로드
-              <input type="file" accept="image/*" hidden />
-            </label>
+            {aiPhotoPreview ? (
+              <div className="photo-ai-preview-box">
+                <img src={aiPhotoPreview} alt="AI 분석용 사진" />
+
+                <label className="upload-label">
+                  사진 다시 선택
+                  <input
+                    type="file"
+                    accept="image/*"
+                    hidden
+                    onChange={handleAiPhotoChange}
+                  />
+                </label>
+              </div>
+            ) : (
+              <label className="upload-label">
+                클릭 혹은 이미지를 드래그 하세요
+                <input
+                  type="file"
+                  accept="image/*"
+                  hidden
+                  onChange={handleAiPhotoChange}
+                />
+              </label>
+            )}
 
             <small>JPG, PNG 파일을 등록할 수 있어요.</small>
           </div>
@@ -326,7 +627,8 @@ function MealRecordModal({
         <section className="mr-added-section">
           <div className="added-food-header">
             <h3>추가된 음식 ({foods.length})</h3>
-            <button type="button" onClick={() => setFoods([])}>
+
+            <button type="button" onClick={clearAllFoods}>
               전체 삭제
             </button>
           </div>
@@ -340,8 +642,12 @@ function MealRecordModal({
           ) : (
             <div className="mr-added-list">
               {foods.map((food) => (
-                <div className="mr-added-item" key={food.id}>
-                  <img src={food.image} alt={food.name} />
+                <div className="mr-added-item" key={food.uid}>
+                  {food.image ? (
+                    <img src={food.image} alt={food.name} />
+                  ) : (
+                    <div className="food-no-image">🍽️</div>
+                  )}
 
                   <div className="mr-added-info">
                     <strong>{food.name}</strong>
@@ -351,14 +657,16 @@ function MealRecordModal({
                   <div className="food-count">
                     <button
                       type="button"
-                      onClick={() => changeCount(food.id, "minus")}
+                      onClick={() => changeCount(food.uid, "minus")}
                     >
                       −
                     </button>
+
                     <span>{food.count}</span>
+
                     <button
                       type="button"
-                      onClick={() => changeCount(food.id, "plus")}
+                      onClick={() => changeCount(food.uid, "plus")}
                     >
                       +
                     </button>
@@ -369,7 +677,7 @@ function MealRecordModal({
                     className={`mr-star-btn ${
                       favorites.includes(food.id) ? "active" : ""
                     }`}
-                    onClick={() => toggleFavorite(food.id)}
+                    onClick={() => addSingleFoodFavorite(food.id)}
                   >
                     ★
                   </button>
@@ -377,9 +685,9 @@ function MealRecordModal({
                   <button
                     type="button"
                     className="mr-trash-btn"
-                    onClick={() => removeFood(food.id)}
+                    onClick={() => removeFood(food.uid)}
                   >
-                    < FiTrash2 />
+                    <FiTrash2 />
                   </button>
                 </div>
               ))}
@@ -412,6 +720,92 @@ function MealRecordModal({
           </div>
         </section>
 
+      <section className="meal-cover-section">
+        <div className="meal-cover-header">
+          <h3>
+            대표 사진 <span>선택</span>
+          </h3>
+
+          <p>식단 대표 이미지로 사용돼요.</p>
+        </div>
+
+
+        <div className="meal-cover-body">
+          {mealImagePreview ? (
+            <div className="meal-cover-preview-box">
+              <img
+                src={mealImagePreview}
+                alt="대표 사진 미리보기"
+              />
+
+              <button
+                type="button"
+                onClick={removeMealImage}
+              >
+                ×
+              </button>
+
+              <label className="meal-cover-change-btn">
+                사진 변경
+
+                <input
+                  type="file"
+                  hidden
+                  accept="image/*"
+                  onChange={handleMealImageChange}
+                />
+              </label>
+            </div>
+
+          ) : (
+
+            <div
+              className={`meal-cover-upload-box ${
+                dragActive ? "dragging" : ""
+              }`}
+              onDragEnter={handleDrag}
+              onDragOver={handleDrag}
+              onDragLeave={handleDrag}
+              onDrop={handleDrop}
+              onClick={() =>
+                document
+                  .getElementById("mealImageInput")
+                  .click()
+              }
+            >
+
+              <input
+                id="mealImageInput"
+                type="file"
+                hidden
+                accept="image/*"
+                onChange={handleMealImageChange}
+              />
+
+              <div className="meal-cover-upload-icon">
+                {dragActive ? "📥" : "🖼️"}
+              </div>
+
+              <strong>
+                {dragActive
+                  ? "여기에 놓으세요!"
+                  : "사진 추가하기"}
+              </strong>
+
+              <small>
+                클릭 또는 이미지를 드래그 하세요
+              </small>
+
+            </div>
+          )}
+        </div>
+
+        <p className="meal-cover-help">
+          JPG, PNG 파일을 등록할 수 있어요.
+        </p>
+
+      </section>
+
         <div className="modal-ai-tip mr-ai-tip">
           <span>🤖</span>
           <p>
@@ -420,10 +814,6 @@ function MealRecordModal({
             맞춤 피드백을 제공해드려요!
           </p>
         </div>
-
-        <button type="button" className="mr-meal-fav-btn">
-          ♡ 현재 식단 즐겨찾기 저장
-        </button>
 
         <div className="modal-actions">
           <button type="button" className="cancel-btn" onClick={onClose}>
@@ -434,12 +824,35 @@ function MealRecordModal({
             AI 분석하고 저장하기 ✨
           </button>
         </div>
+        {selectedMeal && (
+          <MealFavoriteDetailModal
+            meal={selectedMeal}
+            onUpdated={handleMealFavoriteUpdated}
+            onClose={() => setSelectedMeal(null)}
+            onLoad={() => {
+              loadFavoriteMeal(selectedMeal);
+              setSelectedMeal(null);
+            }}
+            onDelete={() => {
+              deleteMealFavorite(selectedMeal.mfNum);
+              setSelectedMeal(null);
+            }}
+          />
+        )}
       </div>
     </div>
   );
 }
 
-function FoodRow({ food, isFavorite, onAdd, onFavorite }) {
+function MealThumb({ image }) {
+  return image ? (
+    <img src={image} alt="식단 이미지" />
+  ) : (
+    <div className="meal-default-thumb">🍽️</div>
+  );
+}
+
+function FoodRow({ food, isFavorite, onAdd, onFavorite, buttonText }) {
   return (
     <div className="mr-food-row">
       {food.image ? (
@@ -447,6 +860,7 @@ function FoodRow({ food, isFavorite, onAdd, onFavorite }) {
       ) : (
         <div className="food-no-image">🍽️</div>
       )}
+
       <div className="mr-food-info">
         <strong>{food.name}</strong>
         <span>{food.kcal} kcal</span>
@@ -461,7 +875,7 @@ function FoodRow({ food, isFavorite, onAdd, onFavorite }) {
       </button>
 
       <button type="button" className="mr-add-btn" onClick={onAdd}>
-        + 추가
+        {buttonText || "+ 추가"}
       </button>
     </div>
   );

@@ -5,6 +5,7 @@ import java.time.LocalDate;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
+import kr.hi.project.dto.FailedPredictDTO;
 import kr.hi.project.dto.FoodDTO;
 import kr.hi.project.dto.MealDayDTO;
 import kr.hi.project.dto.MealDetailDTO;
@@ -58,4 +59,12 @@ public interface MealDao {
 	int checkDuplicateMeal(@Param("userNum") int userNum, 
             				@Param("mealType") String mealType, 
             				@Param("dietDate") java.time.LocalDate dietDate);
+
+	void insertFailedRecord(FailedPredictDTO dto);
+	
+	// 사진인식하고 식단 상세 파일과 로그를 지우기 위한 메서드 2개 추가
+	void deleteMealDetailByMkNum(@Param("mkNum") int mkNum);
+	void deleteMealLogByMkNum(@Param("mkNum") int mkNum);
+
+	String findImageUrlByMkNum(@Param("mkNum") int mkNum);
 }

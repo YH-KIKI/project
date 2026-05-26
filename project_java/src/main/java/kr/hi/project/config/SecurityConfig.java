@@ -58,33 +58,55 @@ public class SecurityConfig {
             .csrf(csrf -> csrf.disable())
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers(
-                    "/api/signup",
-                    "/api/login",
-                    "/api/user/info",
-                    
-                    "/api/character/**",
-                    "/api/community/**",
-                    "/api/comments/**",
-                    "/api/likes/**",
-                    "/api/food/**"
-                ).permitAll()
-                .anyRequest().authenticated()
-            )
-
-            // 🔥 FIX: this로 명확하게 Bean 호출
-            .addFilterBefore(this.jwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class);
-
+                .requestMatchers("/", 
+                        		 "/favicon.ico",
+                				 "/uploads/**", 
+                                 "/images/**",  // [추가/재근] 캐릭터 이미지 등 정적 리소스 접근 허용
+                                 "/error",    
+                                 "/api/signup", 
+                                 "/api/login", 
+                                 "/api/information_updata",
+                                 "/api/information_select",
+                                 "/api/diet/**",  // [추가/재근] AI식단추천
+                                 "/api/community/**", // 추가했음(박하)
+                                 "/api/comments/**", // [박하/추가] 댓글 API 허용 추가
+                                 "/api/likes/**",    // [박하/추가] 추천 API 허용 추가
+                                 "/api/food/**", //[연희/추가] food 테이블 불러오는 API
+                                 "/api/character/**" ,
+                                 "/api/bodycheck/**", // [추가/재근] 눈바디
+                                 "/api/user/verify-password", // [추가/재근] 눈바디 비밀번호
+                                 "/api/favorite/**", //[연희/추가] 즐찾들
+                                 "/api/user/privacy/**", //[연희/추가] 프라이버시 영양성분 조회
+                                 "/api/report-fail",//[준성/추가] 음식사진인증실패
+                                 "/api/ai/**",
+                                 "/api/user/info",
+	                             "/api/record",
+	                             "/api/meal/**",
+	                             "/api/login/**", 
+	                             "/login/**",
+	                             "/kakao", 
+	                             "/api/login/kakao/register",
+	                             "/api/user/food/search",
+                                 "/api/fridge/**" //[연희//추가] 냉장고 정보
+                                 ).permitAll() 
+                // 유효한 토큰이 있어야 들어갈수있는 페이지
+                //.requestMatchers("/api/record").authenticated()
+                .anyRequest().authenticated() 
+            );
+        
         return http.build();
     }
 
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
-        CorsConfiguration config = new CorsConfiguration();
-        config.setAllowedOrigins(Arrays.asList("http://localhost:3000"));
-        config.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
-        config.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type", "Cache-Control"));
-        config.setAllowCredentials(true);
+        CorsConfiguration configuration = new CorsConfiguration();
+        configuration.setAllowedOrigins(Arrays.asList(
+        		"http://localhost:3000",
+        		"http://54.116.167.5"
+        		)); 
+        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+        configuration.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type"));
+        configuration.setAllowCredentials(true);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", config);

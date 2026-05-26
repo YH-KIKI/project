@@ -1,5 +1,6 @@
 package kr.hi.project.service;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -8,6 +9,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import kr.hi.project.dao.UserDao;
+import kr.hi.project.dto.FoodDTO;
 import kr.hi.project.dto.UserDTO;
 import kr.hi.project.dto.UserPrivacyDTO;
 
@@ -68,11 +70,30 @@ public class UserService {
                 userDAO.insertUserAllergy(dto.getUserNum(), alName);
             }
         }
+        int userNum = dto.getUserNum();
+        // 기존 선호도 테이블(food_favorite) 초기화
+        userDAO.deleteFoodFavorites(userNum);
+
+	    // 좋아하는 음식 리스트 순회하며 INSERT (ff_favorite_food = 1)
+	    if (dto.getFavoriteFoods() != null && !dto.getFavoriteFoods().isEmpty()) {
+	        for (int foNum : dto.getFavoriteFoods()) {
+	        	userDAO.insertFoodFavorite(userNum, foNum, 1);
+	        }
+	    }
+
+	    // 싫어하는 음식 리스트 순회하며 INSERT (ff_favorite_food = 0)
+	    if (dto.getDislikeFoods() != null && !dto.getDislikeFoods().isEmpty()) {
+	        for (int foNum : dto.getDislikeFoods()) {
+	        	userDAO.insertFoodFavorite(userNum, foNum, 0);
+	        }
+	    }
+        
+        
     }
 
     //영양소 계산 전용 내부 메서드
     private void calculateAndSetGoals(UserPrivacyDTO dto) {
-        //기초대사량(BMR) 계산
+        //1.기초대사량(BMR) 계산
         double bmr;
         if ("M".equals(dto.getUserGender())) {
             bmr = (10 * dto.getUserWeight()) + (6.25 * dto.getUserHeight()) - (5 * dto.getUserAge()) + 5;
@@ -84,20 +105,27 @@ public class UserService {
         double tdee = bmr * dto.getUserAct();
 
         //목표 칼로리 설정 (감량/유지/증량 판단 로직)
-        int calorieAdjustment = 0;
-        if (dto.getUserWeight() > dto.getUserTargetweight()) {
-            calorieAdjustment = -500; // 다이어트
-        } else if (dto.getUserWeight() < dto.getUserTargetweight()) {
-            calorieAdjustment = 300;  // 뚱뚱해지고 싶다
-        }
-        
-        int targetKcal = (int) Math.round(tdee + calorieAdjustment);
+        // 2.목표 유형(up_model)에 따른 칼로리 조정 및 탄/단/지 비율 설정
+        int targetKcal = (int) Math.round(tdee);
+        double carbsRatio = 0.5, proteinRatio = 0.3, fatRatio = 0.2; // 기본값 (건강유지)
 
-        //영양소 배분 (탄 5 : 단 3 : 지 2) 후 DTO에 저장
+        String model = dto.getUserModel(); // up_model 값 (1, 2, 3, 4)
+        if ("1".equals(model)) { // 다이어트 (4:4:2)
+            // targetKcal -= 500;
+            carbsRatio = 0.4; proteinRatio = 0.4; fatRatio = 0.2;
+        } else if ("2".equals(model)) { // 건강 유지 (5:3:2)
+            carbsRatio = 0.5; proteinRatio = 0.3; fatRatio = 0.2;
+        } else if ("3".equals(model)) { // 근육 증량 (5:3:2)
+            carbsRatio = 0.5; proteinRatio = 0.3; fatRatio = 0.2;
+        } else if ("4".equals(model)) { // 저탄고지 (1:2:7)
+            carbsRatio = 0.1; proteinRatio = 0.2; fatRatio = 0.7;
+        }
+
+        // 3.하루 총 목표 영양소 저장
         dto.setUserDailyKcal(targetKcal);
-        dto.setUserDailyCarbs((int) Math.round((targetKcal * 0.5) / 4));
-        dto.setUserDailyProtein((int) Math.round((targetKcal * 0.3) / 4));
-        dto.setUserDailyFat((int) Math.round((targetKcal * 0.2) / 9));
+        dto.setUserDailyCarbs((int) Math.round((targetKcal * carbsRatio) / 4));
+        dto.setUserDailyProtein((int) Math.round((targetKcal * proteinRatio) / 4));
+        dto.setUserDailyFat((int) Math.round((targetKcal * fatRatio) / 9));
         dto.setUserDailyNatrium(2000); // 고정값
     }
 
@@ -112,6 +140,26 @@ public class UserService {
 	/* 오늘 목표보기 */
 	public Map<String, Object> getTodayNutrition(int userNum) {
 	    return userDAO.getTodayTotalNutrition(userNum);
+	}
+
+	// 한끼의 영양성분
+	public Map<String, Object> getMealNutrition(int userNum, String mealType) {
+		Map<String, Object> result = userDAO.getMealNutrition(userNum, mealType);
+	    
+	    // 만약 오늘 등록된 식단이 없거나 DB 조인 결과가 통틀어 null 이라면?
+	    if (result == null || result.isEmpty() || ((Number)result.get("kcal")).intValue() == 0) {
+	        Map<String, Object> errorMap = new HashMap<>();
+	        errorMap.put("status", "NOT_FOUND");
+	        return errorMap;
+	    }
+	    
+	    result.put("status", "SUCCESS");
+	    return result;
+	}
+	
+	// 음식검색
+	public List<FoodDTO> searchFoodByKeyword(String keyword) {
+		return userDAO.searchFoodByKeyword(keyword);
 	}
     
 }

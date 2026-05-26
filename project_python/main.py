@@ -1,15 +1,36 @@
 # main.py
 from fastapi import FastAPI, UploadFile, File, Form
-from pydantic import BaseModel # 🌟 새로 추가됨: 데이터 모델링용
+from pydantic import BaseModel 
+from fastapi.middleware.cors import CORSMiddleware # 식단 피드백용
 
-# 🌟 눈바디 분석 함수(analyze_pose, extract_outline) 및 피드백 함수(generate_daily_feedback) 불러오기
+# 눈바디 분석 함수(analyze_pose, extract_outline) 및 피드백 함수(generate_daily_feedback) 불러오기
 from schemas import UserInfo
-from ai_service import get_best_diet, analyze_pose, extract_outline, generate_daily_feedback
+from ai_service import get_hybrid_diet_recommendation, analyze_pose, extract_outline, generate_daily_feedback
+# 대빵 - 식단 피드백 함수 
+from meal_feedback import generate_meal_feedback
+from fridge_ai import generate_ai_info
 
+import os
+import uvicorn
+from google.genai import types
+
+# Analyze.py 파일에서 필요한 로봇과 함수들을 쏙 뽑아오기!
+from Analyze import get_food_predictions, client, MODEL_NAME
+
+os.environ['KMP_DUPLICATE_LIB_OK'] = 'True'
 app = FastAPI()
 
+# 대빵 - 식단 피드백용 
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 # ==========================================
-# 🌟 [새로 추가됨] AI 피드백을 받기 위한 데이터 형식
+# AI 피드백을 받기 위한 데이터 형식 (personaMode 추가)
 # ==========================================
 class DietFeedbackRequest(BaseModel):
     userNum: int
@@ -20,35 +41,59 @@ class DietFeedbackRequest(BaseModel):
     protein: int
     fat: int
     sodium: int
+    personaMode: str = "다정" # 기본값은 '다정'
+# ==========================================
+# 대빵 - 식단피드백 / 냉장고용 리퀘스트
+# ==========================================
+class MealFeedbackRequest(BaseModel):
+    mealType: str
+    kcal: int
+    carbs: float
+    protein: float
+    fat: float
+    sodium: float
+
+class FridgeRecipeItem(BaseModel):
+    rcpNum: int
+    rcpName: str
+    rcpParts: str
+
+class FridgeRecommendRequest(BaseModel):
+
+    ingredients: list[str]
+    recipes: list[FridgeRecipeItem]
 
 # ==========================================
-# 1. AI 식단 추천 엔드포인트 (기존)
+# 1. AI 식단 추천 엔드포인트
 # ==========================================
 @app.post("/api/ai/recommend")
-async def ai_recommend(user: UserInfo):
-    print(f"🔥 [Python] 식단 추천 요청 도착! 유저번호: {user.userNum}")
-    
-    best_food = get_best_diet(
-        target_kcal = user.targetCalorie / 3,
-        target_carbs = user.carbs / 3,
-        target_protein = user.protein / 3,
-        target_fat = user.fat / 3,
-        diet_type = user.type 
-    )   
-    
-    print(f"🤖 AI 추천 식단: {best_food['menu']}")
+async def ai_recommend(data: dict):
+    try:
+        user_num = data.get("userNum", 1)
+        # 스프링부트에서 1끼 분량으로 나눈 칼로리가 넘어오므로, 
+        # 하루 3끼 기준을 위해 원래 칼로리로 복구하거나 그대로 사용합니다. (여기선 그대로 사용)
+        target_kcal = data.get("targetCalorie", 600) 
+        carbs = data.get("carbs", 75)
+        protein = data.get("protein", 45)
+        fat = data.get("fat", 13)
+        diet_type = data.get("type", "맞춤 식단")
 
-    return [{
-        "id": best_food["id"],
-        "menu": best_food["menu"],
-        "kcal": best_food["kcal"],
-        "carbs": best_food["carbs"],
-        "protein": best_food["protein"],
-        "fat": best_food["fat"],
-        "sodium": best_food["sodium"],
-        "tags": best_food["tags"] + ["AI 정밀분석"]
-    }]
+        # 🌟 이제 반환값이 음식 1개가 아니라, 3개가 담긴 '리스트'입니다!
+        best_foods = ai_service.get_hybrid_diet_recommendation(
+            target_kcal, carbs, protein, fat, diet_type
+        )
 
+        # 🌟 리스트 구조에 맞춰서 콘솔 출력(print) 방식도 예쁘게 변경해 줍니다.
+        print(f"📝 [Python] 3끼 오마카세 추천 완료! (유저: {user_num}, 목표: {diet_type})")
+        for food in best_foods:
+            print(f"🤖 [{food.get('meal_time', '식단')}] 추천 메뉴: {food.get('menu')}")
+
+        # 스프링부트가 받기 좋게 리스트를 통째로 리턴합니다! (이미 리스트이므로 [] 로 감쌀 필요 없음)
+        return best_foods
+
+    except Exception as e:
+        print(f"❌ [Python] 추천 시스템 에러 발생: {e}")
+        return []
 
 # ==========================================
 # 2. AI 눈바디 분석 엔드포인트 (기존)
@@ -61,27 +106,33 @@ async def bodycheck_service(
 ):
     print(f"📸 [Python] 눈바디 사진 도착! 타입: {analyzeType}, 유저: {userNum}")
     
-    # 1. 사진 데이터를 바이트로 읽기
     image_bytes = await file.read()
     
-    # 2. 분석 타입에 따라 ai_service.py의 알맞은 함수 호출
     img_base64 = ""
+    score_data = None # 추가됨
+    
     if analyzeType == 'pose':
-        img_base64 = analyze_pose(image_bytes)
+        result = analyze_pose(image_bytes)
+        # 딕셔너리로 반환된 경우 분기 처리 추가
+        if isinstance(result, dict):
+            img_base64 = result["image_base64"]
+            score_data = result.get("score_data")
+        else:
+            img_base64 = result
     elif analyzeType == 'outline':
         img_base64 = extract_outline(image_bytes)
         
-    # 3. 분석된 이미지를 스프링부트로 반환
     return {
         "status": "success",
         "analyzeType": analyzeType,
-        "image_base64": img_base64
+        "image_base64": img_base64,
+        "score_data": score_data # 추가됨
     }
-
 
 # ==========================================
 # 3. 사진 분석 테스트용 (기존 유지)
 # ==========================================
+@app.post("/detect")
 @app.post("/detect")
 async def detect_service(message: str = Form(...), file: UploadFile = File(...)):
     file_name = file.filename
@@ -93,13 +144,13 @@ async def detect_service(message: str = Form(...), file: UploadFile = File(...))
     }
 
 # ==========================================
-# 🌟 4. [새로 추가됨] AI 식단 3줄 요약 피드백 엔드포인트
+# AI 식단 3줄 요약 피드백 엔드포인트
 # ==========================================
-@app.post("/api/v1/ai/feedback")
+@app.post("/api/ai/feedback")
 async def daily_feedback_service(data: DietFeedbackRequest):
-    print(f"📝 [Python] AI 피드백 요청 도착! 유저번호: {data.userNum}, 등급: {data.grade}")
+    print(f"📝 [Python] AI 피드백 요청 도착! 유저번호: {data.userNum}, 등급: {data.grade}, 모드: {data.personaMode}")
     
-    # ai_service.py의 텍스트 생성 모델 호출
+    # ai_service.py의 텍스트 생성 모델 호출 시 페르소나 모드(persona_mode) 함께 전달
     feedback_result = generate_daily_feedback(
         grade=data.grade, 
         current_kcal=data.currentKcal, 
@@ -107,15 +158,126 @@ async def daily_feedback_service(data: DietFeedbackRequest):
         carbs=data.carbs, 
         protein=data.protein, 
         fat=data.fat, 
-        sodium=data.sodium
+        sodium=data.sodium,
+        persona_mode=data.personaMode
     )
     
-    print(f"🤖 AI 생성 피드백:\n{feedback_result}")
+    print(f"🤖 AI 생성 다이내믹 피드백:\n{feedback_result}")
     
+    # 제미나이가 만들어준 딕셔너리(JSON)에서 타이틀과 3줄 요약을 각각 꺼내서 스프링부트로 전송
     return {
         "status": "success",
-        "feedback": feedback_result
+        "gradeMessage": feedback_result.get("grade_message", f"{data.grade}등급: 분석 완료!"),
+        "feedback": feedback_result.get("ai_feedback", "피드백을 불러오는 데 문제가 발생했습니다.")
     }
+
+# ==========================================
+# 대빵 - 밀피드백(식단기록용)
+# ==========================================
+@app.post("/api/ai/meal-feedback")
+async def meal_feedback_service(data: MealFeedbackRequest):
+
+    feedback = generate_meal_feedback(
+        meal_type=data.mealType,
+        kcal=data.kcal,
+        carbs=data.carbs,
+        protein=data.protein,
+        fat=data.fat,
+        sodium=data.sodium
+    )
+
+    return {
+        "status": "success",
+        "feedback": feedback
+    }
+
+# ==========================================
+# 대빵 - 냉장고 AI 추천
+# ==========================================
+
+@app.post("/api/ai/fridge-recommend")
+async def fridge_recommend_service(
+    data: FridgeRecommendRequest
+):
+
+    results = []
+
+    for recipe in data.recipes:
+
+        ai_data = generate_ai_info(
+            recipe,
+            data.ingredients
+        )
+
+        results.append({
+
+            "rcpNum":
+                recipe.rcpNum,
+
+            "aiReason":
+                ai_data["reason"],
+
+            "hashtags":
+                ai_data["hashtags"]
+
+        })
+
+    return {
+        "status": "success",
+        "results": results
+    }
+
+# ==================================================================================
+# [창구 1] 음식 사진 자동 스캔 API
+# ==================================================================================
+@app.post("/api/ai/predict")
+async def predict(file: UploadFile = File(...)):
+    print("📸 [main.py] 사진 요청 도착 -> Analyze.py로 토스한다냥!")
+    img_bytes = await file.read()
+    
+    # Analyze.py에 정의된 사진 인식 함수를 실행해서 결과를 받아옵니다냥!
+    predictions = get_food_predictions(img_bytes)
+    return {"results": predictions}
+
+
+# ==================================================================================
+# [창구 2] 제미나이 냥이 말투 식단 평가 API (422 검사 오류 완벽 방어!)
+# ==================================================================================
+@app.post("/api/ai/evaluate")
+async def evaluate_meal(payload: dict): # 👈 422 억까 방어용 dict 타입 고정!
+    print("🐱 [main.py] 영양 분석 요청 도착 -> 제미나이 소환한다냥!")
+    
+    # 리액트가 쏴준 영양소 상자 데이터 열기
+    meal_result = payload.get("mealResult", {})
+    meal_target = payload.get("mealTarget", {})
+    meal_type = payload.get("mealType", "식사")
+    user_model = payload.get("userModel", "2")
+    user_name = payload.get("userName", "회원")
+
+    model_name_kr = {"1": "다이어트", "2": "건강유지", "3": "근육증량", "4": "저탄고지"}.get(user_model, "건강유지")
+
+    system_instruction = (
+        "당신은 세상에서 가장 친절하고 귀여운 '냥이 영양사'입니다. "
+        "말투는 '~했냥?', '~다냥!', '웅웅!' 같은 고양이 말투를 필수적으로 사용해야 합니다."
+    )
+
+    prompt = f"""
+    [현재 사용자의 식단 상황]
+    - 사용자 이름: {user_name} | 끼니 종류: {meal_type} | 목표 모드: {model_name_kr}
+    [영양소 데이터 (실제 먹은 양 / 권장 목표량)]
+    - 에너지(칼로리): {meal_result.get('kcal', 0)} / {meal_target.get('kcal', 0)} kcal
+    - 탄수화물: {meal_result.get('carbs', 0)} / {meal_target.get('carbs', 0)} g
+    - 단백질: {meal_result.get('protein', 0)} / {meal_target.get('protein', 0)} g
+    - 지방: {meal_result.get('fat', 0)} / {meal_target.get('fat', 0)} g
+    """
+
+    # Analyze.py에서 가져온 client와 MODEL_NAME으로 구글 호출!
+    response = client.models.generate_content(
+        model=MODEL_NAME, contents=[prompt],
+        config=types.GenerateContentConfig(system_instruction=system_instruction, temperature=0.75)
+    )
+
+    return {"aiComment": response.text}
 
 if __name__ == "__main__":
     import uvicorn

@@ -35,4 +35,26 @@ public class FileService {
         // DB에는 브라우저 접근 경로인 /uploads/파일명 만 저장
         return "/uploads/" + savedName;
     }
+    
+    // 설정 파일에서 경로를 읽기
+    @Value("${project.relearn.path}")
+    private String relearnPath;
+
+    public String saveToTrainingFolder(MultipartFile file, String foodName) throws IOException {
+        // 운영체제에 상관없이 경로를 합쳐주는 File.separator 사용
+        String cleanPath = relearnPath.replace("file:", "").replace("///", "/");
+        File folder = new File(cleanPath + File.separator + foodName);
+        
+        if (!folder.exists()) folder.mkdirs(); 
+
+        // 파일 저장
+        String originalName = file.getOriginalFilename();
+        String uuid = UUID.randomUUID().toString();
+        String savedName = uuid + "_" + originalName;
+
+        File target = new File(folder, savedName);
+        file.transferTo(target);
+        
+        return "/uploads/relearn/" + foodName + "/" + savedName;
+    }
 }

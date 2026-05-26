@@ -14,7 +14,7 @@ import kr.hi.project.dao.UserDao;
 import lombok.RequiredArgsConstructor;
 
 @RestController
-@RequestMapping("/api/v1/user")
+@RequestMapping("/api/user")
 @RequiredArgsConstructor
 public class UserController {
 

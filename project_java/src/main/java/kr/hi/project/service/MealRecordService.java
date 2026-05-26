@@ -1,11 +1,15 @@
 package kr.hi.project.service;
 
+import java.io.File;
 import java.time.LocalDate;
 import java.time.temporal.ChronoField;
 import java.util.List;
+import java.util.UUID;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import kr.hi.project.dao.MealRecordDao;
 import kr.hi.project.dto.FoodDTO;
@@ -22,17 +26,68 @@ import lombok.RequiredArgsConstructor;
 public class MealRecordService {
 
     private final MealRecordDao mealRecordDao;
+    
+    @Value("${meal.upload.path:C:/uploads/meal/}")
+    private String mealUploadPath;
+    
+    
+    
+    private String saveMealImage(MultipartFile file) {
+
+        if (file == null || file.isEmpty()) {
+            return null;
+        }
+
+        try {
+
+        	String uploadDir = mealUploadPath;
+
+            File dir = new File(uploadDir);
+
+            if (!dir.exists()) {
+                dir.mkdirs();
+            }
+
+            String originalName = file.getOriginalFilename();
+
+            String ext =
+                originalName.substring(
+                    originalName.lastIndexOf(".")
+                );
+
+            String savedName =
+                UUID.randomUUID() + ext;
+
+            File saveFile =
+                new File(dir, savedName);
+
+            file.transferTo(saveFile);
+
+            return "/uploads/meal/" + savedName;
+
+        } catch(Exception e){
+
+            throw new RuntimeException(
+                "이미지 저장 실패", e
+            );
+        }
+    }
 
     @Transactional
-    public void saveMealRecord(MealRecordRequestDTO request) {
+    public void saveMealRecord(MealRecordRequestDTO request, MultipartFile mealImageFile) {
 
         int userNum = request.getUserNum();
 
-        LocalDate now = LocalDate.now();
-        int year = now.getYear();
-        int month = now.getMonthValue();
-        int day = now.getDayOfMonth();
-        int week = now.get(ChronoField.ALIGNED_WEEK_OF_MONTH);
+        LocalDate selectedDate =
+        	    request.getMkDietDate();
+        int year = selectedDate.getYear();
+        int month = selectedDate.getMonthValue();
+        int day = selectedDate.getDayOfMonth();
+
+        int week =
+            selectedDate.get(
+                ChronoField.ALIGNED_WEEK_OF_MONTH
+            );
 
         // 1. 월간 기록 확인/생성
         Integer mmNum = mealRecordDao.findMonthNum(userNum, year, month);
@@ -74,43 +129,87 @@ public class MealRecordService {
             mdayNum = dayDTO.getMdayNum();
         }
 
-        // 4. meal_log 저장
-        MealLogDTO mealLog = new MealLogDTO();
-        mealLog.setUserNum(userNum);
-        mealLog.setMkMealType(request.getMkMealType());
-        mealLog.setMkImage(null);
-        mealLog.setMkUserMemo(null);
+	     // 4. 같은 날짜 + 같은 식사타입 기존 기록 전체 삭제 후 새로 저장
+	        int mkNum;
+	
+	        // 기존에 같은 날짜/식사타입으로 저장된 meal_log 번호들 찾기
+	        List<Integer> oldMkNums = mealRecordDao.findMealLogNumsForUpdate(
+	                userNum,
+	                request.getMkMealType(),
+	                mdayNum
+	        );
+	
+	        // 기존 기록이 있으면 detail 먼저 삭제 후 log 삭제
+	        if (oldMkNums != null && !oldMkNums.isEmpty()) {
+	            mealRecordDao.deleteMealDetailsByMkNums(oldMkNums);
+	            mealRecordDao.deleteMealLogsByMkNums(oldMkNums);
+	        }
+	
+	        // 새 meal_log 생성
+	        MealLogDTO mealLog = new MealLogDTO();
+	        mealLog.setUserNum(userNum);
+	        mealLog.setMkMealType(request.getMkMealType());
+	        
+	        String imagePath =
+	                saveMealImage(mealImageFile);
 
-        mealRecordDao.insertMealLog(mealLog);
+	        mealLog.setMkImage(imagePath);
+	        
+	        mealLog.setMkUserMemo(request.getMkUserMemo());
+	        
+	        mealLog.setMkDietDate(request.getMkDietDate());
+	
+	        mealRecordDao.insertMealLog(mealLog);
+	
+	        mkNum = mealLog.getMkNum();
+	        request.setMkNum(mkNum);
 
-        int mkNum = mealLog.getMkNum();
+     // 5. 음식 상세 저장
+        if (request.getFoods() != null && !request.getFoods().isEmpty()) {
 
-        // 5. foodDetails 반복 저장
-        for (String foodName : request.getFoodDetails().keySet()) {
+            // 새 방식: foods 배열 기반 저장
+            for (MealDetailDTO food : request.getFoods()) {
 
-            int portion = request.getFoodDetails().get(foodName);
+                MealDetailDTO detail = new MealDetailDTO();
+                detail.setMkNum(mkNum);
+                detail.setFoNum(food.getFoNum());
+                detail.setMdayNum(mdayNum);
 
-            FoodDTO food = mealRecordDao.findFoodByName(foodName);
+                detail.setMdPortion(food.getMdPortion());
+                detail.setMdKcal(food.getMdKcal());
 
-            if (food == null) {
-                throw new RuntimeException("존재하지 않는 음식입니다: " + foodName);
+                mealRecordDao.insertMealDetail(detail);
             }
 
-            int calculatedKcal = Math.round(
-                    food.getFoKcal() * portion / food.getFoBaseGram()
-            );
+        } else if (request.getFoodDetails() != null && !request.getFoodDetails().isEmpty()) {
 
-            MealDetailDTO detail = new MealDetailDTO();
-            detail.setMkNum(mkNum);
-            detail.setFoNum(food.getFoNum());
+            // 기존 방식: 음식명 Map 기반 저장
+            for (String foodName : request.getFoodDetails().keySet()) {
 
-            // 이게 빠져서 터진 거!
-            detail.setMdayNum(mdayNum);
+                int portion = request.getFoodDetails().get(foodName);
 
-            detail.setMdPortion(portion);
-            detail.setMdKcal(calculatedKcal);
+                FoodDTO food = mealRecordDao.findFoodByName(foodName);
 
-            mealRecordDao.insertMealDetail(detail);
+                if (food == null) {
+                    throw new RuntimeException("존재하지 않는 음식입니다: " + foodName);
+                }
+
+                int calculatedKcal = Math.round(
+                        food.getFoKcal() * portion / food.getFoBaseGram()
+                );
+
+                MealDetailDTO detail = new MealDetailDTO();
+                detail.setMkNum(mkNum);
+                detail.setFoNum(food.getFoNum());
+                detail.setMdayNum(mdayNum);
+                detail.setMdPortion(portion);
+                detail.setMdKcal(calculatedKcal);
+
+                mealRecordDao.insertMealDetail(detail);
+            }
+
+        } else {
+            throw new RuntimeException("저장할 음식 정보가 없습니다.");
         }
 
         // 6. 하루 총 칼로리 업데이트
@@ -120,6 +219,11 @@ public class MealRecordService {
     public List<MealDetailDTO> getTodayMealRecord(int userNum, String date) {
         return mealRecordDao.getTodayMealRecord(userNum, date);
     }
+
+    // 날짜 불러오기
+	public List<String> getRecordedDates(int userNum) {
+		 return mealRecordDao.findRecordedDates(userNum);
+	}
     
     
 }

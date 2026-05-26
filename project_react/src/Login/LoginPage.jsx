@@ -1,85 +1,114 @@
 import React, { useState, useEffect } from 'react';
 import Sidebar from '../Main/Sidebar';
-import '../Main/MainLayout.css'; // 🌟 배경 이미지가 들어있는 CSS를 가져옵니다!
+import '../Main/MainLayout.css'; // 배경 이미지가 들어있는 CSS를 가져옵니다!
+import './LoginPage.css';        // 새롭게 분리한 로그인 페이지 전용 CSS를 가져옵니다!
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 
 const LoginPage = () => {
 
+  // --- 여기부터 카카오톡 ---
+  const KAKAO_REST_API_KEY = "b4cc1448ae63974d811c00aa509952ee"; // 여기에 아까 복사한 진짜 키를 붙여넣으세요!
+  const KAKAO_REDIRECT_URI = `${window.location.origin}/kakao-callback`;
+  const KAKAO_AUTH_URL = `https://kauth.kakao.com/oauth/authorize?client_id=${KAKAO_REST_API_KEY}&redirect_uri=${KAKAO_REDIRECT_URI}&response_type=code`;
+
+  const handleKakaoLogin = () => {
+    window.location.href = KAKAO_AUTH_URL; // 버튼 누르면 카카오 로그인 창으로 날려주는 내비게이션 역할!
+  };
+  //------------------------------------------------------
   const [username, setUsername] = useState('');
   const [userid, setUserid] = useState('');
   const [password, setPassword] = useState('');
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
 
-  const handleProtectedFeature = () => {
-  // 방법 1: isLoggedIn 변수로 확인하기
-  if (!isLoggedIn) {
-    alert("🛑 로그인이 필요한 기능입니다. 먼저 로그인해 주세요!");
-    return; // 여기서 함수를 끝내버림 (기능 실행 안 됨)
-  }
+  const handleProtectedFeature = async () => {
+    // 1. 토큰 가져오기
+    const token = localStorage.getItem('login_token') || sessionStorage.getItem('login_token');
+    
+    if (!token) {
+      alert("🛑 토큰이 없습니다. 로그인해주세요.");
+      setIsLoggedIn(false);
+      return;
+    }
 
-  // 로그인 된 경우에만 아래 코드가 실행됨
-  alert("✅ 회원 인증 성공! 비밀 기능을 실행합니다.");
-  // 여기에 진짜 하고 싶은 기능(AI 상담 열기 등)을 넣으세요.
+    try {
+      // 2. 서버에 "이 토큰 아직 쓸 수 있어?"라고 물어보기 (가장 확실한 방법)
+      await axios.get('/api/user/info', {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+
+      // 3. 서버가 200(OK)를 주면 그제야 기능 실행
+      alert("✅ 실제 서버 인증 완료! 비밀 기능을 실행합니다.");
+      
+    } catch (error) {
+      // 4. 서버가 401(만료)을 주면 여기서 걸러짐!
+      if (error.response && error.response.status === 401) {
+        alert("⏰ 인증 시간이 만료되었습니다. 자동으로 로그아웃됩니다.");
+      } else {
+        alert("❌ 인증에 실패했습니다.");
+      }
+      handleLogout(); // 👈 여기서 false로 바꿔야 화면이 로그인창으로 돌아감!
+    }
   };
 
-    const fetchUserInfo = async () => {
-    // 공용 토큰 키와 인라인 전용 토큰 키 모두 탐색
-    const token = localStorage.getItem('token') || 
-                  localStorage.getItem('login_token') || 
-                  sessionStorage.getItem('token') || 
-                  sessionStorage.getItem('login_token'); // 저장된 토큰 꺼내기
+  const fetchUserInfo = async () => {
+    const token = localStorage.getItem('login_token') || sessionStorage.getItem('login_token'); // 저장된 토큰 꺼내기
+    if (!token) return;
+
     try {
-      const response = await axios.get('http://localhost:8080/api/user/info', {
+      const response = await axios.get('/api/user/info', {
         headers: {
           Authorization: `Bearer ${token}` // 핵심: 헤더에 '나 토큰 가졌어!'라고 증명
         }
       });
       alert(`서버 응답: ${response.data.username}님, 환영합니다!`);
+      navigate('/');
     } catch (error) {
-      alert("인증에 실패했습니다. 다시 로그인하세요.");
+      if (error.response && error.response.status === 401) {
+          handleLogout(); // 👈 강제 로그아웃 함수 호출!
+      } else {
+          alert("인증 오류가 발생했습니다.");
+          handleLogout();
+      }
     }
   };
   
-    // 페이지가 새로고침되어도 토큰이 있으면 로그인 유지
-    useEffect(() => {
-      const token = localStorage.getItem('token') || 
-                    localStorage.getItem('login_token') || 
-                    sessionStorage.getItem('token') || 
-                    sessionStorage.getItem('login_token');
-      if (token) {
-        setIsLoggedIn(true);
-      }
-    }, []);
-  
-    const handleLogin = async () => {
-      try {
-        //axios.
-        //status: 서버 응답 코드 (예: 200, 404)
-        //headers: 서버가 보낸 헤더 정보
-        //data: 서버가 진짜로 보내준 핵심 내용물 (JSON)
-        //config: 요청 설정 정보
-        const response = await axios.post('http://localhost:8080/api/login', {
-          username: username,
-          userid: userid,
-          password: password
-        });
-  
-        const token = response.data.token;
-        
-        if (rememberMe) {
-          // 🌟 다른 파일(CharacterHistory 등)에서 일관되게 토큰을 찾을 수 있도록 'token'과 'login_token' 모두 저장해 줍니다.
-          localStorage.setItem('token', token);
-          localStorage.setItem('login_token', token);
-        } else {
-          // 브라우저 끄면 바로 삭제!
-          sessionStorage.setItem('token', token);
-          sessionStorage.setItem('login_token', token);
-        }
+  // 페이지가 새로고침되어도 토큰이 있으면 로그인 유지
+  useEffect(() => {
+    const token = localStorage.getItem('login_token') || sessionStorage.getItem('login_token');
+    if (token) {
+      setIsLoggedIn(true);
+    }
+  }, []);
 
-        // 🌟🌟🌟 [박하] 커뮤니티 게시판에서 사용자 식별을 위해 서버에서 받은 사용자 정보를 'user' 키로 저장
-        localStorage.setItem('user', JSON.stringify(response.data.user));
+  const handleLogin = async () => {
+    try {
+      //axios.
+      //status: 서버 응답 코드 (예: 200, 404)
+      //headers: 서버가 보낸 헤더 정보
+      //data: 서버가 진짜로 보내준 핵심 내용물 (JSON)
+      //config: 요청 설정 정보
+      const response = await axios.post('/api/login', {
+        username: username,
+        userid: userid,
+        password: password
+      });
+
+      const { token, refreshToken, user } = response.data;
+      
+      if (rememberMe) {
+        // 받은 토큰을 브라우저에 저장
+        localStorage.setItem('login_token', token);
+      } else {
+        // 브라우저 끄면 바로 삭제!
+        sessionStorage.setItem('login_token', token);
+      }
+
+      // [준성] refreshToken 추가
+      localStorage.setItem('refresh_token', refreshToken);
+      // [박하] 커뮤니티 게시판에서 사용자 식별을 위해 서버에서 받은 사용자 정보를 'user' 키로 저장
+      localStorage.setItem('user', JSON.stringify(response.data.user));
 
         // 2. 로그인 상태를 '참'으로 변경
         setIsLoggedIn(true);
@@ -96,12 +125,27 @@ const LoginPage = () => {
       localStorage.removeItem('login_token');
       sessionStorage.removeItem('token');
       sessionStorage.removeItem('login_token');
+      // [재근]눈바디(BodyCheck) 등에서 바로 꺼내 쓸 수 있도록 userNum만 따로 저장.
+      localStorage.setItem('userNum', user.user_num);
 
-      // 🌟🌟🌟 [박하] 로그아웃 시 저장된 사용자 정보도 함께 삭제
-      localStorage.removeItem('user');
+      // 2. 로그인 상태를 '참'으로 변경
+      setIsLoggedIn(true);
+      alert("로그인 성공!");
+      fetchUserInfo();
+    } catch (error) {
+      alert("로그인 실패! 아이디와 비밀번호를 확인하세요.");
+    }
+  };
 
-      setIsLoggedIn(false);
-    };
+  const handleLogout = () => {
+    // 로그아웃 시 토큰 삭제 및 상태 변경
+    localStorage.removeItem('login_token');
+
+    // 🌟🌟🌟 [박하] 로그아웃 시 저장된 사용자 정보도 함께 삭제
+    localStorage.removeItem('user');
+
+    setIsLoggedIn(false);
+  };
 
   const navigate = useNavigate();
   return (
@@ -110,86 +154,68 @@ const LoginPage = () => {
       <div className="app-wrapper">
         {/* 앱 내부의 왼쪽: 사이드바 */}
         <Sidebar />
-        {/* 로그인 박스 */}
-        <div style={{ 
-          backgroundColor: 'rgba(255, 255, 255, 0.9)', 
-          padding: '40px', 
-          borderRadius: '20px', 
-          textAlign: 'center',
-          border: '2px solid #d1b8a0',
-          position: 'relative',
-          height: '800px', width: '62%', top: '20px',
-          
-        }}>
-        {/* <div style={{ display: 'flex', 
-          justifyContent: 'center', 
-          alignItems: 'center',
-           height: '100vh' }}> */}
+        
+        {/* 로그인 박스 (클래스 분리 완료) */}
+        <div className="login-box">
           <h1>로그인</h1>
-          <h2 style={{ color: '#5d4037'}}>냠냠플래닛 로그인</h2>
+          <h2 className="login-subtitle">냠냠플래닛 로그인</h2>
           <p>맛있는 다이어트의 시작! 로그인 해주세요.</p>
           
-          <div style={{ marginBottom: '20px', border: '1px solid #ccc', padding: '10px' }}>
+          {/* 회원 전용 기능 테스트 영역 */}
+          {/* <div className="test-button-container">
             <button onClick={handleProtectedFeature}>회원 전용 기능 테스트</button>
             <button onClick={() => alert("누구나 누를 수 있는 버튼")}>일반 기능</button>
-          </div>
+          </div> */}
 
-          {isLoggedIn ? (
-            // 로그인 성공 시 보여줄 화면
-            <div>
-              <h2>🎉 환영합니다! 로그인 상태입니다.</h2>
-              <p>브라우저 LocalStorage에 토큰이 안전하게 저장되었습니다.</p>
-              <button onClick={handleLogout} style={{ padding: '10px 20px' }}>로그아웃</button>
+          {/* 아이디/비밀번호 입력 폼 영역 */}
+          <div>
+            <div className="input-group">
+              <input 
+                type="text" 
+                placeholder="아이디" 
+                className="login-input mb-10" 
+                onChange={(e) => setUserid(e.target.value)}
+              /><br/>
+              <input 
+                type="password" 
+                placeholder="비밀번호" 
+                className="login-input"
+                onChange={(e) => setPassword(e.target.value)}
+              />
             </div>
-          ) : (
-        //실험
-        <div>
-          <div style={{ margin: '20px 20px' }}>
-            <input type="text" placeholder="아이디" 
-            style={{ padding: '10px', width: '200px', marginBottom: '10px' }} 
-            onChange={(e) => setUserid(e.target.value)}
-            /><br/>
-            <input type="password" placeholder="비밀번호" 
-            style={{ padding: '10px', width: '200px' }}
-            onChange={(e) => setPassword(e.target.value)}
-            />
-          </div>
-          <div style={{ marginBottom: '10px', textAlign: 'left' }}>
-            <input 
-              type="checkbox" 
-              id="rememberMe" 
-              checked={rememberMe} 
-              onChange={(e) => setRememberMe(e.target.checked)} 
-            />
-            <label htmlFor="rememberMe" style={{ marginLeft: '5px' }}>빠른 로그인 (로그인 유지)</label>
-          </div>
-          
-          <button onClick={handleLogin} 
-          style={{ 
-            padding: '10px 30px', 
-            backgroundColor: '#d1b8a0', 
-            color: 'white', 
-            border: 'none', 
-            borderRadius: '5px',
-            cursor: 'pointer'
-          }}>
-            로그인
-          </button>
-        </div>//실험
-          )}
+            
+            {/* 로그인 유지 체크박스 */}
+            <div className="remember-me-container">
+              <input 
+                type="checkbox" 
+                id="rememberMe" 
+                checked={rememberMe} 
+                onChange={(e) => setRememberMe(e.target.checked)} 
+              />
+              <label htmlFor="rememberMe" className="remember-me-label">빠른 로그인 (로그인 유지)</label>
+            </div>
+            
+            {/* 일반 로그인 버튼 */}
+            <button onClick={handleLogin} className="btn-login">
+              로그인
+            </button>
 
-          <hr></hr>
-          {/*회원가입 링크*/}
-          <div style={{ marginTop: '20px', fontSize: '14px', color: '#5d4037' }}>
+            {/* 카카오 로그인 버튼 */}
+            <div className="kakao-btn-container">
+              <button onClick={handleKakaoLogin} className="btn-kakao">
+                카카오로 시작하기
+              </button>
+            </div>
+          </div>
+
+          <hr />
+          
+          {/* 회원가입 링크 */}
+          <div className="signup-link-container">
             <span>아직 회원이 아니신가요? </span>
             <a 
               href="/register" 
-              style={{ 
-                color: '#d1b8a0', 
-                fontWeight: 'bold', 
-                textDecoration: 'none',
-                marginLeft: '5px'
-              }}
+              className="link-signup"
               onClick={(e) => {
                 e.preventDefault();
                 // 회원가입 페이지로 이동

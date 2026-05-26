@@ -93,122 +93,181 @@
   font-weight: 700;
   cursor: pointer;
 }
+/* 음식 즐겨찾기 */
 
 /* 음식 즐겨찾기 */
+
 .food-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 14px;
 }
-
 .food-card {
-  background: #fffdfc;
-  border-radius: 18px;
-  overflow: hidden;
-  border: 1px solid #f0dddd;
-}
-
-.food-img-wrap {
-  position: relative;
-  height: 135px;
-  background: #f7f3f3;
-}
-
-.food-img-wrap img {
   width: 100%;
-  height: 100%;
-  object-fit: cover;
+  min-width: 0;
+  border: 1px solid #f0dddd;
+  border-radius: 18px;
+
+  padding: 14px;
+
+  background: #fffdfc;
 }
 
-.star-btn {
-  position: absolute;
-  top: 10px;
-  right: 10px;
+.food-title-area {
+  height: 48px;
 
-  width: 28px;
-  height: 28px;
+  display: flex;
+  align-items: flex-start;
+
+  margin-bottom: 10px;
+}
+
+.food-title-area h3 {
+  margin: 0;
+
+  font-size: 17px;
+  font-weight: 800;
+
+  line-height: 1.3;
+
+  text-align: left;
+
+  color: #2f2424;
+
+  word-break: keep-all;
+
+  display: -webkit-box;
+
+  line-clamp: 2;
+  -webkit-line-clamp: 2;
+
+  -webkit-box-orient: vertical;
+
+  overflow: hidden;
+}
+.nutrition-grid {
+  display: grid;
+
+  grid-template-columns: 1fr 1fr;
+
+  gap: 6px;
+
+  margin-bottom: 14px;
+}
+
+.nutrition-chip {
+  height: 30px;
+
   border-radius: 10px;
 
-  border: 1px solid #ffc7d3;
-
-  background: rgba(255, 255, 255, 0.96);
-
-  font-size: 18px;
-  color: #f4b400;
+  border: 1px solid rgba(240, 221, 221, 0.7);
 
   display: flex;
   align-items: center;
   justify-content: center;
 
-  line-height: 1;
-  padding-bottom: 2px;
-
-  box-shadow: 0 4px 10px rgba(255, 102, 134, 0.15);
-
-  cursor: pointer;
-}
-
-.star-btn:hover {
-  transform: scale(1.12);
-}
-
-.star-btn.active {
-  color: #ffd84d;
-}
-
-.food-content {
-  padding: 14px;
-}
-
-.food-content h3 {
-  margin: 0 0 8px;
-  font-size: 17px;
-  font-weight: 800;
-  line-height: 1.3;
-  word-break: keep-all;
-}
-
-.food-content p {
-  margin: 0;
-  font-size: 12px;
-  color: #6d5f5f;
-  line-height: 1.4;
-}
-
-.food-content strong {
-  display: block;
-  margin-top: 10px;
-  font-size: 21px;
-  font-weight: 800;
-  color: #333;
-}
-
-.food-actions {
-  display: grid;
-  grid-template-columns: 1fr 42px;
-  gap: 8px;
-  margin-top: 12px;
-}
-
-.pink-btn {
-  height: 44px;
-  border-radius: 13px;
-  border: none;
-  background: #ff6686;
-  color: #fff;
-  font-size: 14px;
+  font-size: 11px;
   font-weight: 700;
+
+  white-space: nowrap;
+}
+
+.nutrition-chip.carb {
+  background: #fff8ef;
+}
+
+.nutrition-chip.protein {
+  background: #fff4f4;
+}
+
+.nutrition-chip.fat {
+  background: #fffaf2;
+}
+
+.nutrition-chip.sodium {
+  background: #f6f9ff;
+}
+
+.food-bottom-row {
+  display: flex;
+
+  align-items: center;
+  justify-content: space-between;
+
+  margin-top: auto;
+}
+
+.food-kcal {
+  display: flex;
+  flex-direction: column;
+
+  justify-content: center;
+
+  min-width: 72px;
+
+  gap: 2px;
+}
+
+.food-kcal div {
+  font-size: 11px;
+  font-weight: 700;
+
+  color: #7b6d6d;
+}
+
+.food-kcal {
+  font-size: 18px;
+  font-weight: 800;
+
+  line-height: 1.1;
+
+  color: #2f2424;
+}
+
+.food-card-actions {
+  display: flex;
+  align-items: center;
+
+  gap: 8px;
+}
+
+.food-card-actions .pink-btn {
+  height: 38px;
+
+  padding: 0 14px;
+
+  border-radius: 12px;
+
+  border: none;
+
+  background: #ff6686;
+
+  color: white;
+
+  font-size: 12px;
+  font-weight: 800;
+
   cursor: pointer;
+
+  transition: 0.2s ease;
+}
+
+.food-card-actions .pink-btn:hover {
+  background: #ff4f78;
+}
+
+.food-card-actions .meal-delete-btn {
+  width: 38px;
+  height: 38px;
 }
 
 .meal-delete-btn {
-  height: 44px;
-  width: 44px;
-  font-size: 18px;
-  border-radius: 13px;
+  border-radius: 12px;
+
   border: 1px solid #f0dede;
+
   background: #fff;
-  
+
   display: flex;
   align-items: center;
   justify-content: center;
@@ -216,7 +275,8 @@
   color: #9a8a8a;
 
   cursor: pointer;
-  transition: all 0.2s ease;
+
+  transition: 0.2s ease;
 }
 
 .meal-delete-btn:hover {
@@ -229,55 +289,102 @@
   width: 16px;
   height: 16px;
 }
-
 /* 저장한 식단 */
 .meal-list {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 14px;
 }
 
 .fav-meal-card {
-  position: relative;
-  display: grid;
-  grid-template-columns: 120px 1fr;
-  gap: 14px;
-  padding: 16px;
-  background: #fffdfc;
+  width: 100%;
+  min-height: 112px;
+  padding: 14px;
   border-radius: 18px;
   border: 1px solid #f0dddd;
-  align-items: start;
+  background: #fffdfc;
+
+  display: grid;
+  grid-template-columns: 86px 1fr 44px;
+  gap: 12px;
+  align-items: center;
+
+  cursor: pointer;
+  transition: 0.2s ease;
 }
 
-.fav-meal-img {
-  width: 120px;
-  height: 120px;
+.fav-meal-card:hover {
+  background: #fff9fa;
+  transform: translateY(-1px);
+}
+
+.fav-meal-thumb-wrap {
+  width: 86px;
+  height: 86px;
   border-radius: 16px;
   overflow: hidden;
   background: #f7f3f3;
   flex-shrink: 0;
 }
 
-.fav-meal-img img {
+.fav-meal-thumb-wrap img {
   width: 100%;
   height: 100%;
   object-fit: cover;
 }
 
+.fav-meal-thumb-empty {
+  width: 100%;
+  height: 100%;
+  background: #fff2f5;
+  color: #ff6686;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  font-size: 30px;
+}
+
+.fav-meal-info {
+  min-width: 0;
+}
+
+.fav-meal-title-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  margin-bottom: 6px;
+}
+
+.fav-meal-title-row h3 {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 800;
+  line-height: 1.25;
+  color: #171212;
+
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .meal-type-badge {
-  position: absolute;
-  top: 12px;
-  left: 12px;
-  padding: 6px 12px;
+  position: static;
+  flex-shrink: 0;
+
+  padding: 5px 10px;
   border-radius: 999px;
+
   color: white;
   font-size: 12px;
-  font-weight: 700;
-  z-index: 2;
+  font-weight: 800;
+  line-height: 1;
 }
 
 .meal-type-badge.아침 {
-  background: #ff8fa3;
+  background: #ff6686;
 }
 
 .meal-type-badge.점심 {
@@ -285,61 +392,81 @@
 }
 
 .meal-type-badge.저녁 {
-  background: #9d7df5;
-}
-
-.fav-meal-info {
-  min-width: 0;
-}
-
-.fav-meal-info h3 {
-  margin: 0 0 8px;
-  font-size: 19px;
-  font-weight: 800;
-  line-height: 1.25;
-  word-break: keep-all;
+  background: #8b62f6;
 }
 
 .fav-meal-info p {
-  margin: 0;
-  font-size: 13px;
-  line-height: 1.45;
-  color: #5f5555;
-  word-break: keep-all;
-}
-
-.meal-macro {
-  margin-top: 8px;
+  margin: 0 0 8px;
   font-size: 12px;
-  color: #5f5555;
   line-height: 1.4;
-}
+  color: #6f6262;
 
-.meal-macro span,
-.macro-chip {
-  background: #f3f4f6;
-  padding: 4px 8px;
-  border-radius: 8px;
-  font-size: 12px;
-  font-weight: 600;
-  color: #555;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .fav-meal-info strong {
   display: block;
-  margin-top: 10px;
-  font-size: 26px;
-  line-height: 1;
+  font-size: 15px;
   font-weight: 800;
   color: #2f2424;
 }
 
-.fav-meal-info small {
-  display: block;
-  margin-top: 8px;
-  color: #8f7f7f;
+.fav-meal-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-items: center;
+}
+
+.fav-meal-info p {
+  margin: 0 0 8px;
   font-size: 12px;
-  font-weight: 600;
+  line-height: 1.4;
+  color: #6f6262;
+
+  text-align: left;
+  align-self: flex-start;
+}
+
+.fav-meal-info strong {
+  display: block;
+  font-size: 15px;
+  font-weight: 800;
+  color: #2f2424;
+
+  text-align: left;
+  align-self: flex-start;
+}
+
+.meal-load-square-btn {
+  width: 44px;
+  height: 44px;
+  border-radius: 13px;
+  border: 1px solid #ff9db0;
+  background: #fff4f7;
+
+  color: #ff5d84;
+  font-size: 26px;
+  font-weight: 800;
+  line-height: 1;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  cursor: pointer;
+}
+
+.meal-load-square-btn:hover {
+  background: #ff6686;
+  color: white;
+}
+
+.fav-meal-actions .meal-delete-btn {
+  width: 44px;
+  height: 44px;
 }
 
 /* 버튼은 아래로 빼서 안 깨지게 */

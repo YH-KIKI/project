@@ -54,15 +54,9 @@ const CharacterSection = ({ charInfo, onUpdate }) => {
       sessionStorage.getItem('login_token');
 
     try {
-      const response = await axios.post(
-        `http://localhost:8080/api/character/update`,
-        {
-          userNum: charInfo.userNum,
-          type: typeNum
-        },
-        {
-          headers: { Authorization: `Bearer ${token}` }
-        }
+      const response = await axios.post(`/api/character/update`, 
+        { userNum: charInfo.userNum, type: typeNum },
+        { headers: { Authorization: `Bearer ${token}` } }
       );
 
       if (response.status === 200) {

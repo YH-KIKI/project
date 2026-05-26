@@ -41,6 +41,7 @@
 	        p.up_target_weight AS userTargetweight,
 	        p.up_age AS userAge,
 	        p.up_act AS userAct,
+	        p.up_model AS userModel,
 	        <!-- 목표가져오기 -->
 	        p.up_daily_kcal AS userDailyKcal,
 	        p.up_daily_carbs AS userDailyCarbs,
@@ -75,6 +76,7 @@
 	        p.up_target_weight = #{userTargetweight},
 	        p.up_age = #{userAge},
 	        p.up_act = #{userAct},
+	        p.up_model = #{userModel},
 	
 	        p.up_daily_kcal = #{userDailyKcal},
 	        p.up_daily_carbs = #{userDailyCarbs},
@@ -122,5 +124,94 @@
 	    
 	    WHERE mm.user_num = #{userNum}          AND mday.mday_created_at = CURDATE() 
     </select>
+    
+    <!-- 카카오톡 -->
+    <select id="findUserNumByKakaoId" parameterType="string" resultType="java.lang.Integer">
+        SELECT user_num 
+        FROM user_social_accounts
+        WHERE usa_provider = '카톡' AND usa_provider_user_id = #{kakaoId}
+    </select>
+    
+    <insert id="insertSocialUser" parameterType="kr.hi.project.dto.UserDTO" useGeneratedKeys="true" keyProperty="userNum">
+        INSERT INTO user (user_id, user_password, user_email, user_name, user_is_social)
+        VALUES (#{userId}, null, #{userEmail}, #{userName}, 1)
+    </insert>
+    
+    <insert id="insertSocialAccount" parameterType="map">
+        INSERT INTO user_social_accounts (usa_provider, usa_provider_user_id, user_num)
+        VALUES ('카톡', #{kakaoId}, #{userNum})
+    </insert>
+    
+    <select id="findUserByEmail" parameterType="string" resultType="int">
+        SELECT COUNT(*) FROM user WHERE user_email = #{userEmail}
+    </select>
 
+    <insert id="insertSocialUserWithEmail" parameterType="kr.hi.project.dto.UserDTO" useGeneratedKeys="true" keyProperty="userNum">
+        INSERT INTO user (user_id, user_password, user_email, user_name, user_is_social)
+        VALUES (#{userId}, null, #{userEmail}, #{userName}, 1)
+    </insert>
+    <!-- 카카오톡 -->
+    
+    <!-- 한끼영양성분 -->
+    <select id="getMealNutrition" resultType="map">
+	    SELECT 
+	      mk.mk_num AS mkNum,  
+	      md.mday_num AS mdayNum,
+	      IFNULL(SUM(md.md_kcal), 0) AS kcal,
+	      IFNULL(ROUND(SUM(f.fo_carbs * md.md_portion), 1), 0) AS carbs,
+	      IFNULL(ROUND(SUM(f.fo_protein * md.md_portion), 1), 0) AS protein,
+	      IFNULL(ROUND(SUM(f.fo_fat * md.md_portion), 1), 0) AS fat,
+	      IFNULL(ROUND(SUM(f.fo_natrium * md.md_portion), 1), 0) AS sodium
+	  FROM meal_detail md
+	  JOIN food f ON md.fo_num = f.fo_num
+	  JOIN meal_log mk ON md.mk_num = mk.mk_num
+	  
+	  WHERE mk.user_num = #{userNum} 
+	    AND DATE(mk.mk_created_at) = CURDATE() 
+	    AND mk.mk_meal_type = #{mealType}
+	    
+	  GROUP BY mk.mk_num, md.mday_num
+  	</select>
+  	
+  	<!-- 음식검색 -->
+  	<select id="searchFoodByKeyword" resultType="kr.hi.project.dto.FoodDTO">
+        SELECT 
+            fo_num        AS foNum,
+            fo_name       AS foName,
+            fo_base_gram  AS foBaseGram,
+            fo_type       AS foType
+        FROM food 
+        WHERE fo_name LIKE CONCAT('%', #{keyword}, '%')
+    </select>
+    
+	<!-- 좋아하는 음식, 싫어하는 음식초기화 -->
+    <delete id="deleteFoodFavorites">
+        DELETE FROM food_favorite 
+        WHERE user_num = #{userNum}
+    </delete>
+    
+	<!-- 좋아하는 음식, 싫어하는 음식입력 -->
+    <insert id="insertFoodFavorite">
+        INSERT INTO food_favorite (ff_favorite_food, user_num, fo_num)
+        VALUES (#{isFavorite}, #{userNum}, #{foNum})
+    </insert>
+  	
+  	<select id="findFavoriteFoodsBySub" resultType="kr.hi.project.dto.FoodDTO">
+	    SELECT 
+	        f.fo_num  AS foNum,
+	        f.fo_name AS foName
+	    FROM food_favorite ff
+	    JOIN food f ON ff.fo_num = f.fo_num
+	    WHERE ff.user_num = #{userNum} AND ff.ff_favorite_food = 1
+	</select>
+	
+	<select id="findDislikeFoodsBySub" resultType="kr.hi.project.dto.FoodDTO">
+	    SELECT 
+	        f.fo_num  AS foNum,
+	        f.fo_name AS foName
+	    FROM food_favorite ff
+	    JOIN food f ON ff.fo_num = f.fo_num
+	    WHERE ff.user_num = #{userNum} AND ff.ff_favorite_food = 0
+	</select>
+	
 </mapper>

@@ -15,5 +15,14 @@ public class MealDetailDTO {
     private int mdayNum; 		// 하루식단고유번호
     private String foName;		// 음식이름
     private String mkMealType;	// 식사종류(아침,점심,저녁)
+    
+    
+    private float foKcal;
+    private float foCarbs;
+    private float foProtein;
+    private float foFat;
+    private float foNatrium;
+    private String mkImage;
+    
 
 }

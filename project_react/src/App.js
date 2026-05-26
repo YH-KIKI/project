@@ -19,25 +19,45 @@ import Analyze from "./ImageAnalyze/Analyze"
 import FavoritePage from "./SidebarMenu/components/FavoritePage";
 import Stats from "./SidebarMenu/components/Stats";
 import BodyCheck from "./SidebarMenu/components/BodyCheck";
-
+import Goal from "./SidebarMenu/components/Goal";
 
 import Community from "./community/Community"; //요고 추가해따잉~
 import PostWrite from "./community/PostWrite"; //요고 추가해따잉~
 import PostDetail from "./community/PostDetail"; //요고 추가해따잉~
 import TargetGoals from "./Mypage/TargetGoals";
 import Evaluation from "./ImageAnalyze/Evaluation";
+import KakaoCallback from "./Login/KakaoCallback";
+
+import { Navigate, Outlet } from 'react-router-dom';
+
+const ProtectedRoute = () => {
+  const token = localStorage.getItem('login_token') || sessionStorage.getItem('login_token');
+
+  if (!token) {
+    // 토큰 없으면 로그인창으로 쫓아내기
+    return <Navigate to="/login" replace />;
+  }
+  return <Outlet />;
+};
 
 function App() {
     return (
         <Router>
             <div className="App">
                 <Routes>
+                    {/* 🔓 누구나 접근 가능한 페이지 */}
+                    <Route path="/login" element={<LoginPage />} />
+                    <Route path="/signup" element={<SignUp />} />
+                    {/*카카오톡 주소(/kakaocallback)*/}
+                    <Route path="/kakao-callback" element={<KakaoCallback />} />
                     
+
                     {/* 🌟 배경과 사이드바가 유지되는 그룹 */}
                     <Route element={<MainLayout />}>
                         {/* 기본 화면 (대시보드) */}
                         <Route path="/" element={<Dashboard />} />
-                        
+                    {/* 🔒 로그인이 필요한 페이지 그룹 */}
+                    <Route element={<ProtectedRoute />}>
                         {/* 식단 추천 화면 */}
                         <Route path="/recommend" element={<DietRecommendation />} />
                         {/* 식단 기록 관리 */}
@@ -71,15 +91,17 @@ function App() {
                         <Route path="/information" element={<Information />} />
                         {/*마이페이지 목표보기 주소(/targetgoals)*/}
                         <Route path="/targetgoals" element={<TargetGoals />} />
+                        {/*목표관리 주소(/goal)*/}
+                        <Route path="/goal" element={<Goal />} />
                     </Route>
 
                     {/* 배경과 사이드바가 필요 없는 단독 화면들 */}
-                    <Route path="/login" element={<LoginPage />} />
-                    <Route path="/signup" element={<SignUp />} />
                     {/*마이페이지 주소(/mypage)*/}
                     <Route path="/mypage" element={<Mypage />} />
                     {/*식단기록 주소(/meallogpage)*/}
                     <Route path="/meallogpage" element={<MealLogPage />} />
+                    
+                    </Route>
                 </Routes>
             </div>
         </Router>

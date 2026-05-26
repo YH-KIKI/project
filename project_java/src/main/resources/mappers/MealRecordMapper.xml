@@ -15,13 +15,15 @@
             mk_meal_type,
             mk_image,
             mk_usermemo,
-            user_num
+            user_num,
+            mk_diet_date
         )
         VALUES (
             #{mkMealType},
             #{mkImage},
             #{mkUserMemo},
-            #{userNum}
+            #{userNum},
+            #{mkDietDate}
         )
 
     </insert>
@@ -166,7 +168,7 @@
 	
 	
 	<select id="getTodayMealRecord"
-	        resultType="kr.hi.project.dto.MealDetailDTO">
+        resultType="kr.hi.project.dto.MealDetailDTO">
 	    SELECT
 	        md.md_num AS mdNum,
 	        md.md_kcal AS mdKcal,
@@ -174,7 +176,15 @@
 	        md.mk_num AS mkNum,
 	        md.fo_num AS foNum,
 	        md.mday_num AS mdayNum,
+	
 	        f.fo_name AS foName,
+	        f.fo_kcal AS foKcal,
+	        f.fo_carbs AS foCarbs,
+	        f.fo_protein AS foProtein,
+	        f.fo_fat AS foFat,
+	        f.fo_natrium AS foNatrium,
+			
+			ml.mk_image AS mkImage,
 	        ml.mk_meal_type AS mkMealType
 	    FROM meal_detail md
 	    JOIN meal_log ml
@@ -182,8 +192,51 @@
 	    JOIN food f
 	        ON md.fo_num = f.fo_num
 	    WHERE ml.user_num = #{userNum}
-	      AND DATE(ml.mk_created_at) = #{date}
+	      AND ml.mk_diet_date = #{date}
 	    ORDER BY ml.mk_created_at DESC, md.md_num DESC
 	</select>
+	
+	<select id="findRecordedDates" resultType="string">
+	    SELECT DATE_FORMAT(mk_diet_date, '%Y-%m-%d') AS recordedDate
+	    FROM meal_log
+	    WHERE user_num = #{userNum}
+	    GROUP BY DATE_FORMAT(mk_diet_date, '%Y-%m-%d')
+	    ORDER BY recordedDate DESC
+	</select>
+	
+	<delete id="deleteMealDetails">
+	    DELETE FROM meal_detail
+	    WHERE mk_num = #{mkNum}
+	</delete>
+	<delete id="deleteMealLog">
+	    DELETE FROM meal_log
+	    WHERE mk_num = #{mkNum}
+	</delete>
+	
+	<select id="findMealLogNumsForUpdate" resultType="int">
+	    SELECT DISTINCT ml.mk_num
+	    FROM meal_log ml
+	    JOIN meal_detail md ON ml.mk_num = md.mk_num
+	    WHERE ml.user_num = #{userNum}
+	      AND ml.mk_meal_type = #{mkMealType}
+	      AND md.mday_num = #{mdayNum}
+	</select>
+	
+	<delete id="deleteMealDetailsByMkNums">
+	    DELETE FROM meal_detail
+	    WHERE mk_num IN
+	    <foreach collection="list" item="mkNum" open="(" separator="," close=")">
+	        #{mkNum}
+	    </foreach>
+	</delete>
+	
+	<delete id="deleteMealLogsByMkNums">
+	    DELETE FROM meal_log
+	    WHERE mk_num IN
+	    <foreach collection="list" item="mkNum" open="(" separator="," close=")">
+	        #{mkNum}
+	    </foreach>
+	</delete>
+
 
 </mapper>

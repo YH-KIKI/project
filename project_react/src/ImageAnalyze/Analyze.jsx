@@ -5,46 +5,78 @@ import '../Main/MainLayout.css';
 import { useNavigate } from 'react-router-dom';
 
 const Analyze = () => {
-  const [selectedFile, setSelectedFile] = useState(null); // 실제 파일 객체
-  const [previewUrl, setPreviewUrl] = useState(null);    // 미리보기 이미지 주소
-  const [isAnalyzing, setIsAnalyzing] = useState(false); // 로딩 상태
-  const [aiResults, setAiResults] = useState([]);       // AI가 찾은 음식 후보들
-  const [selectedFoods, setSelectedFoods] = useState([]); // 사용자가 클릭해서 선택한 음식들
-  const [showModal, setShowModal] = useState(false); // 입력 팝업 노출 여부
-  const [mealType, setMealType] = useState('아침');   // 아침, 점심, 저녁
-  const [foodDetails, setFoodDetails] = useState({}); // { '제육볶음': 200, '냉면': 450 } 형식
+  const [selectedFile, setSelectedFile] = useState(null); 
+  const [previewUrl, setPreviewUrl] = useState(null);    
+  const [isAnalyzing, setIsAnalyzing] = useState(false); 
+  const [aiResults, setAiResults] = useState([]);       
+  const [selectedFoods, setSelectedFoods] = useState([]); 
+  
+  // 🌟 [추가된 필살기 상태창들냥!]
+  const [showModal, setShowModal] = useState(false); 
+  const [showVariantModal, setShowVariantModal] = useState(false); // 세부 음식 선택 모달 스위치
+  const [currentSearchIndex, setCurrentSearchIndex] = useState(0); // 여러 개 선택했을 때 순서대로 처리하기 위함
+  const [foodVariants, setFoodVariants] = useState([]); // DB에서 LIKE로 찾은 세부 음식 리스트
+  const [finalSelectedFoods, setFinalSelectedFoods] = useState([]); // 세부 종류까지 100% 확정된 최종 음식 리스트냥!
 
-  const navigate = useNavigate(); //이동 함수 생성
+  const [mealType, setMealType] = useState('아침');   
+  const [foodDetails, setFoodDetails] = useState({}); 
+  const [customFoodName, setCustomFoodName] = useState("");
 
-  //사진 선택 시 처리
+  const navigate = useNavigate(); 
+
+  // 기존에 적혀있던 자동 주소 선택 스위치냥
+  const SERVER_URL = process.env.REACT_APP_API_URL || window.location.origin;
+
+  // 주소에서 자바 포트(:8080)를 싹 지우고, 파이썬 포트(:8000)를 붙인
+  const AI_SERVER_URL = SERVER_URL.replace(':8080', '') + ':8000';
+
+  const handleReportFail = async () => {
+    if (!customFoodName) {
+        alert("음식 이름을 입력해주세요!");
+        return;
+    }
+    const formData = new FormData();
+    formData.append('file', selectedFile);
+    const user = JSON.parse(localStorage.getItem('user') || '{}');
+    const data = { userNum: user.user_num, userInputName: customFoodName };
+    formData.append('data', JSON.stringify(data));
+
+    try {
+        // MealController
+        await axios.post(`/api/report-fail`, formData, { 
+          headers: { 'Content-Type': 'multipart/form-data' } 
+        });
+        alert("감사합니다! 입력하신 '" + customFoodName + "' 데이터가 수집되었습니다.");
+        setCustomFoodName(""); 
+    } catch (error) {
+        alert("제보 전송 중 오류가 발생했습니다.");
+    }
+  };
+
   const handleFileChange = (e) => {
     const file = e.target.files[0];
     if (file) {
       setSelectedFile(file);
-      setPreviewUrl(URL.createObjectURL(file)); // 브라우저 임시 경로 생성
-      setAiResults([]);       // 새 사진 올리면 이전 결과 초기화
-      setSelectedFoods([]);   // 선택 상태도 초기화
+      setPreviewUrl(URL.createObjectURL(file)); 
+      setAiResults([]);       
+      setSelectedFoods([]);   
+      setFinalSelectedFoods([]); // 초기화냥
     }
   };
 
-  //AI 분석 시작 (Python 서버 호출)
   const handleAnalyze = async () => {
     if (!selectedFile) {
       alert("분석할 사진을 먼저 선택해주세요!");
       return;
     }
-
     setIsAnalyzing(true);
     const formData = new FormData();
     formData.append('file', selectedFile);
 
     try {
-      // 파이썬 FastAPI 서버 주소
-      const response = await axios.post('http://localhost:8000/ai/predict', formData, {
-        headers: { 'Content-Type': 'multipart/form-data' }
+      const response = await axios.post(`/api/ai/predict`, formData, { 
+        headers: { 'Content-Type': 'multipart/form-data' } 
       });
-      
-      // 결과가 있으면 저장
       if (response.data.results) {
         setAiResults(response.data.results);
       }
@@ -56,67 +88,131 @@ const Analyze = () => {
     }
   };
 
-  //음식 선택/해제 토글 함수
   const toggleFoodSelection = (foodName) => {
     if (selectedFoods.includes(foodName)) {
-      // 이미 선택됨 -> 제거
       setSelectedFoods(selectedFoods.filter(f => f !== foodName));
     } else {
-      // 미선택 -> 추가
       setSelectedFoods([...selectedFoods, foodName]);
     }
   };
 
-  //추천하기(DB 저장) 버튼 클릭
-  const handleRecommend = () => {
+  // 기록하기 누르면 먼저 LIKE '%음식이름%' 조회하러 출발냥!
+  const handleRecommend = async () => {
     if (selectedFoods.length === 0) {
       alert("먹은 음식을 선택해주세요!");
       return;
     }
 
-  //선택된 음식들의 초기 중량을 0으로 설정하여 세팅
-  const initialDetails = {};
-    selectedFoods.forEach(food => {
-      initialDetails[food] = 0; 
-    });
-    setFoodDetails(initialDetails);
-    
-    setShowModal(true); // 입력 팝업 열기
+    // 최종 확정 상자 초기화하고 첫 번째 선택 음식부터 탐색 시작냥
+    setFinalSelectedFoods([]);
+    fetchVariantsForFood(0, selectedFoods[0]);
   };
+
+  // 특정 음식의 세부 종류를 DB에서 받아와 모달을 열어줍니다냥!
+  const fetchVariantsForFood = async (index, foodName) => {
+    try {
+      const token = localStorage.getItem('login_token') || sessionStorage.getItem('login_token');
+      const res = await axios.get(`/api/food/search-variants?foodName=${foodName}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+
+      if (res.data && res.data.length > 0) {
+        setFoodVariants(res.data); // DB에서 찾은 후라이드치킨, 양념치킨 상자 세팅냥!
+        setCurrentSearchIndex(index);
+        setShowVariantModal(true);  // 세부 선택창 
+      } else {
+        // 만약 DB에 LIKE로 걸리는 세부 종류가 전혀 없다면 그냥 AI 이름을 최종 이름으로 간주냥!
+        alert(`🚨 DB에 '${foodName}'과 일치하는 상세 종류가 없어 기본 이름으로 진행합니다냥.`);
+        // const nextFoods = [...finalSelectedFoods, foodName];
+        // setFinalSelectedFoods(nextFoods);
+        // checkNextOrMoveToWeight(index, nextFoods);
+        return
+      }
+    } catch (error) {
+      console.error("세부 음식 조회 실패", error);
+      alert("음식 상세 정보를 가져오는 중 오류가 발생했습니다.");
+    }
+  };
+
+  // 다음 고를 음식이 또 있는지 검사하거나 최종 중량 모달로 토스냥!
+  const checkNextOrMoveToWeight = (currentIndex, currentFinalList) => {
+    if (currentIndex + 1 < selectedFoods.length) {
+      // 아직 세부 선택을 완료해야 할 음식이 더 남았다면 다음 녀석 조회냥!
+      fetchVariantsForFood(currentIndex + 1, selectedFoods[currentIndex + 1]);
+    } else {
+      // 모든 음식의 세부 종류 확정이 끝났다면 대망의 중량 입력 모달 오픈!!!
+      const initialDetails = {};
+      currentFinalList.forEach(food => {
+        initialDetails[food] = 0; 
+      });
+      setFoodDetails(initialDetails);
+      setShowModal(true); // 중량 및 식사종류 모달창 오픈냥!
+    }
+  };
+
+  // 세부 모달에서 특정 음식 딱 클릭했을 때 처리 로직냥!
+  const handleSelectVariant = (exactFoodName) => {
+    const nextFoods = [...finalSelectedFoods, exactFoodName];
+    setFinalSelectedFoods(nextFoods);
+    setShowVariantModal(false); // 세부 선택창 닫기
+    
+    // 다음 스텝으로 진행냥
+    checkNextOrMoveToWeight(currentSearchIndex, nextFoods);
+  };
+
 
   const handleFinalSubmit = async () => {
     const formData = new FormData();
-    formData.append('file', selectedFile); // AI 분석에 썼던 원본 파일
+    formData.append('file', selectedFile); 
     const user = JSON.parse(localStorage.getItem('user') || '{}');
-    // 나머지 데이터를 JSON 객체로 묶어서 보냄
+    
     const data = {
       userNum: user.user_num,
       mkMealType: mealType,
-      foodDetails: foodDetails // { "제육볶음": 200, "냉면": 450 }
+      foodDetails: foodDetails // 확정된 세부음식이름과 중량이 정상적으로 전달된다냥!
     };
     formData.append('data', JSON.stringify(data));
 
     try {
-      const response = await axios.post('http://localhost:8080/api/record', formData, {
-        headers: { 
-          'Content-Type': 'multipart/form-data',
-          'Authorization': `Bearer ${localStorage.getItem('login_token')}`
-        }
+      const token = localStorage.getItem('login_token') || sessionStorage.getItem('login_token');
+      if (!token) {
+        alert("로그인 정보가 만료되었습니다. 다시 로그인해주세요! 🏃‍♂️");
+        navigate('/login');
+        return;
+      }
+
+      await axios.post('/api/record', formData, {
+        headers: { 'Content-Type': 'multipart/form-data', 'Authorization': `Bearer ${token}` }
       });
+      
       alert("식단 기록중...");
-      console.log(response)
+      const nutritionRes = await axios.get(
+        `/api/meal/current-nutrition?userNum=${user.user_num}&mealType=${mealType}`,
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+
+      if (nutritionRes.data.status === "NOT_FOUND") {
+        alert("🛑 죄송합니다. 이 음식의 정보가 없습니다.\n하단의 '정답 제보하기'를 통해 음식의 이름을 알려주시면 빠르게 이 음식정보를 추가하겠습니다");
+        setShowModal(false);
+        return;
+      }
+      
+      alert("식단 기록 완료! 평가 리포트로 이동합니다. 📊");
       setShowModal(false);
-      navigate('/'); // 기록 후 메인 페이지로 이동
+
+      navigate('/evaluation', { 
+        state: { mealResult: nutritionRes.data, mealType: mealType } 
+      });
     } catch (error) {
       console.error("기록 실패", error);
-    // 중복식사 알림 등를 alert으로 띄웁니다.
-    if (error.response && error.response.data) {
-      alert(`🛑 등록 실패: ${error.response.data}`);
-    } else {
-      alert("❌ 서버 오류가 발생했습니다. 잠시 후 다시 시도해주세요.");
+      if (error.response && error.response.data) {
+        alert(`🛑 등록 실패: ${error.response.data}`);
+      } else {
+        alert("❌ 서버 오류가 발생했습니다. 잠시 후 다시 시도해주세요.");
+      }
     }
-  }
-};
+  };
+
   return (
         <div style={{ 
           backgroundColor: '#fffcf9', padding: '40px', borderRadius: '30px', 
@@ -129,8 +225,6 @@ const Analyze = () => {
 
           {/* 상단: 사진 업로드 & 상태창 */}
           <div style={{ display: 'flex', gap: '20px', marginBottom: '40px' }}>
-            
-            {/* 사진 업로드 구역 */}
             <div style={{ flex: 1, backgroundColor: '#fbe9e7', borderRadius: '20px', padding: '20px' }}>
               <p style={{ fontWeight: 'bold', marginBottom: '10px' }}>사진 업로드</p>
               <label style={{ cursor: 'pointer' }}>
@@ -152,7 +246,6 @@ const Analyze = () => {
               </label>
             </div>
 
-            {/* AI 분석 상태창 */}
             <div style={{ 
               flex: 1, backgroundColor: '#fff', borderRadius: '20px', padding: '20px', 
               border: '1px solid #eee', display: 'flex', flexDirection: 'column', 
@@ -188,7 +281,6 @@ const Analyze = () => {
 
           {/* 하단: 결과 리스트 */}
           <div style={{ textAlign: 'center' }}>
-            <h3 style={{ color: '#5d4037' }}>찾으시는 게 없나요?</h3>
             <p style={{ fontSize: '13px', color: '#888', marginBottom: '30px' }}>
               AI가 사진에서 분석한 결과입니다. 먹은 음식을 **모두** 클릭해주세요!
             </p>
@@ -217,10 +309,28 @@ const Analyze = () => {
                     <p style={{ fontWeight: 'bold', fontSize: '15px', color: isSelected ? '#ff8a80' : '#555' }}>
                       {result.foodName}
                     </p>
-                    <p style={{ fontSize: '12px', color: '#bbb' }}>{result.confidence}% 일치</p>
                   </div>
                 );
               })}
+            </div>
+
+            <div style={{ marginTop: '30px', padding: '20px', backgroundColor: '#fff3e0', borderRadius: '15px' }}>
+              <p style={{ fontWeight: 'bold' }}>🧐 찾는 음식이 결과에 없나요?</p>
+              <input 
+                type="text" 
+                placeholder="음식 이름을 직접 입력해주세요"
+                value={customFoodName}
+                onChange={(e) => setCustomFoodName(e.target.value)}
+                style={{ padding: '10px', borderRadius: '10px', border: '1px solid #ddd', marginRight: '10px' }}
+              />
+              <button 
+                onClick={handleReportFail}
+                style={{ 
+                padding: '10px 20px', backgroundColor: '#ff9800', color: 'white', 
+                border: 'none', borderRadius: '10px', cursor: 'pointer', fontWeight: 'bold' 
+            }}>
+                정답 제보하기
+              </button>
             </div>
 
             {selectedFoods.length > 0 && (
@@ -233,10 +343,54 @@ const Analyze = () => {
                   boxShadow: '0 4px 10px rgba(198,70,93,0.3)'
                 }}
               >
-                {selectedFoods.length}개 선택됨 - 기록하기
+                {selectedFoods.length}개 선택됨 - 상세 종류 고르기
               </button>
             )}
-            {/* --- 중량 및 식사 종류 입력 모달 --- */}
+
+            {/* 🌟 1차 모달: [신규 생성] LIKE '%음식이름%' 세부 음식 선택 모달창냥! */}
+            {showVariantModal && (
+              <div style={{
+                position: 'fixed', top: 0, left: 0, width: '100%', height: '100%',
+                backgroundColor: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1001
+              }}>
+                <div style={{
+                  backgroundColor: '#fff', padding: '30px', borderRadius: '25px', width: '450px', textAlign: 'center',
+                  maxHeight: '70vh', overflowY: 'auto'
+                }}>
+                  <h3 style={{ color: '#5d4037', marginBottom: '10px' }}>🔍 세부 종류 선택</h3>
+                  <p style={{ fontSize: '14px', color: '#e65100', marginBottom: '20px' }}>
+                    원래 고르신 <b>'{selectedFoods[currentSearchIndex]}'</b>의 세부 종류가 여러 개 발견되었다냥!<br/>가장 가까운 음식을 골라달라냥 🐾
+                  </p>
+                  
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginBottom: '20px' }}>
+                    {foodVariants.map((food, idx) => (
+                      <button
+                        key={idx}
+                        onClick={() => handleSelectVariant(food.foName || food.fo_name || food)} 
+                        style={{
+                          padding: '12px', borderRadius: '15px', border: '1px solid #ddd',
+                          backgroundColor: '#fffcf9', cursor: 'pointer', fontWeight: 'bold',
+                          textAlign: 'left', fontSize: '15px', color: '#5d4037', transition: '0.2s'
+                        }}
+                        onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#fbe9e7'}
+                        onMouseOut={(e) => e.currentTarget.style.backgroundColor = '#fffcf9'}
+                      >
+                        🍗 {food.foName || food.fo_name || food}
+                      </button>
+                    ))}
+                  </div>
+                  
+                  <button 
+                    onClick={() => setShowVariantModal(false)}
+                    style={{ padding: '10px 30px', border: 'none', borderRadius: '15px', backgroundColor: '#eee', cursor: 'pointer' }}
+                  >
+                    창 닫기
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* 2차 모달: 기존의 [중량 및 식사 종류 입력] 모달창냥! */}
             {showModal && (
               <div style={{
                 position: 'fixed', top: 0, left: 0, width: '100%', height: '100%',
@@ -247,7 +401,6 @@ const Analyze = () => {
                 }}>
                   <h3 style={{ color: '#5d4037', marginBottom: '20px' }}>식단 상세 정보 입력</h3>
                   
-                  {/* 식사 종류 선택 */}
                   <div style={{ marginBottom: '20px', display: 'flex', justifyContent: 'center', gap: '10px' }}>
                     {['아침', '점심', '저녁'].map(type => (
                       <button 
@@ -262,11 +415,11 @@ const Analyze = () => {
                     ))}
                   </div>
 
-                  {/* 음식별 중량 입력 */}
+                  {/* 🌟 [수정 구역] AI 이름이 아닌, 완벽히 확정된 세부 음식이름 리스트로 중량을 입력받는다냥! */}
                   <div style={{ textAlign: 'left', marginBottom: '25px' }}>
-                    {selectedFoods.map(foodName => (
+                    {finalSelectedFoods.map(foodName => (
                       <div key={foodName} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
-                        <span style={{ fontWeight: 'bold' }}>{foodName}</span>
+                        <span style={{ fontWeight: 'bold', color: '#e65100' }}>✨ {foodName}</span>
                         <div style={{ display: 'flex', alignItems: 'center' }}>
                           <input 
                             type="number" 
@@ -279,7 +432,6 @@ const Analyze = () => {
                     ))}
                   </div>
 
-                  {/* 최종 저장 버튼 */}
                   <div style={{ display: 'flex', gap: '10px' }}>
                     <button 
                       onClick={() => setShowModal(false)}
@@ -287,9 +439,7 @@ const Analyze = () => {
                     >취소</button>
                     <button 
                       onClick={() => {
-                        // 여기서 Spring Boot 서버로 (selectedFile, mealType, foodDetails)를 한꺼번에 보냅니다!
                         console.log("최종 전송 데이터:", { mealType, foodDetails });
-                        alert("DB에 기록되었습니다!");
                         setShowModal(false);
                         handleFinalSubmit();
                       }}
@@ -300,7 +450,6 @@ const Analyze = () => {
               </div>
             )}
           </div>
-          {/* 로딩 애니메이션 CSS */}
           <style>{`
             @keyframes spin {
               0% { transform: rotate(0deg); }
@@ -308,7 +457,6 @@ const Analyze = () => {
             }
           `}</style>
         </div>
-
   );
 };
 

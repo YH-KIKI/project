@@ -24,13 +24,14 @@ const TargetGoals = () => {
         if (!userNum) return;
 
         const [nutritionRes, goalRes] = await Promise.all([
-          axios.get(`http://localhost:8080/api/meal/today-nutrition?userNum=${userNum}`),
-          axios.get(`http://localhost:8080/api/information_select`, {
+          axios.get(`/api/meal/today-nutrition?userNum=${userNum}`),
+          axios.get(`/api/information_select`, {
             headers: { Authorization: `Bearer ${token}` }
           })
         ]);
 
         const goals = goalRes.data;
+        console.log(goals)
         if (!goals || goals.userDailyKcal === 0 || !goals.userDailyKcal) {
           if (!hasAlerted.current) {
             alert("개인정보에 키, 몸무게, 목표 몸무게, 나이, 활동량을 입력해야 목표치를 보여줄 수 있어요! 정보 입력 페이지로 이동합니다. 🏃‍♂️");
@@ -53,7 +54,6 @@ const TargetGoals = () => {
             fat: getCalc(nutritionRes.data.totalFat, goalRes.data.userDailyFat)
           });
         }, 100);
-
       } catch (error) {
         console.error("데이터 로딩 실패", error);
         setLoading(false);

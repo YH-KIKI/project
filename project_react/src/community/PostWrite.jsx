@@ -39,7 +39,7 @@ const PostWrite = () => {
 
       try {
         // [수정] 업로드 엔드포인트 유지
-        const response = await axios.post('http://localhost:8080/api/community/upload', formData, {
+        const response = await axios.post('/api/community/upload', formData, {
           headers: { 'Content-Type': 'multipart/form-data' }
         });
 
@@ -83,7 +83,7 @@ const PostWrite = () => {
       formData.append("file", file);
 
       try {
-        const response = await axios.post('http://localhost:8080/api/community/upload', formData, {
+        const response = await axios.post('/api/community/upload', formData, {
           headers: { 'Content-Type': 'multipart/form-data' }
         });
 
@@ -149,9 +149,9 @@ const PostWrite = () => {
     try {
       let response;
       if (editPost) {
-        response = await axios.put('http://localhost:8080/api/community/update', postData);
+        response = await axios.put('/api/community/update', postData);
       } else {
-        response = await axios.post('http://localhost:8080/api/community/write', postData);
+        response = await axios.post('/api/community/write', postData);
       }
       
       if (response.data === "success" || response.status === 200) {

@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="kr.hi.project.dao.FridgeDao">
+	<select id="getFridgeSummary"
+	        resultType="kr.hi.project.dto.FridgeSummaryDTO">
+	
+	    SELECT
+	
+	        -- 목표값
+	        up.up_daily_kcal AS targetKcal,
+	        up.up_daily_carbs AS targetCarbs,
+	        up.up_daily_protein AS targetProtein,
+	        up.up_daily_fat AS targetFat,
+	        up.up_daily_natrium AS targetNatrium,
+	
+	        -- 현재 섭취량
+	        IFNULL(SUM(md.md_kcal),0) AS currentKcal,
+	
+			IFNULL(SUM(f.fo_carbs),0) AS currentCarbs,
+			
+			IFNULL(SUM(f.fo_protein),0) AS currentProtein,
+			
+			IFNULL(SUM(f.fo_fat),0) AS currentFat,
+			
+			IFNULL(SUM(f.fo_natrium),0) AS currentNatrium
+	
+	    FROM user_privacy up
+	
+	    LEFT JOIN meal_log ml
+	        ON up.user_num = ml.user_num
+	        AND DATE(ml.mk_diet_date) = CURDATE()
+	
+	    LEFT JOIN meal_detail md
+	        ON ml.mk_num = md.mk_num
+	
+	    LEFT JOIN food f
+	        ON md.fo_num = f.fo_num
+	
+	    WHERE up.user_num = #{userNum}
+	
+	</select>
+	
+	<select id="findRecipesByIngredients"
+        resultType="kr.hi.project.dto.FridgeRecipeDTO">
+
+	    SELECT
+	        rcp_num AS rcpNum,
+	        rcp_name AS rcpName,
+	        rcp_way AS rcpWay,
+	        rcp_type AS rcpType,
+	        rcp_weight AS rcpWeight,
+	        rcp_kcal AS rcpKcal,
+	        rcp_carbs AS rcpCarbs,
+	        rcp_protein AS rcpProtein,
+	        rcp_fat AS rcpFat,
+	        rcp_natrium AS rcpNatrium,
+	        rcp_image AS rcpImage,
+	        rcp_parts AS rcpParts
+	
+	    FROM recipe
+	
+	    WHERE
+	
+	    <foreach collection="ingredients"
+	             item="ing"
+	             separator=" OR ">
+	
+	        rcp_parts LIKE CONCAT('%', #{ing}, '%')
+	
+	    </foreach>
+	
+	    LIMIT 5
+	
+	</select>
+	
+	<select id="getRecipeSteps"
+	        resultType="kr.hi.project.dto.FridgeRecipeStepDTO">
+	
+	    SELECT
+	        step_num AS stepNum,
+	        rcp_num AS rcpNum,
+	        step_order AS stepOrder,
+	        step_text AS stepText
+	    FROM recipe_step
+	    WHERE rcp_num = #{rcpNum}
+	    ORDER BY step_order ASC
+	
+	</select>
+</mapper>

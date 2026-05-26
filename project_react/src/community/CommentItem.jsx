@@ -13,7 +13,7 @@ const CommentItem = ({ comment, user_num, onRefresh }) => {
 
     const handleUpdate = async () => {
         try {
-            await axios.put('http://localhost:8080/api/comments', {
+            await axios.put('/api/comments', {
                 // [수정] 스네이크 케이스를 모두 DTO 필드명(CamelCase)으로 변경
                 pcNum: comment.pcNum,
                 userNum: user_num,
@@ -28,7 +28,7 @@ const CommentItem = ({ comment, user_num, onRefresh }) => {
         if (!window.confirm("댓글을 삭제하시겠습니까?")) return;
         try {
             // [수정] pc_num -> pcNum
-            await axios.delete(`http://localhost:8080/api/comments/${comment.pcNum}`);
+            await axios.delete(`/api/comments/${comment.pcNum}`);
             onRefresh();
         } catch (error) { console.error(error); }
     };
@@ -43,7 +43,7 @@ const CommentItem = ({ comment, user_num, onRefresh }) => {
             return;
         }
         try {
-            await axios.post('http://localhost:8080/api/comments', {
+            await axios.post('/api/comments', {
                 // [수정] 스네이크 케이스를 모두 DTO 필드명(CamelCase)으로 변경
                 postNum: comment.postNum,
                 userNum: user_num,

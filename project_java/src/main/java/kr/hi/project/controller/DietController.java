@@ -17,7 +17,7 @@ import kr.hi.project.service.DietAnalysisService; // 🌟 추가됨
 import lombok.RequiredArgsConstructor;
 
 @RestController
-@RequestMapping("/api/v1/diet") 
+@RequestMapping("/api/diet") 
 @RequiredArgsConstructor
 public class DietController {
 
@@ -43,16 +43,15 @@ public class DietController {
         return ResponseEntity.ok(pythonResult);
     }
     
-    /**
-     * 3. 통계(주간/월간) 차트 및 영양소 데이터 반환 API
-     */
+    
+     // 3. 통계(주간/월간) 차트 및 영양소 데이터 반환 API
+    
     @GetMapping("/stats")
     public ResponseEntity<Map<String, Object>> getStats(
             @RequestParam(name = "userNum") Long userNum, 
             @RequestParam(name = "date") String date,
             @RequestParam(name = "type") String type) {
         
-        // 🌟 이제 선언된 dietAnalysisService를 정상적으로 사용할 수 있습니다.
         Map<String, Object> response = dietAnalysisService.getStatsData(userNum, date, type);
         return ResponseEntity.ok(response);
     }
