@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import './CharacterHistory.css';
 
@@ -9,9 +9,24 @@ const CharacterHistory = ({ isOpen, onClose, userNum }) => {
   const [totalPages, setTotalPages] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
 
-  const fetchHistory = async (page) => {
-    // userNum이 없으면 요청을 보내지 않습니다.
-    if (!userNum) return;
+  const fetchHistory = useCallback(async (page) => {
+    // 🚀 [보정] 부모가 준 userNum이 비어있다면 localStorage에서 안전하게 백업 추출합니다.
+    let activeUserNum = userNum;
+
+    if (!activeUserNum) {
+      const userData = localStorage.getItem('user');
+      if (userData) {
+        try {
+          const parsed = JSON.parse(userData);
+          activeUserNum = parsed.userNum || parsed.user_num || (parsed.user && (parsed.user.userNum || parsed.user.user_num));
+        } catch (e) {
+          console.error("유저 데이터 파싱 실패:", e);
+        }
+      }
+    }
+
+    // 최종 유저 번호조차 없으면 요청을 보내지 않습니다.
+    if (!activeUserNum) return;
 
     setIsLoading(true);
     try {
@@ -32,10 +47,10 @@ const CharacterHistory = ({ isOpen, onClose, userNum }) => {
       const response = await axios.get(
         'http://localhost:8080/api/history/list',
         {
-          // params에 userNum을 추가하여 해당 유저의 데이터임을 명시합니다.
+          // params에 확실하게 확인된 유저 고유 번호를 전송합니다.
           params: { 
             page: page,
-            userNum: userNum 
+            userNum: Number(activeUserNum) 
           },
           headers: {
             'Authorization': token ? `Bearer ${token}` : ''
@@ -54,18 +69,25 @@ const CharacterHistory = ({ isOpen, onClose, userNum }) => {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [userNum]); // 의존성 고정
 
+  // 🚀 [규칙 준수] Hooks 규칙을 위반하지 않도록 고정된 크기의 의존성 배열 유지
   useEffect(() => {
-    if (isOpen && userNum) {
-      setCurrentPage(1);
-      fetchHistory(1);
+    if (isOpen) {
+      fetchHistory(currentPage);
     }
-  }, [isOpen, userNum]);
+  }, [isOpen, currentPage, fetchHistory]);
+
+  // 모달이 완전히 닫힐 때 상태 초기화
+  useEffect(() => {
+    if (!isOpen) {
+      setCurrentPage(1);
+    }
+  }, [isOpen]);
 
   const paginate = (pageNumber) => {
+    if (pageNumber < 1 || pageNumber > totalPages) return;
     setCurrentPage(pageNumber);
-    fetchHistory(pageNumber);
   };
 
   if (!isOpen) return null;
@@ -84,33 +106,47 @@ const CharacterHistory = ({ isOpen, onClose, userNum }) => {
           ) : historyData && historyData.length > 0 ? (
             <>
               <div className="history-list-container">
-                {historyData.map((item, index) => (
-                  <div key={item.id || index} className={`history-card ${item.isLevelUp ? 'level-up-card' : ''}`}>
-                    <div className="history-info-group">
-                      <div className="history-header-row">
-                        <span className="history-label">{item.type}</span>
-                        <span className="history-current-lv">Lv.{item.currentLv}</span>
-                      </div>
-                      <span className="history-timestamp">{item.date}</span>
-                    </div>
+                {historyData.map((item, index) => {
+                  // 🚀 [필드명 유연성 대응] DB 호환용 (isLevelUp 혹은 is_level_up 둘 다 판정 가능하게 보완)
+                  const rawLevelUp = item.isLevelUp !== undefined ? item.isLevelUp : item.is_level_up;
+                  const isLevelUpFlag = Number(rawLevelUp) === 1;
+                  
+                  const displayLv = item.currentLv !== undefined ? item.currentLv : item.current_lv;
+                  const displayExp = item.exp !== undefined ? item.exp : item.experience;
 
-                    <div className="history-point-group">
-                      {item.isLevelUp ? (
-                        <span className="level-up-badge">LEVEL UP!</span>
-                      ) : (
-                        <>
-                          <span className="history-plus">+</span>
-                          <span className="history-exp-val">{item.exp}</span>
-                          <span className="history-unit">XP</span>
-                        </>
-                      )}
+                  return (
+                    <div key={item.id || index} className={`history-card ${isLevelUpFlag ? 'level-up-card' : ''}`}>
+                      <div className="history-info-group">
+                        <div className="history-header-row">
+                          <span className="history-label">{item.type}</span>
+                          <span className="history-current-lv">Lv.{displayLv}</span>
+                        </div>
+                        <span className="history-timestamp">{item.date}</span>
+                      </div>
+
+                      <div className="history-point-group">
+                        {isLevelUpFlag ? (
+                          <span className="level-up-badge">LEVEL UP!</span>
+                        ) : (
+                          <>
+                            <span className="history-plus">+</span>
+                            <span className="history-exp-val">{displayExp}</span>
+                            <span className="history-unit">XP</span>
+                          </>
+                        )}
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
 
+              {/* 🚀 CSS 파일 클래스명(.page-arrow, .page-num) 완벽 일치화 */}
               <div className="history-pagination">
-                <button onClick={() => paginate(currentPage - 1)} disabled={currentPage === 1}>
+                <button 
+                  className="page-arrow" 
+                  onClick={() => paginate(currentPage - 1)} 
+                  disabled={currentPage === 1}
+                >
                   &lt;
                 </button>
 
@@ -118,13 +154,17 @@ const CharacterHistory = ({ isOpen, onClose, userNum }) => {
                   <button
                     key={i + 1}
                     onClick={() => paginate(i + 1)}
-                    className={currentPage === i + 1 ? 'active' : ''}
+                    className={`page-num ${currentPage === i + 1 ? 'active' : ''}`}
                   >
                     {i + 1}
                   </button>
                 ))}
 
-                <button onClick={() => paginate(currentPage + 1)} disabled={currentPage === totalPages}>
+                <button 
+                  className="page-arrow" 
+                  onClick={() => paginate(currentPage + 1)} 
+                  disabled={currentPage === totalPages}
+                >
                   &gt;
                 </button>
               </div>

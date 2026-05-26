@@ -15,6 +15,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import kr.hi.project.dto.PostDTO;
 import kr.hi.project.dto.PostRequestDTO;
 import kr.hi.project.service.PostService;
+import kr.hi.project.service.CharacterService; // 🔥 추가
 
 @RestController
 @RequestMapping("/api/community")
@@ -23,6 +24,9 @@ public class PostController {
 
     @Autowired
     private PostService postService;
+
+    @Autowired
+    private CharacterService characterService; // 🔥 캐릭터 서비스 주입
 
     // 게시글 목록 조회
     @GetMapping("/posts")
@@ -45,10 +49,27 @@ public class PostController {
         return postService.getPostDetail(id, userNum, request, response);
     }
 
-    // 게시글 작성
+    // 🚀 게시글 작성 (경험치 연동 수정 부)
     @PostMapping("/write")
     public String writePost(@RequestBody PostRequestDTO dto) {
+        // 1. 기존 게시글 작성 로직 실행 (DB에 인서트)
         postService.writePost(dto);
+        
+        // 2. 글 작성 유저에게 활동 보너스(5 XP) 지급
+        try {
+            // PostRequestDTO에 있는 userNum 가져오기 (변수명 대소문자가 DTO 스펙과 다르면 dto.getUser_num() 등으로 체크)
+            int userNum = dto.getUserNum(); 
+            
+            if (userNum > 0) {
+                characterService.processPostReward(userNum);
+                System.out.println("📝 [경험치 알림] " + userNum + "번 유저 게시글 작성 경험치(+5 XP) 정산 완료!");
+            }
+        } catch (Exception e) {
+            // 경험치 때문에 글쓰기 전체가 튕기면 안 되므로 예외 처리 적용
+            System.out.println("❌ [경험치 오류] 게시글 작성 보상 지급 중 에러 발생: " + e.getMessage());
+            e.printStackTrace();
+        }
+        
         return "success";
     }
 
@@ -59,7 +80,7 @@ public class PostController {
         return "success";
     }
 
-    // 게시글 삭제 (빨간 줄 수정 완료)
+    // 게시글 삭제
     @DeleteMapping("/delete/{id}")
     public String deletePost(@PathVariable("id") int id) {
         postService.removePost(id);
