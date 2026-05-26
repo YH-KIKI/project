@@ -152,5 +152,5 @@ const DietRecommendation = () => {
     </div>
   );
 };
-ㅁ
+
 export default DietRecommendation;
