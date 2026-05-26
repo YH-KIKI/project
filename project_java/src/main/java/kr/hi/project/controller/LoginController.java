@@ -9,12 +9,13 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import kr.hi.project.dto.UserDTO;
+import kr.hi.project.service.CharacterService; // 🔥 주입 완료
 import kr.hi.project.service.JwtService;
 import kr.hi.project.service.UserService;
-import kr.hi.project.service.CharacterService; // 🔥 주입 완료
 
 @RestController
 @CrossOrigin(origins = "http://localhost:3000")
@@ -113,4 +114,46 @@ public class LoginController {
 	    response.put("message", "회원가입이 완료되었습니다!");
 		return response;
 	}
+	
+	// 로그인버튼 위해 토큰검사하기
+	@GetMapping("/api/auth/validate")
+	public Map<String, Object> validateToken(@RequestHeader("Authorization") String authHeader){
+		Map<String, Object> response = new HashMap();
+		try {
+			String token = authHeader.replace("Bearer ", "");
+			if (jwtService.validateToken(token)) {
+				response.put("isValid", true);
+			}else {
+	            response.put("isValid", false);
+	        }
+	    } catch (Exception e) {
+	        response.put("isValid", false);
+	    }
+	    return response;
+	}
+	
+	//가입하기전 중복체크
+	@GetMapping("/api/check-duplicate")
+	public Map<String, Boolean> checkDuplicate(
+			@RequestParam(value = "userid", required = false) String userid,
+		    @RequestParam(value = "username", required = false) String username,
+		    @RequestParam(value = "email", required = false) String email) {
+	    
+	    Map<String, Boolean> response = new HashMap<>();
+	    
+	    if (userid != null) {
+	        response.put("isIdTaken", userService.isUserIdTaken(userid));
+	    }
+	    if (username != null) {
+	        response.put("isNameTaken", userService.isUserNameTaken(username));
+	    }
+	    if (email != null) {
+	        // 이메일 중복 체크
+	        response.put("isEmailTaken", userService.isEmailTaken(email));
+	    }
+	    return response;
+	}
+
 }
+
+

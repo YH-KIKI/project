@@ -71,4 +71,8 @@ public interface UserDao {
 
 	// favorite_food = 0 (싫어요)인 음식 목록 조회
 	List<FoodDTO> findDislikeFoodsBySub(@Param("userNum") int userNum);
+	
+	int countByUserid(@Param("userid") String userid);
+	int countByUsername(@Param("username") String username);
+	int countByEmail(@Param("userEmail") String userEmail);
 }
