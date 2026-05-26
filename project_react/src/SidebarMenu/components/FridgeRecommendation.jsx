@@ -1,6 +1,9 @@
 import axios from "axios";
 import React, { useEffect, useState } from "react";
 import { FiHeart } from "react-icons/fi";
+import { useNavigate } from "react-router-dom";
+import MealRecordModal from "./MealRecordModal";
+import MealTypeSelectModal from "./MealTypeSelectModal";
 import "./FridgeRecommendation.css";
 
 const MacroItem = ({ name, icon, goal, intake, percent, type }) => {
@@ -48,6 +51,9 @@ const FridgeRecommendation = () => {
     weekday: "short",
   });
 
+  const navigate = useNavigate();
+
+
   const [ingredient, setIngredient] = useState("");
   const [ingredients, setIngredients] = useState([]);
   const [isRecommended, setIsRecommended] = useState(false);
@@ -56,6 +62,14 @@ const FridgeRecommendation = () => {
   const [recipes, setRecipes] = useState([]);
   const [activeSuggestionIndex, setActiveSuggestionIndex] = useState(-1);
   const [favoriteRecipeNums, setFavoriteRecipeNums] = useState([]);
+  const [mealAddRecipe, setMealAddRecipe] = useState(null);
+  const [isMealTypeModalOpen, setIsMealTypeModalOpen] = useState(false);
+  const [selectedMealType, setSelectedMealType] = useState(null);
+  const [selectedDate, setSelectedDate] = useState(null);
+  const [isMealRecordModalOpen, setIsMealRecordModalOpen] = useState(false);
+
+
+    
 
   const ingredientSuggestions = `
   계란
@@ -315,6 +329,18 @@ const FridgeRecommendation = () => {
       console.error("레시피 즐겨찾기 처리 실패:", err);
       alert("레시피 즐겨찾기 처리 실패!");
     }
+  };
+
+  const closeMealTypeModal = () => {
+    setIsMealTypeModalOpen(false);
+    setMealAddRecipe(null);
+  };
+  const handleMealTypeSelect = ({ mealType, date }) => {
+    setSelectedMealType(mealType);
+    setSelectedDate(date);
+
+    setIsMealTypeModalOpen(false);
+    setIsMealRecordModalOpen(true);
   };
 
   useEffect(() => {
@@ -813,17 +839,44 @@ const FridgeRecommendation = () => {
             >
               ❤️ 즐겨찾기
             </button>
-
-            <button className="add-meal-btn">
+            <button
+              className="add-meal-btn"
+              onClick={() => {
+                setMealAddRecipe(selectedRecipe);
+                setIsMealTypeModalOpen(true);
+              }}
+            >
               🍽 식단으로 추가
             </button>
-
           </div>
 
         </div>
 
       </div>
 
+    )}
+    {isMealRecordModalOpen && mealAddRecipe && (
+      <MealRecordModal
+        mealType={selectedMealType}
+        selectedDate={selectedDate}
+        selectedRecipe={{
+          rcpNum: mealAddRecipe.rcpNum,
+          name: mealAddRecipe.rcpName,
+          kcal: mealAddRecipe.rcpKcal || 0,
+          carbs: mealAddRecipe.rcpCarbs || 0,
+          protein: mealAddRecipe.rcpProtein || 0,
+          fat: mealAddRecipe.rcpFat || 0,
+          natrium: mealAddRecipe.rcpNatrium || 0,
+          image: mealAddRecipe.rcpImage,
+          aiReason: mealAddRecipe.aiReason || mealAddRecipe.rcpWay || "",
+        }}
+        onClose={() => {
+          setIsMealRecordModalOpen(false);
+          setMealAddRecipe(null);
+          setSelectedMealType(null);
+          setSelectedDate(null);
+        }}
+      />
     )}
     </div>
 
