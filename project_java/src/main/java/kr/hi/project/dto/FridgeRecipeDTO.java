@@ -26,4 +26,10 @@ public class FridgeRecipeDTO {
     // 추천 뱃지 여부
     private boolean recommended;
     
+    // AI 추천 이유
+    private String aiReason;
+
+    // AI 해시태그
+    private List<String> hashtags;
+    
 }

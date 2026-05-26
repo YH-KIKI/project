@@ -15,7 +15,6 @@ import jakarta.servlet.http.HttpServletResponse;
 import kr.hi.project.dto.PostDTO;
 import kr.hi.project.dto.PostRequestDTO;
 import kr.hi.project.service.PostService;
-import kr.hi.project.service.CharacterService;
 
 @RestController
 @RequestMapping("/api/community")
@@ -24,9 +23,6 @@ public class PostController {
 
     @Autowired
     private PostService postService;
-    
-    @Autowired
-    private CharacterService characterService;
 
     // 게시글 목록 조회
     @GetMapping("/posts")
@@ -53,18 +49,6 @@ public class PostController {
     @PostMapping("/write")
     public String writePost(@RequestBody PostRequestDTO dto) {
         postService.writePost(dto);
-        try {
-            // dto 가방 안에 들어있는 작성자 고유번호(userNum)를 쏙 꺼내기
-            int userNum = dto.getUserNum(); 
-            
-            //(유저번호, edNum=8[게시글작성], 줄경험치=5, 사유="게시글작성")
-            characterService.addExperience(userNum, 8, 5, "게시글 작성 보상");
-            System.out.println("[" + userNum + "] 유저 게시글 작성 경험치 트리거 가동 완료");
-            
-        } catch (Exception e) {
-            System.out.println("⚠️ 게시글 경험치 누적 중 오류 발생 (글 저장은 정상 완료): " + e.getMessage());
-            e.printStackTrace();
-        }
         return "success";
     }
 
