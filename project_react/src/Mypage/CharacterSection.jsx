@@ -130,19 +130,40 @@ const CharacterSection = ({ charInfo, onUpdate }) => {
 
             <div className="char-option-grid">
               {/* 각 캐릭터의 베이스 번호 (1:냠냠, 7:로로, 13:탄탄, 19:꿈꿈) */}
-              {[1, 7, 13, 19].map((type) => (
-                <div
-                  key={type}
-                  className="char-option-item"
-                  onClick={() => changeCharacter(type)}
-                >
-                  <img
-                    src={`/images/characters/${type === 1 ? 'nyam' : type === 7 ? 'roro' : type === 13 ? 'tan' : 'kku'}_lv1.png`}
-                    alt="char"
-                    style={{ width: '50px' }}
-                  />
-                </div>
-              ))}
+              {[1, 7, 13, 19].map((type) => {
+                // 타입 번호에 맞는 캐릭터 한글 이름 및 영어 접두사 정의
+                const nameMap = {
+                  1: { ko: '냠냠이', en: 'nyam' },
+                  7: { ko: '로로', en: 'roro' },
+                  13: { ko: '탄탄이', en: 'tan' },
+                  19: { ko: '꿈꿈이', en: 'kku' }
+                };
+                
+                return (
+                  <div
+                    key={type}
+                    className="char-option-item"
+                    onClick={() => changeCharacter(type)}
+                    style={{ 
+                      display: 'flex', 
+                      flexDirection: 'column', 
+                      alignItems: 'center', 
+                      gap: '8px',
+                      cursor: 'pointer'
+                    }}
+                  >
+                    <img
+                      src={`/images/characters/${nameMap[type].en}_lv1.png`}
+                      alt={nameMap[type].ko}
+                      style={{ width: '50px' }}
+                    />
+                    {/* 🚀 캐릭터 이름 레이블 추가 */}
+                    <span style={{ fontSize: '12px', fontWeight: '600', color: '#555' }}>
+                      {nameMap[type].ko}
+                    </span>
+                  </div>
+                );
+              })}
             </div>
 
             <button
