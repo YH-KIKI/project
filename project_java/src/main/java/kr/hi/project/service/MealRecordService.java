@@ -59,7 +59,7 @@ public class MealRecordService {
                 UUID.randomUUID() + ext;
 
             File saveFile =
-                new File(dir, savedName);
+                new File(uploadDir + savedName);
 
             file.transferTo(saveFile);
 

@@ -42,51 +42,5 @@
 	    WHERE up.user_num = #{userNum}
 	
 	</select>
-	
-	<select id="findRecipesByIngredients"
-        resultType="kr.hi.project.dto.FridgeRecipeDTO">
 
-	    SELECT
-	        rcp_num AS rcpNum,
-	        rcp_name AS rcpName,
-	        rcp_way AS rcpWay,
-	        rcp_type AS rcpType,
-	        rcp_weight AS rcpWeight,
-	        rcp_kcal AS rcpKcal,
-	        rcp_carbs AS rcpCarbs,
-	        rcp_protein AS rcpProtein,
-	        rcp_fat AS rcpFat,
-	        rcp_natrium AS rcpNatrium,
-	        rcp_image AS rcpImage,
-	        rcp_parts AS rcpParts
-	
-	    FROM recipe
-	
-	    WHERE
-	
-	    <foreach collection="ingredients"
-	             item="ing"
-	             separator=" OR ">
-	
-	        rcp_parts LIKE CONCAT('%', #{ing}, '%')
-	
-	    </foreach>
-	
-	    LIMIT 5
-	
-	</select>
-	
-	<select id="getRecipeSteps"
-	        resultType="kr.hi.project.dto.FridgeRecipeStepDTO">
-	
-	    SELECT
-	        step_num AS stepNum,
-	        rcp_num AS rcpNum,
-	        step_order AS stepOrder,
-	        step_text AS stepText
-	    FROM recipe_step
-	    WHERE rcp_num = #{rcpNum}
-	    ORDER BY step_order ASC
-	
-	</select>
 </mapper>

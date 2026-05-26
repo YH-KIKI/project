@@ -8,8 +8,6 @@ from schemas import UserInfo
 from ai_service import get_hybrid_diet_recommendation, analyze_pose, extract_outline, generate_daily_feedback
 # 대빵 - 식단 피드백 함수 
 from meal_feedback import generate_meal_feedback
-from fridge_ai import generate_ai_info
-
 import os
 import uvicorn
 from google.genai import types
@@ -43,7 +41,7 @@ class DietFeedbackRequest(BaseModel):
     sodium: int
     personaMode: str = "다정" # 기본값은 '다정'
 # ==========================================
-# 대빵 - 식단피드백 / 냉장고용 리퀘스트
+# 대빵 - 식단피드백용 리퀘스트
 # ==========================================
 class MealFeedbackRequest(BaseModel):
     mealType: str
@@ -53,16 +51,6 @@ class MealFeedbackRequest(BaseModel):
     fat: float
     sodium: float
 
-class FridgeRecipeItem(BaseModel):
-    rcpNum: int
-    rcpName: str
-    rcpParts: str
-
-class FridgeRecommendRequest(BaseModel):
-
-    ingredients: list[str]
-    recipes: list[FridgeRecipeItem]
-
 # ==========================================
 # 1. AI 식단 추천 엔드포인트
 # ==========================================
@@ -70,25 +58,22 @@ class FridgeRecommendRequest(BaseModel):
 async def ai_recommend(data: dict):
     try:
         user_num = data.get("userNum", 1)
-        # 스프링부트에서 1끼 분량으로 나눈 칼로리가 넘어오므로, 
-        # 하루 3끼 기준을 위해 원래 칼로리로 복구하거나 그대로 사용합니다. (여기선 그대로 사용)
         target_kcal = data.get("targetCalorie", 600) 
         carbs = data.get("carbs", 75)
         protein = data.get("protein", 45)
         fat = data.get("fat", 13)
         diet_type = data.get("type", "맞춤 식단")
+        
+        # 🌟 자바(스프링)가 보내준 챗봇 말투 받기! (없으면 '비즈니스' 기본값)
+        persona_mode = data.get("personaMode", "비즈니스") 
 
-        # 🌟 이제 반환값이 음식 1개가 아니라, 3개가 담긴 '리스트'입니다!
-        best_foods = ai_service.get_hybrid_diet_recommendation(
-            target_kcal, carbs, protein, fat, diet_type
+        # 🌟 5개 추출 함수로 파라미터 전부 전달!
+        best_foods = get_hybrid_diet_recommendation(
+            target_kcal, carbs, protein, fat, diet_type, persona_mode
         )
 
-        # 🌟 리스트 구조에 맞춰서 콘솔 출력(print) 방식도 예쁘게 변경해 줍니다.
-        print(f"📝 [Python] 3끼 오마카세 추천 완료! (유저: {user_num}, 목표: {diet_type})")
-        for food in best_foods:
-            print(f"🤖 [{food.get('meal_time', '식단')}] 추천 메뉴: {food.get('menu')}")
-
-        # 스프링부트가 받기 좋게 리스트를 통째로 리턴합니다! (이미 리스트이므로 [] 로 감쌀 필요 없음)
+        print(f"📝 [Python] 5가지 식단 추천 완료! (유저: {user_num}, 목표: {diet_type}, 말투: {persona_mode})")
+        
         return best_foods
 
     except Exception as e:
@@ -132,7 +117,6 @@ async def bodycheck_service(
 # ==========================================
 # 3. 사진 분석 테스트용 (기존 유지)
 # ==========================================
-@app.post("/detect")
 @app.post("/detect")
 async def detect_service(message: str = Form(...), file: UploadFile = File(...)):
     file_name = file.filename
@@ -189,42 +173,6 @@ async def meal_feedback_service(data: MealFeedbackRequest):
     return {
         "status": "success",
         "feedback": feedback
-    }
-
-# ==========================================
-# 대빵 - 냉장고 AI 추천
-# ==========================================
-
-@app.post("/api/ai/fridge-recommend")
-async def fridge_recommend_service(
-    data: FridgeRecommendRequest
-):
-
-    results = []
-
-    for recipe in data.recipes:
-
-        ai_data = generate_ai_info(
-            recipe,
-            data.ingredients
-        )
-
-        results.append({
-
-            "rcpNum":
-                recipe.rcpNum,
-
-            "aiReason":
-                ai_data["reason"],
-
-            "hashtags":
-                ai_data["hashtags"]
-
-        })
-
-    return {
-        "status": "success",
-        "results": results
     }
 
 # ==================================================================================

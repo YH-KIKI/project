@@ -20,4 +20,25 @@
         WHERE user_num = #{userNum}
     </update>
 
+	<update id="updateCharacterExpAndLevel" parameterType="map">
+	    UPDATE `character`
+	    SET ch_level = #{chLevel},
+	        ch_exp = #{chExp}
+	    WHERE user_num = #{userNum}
+	</update>
+	
+	<!-- 오늘출석검사 -->
+	<select id="checkTodayExpHistory" parameterType="map" resultType="int">
+	    SELECT COUNT(*) 
+	    FROM exp_history eh
+	    JOIN `character` c ON eh.ch_num = c.ch_num
+	    WHERE c.user_num = #{userNum}
+	      AND eh.ed_num = #{edNum}
+	      AND DATE(eh.eh_created_at) = CURRENT_DATE()
+	</select>
+	
+	<insert id="insertExpHistory" parameterType="map">
+	    INSERT INTO exp_history (ch_num, ed_num, eh_exp, eh_type_name, eh_created_at)
+	    VALUES (#{chNum}, #{edNum}, #{ehExp}, #{ehTypeName}, NOW())
+	</insert>
 </mapper>
