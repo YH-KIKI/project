@@ -27,54 +27,29 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class DietService {
 
-    // 🌟 분리된 3개의 DAO 주입
-    private final UserPrivacyDao userPrivacyDao;
-    private final ChatbotDao chatbotDao;
-    private final DietDao dietDao;
-    
+    private final UserPrivacyDao userPrivacyMapper;
     private final RestTemplate restTemplate = new RestTemplate();
 
-    @Value("${AI_MEAL_URL:http://localhost:8000}")
+    @Value("${AI_SERVER_URL:http://localhost:8000}")
     private String aiServerUrl;
 
     /**
      * AI 식단 추천 로직
+     * 1. DB에서 유저 정보를 가져옴
+     * 2. 탭(type)에 따라 탄단지 비율 및 목표 칼로리 재설정
+     * 3. 파이썬 서버로 데이터 전송 및 결과 반환
      */
     public List<Map<String, Object>> getDietRecommendations(Long userNum, String type) {
         try {
-            String todayStr = java.time.LocalDate.now().toString();
-            
-            // 1. [DietDao] 오늘 추천 API 호출 여부 락(Lock) 확인
-			/*
-			 * int recommendCount = dietDao.checkTodayRecommendCount(userNum, todayStr);
-			 * 
-			 * if (recommendCount > 0) { Map<String, Object> limitBlockResult = new
-			 * HashMap<>(); limitBlockResult.put("id", 0); limitBlockResult.put("menu",
-			 * "오늘의 식단 추천 완료! 🌟"); limitBlockResult.put("ai_comment",
-			 * "식단 추천은 회원님의 올바른 습관 형성을 위해 하루에 단 한 번만 가능합니다. 내일 새로운 메뉴로 찾아올게요!");
-			 * limitBlockResult.put("kcal", 0); limitBlockResult.put("carbs", 0);
-			 * limitBlockResult.put("protein", 0); limitBlockResult.put("fat", 0);
-			 * limitBlockResult.put("sodium", 0); limitBlockResult.put("tags",
-			 * Collections.singletonList("안내")); limitBlockResult.put("meal_time", "알림");
-			 * 
-			 * System.out.println("🛡️ [Spring] 식단 추천 제한 횟수 초과 방어 완료"); return
-			 * Collections.singletonList(limitBlockResult); }
-			 */
-            // 2. [ChatbotDao] 챗봇 페르소나 설정 확인
-            String persona = chatbotDao.getUserChatbotMode(userNum);
-            if (persona == null || persona.isEmpty()) {
-                persona = "비즈니스";
-            }
-
-            // 3. [UserPrivacyDao] 대빵 메서드로 유저 정보 조회 🌟
-            UserPrivacyDTO userInfo = userPrivacyDao.findNutritionTargetByUserNum(userNum.intValue());
+            DietUserDTO userInfo = userPrivacyMapper.findUserByNum(userNum);
             Map<String, Object> aiRequestData = new HashMap<>();
             
+            // 유저 정보가 있을 경우에만 정밀 계산 수행
             if (userInfo != null) {
-                // 🌟 DTO 이름에 완벽하게 맞춤! (빨간 줄 소멸)
-                double targetCalorie = userInfo.getUserDailyKcal() > 0 ? userInfo.getUserDailyKcal() : 2000.0;
-                double carbRatio = 0.5, proteinRatio = 0.3, fatRatio = 0.2; 
+                double targetCalorie = userInfo.getTargetCalorie() != null ? userInfo.getTargetCalorie() : 2000.0;
+                double carbRatio = 0.5, proteinRatio = 0.3, fatRatio = 0.2; // 기본값
 
+                // 탭별 로직 (요청하신 5가지 탭 기준)
                 switch (type) {
                     case "다이어트":
                         carbRatio = 0.4; proteinRatio = 0.4; fatRatio = 0.2;
@@ -85,11 +60,18 @@ public class DietService {
                         targetCalorie *= 1.2;
                         break;
                     case "저탄고지":
-                        carbRatio = 0.1; proteinRatio = 0.2;  fatRatio = 0.7;
+                        carbRatio = 0.1; proteinRatio = 0.2; fatRatio = 0.7;
                         break;
                     case "건강유지":
-                    default:
                         carbRatio = 0.5; proteinRatio = 0.3; fatRatio = 0.2;
+                        break;
+                    case "맞춤 식단":
+                    default:
+                        if (userInfo.getCarbs() != null && userInfo.getCarbs() > 0) {
+                            carbRatio = (userInfo.getCarbs() * 4.0) / targetCalorie;
+                            proteinRatio = (userInfo.getProtein() * 4.0) / targetCalorie;
+                            fatRatio = (userInfo.getFat() * 9.0) / targetCalorie;
+                        }
                         break;
                 }
                 
@@ -98,29 +80,22 @@ public class DietService {
                 int targetFat = (int) Math.round((targetCalorie * fatRatio) / 9.0);
 
                 aiRequestData.put("userNum", userNum);
-                aiRequestData.put("height", userInfo.getUserHeight() > 0 ? userInfo.getUserHeight() : 170.0);
-                aiRequestData.put("weight", userInfo.getUserWeight() > 0 ? userInfo.getUserWeight() : 65.0);
-                aiRequestData.put("targetCalorie", (int) (targetCalorie / 3)); 
+                aiRequestData.put("height", userInfo.getHeight() != null ? userInfo.getHeight() : 170.0);
+                aiRequestData.put("weight", userInfo.getWeight() != null ? userInfo.getWeight() : 65.0);
+                aiRequestData.put("targetCalorie", (int) (targetCalorie / 3)); // 1끼 기준
                 aiRequestData.put("carbs", (int) (targetCarbs / 3));
                 aiRequestData.put("protein", (int) (targetProtein / 3));
                 aiRequestData.put("fat", (int) (targetFat / 3));
-                aiRequestData.put("sodium", userInfo.getUserDailyNatrium() > 0 ? userInfo.getUserDailyNatrium() : 2000.0); 
+                aiRequestData.put("sodium", userInfo.getSodium() != null ? userInfo.getSodium() : 2000); 
                 aiRequestData.put("type", type);
-                aiRequestData.put("personaMode", persona); // 파이썬에 챗봇 말투 전달
+                
+                System.out.println("✅ AI 서버 전송 데이터: " + aiRequestData.toString());
             }
 
-            // 4. 파이썬 서버 통신
             String pythonAiUrl = aiServerUrl + "/api/ai/recommend";
             ResponseEntity<List> response = restTemplate.postForEntity(pythonAiUrl, aiRequestData, List.class);
             
-            List<Map<String, Object>> result = response.getBody() != null ? response.getBody() : Collections.emptyList();
-            
-            // 5. [DietDao] 통신 성공 시 무조건 로그 기록 (다음 호출 차단)
-            if (!result.isEmpty() && !result.get(0).containsKey("error")) {
-                dietDao.insertRecommendLog(userNum, todayStr);
-            }
-            
-            return result;
+            return response.getBody() != null ? response.getBody() : Collections.emptyList();
 
         } catch (Exception e) {
             System.err.println("❌ 식단 추천 에러: " + e.getMessage());

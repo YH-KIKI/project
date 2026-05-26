@@ -13,8 +13,8 @@ if platform.system() == "Windows":
     SAVE_PATH = r'C:/Users/C603/Documents/AWS Class/git/aws_class/python/testfood/nyamnyam_model.pth'
 else:
     # AWS(리눅스) 환경일 때의 경로
-    BASE_DIR = '/home/ubuntu/project/uploads/relearn'
-    SAVE_PATH = '/home/ubuntu/project/model/nyamnyam_model.pth'
+    BASE_DIR = '/app/uploads/relearn'
+    SAVE_PATH = '/project_python/model/nyamnyam_model.pth'
 
 def train_update():
     print(f"[{datetime.now()}] 자동 재학습 파이프라인 가동...")

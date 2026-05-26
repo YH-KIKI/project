@@ -1,7 +1,6 @@
 .char-section {
     width: 100%;
     box-sizing: border-box;
-    /* 패딩이 전체 너비에 포함되도록 설정 */
     border: 1px solid #FFDADA;
     border-radius: 30px;
     padding: 30px;
@@ -12,9 +11,9 @@
     background-color: #fff;
     position: relative;
     overflow: visible;
-    /* 툴팁 노출을 위해 중요 */
 }
 
+/* 이미지 */
 .char-img-wrapper {
     position: relative;
     display: flex;
@@ -27,10 +26,10 @@
     margin-bottom: 10px;
 }
 
+/* 경험치 영역 */
 .char-exp-wrapper {
     width: 100%;
     max-width: 400px;
-    /* 경험치 바가 너무 길어지지 않게 제한 */
     margin-top: 10px;
     display: flex;
     flex-direction: column;
@@ -51,7 +50,7 @@
     white-space: nowrap;
 }
 
-/* 경험치 바 컨테이너 */
+/* 경험치 바 */
 .char-progress-container {
     flex: 1;
     height: 12px;
@@ -69,7 +68,7 @@
     transition: width 0.5s ease-in-out;
 }
 
-/* 툴팁 스타일 */
+/* 툴팁 */
 .char-exp-tooltip {
     position: absolute;
     top: -35px;
@@ -93,17 +92,7 @@
     top: -40px;
 }
 
-.char-exp-tooltip::after {
-    content: '';
-    position: absolute;
-    top: 100%;
-    left: 50%;
-    margin-left: -5px;
-    border-width: 5px;
-    border-style: solid;
-    border-color: rgba(0, 0, 0, 0.8) transparent transparent transparent;
-}
-
+/* 상태 텍스트 */
 .char-status-text {
     font-size: 14px;
     color: #888;
@@ -111,10 +100,19 @@
     text-align: center;
 }
 
-.char-change-btn {
+/* ========================= */
+/* 버튼 (핵심: 원래 디자인 복구) */
+/* ========================= */
+
+.char-button-group {
     position: absolute;
     bottom: 20px;
     right: 25px;
+    display: flex;
+    gap: 8px;
+}
+
+.char-change-btn {
     background-color: #f8f8f8;
     border: 1px solid #ddd;
     border-radius: 20px;
@@ -123,11 +121,28 @@
     font-size: 12px;
     color: #666;
     font-weight: bold;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
-    transition: all 0.2s ease;
 }
 
-/* 모달 디자인 (변경 없음) */
+.char-history-btn {
+    background-color: #fff4e8;
+    border: 1px solid #ffd3aa;
+    border-radius: 20px;
+    padding: 6px 12px;
+    cursor: pointer;
+    font-size: 12px;
+    color: #d67b2d;
+    font-weight: bold;
+}
+
+.char-history-btn:hover,
+.char-change-btn:hover {
+    transform: translateY(-1px);
+}
+
+/* ========================= */
+/* 모달 (변경 없음) */
+/* ========================= */
+
 .char-modal-overlay {
     position: fixed;
     top: 0;
@@ -171,4 +186,47 @@
     color: #fff;
     border-radius: 10px;
     cursor: pointer;
+}
+
+/* ========================= */
+/* 히스토리 (변경 없음) */
+/* ========================= */
+
+.char-history-list {
+    max-height: 300px;
+    overflow-y: auto;
+    text-align: left;
+}
+
+.char-history-item {
+    border-bottom: 1px solid #f1f1f1;
+    padding: 12px 0;
+}
+
+.char-history-item:last-child {
+    border-bottom: none;
+}
+
+.char-history-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.char-history-reason {
+    font-size: 14px;
+    font-weight: bold;
+    color: #444;
+}
+
+.char-history-exp {
+    font-size: 14px;
+    font-weight: bold;
+    color: #ff8a3d;
+}
+
+.char-history-date {
+    margin-top: 5px;
+    font-size: 11px;
+    color: #999;
 }

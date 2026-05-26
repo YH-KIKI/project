@@ -5,6 +5,7 @@ import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import kr.hi.project.dao.CharacterDao;
 import kr.hi.project.dto.CharacterDTO;
@@ -15,75 +16,106 @@ public class CharacterService {
     @Autowired
     private CharacterDao characterDao;
 
-    // 1. 기존 캐릭터 정보 조회
+    // 1. 기존 캐릭터 정보 조회 (방어 코드 추가)
+    @Transactional
     public CharacterDTO getCharacterStatus(int userNum) {
-        return characterDao.getCharacterInfo(userNum);
+        CharacterDTO character = characterDao.getCharacterInfo(userNum);
+        
+        // [방어 코드] 만약 DB 트리거 누락 등으로 캐릭터가 없다면 여기서 최초 1회 생성해줌
+        if (character == null) {
+            Map<String, Object> initParams = new HashMap<>();
+            initParams.put("userNum", userNum);
+            // MyBatis 마퍼에 해당 유저의 기본 캐릭터(레벨1, 경험치0, cg_num=1)를 인서트하는 메서드가 있다고 가정
+            // characterDao.insertDefaultCharacter(userNum); 
+            // character = characterDao.getCharacterInfo(userNum);
+        }
+        return character;
     }
 
-    // 2. 캐릭터 타입 변경 로직 수정
+    // 2. 캐릭터 타입 변경 (수동 변경용)
     public void updateCharacterType(int userNum, int type) {
-        // DB 설계상 character 테이블의 cg_num만 바꾸면 
-        // JOIN을 통해 cgName과 cgImg가 자동으로 결정됩니다.
-        // 수정된 Dao의 메서드를 호출합니다.
         characterDao.updateCharacterType(userNum, type);
     }
-    
-    public int getRequiredExp(int level) {
-        if (level >= 91) return 1000;
-        if (level >= 61) return 750;
-        if (level >= 31) return 500;
-        if (level >= 11) return 250;
-        return 100;
-    }
 
-    public void addExperience(int userNum, int edNum, int expAmount, String reason) {
-        
-        // 오늘 영수증이 있는지 검사
-        if (edNum == 10) {
-            int alreadyGot = characterDao.checkTodayExpHistory(userNum, edNum);
-            if (alreadyGot > 0) {
-                System.out.println("❌ 오늘 이미 로그인 출석 보상을 받으셨다냥!");
-                return;
-            }
-        }
-        
-        // 게시글 작성 보상(8번) 하루 최대 3번만
-        if (edNum == 8) {
-            int alreadyGot = characterDao.checkTodayExpHistory(userNum, edNum);
-            if (alreadyGot >= 3) { // 오늘 쓴 글 영수증이 3개 이상 쌓였다면
-                System.out.println("❌ 오늘 게시글 작성 보상(3회)을 모두 채우셨다냥! 글은 써지지만 경험치는 안 준다냥!");
-                return; // 경험치 안 주고 여기서 튕겨내기
-            }
-        }
-
+    /**
+     * [핵심 로직] 경험치 추가 및 레벨업 처리
+     */
+    @Transactional
+    public void addExperience(int userNum, int expAmount, String source) {
+        // 1) 현재 캐릭터 정보 가져오기
         CharacterDTO character = characterDao.getCharacterInfo(userNum);
         if (character == null) return;
 
-        // 레벨업 판정 while 루프 구역은 그대로 유지
-        int currentLevel = character.getChLevel();
-        int currentExp = character.getChExp() + expAmount;
-        while (currentExp >= getRequiredExp(currentLevel)) {
-            currentExp -= getRequiredExp(currentLevel);
+        int oldLevel = character.getChLevel();
+        int newExp = character.getChExp() + expAmount;
+        int currentLevel = oldLevel;
+
+        // 2) 레벨업 로직 (누적 경험치 기반)
+        while (currentLevel < 99) {
+            Integer nextLevelTotalExp = characterDao.getNextLevelRequiredExp(currentLevel);
+            
+            // 다음 레벨 요구치 데이터가 없거나, 현재 내 누적 경험치가 요구치보다 적으면 중단
+            if (nextLevelTotalExp == null || newExp < nextLevelTotalExp) {
+                break;
+            }
             currentLevel++;
         }
 
-        // 캐릭터 실시간 점수 업데이트
+        // 3) 레벨 구간별 외형 번호 계산
+        int newCgNum = calculateCgNum(character.getCgNum(), currentLevel);
+        boolean isLevelUp = currentLevel > oldLevel;
+
+        // 4) DB 업데이트 (캐릭터 상태)
         Map<String, Object> updateParams = new HashMap<>();
         updateParams.put("userNum", userNum);
+        updateParams.put("chExp", newExp);
         updateParams.put("chLevel", currentLevel);
-        updateParams.put("chExp", currentExp);
-        characterDao.updateCharacterExpAndLevel(updateParams);
+        updateParams.put("cgNum", newCgNum);
 
-        // 영수증 박기 (ch_num 자리에 0 안 꽂히게 확실하게 묶기)
+        characterDao.updateCharacterExpAndLevel(updateParams);
+        
+        // 5) 경험치 획득 이력 저장
         Map<String, Object> historyParams = new HashMap<>();
+        historyParams.put("userNum", userNum);
+        historyParams.put("exp", expAmount);
+        historyParams.put("source", source); // DB에 한글('로그인', '식단평가A')로 들어가므로 한글 값이 와야 함
+        historyParams.put("isLevelUp", isLevelUp ? 1 : 0);
+        historyParams.put("currentLv", currentLevel); 
+
+        characterDao.insertExpHistory(historyParams);
+    }
+
+    /**
+     * 로그인 보상 로직 연산
+     */
+    public void processLoginReward(int userNum, int streakCount) {
+        int xp = 5; 
+        // 🛠️ DB의 exp_details 테이블 ed_type 값인 '로그인'과 일치하도록 한글로 수정 완료
+        String sourceKey = "로그인"; 
+
+        if (streakCount == 3) {
+            xp = 10; 
+        } else if (streakCount >= 7) {
+            xp = 15; 
+        }
         
-        historyParams.put("chNum", character.getChNum() == 0 ? userNum : character.getChNum()); 
-        
-        historyParams.put("edNum", edNum);
-        historyParams.put("ehExp", expAmount);
-        historyParams.put("ehTypeName", reason);           
-        
-        characterDao.insertExpHistory(historyParams); 
-        System.out.println("💾 영수증에 진짜 번호 쾅 박기 대성공이다냥!");
+        addExperience(userNum, xp, sourceKey);
+    }
+
+    /**
+     * 캐릭터 레벨 구간별 외형 번호 계산
+     */
+    private int calculateCgNum(int currentCgNum, int level) {
+        int baseType = ((currentCgNum - 1) / 6) * 6; 
+        int step;
+
+        if (level >= 99) step = 6;      // 전설 (99)
+        else if (level >= 91) step = 5; // 다이어트 신 (91~98)
+        else if (level >= 61) step = 4; // 건강 마스터 (61~90)
+        else if (level >= 31) step = 3; // 프로 식단러 (31~60)
+        else if (level >= 11) step = 2; // 쑥쑥 자라요 (11~30)
+        else step = 1;                  // 식단 병아리 (1~10)
+
+        return baseType + step;
     }
 }

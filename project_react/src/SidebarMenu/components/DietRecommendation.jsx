@@ -132,7 +132,7 @@ const handleFinalRecord = async (mealType) => {
           {isLoading ? (
             <div className="loading-state">
               <span className="spinner">🥗</span>
-              <p>AI 셰프가 오늘의 5가지 추천 식단을 구성 중입니다...</p>
+              <p>AI 셰프가 오늘의 3끼 오마카세를 구성 중입니다...</p>
             </div>
           ) : error ? (
             <div className="error-state">
@@ -186,7 +186,7 @@ const handleFinalRecord = async (mealType) => {
                         className="mini-record-btn"
                         onClick={() => openRecordModal(item)}
                       >
-                        이 식단으로 기록하기
+                        기록하기
                       </button>
                     </div>
                   </div>
@@ -213,7 +213,7 @@ const handleFinalRecord = async (mealType) => {
       )}
 
       <div className="info-footer">
-        <p>💡 탭을 클릭할 때마다 AI가 영양 목표에 맞는 5가지 옵션을 새롭게 제안합니다.</p>
+        <p>💡 탭을 클릭할 때마다 AI가 새로운 메뉴를 무작위로 구성합니다.</p>
       </div>
     </div>
   );

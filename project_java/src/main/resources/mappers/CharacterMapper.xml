@@ -2,43 +2,71 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="kr.hi.project.dao.CharacterDao">
 
+    <!-- 1. 캐릭터 정보 상세 조회 (경험치 바 계산을 위한 정보 보완) -->
     <select id="getCharacterInfo" parameterType="int" resultType="kr.hi.project.dto.CharacterDTO">
         SELECT 
+            c.ch_num AS chNum,
             c.ch_level AS chLevel,
             c.ch_exp AS chExp,
-            c.user_num AS userNum, cg.cg_name AS cgName,
+            c.user_num AS userNum,
+            c.cg_num AS cgNum,
+            cg.cg_name AS cgName,
             cg.cg_img AS cgImg,
+            <!-- 현재 레벨의 시작 경험치 (직전 레벨의 최고치) -->
+            (SELECT COALESCE(MAX(he_exp), 0) FROM highest_exp WHERE he_level &lt; c.ch_level) AS currentLevelExp,
+            <!-- 다음 레벨의 목표 경험치 -->
             (SELECT MIN(he_exp) FROM highest_exp WHERE he_level > c.ch_level) AS nextLevelExp
         FROM `character` c
         JOIN character_grow cg ON c.cg_num = cg.cg_num
         WHERE c.user_num = #{userNum}
     </select>
 
+    <!-- 2. 캐릭터 타입(외형) 변경 -->
     <update id="updateCharacterType" parameterType="map">
         UPDATE `character`
         SET cg_num = #{type}
         WHERE user_num = #{userNum}
     </update>
 
-	<update id="updateCharacterExpAndLevel" parameterType="map">
-	    UPDATE `character`
-	    SET ch_level = #{chLevel},
-	        ch_exp = #{chExp}
-	    WHERE user_num = #{userNum}
-	</update>
-	
-	<!-- 오늘출석검사 -->
-	<select id="checkTodayExpHistory" parameterType="map" resultType="int">
-	    SELECT COUNT(*) 
-	    FROM exp_history eh
-	    JOIN `character` c ON eh.ch_num = c.ch_num
-	    WHERE c.user_num = #{userNum}
-	      AND eh.ed_num = #{edNum}
-	      AND DATE(eh.eh_created_at) = CURRENT_DATE()
-	</select>
-	
-	<insert id="insertExpHistory" parameterType="map">
-	    INSERT INTO exp_history (ch_num, ed_num, eh_exp, eh_type_name, eh_created_at)
-	    VALUES (#{chNum}, #{edNum}, #{ehExp}, #{ehTypeName}, NOW())
-	</insert>
+    <!-- 3. 다음 레벨업에 필요한 누적 경험치 조회 -->
+    <select id="getNextLevelRequiredExp" parameterType="int" resultType="Integer">
+        SELECT he_exp 
+        FROM highest_exp 
+        WHERE he_level > #{currentLevel} 
+        ORDER BY he_level ASC 
+        LIMIT 1
+    </select>
+
+    <!-- 4. 경험치, 레벨, 외형 일괄 업데이트 -->
+    <update id="updateCharacterExpAndLevel" parameterType="map">
+        UPDATE `character`
+        SET ch_exp = #{chExp},
+            ch_level = #{chLevel},
+            cg_num = #{cgNum}
+        WHERE user_num = #{userNum}
+    </update>
+
+    <!-- 5. 경험치 획득 이력 저장 -->
+    <insert id="insertExpHistory" parameterType="map">
+        INSERT INTO exp_history (
+            eh_exp, 
+            eh_type_name, 
+            ch_num, 
+            ed_num,
+            eh_current_lv,
+            eh_is_level_up,
+            eh_created_at
+        )
+        SELECT 
+            #{exp}, 
+            #{source}, 
+            c.ch_num, 
+            (SELECT ed_num FROM exp_details WHERE ed_type = #{source} LIMIT 1),
+            c.ch_level,
+            #{isLevelUp},
+            NOW()
+        FROM `character` c
+        WHERE c.user_num = #{userNum}
+    </insert>
+
 </mapper>
