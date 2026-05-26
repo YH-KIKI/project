@@ -10,4 +10,6 @@ public interface DietDao {
 
     // 식단 추천 로그 기록
     void insertRecommendLog(@Param("userNum") Long userNum, @Param("today") String today);
+    
+
 }

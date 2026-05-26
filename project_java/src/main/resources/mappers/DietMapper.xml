@@ -14,5 +14,4 @@
         INSERT INTO user_event_log (user_num, event_type, event_date) 
         VALUES (#{userNum}, 'AI_RECOMMEND', #{today})
     </insert>
-
 </mapper>

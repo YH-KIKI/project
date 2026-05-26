@@ -1,7 +1,7 @@
-/* 전체 컨테이너: 양옆 24px 여백 및 중앙 정렬 */
+/* 전체 컨테이너 */
 .recommendation-container {
   background-color: transparent;
-  padding: 0 24px 40px;
+  padding: 0 0 40px 0;
   box-sizing: border-box; 
   font-family: 'Pretendard', -apple-system, sans-serif;
   width: 100%;
@@ -16,22 +16,8 @@
   padding: 0 5px;
 }
 
-.header-area .title {
-  margin: 0;
-  font-size: 24px;
-  font-weight: 800;
-  color: #333;
-}
-
-.header-area .date {
-  font-size: 15px;
-  color: #ff8fa3;
-  font-weight: 700;
-  background-color: #fff;
-  padding: 5px 12px;
-  border-radius: 20px;
-  box-shadow: 0 2px 8px rgba(255, 143, 163, 0.2);
-}
+.header-area .title { margin: 0; font-size: 24px; font-weight: 800; color: #333; }
+.header-area .date { font-size: 15px; color: #ff8fa3; font-weight: 700; background-color: #fff; padding: 5px 12px; border-radius: 20px; box-shadow: 0 2px 8px rgba(255, 143, 163, 0.2); }
 
 /* 메인 배경 카드 */
 .recommendation-card-wrapper {
@@ -44,7 +30,7 @@
   box-sizing: border-box;
 }
 
-/* 탭 메뉴 스타일 */
+/* 탭 메뉴 */
 .tab-menu {
   display: flex;
   gap: 6px;
@@ -52,211 +38,99 @@
   border: 1.5px solid #FFEDEA;
   padding: 5px;
   border-radius: 18px;
-  margin-bottom: 25px;
+  margin-bottom: 20px;
+}
+.tab-button { flex: 1; padding: 12px 0; border: none; background-color: transparent; color: #aaa; font-size: 14px; font-weight: 700; cursor: pointer; border-radius: 14px; transition: all 0.3s ease; }
+.tab-button.active { background-color: #ff8fa3; color: white; box-shadow: 0 4px 12px rgba(255, 143, 163, 0.3); }
+
+/* 디버그 텍스트 */
+.debug-log {
+  text-align: center;
+  color: #ff8fa3;
+  font-weight: 800;
+  margin-bottom: 20px;
 }
 
-.tab-button {
-  flex: 1;
-  padding: 12px 0;
-  border: none;
-  background-color: transparent;
-  color: #aaa;
-  font-size: 14px;
-  font-weight: 700;
-  cursor: pointer;
-  border-radius: 14px;
-  transition: all 0.3s ease;
-}
-
-.tab-button.active {
-  background-color: #ff8fa3; 
-  color: white;
-  box-shadow: 0 4px 12px rgba(255, 143, 163, 0.3);
-}
-
-/* 5끼 식단 리스트 (세로 정렬) */
+/* 🔥 핵심 수정: 높이 제한과 스크롤 완전 삭제, 세로로 쭉 쌓음 */
+.diet-list { width: 100%; }
 .meal-grid {
   display: flex;
   flex-direction: column;
-  gap: 24px;
+  align-items: center;
+  gap: 30px; /* 카드 간격 넉넉하게 */
+  width: 100%;
 }
 
 /* 개별 식단 카드 */
 .diet-card {
+  width: 100%;
+  max-width: 450px; /* 카드가 너무 넓게 퍼지지 않도록 크기 고정 */
   position: relative;
   background-color: #fff;
   border: 1.5px solid #FFEDEA;
   border-radius: 24px;
-  overflow: hidden; 
-  transition: all 0.3s ease;
   display: flex;
   flex-direction: column;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.03);
+  transition: transform 0.3s ease;
 }
+.diet-card:hover { transform: translateY(-3px); box-shadow: 0 10px 20px rgba(255, 182, 163, 0.15); }
 
-.diet-card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 10px 20px rgba(255, 182, 163, 0.2);
-}
+/* 이모지 영역 */
+.diet-icon-area { position: relative; width: 100%; height: 160px; background-color: #FFF5F7; display: flex; justify-content: center; align-items: center; border-top-left-radius: 22px; border-top-right-radius: 22px; overflow: hidden; }
+.food-emoji { font-size: 80px; transition: transform 0.4s ease; }
+.diet-card:hover .food-emoji { transform: scale(1.15) rotate(5deg); }
 
-/* 🌟 대형 이모지 영역 (사진 대체) */
-.diet-icon-area {
-  position: relative;
-  width: 100%;
-  height: 160px; /* 높이를 살짝 줄여서 비율을 맞춤 */
-  background-color: #FFF5F7; /* 따뜻하고 은은한 핑크 배경 */
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  overflow: hidden;
-}
-
-.food-emoji {
-  font-size: 80px; /* 엄청 크고 귀엽게 */
-  transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-}
-
-/* 마우스를 올리면 이모지가 뿅! 하고 커지면서 살짝 까딱거림 */
-.diet-card:hover .food-emoji {
-  transform: scale(1.2) rotate(8deg); 
-}
-
-/* 뱃지 위치 조정 */
-.meal-badge {
-  position: absolute;
-  top: 15px;
-  left: 15px;
-  font-size: 13px;
-  font-weight: 800;
-  padding: 6px 14px;
-  border-radius: 14px;
-  box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-  z-index: 10;
-}
-
-/* 1번~5번 뱃지 및 카드 상단 컬러 포인트 */
+/* 뱃지 */
+.meal-badge { position: absolute; top: 15px; left: 15px; font-size: 13px; font-weight: 800; padding: 6px 14px; border-radius: 12px; box-shadow: 0 2px 6px rgba(0,0,0,0.1); z-index: 10; }
 .meal-time-0 .meal-badge { background-color: #fff; color: #FF9F0A; } 
 .meal-time-1 .meal-badge { background-color: #fff; color: #007AFF; } 
 .meal-time-2 .meal-badge { background-color: #fff; color: #AF52DE; } 
 .meal-time-3 .meal-badge { background-color: #fff; color: #4CAF50; } 
 .meal-time-4 .meal-badge { background-color: #fff; color: #FF4D6D; } 
 
-/* 배경색도 은은하게 맞춰주기 */
-.meal-time-0 .diet-icon-area { background-color: #FFF9F0; } /* 주황빛 */
-.meal-time-1 .diet-icon-area { background-color: #F0F8FF; } /* 파랑빛 */
-.meal-time-2 .diet-icon-area { background-color: #FBF0FF; } /* 보라빛 */
-.meal-time-3 .diet-icon-area { background-color: #F0FFF4; } /* 초록빛 */
-.meal-time-4 .diet-icon-area { background-color: #FFF0F4; } /* 분홍빛 */
+.meal-time-0 .diet-icon-area { background-color: #FFF9F0; } 
+.meal-time-1 .diet-icon-area { background-color: #F0F8FF; } 
+.meal-time-2 .diet-icon-area { background-color: #FBF0FF; } 
+.meal-time-3 .diet-icon-area { background-color: #F0FFF4; } 
+.meal-time-4 .diet-icon-area { background-color: #FFF0F4; } 
 
-
-/* 텍스트 컨텐츠 영역 */
+/* 텍스트 컨텐츠 영역 (모든 요소 정중앙 배열) */
 .diet-content {
-  padding: 20px 24px;
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-end;
-}
-
-.diet-info {
-  flex: 1;
-}
-
-.menu-title {
-  font-size: 18px;
-  font-weight: 800;
-  color: #222;
-  margin: 0 0 8px 0;
-}
-
-.ai-comment {
-  font-size: 14px;
-  color: #666;
-  font-style: italic;
-  margin-bottom: 15px;
-  line-height: 1.4;
-  word-break: keep-all;
-}
-
-/* 영양소 영역 */
-.nutrition-summary {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  margin-bottom: 12px;
-}
-
-.kcal-badge {
-  font-size: 14px;
-  font-weight: 800;
-  color: #ff6b8b;
-  background-color: #ffeef1;
-  padding: 4px 10px;
-  border-radius: 8px;
-}
-
-.macro-pills {
-  font-size: 13px;
-  color: #888;
-  font-weight: 600;
-  display: flex;
-  gap: 8px;
-}
-
-/* 태그 뱃지 */
-.tag-badge {
-  font-size: 12px;
-  padding: 4px 10px;
-  background-color: #f8f9fa;
-  color: #868e96;
-  border-radius: 6px;
-  font-weight: 600;
-  margin-right: 6px;
-}
-
-/* 개별 기록하기 버튼 */
-.mini-record-btn {
-  background-color: #ff8fa3;
-  color: white;
-  border: none;
-  padding: 12px 20px;
-  border-radius: 14px;
-  font-size: 14px;
-  font-weight: 700;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  box-shadow: 0 4px 10px rgba(255, 143, 163, 0.2);
-}
-
-.mini-record-btn:hover {
-  background-color: #ff768e;
-  transform: scale(1.05);
-}
-
-/* 로딩 상태 */
-.loading-state {
+  padding: 25px 20px;
   display: flex;
   flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  height: 400px;
-}
-
-.spinner {
-  font-size: 40px;
-  margin-bottom: 15px;
-  animation: bounce 1s infinite alternate;
-}
-
-@keyframes bounce {
-  from { transform: translateY(0); }
-  to { transform: translateY(-15px); }
-}
-
-/* 하단 정보 텍스트 */
-.info-footer {
+  align-items: center; 
   text-align: center;
-  margin-top: 25px;
-  font-size: 13px;
-  color: #ff8fa3;
-  font-weight: 600;
-  opacity: 0.8;
 }
+
+.menu-title { font-size: 18px; font-weight: 800; color: #222; margin: 0 0 10px 0; word-break: keep-all; }
+.ai-comment { font-size: 14px; color: #666; margin: 0 0 15px 0; line-height: 1.4; word-break: keep-all; }
+
+/* 영양소 요약 */
+.nutrition-summary { display: flex; justify-content: center; align-items: center; gap: 12px; margin-bottom: 15px; }
+.kcal-badge { font-size: 15px; font-weight: 800; color: #ff6b8b; background-color: #ffeef1; padding: 6px 12px; border-radius: 8px; }
+.macro-pills { display: flex; gap: 8px; }
+.pill { font-size: 13px; color: #888; font-weight: 600; background-color: #f4f4f4; padding: 4px 8px; border-radius: 6px; }
+
+/* 태그 */
+.menu-tags { display: flex; justify-content: center; flex-wrap: wrap; gap: 6px; margin-bottom: 20px; }
+.tag-badge { font-size: 12px; padding: 4px 10px; background-color: #f8f9fa; color: #868e96; border-radius: 6px; border: 1px solid #eee; font-weight: 600; }
+
+/* 기록하기 버튼 */
+.diet-action { width: 100%; display: flex; justify-content: center; }
+.mini-record-btn { width: 90%; background-color: #ff8fa3; color: white; border: none; padding: 14px; border-radius: 12px; font-size: 15px; font-weight: 700; cursor: pointer; box-shadow: 0 4px 10px rgba(255, 143, 163, 0.2); transition: all 0.2s ease; }
+.mini-record-btn:hover { background-color: #ff768e; transform: scale(1.03); }
+
+/* 모달창 및 기타 */
+.modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.4); display: flex; align-items: center; justify-content: center; z-index: 9999; }
+.modal-content { background-color: #fff; padding: 30px; border-radius: 24px; text-align: center; width: 320px; box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15); }
+.modal-title { margin-top: 0; margin-bottom: 25px; color: #333; font-weight: 800; }
+.modal-button-group { display: flex; justify-content: space-between; margin-bottom: 25px; }
+.modal-btn { padding: 12px 18px; border-radius: 14px; border: 2px solid #FFEDEA; background-color: #FFF5F7; color: #ff8fa3; font-weight: 800; cursor: pointer; transition: all 0.2s ease; }
+.modal-btn:hover { background-color: #ff8fa3; color: #fff; border-color: #ff8fa3; transform: translateY(-2px); }
+.modal-cancel-btn { background: none; border: none; color: #aaa; font-weight: 600; text-decoration: underline; cursor: pointer; }
+.loading-state, .error-state { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 50px 0; }
+.spinner { font-size: 40px; margin-bottom: 15px; animation: bounce 1s infinite alternate; }
+@keyframes bounce { from { transform: translateY(0); } to { transform: translateY(-15px); } }
+.info-footer { text-align: center; margin-top: 25px; font-size: 13px; color: #ff8fa3; font-weight: 600; opacity: 0.8; }
