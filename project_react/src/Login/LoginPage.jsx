@@ -25,7 +25,11 @@ const LoginPage = () => {
   };
 
     const fetchUserInfo = async () => {
-    const token = localStorage.getItem('login_token') || sessionStorage.getItem('login_token'); // 저장된 토큰 꺼내기
+    // 공용 토큰 키와 인라인 전용 토큰 키 모두 탐색
+    const token = localStorage.getItem('token') || 
+                  localStorage.getItem('login_token') || 
+                  sessionStorage.getItem('token') || 
+                  sessionStorage.getItem('login_token'); // 저장된 토큰 꺼내기
     try {
       const response = await axios.get('http://localhost:8080/api/user/info', {
         headers: {
@@ -40,7 +44,10 @@ const LoginPage = () => {
   
     // 페이지가 새로고침되어도 토큰이 있으면 로그인 유지
     useEffect(() => {
-      const token = localStorage.getItem('login_token') || sessionStorage.getItem('login_token');
+      const token = localStorage.getItem('token') || 
+                    localStorage.getItem('login_token') || 
+                    sessionStorage.getItem('token') || 
+                    sessionStorage.getItem('login_token');
       if (token) {
         setIsLoggedIn(true);
       }
@@ -62,12 +69,14 @@ const LoginPage = () => {
         const token = response.data.token;
         
         if (rememberMe) {
-        // 받은 토큰을 브라우저에 저장
-        localStorage.setItem('login_token', token);
-      } else {
-        // 브라우저 끄면 바로 삭제!
-        sessionStorage.setItem('login_token', token);
-      }
+          // 🌟 다른 파일(CharacterHistory 등)에서 일관되게 토큰을 찾을 수 있도록 'token'과 'login_token' 모두 저장해 줍니다.
+          localStorage.setItem('token', token);
+          localStorage.setItem('login_token', token);
+        } else {
+          // 브라우저 끄면 바로 삭제!
+          sessionStorage.setItem('token', token);
+          sessionStorage.setItem('login_token', token);
+        }
 
         // 🌟🌟🌟 [박하] 커뮤니티 게시판에서 사용자 식별을 위해 서버에서 받은 사용자 정보를 'user' 키로 저장
         localStorage.setItem('user', JSON.stringify(response.data.user));
@@ -82,8 +91,11 @@ const LoginPage = () => {
     };
   
     const handleLogout = () => {
-      // 로그아웃 시 토큰 삭제 및 상태 변경
+      // 로그아웃 시 모든 형태의 토큰 일괄 정렬 삭제
+      localStorage.removeItem('token');
       localStorage.removeItem('login_token');
+      sessionStorage.removeItem('token');
+      sessionStorage.removeItem('login_token');
 
       // 🌟🌟🌟 [박하] 로그아웃 시 저장된 사용자 정보도 함께 삭제
       localStorage.removeItem('user');

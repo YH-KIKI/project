@@ -18,13 +18,34 @@ public class CharacterDao {
         return sqlSession.selectOne("kr.hi.project.dao.CharacterDao.getCharacterInfo", userNum);
     }
 
-    // 2. 캐릭터 타입 변경 업데이트 메서드 추가
+    // 2. 캐릭터 타입(외형) 수동 변경
     public void updateCharacterType(int userNum, int type) {
-        // 파라미터가 2개 이상일 때는 Map에 담아서 전달해야 매퍼(XML)에서 인식할 수 있습니다.
         Map<String, Object> params = new HashMap<>();
         params.put("userNum", userNum);
         params.put("type", type);
-
         sqlSession.update("kr.hi.project.dao.CharacterDao.updateCharacterType", params);
+    }
+
+    /**
+     * 3. 다음 레벨업에 필요한 누적 경험치 조회
+     */
+    public Integer getNextLevelRequiredExp(int currentLevel) {
+        return sqlSession.selectOne("kr.hi.project.dao.CharacterDao.getNextLevelRequiredExp", currentLevel);
+    }
+
+    /**
+     * 4. 경험치, 레벨, 외형(성장단계) 일괄 업데이트
+     */
+    public void updateCharacterExpAndLevel(Map<String, Object> params) {
+        sqlSession.update("kr.hi.project.dao.CharacterDao.updateCharacterExpAndLevel", params);
+    }
+
+    /**
+     * 5. 경험치 획득 이력(History) 저장 (수정됨)
+     * Service에서 넘겨준 Map(userNum, exp, source, isLevelUp)을 그대로 Mapper에 전달합니다.
+     */
+    public void insertExpHistory(Map<String, Object> params) {
+        // XML에서 parameterType="map"으로 설정했으므로 Map을 직접 넘깁니다.
+        sqlSession.insert("kr.hi.project.dao.CharacterDao.insertExpHistory", params);
     }
 }
