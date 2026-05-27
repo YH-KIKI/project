@@ -1,15 +1,20 @@
 import json
-
+import os
 from google import genai
 from pydantic import BaseModel, Field
 from typing import List
 
 USE_DUMMY = True
 
-client = genai.Client(
-    # api_key="API키"
-    # api_key=os.getenv("GOOGLE_AI_API_KEY")
-)
+client = None
+
+if not USE_DUMMY:
+    api_key = os.getenv("GOOGLE_API_KEY")
+
+    if not api_key:
+        raise ValueError("GOOGLE_AI_API_KEY 환경변수 없음")
+
+    client = genai.Client(api_key=api_key)
 
 
 class RecipeRecommendation(BaseModel):
