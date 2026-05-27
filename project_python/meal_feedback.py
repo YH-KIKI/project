@@ -1,16 +1,16 @@
 import os
 from google import genai
-from dotenv import load_dotenv
 
-load_dotenv()
 
-USE_GEMINI = False  # 나중에 AI 쓰고 싶으면 True
+USE_GEMINI = False # 나중에 AI 쓰고 싶으면 True
 
-api_key = (
-    os.getenv("GEMINI_API_KEY")
-    or os.getenv("GOOGLE_AI_API_KEY")
-    or os.getenv("GOOGLE_API_KEY")
-)
+# api_key = (
+#     os.getenv("GEMINI_API_KEY")
+#     or os.getenv("GOOGLE_AI_API_KEY")
+#     or os.getenv("GOOGLE_API_KEY")
+# )
+
+# api_key = "API키"
 
 if USE_GEMINI and api_key:
     client = genai.Client(api_key=api_key)
