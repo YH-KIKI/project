@@ -118,7 +118,7 @@ public class MealService {
             detailDTO.setMdPortion(intakeGram);
 
             // 칼로리 계산
-            int calculatedKcal = (int) (food.getFoKcal() * intakeGram);
+            int calculatedKcal = (int) ((food.getFoKcal()/100) * intakeGram);
             detailDTO.setMdKcal(calculatedKcal);
             
             mealDAO.insertMealDetail(detailDTO);

@@ -75,6 +75,18 @@ public class JwtService {
 	    }
 	    return false; // 3. 문제 있으면 가짜/만료 토큰냥!
 	}
+	
+	// 토큰재발급
+	public boolean isTokenExpired(String token) {
+	    try {
+	        Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token);
+	        return false; // 안 만료됨
+	    } catch (io.jsonwebtoken.ExpiredJwtException e) {
+	        return true; // 만료됨
+	    } catch (Exception e) {
+	        return false; // 그 외 (위조 등)
+	    }
+	}
 }
 
 		
