@@ -103,7 +103,8 @@ function MealRecordModal({
     sodium: Number(food.sodium ?? food.natrium ?? food.foNatrium ?? 0),
     image: foodImage(food.image || food.foImage),
     count: food.count || food.portion || food.mdPortion || food.mfPortion || 1,
-    isFavorite: food.isFavorite || false,
+    isFavorite:
+      food.isFavorite || favorites.includes(food.id || food.foNum),
     favoriteType: food.favoriteType || null,
     sfNum: food.sfNum || null,
     rfNum: food.rfNum || null,
@@ -129,6 +130,11 @@ function MealRecordModal({
   };
 
   const [foods, setFoods] = useState(normalizeInitialFoods);
+
+  useEffect(() => {
+    if (!userNum) return;
+    loadSingleFoodFavorites();
+  }, [userNum]);
 
   const toFoodItem = (food) => ({
     uid: makeUid(),
@@ -252,18 +258,33 @@ function MealRecordModal({
   };
 
   const addFood = (food) => {
+    const nextFood = {
+      ...food,
+      isFavorite: food.isFavorite || favorites.includes(food.id),
+    };
+
     setFoods((prev) => {
-      const exists = prev.find((item) => item.id === food.id);
+      const exists = prev.find((item) => item.id === nextFood.id);
 
       if (exists) {
         return prev.map((item) =>
-          item.id === food.id ? { ...item, count: item.count + 1 } : item
+          item.id === nextFood.id
+            ? {
+                ...item,
+                count: item.count + 1,
+                isFavorite: item.isFavorite || favorites.includes(item.id),
+              }
+            : item
         );
       }
 
       return [
         ...prev,
-        { ...food, uid: food.uid || makeUid(), count: food.count || 1 },
+        {
+          ...nextFood,
+          uid: nextFood.uid || makeUid(),
+          count: nextFood.count || 1,
+        },
       ];
     });
   };
@@ -368,8 +389,10 @@ function MealRecordModal({
         carbs: food.foCarbs || 0,
         protein: food.foProtein || 0,
         fat: food.foFat || 0,
+        sodium: food.foNatrium || 0,
         image: food.foImage,
         count: food.count || food.mdPortion || food.mfPortion || 1,
+        isFavorite: favorites.includes(food.foNum),
       })
     );
 
@@ -744,7 +767,9 @@ function MealRecordModal({
                   </div>
                   <button
                     type="button"
-                    className={`mr-star-btn ${food.isFavorite ? "active" : ""}`}
+                    className={`mr-star-btn ${
+                      food.isFavorite || favorites.includes(food.id) ? "active" : ""
+                    }`}
                   >
                     ★
                   </button>
