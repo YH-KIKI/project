@@ -32,6 +32,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         if (authHeader != null && authHeader.startsWith("Bearer ")) {
             String token = authHeader.substring(7);
+            
+            if (jwtService.isTokenExpired(token)) {
+                // 만료된 경우 응답 헤더에 특정 값을 넣어 프론트엔드에게 알려줌
+                response.setHeader("is-token-expired", "true");
+            } else {
             try {
                 String userid = jwtService.getUsernameFromToken(token);
 
@@ -50,6 +55,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
             } catch (Exception e) {
                 System.out.println("토큰 검증 에러: " + e.getMessage());
+            }
             }
         }
 

@@ -223,7 +223,7 @@ const Information = () => {
       </div>
 
       {/* 알레르기 카드 */}
-      <div className="allergy-section">
+      {/* <div className="allergy-section">
         <span className="allergy-title">🚫 보유 알레르기 체크</span>
         <div className="allergy-flex">
           {['우유류', '달걀류', '견과류', '생선류', '대두류'].map((item) => (
@@ -243,14 +243,14 @@ const Information = () => {
             </label>
           ))}
         </div>
-      </div>
+      </div> */}
 
-      <hr style={{ border: '0.5px solid #eee', margin: '30px 0' }} />
+      {/* <hr style={{ border: '0.5px solid #eee', margin: '30px 0' }} /> */}
 
         <div style={{ display: 'flex', gap: '20px', justifyContent: 'center', marginBottom: '40px', width: '100%', boxSizing: 'border-box' }}>
         
         {/* 좋아하는 음식 카드 */}
-        <div style={{ flex: 1, width: '50%', textAllign: 'left', padding: '24px', backgroundColor: '#f1f8e9', borderRadius: '20px', border: '1px solid #d0e7b5', display: 'flex', flexDirection: 'column', boxSizing: 'border-box', gap: '15px' }}>
+        {/* <div style={{ flex: 1, width: '50%', textAllign: 'left', padding: '24px', backgroundColor: '#f1f8e9', borderRadius: '20px', border: '1px solid #d0e7b5', display: 'flex', flexDirection: 'column', boxSizing: 'border-box', gap: '15px' }}>
           <div style={{ width: '100%', boxSizing: 'border-box', textAlign: 'left' }}>
             <h3 style={{ margin: 0, fontSize: '16px', fontWeight: 'bold', color: '#2e7d32' }}>❤️ 좋아하는 음식</h3>
           </div>
@@ -271,10 +271,10 @@ const Information = () => {
               </span>
             ))}
           </div>
-        </div>
+        </div> */}
 
         {/*싫어하는 음식 카드*/}
-        <div style={{ flex: 1, width: '50%', textAllign: 'left', padding: '24px', backgroundColor: '#fbe9e7', borderRadius: '20px', border: '1px solid #ffccbc', display: 'flex', flexDirection: 'column', boxSizing: 'border-box', gap: '15px' }}>
+        {/* <div style={{ flex: 1, width: '50%', textAllign: 'left', padding: '24px', backgroundColor: '#fbe9e7', borderRadius: '20px', border: '1px solid #ffccbc', display: 'flex', flexDirection: 'column', boxSizing: 'border-box', gap: '15px' }}>
           <div style={{ width: '100%', boxSizing: 'border-box', textAlign: 'left' }}>
             <h3 style={{ margin: 0, fontSize: '16px', fontWeight: 'bold', color: '#c62828' }}>🥦 싫어하는 음식</h3>
           </div>
@@ -295,12 +295,12 @@ const Information = () => {
               </span>
             ))}
           </div>
-        </div>
+        </div> */}
 
       </div>
 
       {/* 음식 검색 모달 */}
-      {activeModal && (
+      {/* {activeModal && (
         <div className="modal-overlay">
           <div className="modal-content">
             <h3 className="modal-title">🔍 {activeModal === 'favorite' ? '좋아하는' : '싫어하는'} 음식 검색</h3>
@@ -321,7 +321,7 @@ const Information = () => {
             <button type="button" onClick={() => setActiveModal(null)} className="modal-close-btn">창 닫기</button>
           </div>
         </div>
-      )}
+      )} */}
 
       {/* 최종 수정 버튼 */}
       <button type="button" onClick={handleUpdata} className="submit-btn">

@@ -153,6 +153,27 @@ public class LoginController {
 	    }
 	    return response;
 	}
+	
+
+	@PostMapping("/api/auth/refresh")
+	public Map<String, Object> refresh(@RequestHeader("Authorization") String authHeader) {
+	    String refreshToken = authHeader.replace("Bearer ", "");
+	    
+	    // Refresh Token이 유효한지 검사
+	    if (jwtService.validateToken(refreshToken)) {
+	        String userid = jwtService.getUsernameFromToken(refreshToken);
+	        
+	        // 새로운 Access Token 생성
+	        String newAccessToken = jwtService.createToken(userid);
+	        
+	        Map<String, Object> response = new HashMap<>();
+	        response.put("accessToken", newAccessToken);
+	        return response;
+	    } else {
+	        // Refresh Token 자체가 만료되었거나 위조됨
+	        throw new RuntimeException("Refresh Token이 만료되었습니다. 다시 로그인하세요.");
+	    }
+	}
 
 }
 

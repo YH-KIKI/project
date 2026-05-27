@@ -24,7 +24,7 @@ const LoginPage = () => {
 
   const handleProtectedFeature = async () => {
     // 1. 토큰 가져오기
-    const token = localStorage.getItem('login_token') || sessionStorage.getItem('login_token');
+    const token = localStorage.getItem('refresh_token') || localStorage.getItem('login_token') || sessionStorage.getItem('login_token');
     
     if (!token) {
       alert("🛑 토큰이 없습니다. 로그인해주세요.");
