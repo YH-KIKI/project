@@ -1,53 +1,52 @@
 # ---------------------------------------
-# 1단계: 빌드 스테이지 (컴파일 전용)
+# 1단계: 빌드 스테이지 (무거운 컴파일 도구 포함)
 # ---------------------------------------
-FROM python:3.12-slim AS builder
+# 🌟 파이썬 버전을 3.10으로 낮춰서 설치 에러 원천 차단!
+FROM python:3.10-slim AS builder
 
 WORKDIR /project_python
 
-# 빌드에 필요한 모든 시스템 도구 설치
-# cmake와 python3-dev는 chromadb 빌드에 필수
+# AI 라이브러리 컴파일에 필요한 도구 설치 (최종 이미지에는 포함 안 됨)
 RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential \
     gcc \
     g++ \
     cmake \
     python3-dev \
-    libssl-dev \
     && rm -rf /var/lib/apt/lists/*
 
-# pip 환경 최신화 및 의존성 설치(가상 환경 셋팅)
 COPY requirements.txt .
+
+# --user 옵션으로 /root/.local 에 패키지들만 깔끔하게 설치
 RUN pip install --no-cache-dir --upgrade pip setuptools wheel && \
     pip install --no-cache-dir --user -r requirements.txt
 
-# 🌟 [여기 추가됨!] 의존성이 꼬여서 누락되기 쉬운 핵심 AI 라이브러리들 강제 재설치!
-# (--user 옵션을 꼭 붙여야 2단계(실행 스테이지)로 무사히 복사됩니다)
-RUN pip install --no-cache-dir --user --force-reinstall packaging matplotlib ultralytics
+# ---------------------------------------
+# 2단계: 실행 스테이지 (가볍고 깨끗한 최종 환경)
+# ---------------------------------------
+# 🌟 빌드 스테이지와 파이썬 버전을 똑같이 맞춰야 합니다.
+FROM python:3.10-slim
 
-# ---------------------------------------
-# 2단계: 실행 스테이지 (경량화 환경)
-# ---------------------------------------
-FROM python:3.12-slim
-RUN apt-get update && apt-get install -y libgl1 libglib2.0-0 && rm -rf /var/lib/apt/lists/*
 WORKDIR /project_python
 
-# 1단계에서 설치된 패키지들을 복사 (로컬 유저 사이트 경로)
-COPY --from=builder /root/.local /root/.local
-
-# 환경 변수 설정: 복사해온 패키지들을 인식하도록 함
-ENV PATH=/root/.local/bin:$PATH
-ENV PYTHONUSERBASE=/root/.local
-
-# 런타임에 필요한 최소한의 라이브러리만 설치 (예: libgomp)
+# OpenCV, Mediapipe 실행에 꼭 필요한 '최소한의' 그래픽 라이브러리만 쏙쏙 설치
 RUN apt-get update && apt-get install -y --no-install-recommends \
+    libgl1-mesa-glx \
+    libglib2.0-0 \
     libgomp1 \
     && rm -rf /var/lib/apt/lists/*
 
-# 소스 코드 복사
+# 🌟 1단계(builder)에서 설치 완료된 패키지 폴더(/root/.local)만 가져오기 (이게 경량화의 핵심!)
+COPY --from=builder /root/.local /root/.local
+
+# 파이썬이 복사해온 패키지들을 인식하도록 환경 변수 설정
+ENV PATH=/root/.local/bin:$PATH
+ENV PYTHONUSERBASE=/root/.local
+
+# 내 소스 코드 복사
 COPY . .
 
 EXPOSE 8000
 
-# 최종 실행 명령어
+# 최종 서버 실행 명령어
 CMD ["python", "-m", "uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
