@@ -19,4 +19,11 @@ public class MealRecordRequestDTO {
     private String mkUserMemo;
     private Integer mkNum;
     private LocalDate mkDietDate;
+    
+    // 재근추가: AI 식단 전용 데이터를 받기 위한 변수
+    private String aiMenuName;
+    private Integer aiKcal;
+    private float aiCarbs;
+    private float aiProtein;
+    private float aiFat;
 }

@@ -1,0 +1,252 @@
+/* =========================================================
+   MODAL BACKDROP
+========================================================= */
+.badge-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: rgba(0, 0, 0, 0.55);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+/* =========================================================
+   MODAL CONTAINER
+========================================================= */
+.badge-modal-content {
+    background-color: #ffffff;
+    padding: 24px;
+    border-radius: 18px;
+    border: 2px solid #e3d5c9;
+    width: 95%;
+    max-width: 900px;
+    height: 80vh;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+    animation: modalFadeIn 0.25s ease;
+    overflow: hidden;
+}
+
+/* =========================================================
+   CLOSE BUTTON
+========================================================= */
+.badge-modal-close {
+    position: absolute;
+    top: 14px;
+    right: 18px;
+    background: none;
+    border: none;
+    font-size: 26px;
+    cursor: pointer;
+    color: #777;
+}
+
+.badge-modal-close:hover {
+    color: #222;
+}
+
+/* =========================================================
+   HEADER
+========================================================= */
+.badge-modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #eee;
+}
+
+.badge-modal-header h2 {
+    font-size: 20px;
+    font-weight: 700;
+    color: #333;
+}
+
+.badge-summary {
+    font-size: 14px;
+    color: #888;
+}
+
+/* =========================================================
+   BODY LAYOUT
+========================================================= */
+.badge-modal-body {
+    display: flex;
+    flex: 1;
+    gap: 20px;
+    padding-top: 15px;
+    overflow: hidden;
+}
+
+/* =========================================================
+   BADGE GRID
+========================================================= */
+.badge-grid {
+    flex: 2;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    gap: 14px;
+    overflow-y: auto;
+    padding-right: 10px;
+}
+
+/* =========================================================
+   BADGE CARD
+========================================================= */
+.badge-card {
+    background: #faf7f2;
+    border: 1px solid #e8dfd6;
+    border-radius: 14px;
+    padding: 12px;
+    cursor: pointer;
+    transition: 0.2s ease;
+    position: relative;
+    text-align: center;
+}
+
+.badge-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.08);
+}
+
+/* owned / locked */
+.badge-card.locked {
+    filter: grayscale(100%);
+    opacity: 0.6;
+}
+
+/* =========================================================
+   BADGE ICON
+========================================================= */
+.badge-icon {
+    font-size: 28px;
+    margin-bottom: 6px;
+}
+
+/* =========================================================
+   TEXT
+========================================================= */
+.badge-name {
+    font-size: 13px;
+    font-weight: 600;
+    color: #333;
+}
+
+.badge-level {
+    font-size: 11px;
+    color: #777;
+    margin-top: 4px;
+}
+
+/* =========================================================
+   PROGRESS BAR
+========================================================= */
+.badge-progress-bar {
+    width: 100%;
+    height: 6px;
+    background: #eaeaea;
+    border-radius: 10px;
+    margin-top: 8px;
+    overflow: hidden;
+}
+
+.badge-progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #f7b267, #f4845f);
+    transition: width 0.3s ease;
+}
+
+/* =========================================================
+   LOCK TEXT
+========================================================= */
+.badge-locked-text {
+    font-size: 11px;
+    color: #999;
+    margin-top: 8px;
+}
+
+/* =========================================================
+   EQUIPPED BADGE
+========================================================= */
+.badge-equipped {
+    position: absolute;
+    top: 6px;
+    left: 6px;
+    font-size: 10px;
+    background: #ffcc66;
+    padding: 3px 6px;
+    border-radius: 8px;
+    font-weight: bold;
+}
+
+/* =========================================================
+   DETAIL PANEL
+========================================================= */
+.badge-detail-panel {
+    flex: 1;
+    background: #fff;
+    border-left: 1px solid #eee;
+    padding-left: 18px;
+    overflow-y: auto;
+}
+
+.badge-detail-panel h3 {
+    font-size: 18px;
+    margin-bottom: 10px;
+}
+
+.badge-description {
+    font-size: 13px;
+    color: #666;
+    margin-bottom: 12px;
+}
+
+.badge-detail-info p {
+    font-size: 12px;
+    color: #777;
+    margin: 4px 0;
+}
+
+.badge-condition {
+    color: #c0392b;
+}
+
+/* =========================================================
+   BUTTON
+========================================================= */
+.equip-btn {
+    margin-top: 12px;
+    padding: 8px 12px;
+    border: none;
+    background: #f7b267;
+    color: white;
+    border-radius: 10px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: 0.2s;
+}
+
+.equip-btn:hover {
+    background: #f4845f;
+}
+
+/* =========================================================
+   ANIMATION
+========================================================= */
+@keyframes modalFadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}

@@ -36,6 +36,21 @@ const SignupPage = () => {
     }
 
     try {
+      const res = await axios.get(`/api/check-duplicate?userid=${userid}&username=${username}&email=${email}`);
+      
+      if (res.data.isIdTaken) {
+        alert("이미 사용 중인 아이디입니다.");
+        return;
+      }
+      if (res.data.isNameTaken) {
+        alert("이미 사용 중인 이름입니다.");
+        return;
+      }
+      if (res.data.isEmailTaken) {
+        alert("이미 사용 중인 이메일입니다.");
+        return;
+      }
+
       // 1. 회원가입 API 호출
       await axios.post('/api/signup', {
         userId: userid,

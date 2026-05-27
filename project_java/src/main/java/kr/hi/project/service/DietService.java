@@ -1,9 +1,11 @@
 package kr.hi.project.service;
 
-import kr.hi.project.dao.UserPrivacyDao;
-import kr.hi.project.dto.DietUserDTO;
-import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Value; 
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -15,10 +17,9 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Collections;
+import kr.hi.project.dao.UserPrivacyDao;
+import kr.hi.project.dto.DietUserDTO;
+import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
@@ -125,4 +126,6 @@ public class DietService {
             return "{\"status\":\"error\", \"message\":\"파이썬 통신 실패\"}";
         }
     }
+    
+   
 }
