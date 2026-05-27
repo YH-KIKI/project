@@ -1,7 +1,7 @@
 # -------------------------
 # 1단계: React 빌드
 # -------------------------
-FROM node:18 AS frontend
+FROM node:24 AS frontend
 # WORKDIR은 리액트 프로젝트 폴더
 WORKDIR /project_react
 COPY package*.json ./
