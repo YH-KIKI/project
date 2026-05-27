@@ -32,6 +32,7 @@ public class WebConfig implements WebMvcConfigurer {
 
         // 1. 기존 매핑 경로 /uploads/** 유지
         registry.addResourceHandler("/uploads/**")
+        	.addResourceLocations("file:///C:/uploads/"),
                 .addResourceLocations(location)
                 .setCachePeriod(0)
                 .resourceChain(false);
