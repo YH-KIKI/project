@@ -1,5 +1,8 @@
 import axios from "axios";
 import React, { useEffect, useState } from "react";
+import { FiHeart } from "react-icons/fi";
+import { useNavigate } from "react-router-dom";
+import MealTypeSelectModal from "./MealTypeSelectModal";
 import "./FridgeRecommendation.css";
 
 const MacroItem = ({ name, icon, goal, intake, percent, type }) => {
@@ -21,6 +24,9 @@ const MacroItem = ({ name, icon, goal, intake, percent, type }) => {
 };
 
 const FridgeRecommendation = () => {
+
+  const user = JSON.parse(localStorage.getItem("user"));
+  const userNum = user?.user_num;
 
   const SERVER_URL =
     process.env.REACT_APP_API_URL ||
@@ -44,38 +50,76 @@ const FridgeRecommendation = () => {
     weekday: "short",
   });
 
+  const navigate = useNavigate();
+
+
   const [ingredient, setIngredient] = useState("");
-  const [ingredients, setIngredients] = useState([
-    "계란",
-    "우유",
-    "식빵",
-    "토마토",
-    "치즈",
-    "버터",
-  ]);
+  const [ingredients, setIngredients] = useState([]);
   const [isRecommended, setIsRecommended] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
   const [selectedRecipe, setSelectedRecipe] = useState(null);
   const [recipes, setRecipes] = useState([]);
+  const [activeSuggestionIndex, setActiveSuggestionIndex] = useState(-1);
+  const [favoriteRecipeNums, setFavoriteRecipeNums] = useState([]);
+  const [mealAddRecipe, setMealAddRecipe] = useState(null);
+  const [isMealTypeModalOpen, setIsMealTypeModalOpen] = useState(false);
 
-  const ingredientSuggestions = [
-    "계란",
-    "우유",
-    "식빵",
-    "토마토",
-    "치즈",
-    "버터",
-    "양파",
-    "감자",
-    "당근",
-    "오이",
-    "닭가슴살",
-    "두부",
-    "김치",
-    "햄",
-    "참치",
-    "고구마",
-  ];
+  const ingredientSuggestions = `
+  계란
+  양파
+  대파
+  마늘
+  감자
+  고구마
+  당근
+  양배추
+  상추
+  토마토
+  오이
+  버섯
+  새송이버섯
+  팽이버섯
+  양송이버섯
+  두부
+  김치
+  밥
+  닭가슴살
+  돼지고기
+  소고기
+  새우
+  오징어
+  치즈
+  우유
+  브로콜리
+  애호박
+  참치
+  햄
+  베이컨
+  소시지
+  고추
+  콩나물
+  시금치
+  깻잎
+  사과
+  바나나
+  딸기
+  레몬
+  파스타면
+  라면
+  미나리
+  파프리카
+  청경채
+  연근
+  가지
+  아보카도
+  연어
+  전복
+  부추
+  호박
+  무
+  배추
+  고춧가루
+  `.trim().split("\n");
 
   const quickIngredients = [
     "계란",
@@ -88,8 +132,44 @@ const FridgeRecommendation = () => {
   ];
 
   const filteredSuggestions = ingredientSuggestions.filter(
-    (item) => ingredient.trim() !== "" && item.includes(ingredient.trim())
+    (item) =>
+      ingredient.trim() !== "" &&
+      item.includes(ingredient.trim()) &&
+      !ingredients.includes(item)
   );
+
+  const handleIngredientKeyDown = (e) => {
+  if (e.key === "ArrowDown") {
+    e.preventDefault();
+
+    setActiveSuggestionIndex((prev) =>
+      prev < filteredSuggestions.length - 1 ? prev + 1 : 0
+    );
+  }
+
+  if (e.key === "ArrowUp") {
+    e.preventDefault();
+
+    setActiveSuggestionIndex((prev) =>
+      prev > 0 ? prev - 1 : filteredSuggestions.length - 1
+    );
+  }
+
+  if (e.key === "Enter") {
+    e.preventDefault();
+
+    if (
+      activeSuggestionIndex >= 0 &&
+      filteredSuggestions[activeSuggestionIndex]
+    ) {
+      addIngredient(filteredSuggestions[activeSuggestionIndex]);
+    } else {
+      addIngredient();
+    }
+
+    setActiveSuggestionIndex(-1);
+  }
+};
 
   const addIngredient = (selectedValue) => {
     const value = (selectedValue || ingredient).trim();
@@ -196,6 +276,98 @@ const FridgeRecommendation = () => {
     }
   };
 
+  const fetchRecipeFavorites = async () => {
+    try {
+      const res = await axios.get(
+        `/api/favorite/recipe?userNum=${userNum}`
+      );
+
+      const nums = res.data.map((recipe) => recipe.rcpNum);
+
+      setFavoriteRecipeNums(nums);
+    } catch (err) {
+      console.error("레시피 즐겨찾기 조회 실패:", err);
+    }
+  };
+
+  const toggleRecipeFavorite = async (recipe) => {
+    const isFavorite = favoriteRecipeNums.includes(recipe.rcpNum);
+
+    try {
+      if (isFavorite) {
+        await axios.delete(
+          `/api/favorite/recipe?userNum=${userNum}&rcpNum=${recipe.rcpNum}`
+        );
+
+        setFavoriteRecipeNums((prev) =>
+          prev.filter((num) => num !== recipe.rcpNum)
+        );
+
+        alert("레시피 즐겨찾기를 해제했어요!");
+        return;
+      }
+
+      await axios.post("/api/favorite/recipe", {
+        userNum,
+        rcpNum: recipe.rcpNum,
+      });
+
+      setFavoriteRecipeNums((prev) => [
+        ...prev,
+        recipe.rcpNum,
+      ]);
+
+      alert("레시피 즐겨찾기에 저장했어요!");
+    } catch (err) {
+      console.error("레시피 즐겨찾기 처리 실패:", err);
+      alert("레시피 즐겨찾기 처리 실패!");
+    }
+  };
+
+  const closeMealTypeModal = () => {
+    setIsMealTypeModalOpen(false);
+    setMealAddRecipe(null);
+  };
+
+  const handleMealTypeSelect = ({ mealType, date }) => {
+    if (!mealType) {
+      alert("식사 타입을 선택해주세요!");
+      return;
+    }
+
+    const convertedRecipe = {
+      id: mealAddRecipe.rcpNum,
+      rcpNum: mealAddRecipe.rcpNum,
+      name: mealAddRecipe.rcpName,
+      image: mealAddRecipe.rcpImage,
+      way: mealAddRecipe.rcpWay,
+      type: mealAddRecipe.rcpType,
+      kcal: mealAddRecipe.rcpKcal || 0,
+      carbs: mealAddRecipe.rcpCarbs || 0,
+      protein: mealAddRecipe.rcpProtein || 0,
+      fat: mealAddRecipe.rcpFat || 0,
+      natrium: mealAddRecipe.rcpNatrium || 0,
+      parts: mealAddRecipe.rcpParts,
+      aiReason: mealAddRecipe.aiReason || mealAddRecipe.rcpWay || "",
+      hashtags: mealAddRecipe.hashtags || [],
+
+      isFavorite:
+        favoriteRecipeNums.includes(mealAddRecipe.rcpNum),
+    };
+
+    navigate("/record", {
+      state: {
+        fromFavorite: true,
+        favoriteType: "recipe",
+        selectedRecipe: convertedRecipe,
+        mealType,
+        date,
+      },
+    });
+
+    closeMealTypeModal();
+  };
+
   useEffect(() => {
     const fetchSummary = async () => {
 
@@ -221,6 +393,12 @@ const FridgeRecommendation = () => {
     fetchSummary();
 
   }, []);
+
+  useEffect(() => {
+    if (userNum) {
+      fetchRecipeFavorites();
+    }
+  }, [userNum]);
 
   return (
     <div className="fridge-container">
@@ -313,23 +491,24 @@ const FridgeRecommendation = () => {
                   type="text"
                   placeholder="재료명을 입력하세요 (예: 계란, 우유, 양파)"
                   value={ingredient}
-                  onChange={(e) => setIngredient(e.target.value)}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter") addIngredient();
+                  onChange={(e) => {
+                    setIngredient(e.target.value);
+                    setActiveSuggestionIndex(-1);
                   }}
+                  onKeyDown={handleIngredientKeyDown}
                 />
-
                 {ingredient && filteredSuggestions.length > 0 && (
                   <div className="suggestion-box">
-                    {filteredSuggestions.map((item) => (
-                      <button
-                        key={item}
-                        type="button"
-                        onMouseDown={() => addIngredient(item)}
-                      >
-                        🧺 {item}
-                      </button>
-                    ))}
+                  {filteredSuggestions.map((item, index) => (
+                    <button
+                      key={item}
+                      type="button"
+                      className={activeSuggestionIndex === index ? "active" : ""}
+                      onMouseDown={() => addIngredient(item)}
+                    >
+                      🧺 {item}
+                    </button>
+                  ))}
                   </div>
                 )}
               </div>
@@ -337,21 +516,6 @@ const FridgeRecommendation = () => {
               <button className="add-btn" onClick={() => addIngredient()}>
                 추가
               </button>
-            </div>
-
-            <div className="quick-add-box">
-              <p>자주 사용하는 재료</p>
-              <div>
-                {quickIngredients.map((item) => (
-                  <button
-                    key={item}
-                    type="button"
-                    onClick={() => addIngredient(item)}
-                  >
-                    {item}
-                  </button>
-                ))}
-              </div>
             </div>
 
             {showSuccess && (
@@ -450,6 +614,16 @@ const FridgeRecommendation = () => {
                   <h4>
                     {recipe.rcpName}
                   </h4>
+                  <button
+                    className={
+                      favoriteRecipeNums.includes(recipe.rcpNum)
+                        ? "recipe-favorite-btn active"
+                        : "recipe-favorite-btn"
+                    }
+                    onClick={() => toggleRecipeFavorite(recipe)}
+                  >
+                    <FiHeart />
+                  </button>
 
                 </div>
 
@@ -580,9 +754,17 @@ const FridgeRecommendation = () => {
               <h2>
                 {selectedRecipe.rcpName}
               </h2>
-
+              <button
+                className={
+                  favoriteRecipeNums.includes(selectedRecipe.rcpNum)
+                    ? "recipe-modal-favorite-btn active"
+                    : "recipe-modal-favorite-btn"
+                }
+                onClick={() => toggleRecipeFavorite(selectedRecipe)}
+              >
+                <FiHeart />
+              </button>
             </div>
-
           </div>
 
           {/* 설명 */}
@@ -676,14 +858,21 @@ const FridgeRecommendation = () => {
           {/* 하단 버튼 */}
           <div className="recipe-modal-actions">
 
-            <button className="favorite-btn">
+            <button
+              className="favorite-btn"
+              onClick={() => toggleRecipeFavorite(selectedRecipe)}
+            >
               ❤️ 즐겨찾기
             </button>
-
-            <button className="add-meal-btn">
+            <button
+              className="add-meal-btn"
+              onClick={() => {
+                setMealAddRecipe(selectedRecipe);
+                setIsMealTypeModalOpen(true);
+              }}
+            >
               🍽 식단으로 추가
             </button>
-
           </div>
 
         </div>
@@ -691,6 +880,14 @@ const FridgeRecommendation = () => {
       </div>
 
     )}
+   {isMealTypeModalOpen && mealAddRecipe && (
+    <MealTypeSelectModal
+      title={`${mealAddRecipe.rcpName} 레시피를 어디에 추가할까요?`}
+      onSelect={handleMealTypeSelect}
+      onClose={closeMealTypeModal}
+      showAlert={true}
+    />
+  )}
     </div>
 
   );

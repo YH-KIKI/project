@@ -3,9 +3,8 @@ import torch.nn as nn
 from torchvision import datasets, models, transforms
 import os
 from datetime import datetime
-import codecs
+
 import platform
-import re
 
 if platform.system() == "Windows":
     # Spring Boot가 사진을 저장하는 그 폴더입니다.
@@ -14,8 +13,8 @@ if platform.system() == "Windows":
     SAVE_PATH = r'C:/Users/C603/Documents/AWS Class/git/aws_class/python/testfood/nyamnyam_model.pth'
 else:
     # AWS(리눅스) 환경일 때의 경로
-    BASE_DIR = '/home/ubuntu/images/relearn'
-    SAVE_PATH = '/home/ubuntu/images/nyamnyam_model.pth'
+    BASE_DIR = '/home/ubuntu/project/uploads/relearn'
+    SAVE_PATH = '/home/ubuntu/project/model/nyamnyam_model.pth'
 
 def train_update():
     print(f"[{datetime.now()}] 자동 재학습 파이프라인 가동...")
@@ -36,31 +35,6 @@ def train_update():
         return
 
     image_datasets = datasets.ImageFolder(BASE_DIR, data_transforms)
-    cleaned_classes = []
-    for c in image_datasets.classes:
-        if isinstance(c, str):
-            try:
-                # 탐색기 이름에 '352_' 가 들어가 있다면, 리눅스 백슬래시 형태인 '\352\271\200...' 문자열로 복구해서 실험합니다
-                if platform.system() == "Windows" and re.match(r'^\d+_\d+', c):
-                    # 언더바(_)를 다시 리눅스 백슬래시(\)로 바꿔서 리눅스 상태와 200% 똑같이 복구냥!
-                    c_converted = "\\" + c.replace("_", "\\")
-                    cleaned = codecs.escape_decode(bytes(c_converted, "utf-8"))[0].decode("utf-8")
-                
-                # 🎯 AWS 리눅스 서버에서 진짜로 돌 때 작동하는 방어벽
-                elif '\\' in c or '35' in c:
-                    cleaned = codecs.escape_decode(bytes(c, "utf-8"))[0].decode("utf-8")
-                else:
-                    # 일반적인 한글(ex: '우동')이나 정상 폴더는 그대로 통과냥!
-                    cleaned = c.encode('utf-8', 'surrogateescape').decode('utf-8', 'ignore')
-                
-                cleaned_classes.append(cleaned if cleaned else c)
-            except Exception as e:
-                print(f"⚠️ 복원 실패 사유: {e}")
-                cleaned_classes.append(c)
-        else:
-            cleaned_classes.append(c)
-            
-    image_datasets.classes = cleaned_classes
     dataloaders = torch.utils.data.DataLoader(image_datasets, batch_size=4, shuffle=True)
     class_names = image_datasets.classes
     print(f"발견된 음식 카테고리: {class_names}")
@@ -73,13 +47,9 @@ def train_update():
 
     # 기존 학습된 가중치(Weight) 입히기
     if os.path.exists(SAVE_PATH):
-        try:
-            # 🎯 map_location='cpu' 장치를 달아줘야 윈도우 환경에서도 억까 없이 에러가 안 난다냥!
-            checkpoint = torch.load(SAVE_PATH, map_location=torch.device('cpu'))
-            model.load_state_dict(checkpoint['model_state_dict'])
-            print("기존 지식을 성공적으로 로드했습니다")
-        except Exception as e:
-            print(f"기존 가중치 로드 중 오류 발생 (처음부터 다시 학습): {e}")
+        checkpoint = torch.load(SAVE_PATH)
+        model.load_state_dict(checkpoint['model_state_dict'])
+        print("기존 지식을 성공적으로 로드했습니다.")
     else:
         print("기존 모델이 없어 처음부터 학습을 시작합니다.")
 

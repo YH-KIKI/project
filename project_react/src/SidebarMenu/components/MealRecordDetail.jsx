@@ -1,18 +1,27 @@
 import axios from "axios";
 import React, { useState, useEffect, useRef } from "react";
-import { FiHeart } from "react-icons/fi";
+import { FiHeart, FiTrash2 } from "react-icons/fi";
 import { useLocation } from "react-router-dom";
 import MealRecordModal from "./MealRecordModal";
-import MealDetailModal from "./MealDetailModal";
 import "./MealRecordDetail.css";
 
-const NutrientBar = ({ icon, name, status, type, ratio = 0, valueText }) => {
+const NutrientBar = ({
+  icon,
+  name,
+  status,
+  type,
+  ratio = 0,
+  valueText,
+  currentAmount,
+  targetAmount,
+}) => {
   const safeRatio = Math.min(Math.max(Number(ratio) || 0, 0), 100);
 
   const colorMap = {
     carb: "#f8c15d",
     protein: "#9fcaf4",
     fat: "#ee8fa2",
+    sodium: "#ffbd4a",
   };
 
   const barColor = colorMap[type] || "#ffbd4a";
@@ -25,7 +34,6 @@ const NutrientBar = ({ icon, name, status, type, ratio = 0, valueText }) => {
         <p>
           {name} <span className={type}>{status}</span>
         </p>
-
         {type !== "sodium" && (
           <div className="nutrient-bar-line">
             <div
@@ -34,11 +42,30 @@ const NutrientBar = ({ icon, name, status, type, ratio = 0, valueText }) => {
                 background: `linear-gradient(to right, ${barColor} 0%, ${barColor} ${safeRatio}%, #ececf2 ${safeRatio}%, #ececf2 100%)`,
               }}
             />
-            <b>{safeRatio}%</b>
+
+            <div className="macro-percent-area">
+              <b>{safeRatio}%</b>
+              <small>
+                {currentAmount} / {targetAmount}
+              </small>
+            </div>
           </div>
         )}
 
-        {type === "sodium" && <b className="sodium-value">{valueText}</b>}
+        {type === "sodium" && (
+          <div className="nutrient-bar-line">
+            <div
+              className="macro-bar-bg"
+              style={{
+                background: `linear-gradient(to right, ${barColor} 0%, ${barColor} ${safeRatio}%, #ececf2 ${safeRatio}%, #ececf2 100%)`,
+              }}
+            />
+
+            <b className="sodium-value">
+              {currentAmount} / {targetAmount}
+            </b>
+          </div>
+        )}
       </div>
     </div>
   );
@@ -57,7 +84,6 @@ const MealRecordDetail = () => {
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [isCalendarOpen, setIsCalendarOpen] = useState(false);
   const [isRecordModalOpen, setIsRecordModalOpen] = useState(false);
-  const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
 
   // mkNum 기준으로 관리
   // 예: { 12: { mfNum: 3, mkNum: 12 } }
@@ -70,6 +96,7 @@ const MealRecordDetail = () => {
 
   const [userTargets, setUserTargets] = useState(null);
   const favoriteAddDoneRef = useRef(false);
+  const favoriteImportDoneRef = useRef(false);
   const meals = ["아침", "점심", "저녁"];
 
   const getImageUrl = (path) => {
@@ -97,12 +124,20 @@ const MealRecordDetail = () => {
     return `${y}.${m}.${d} ${week[date.getDay()]}`;
   };
 
+  const parseDateFromState = (dateStr) => {
+    if (!dateStr) return new Date();
+
+    // "2026-05-26" 형태 방어
+    return new Date(`${dateStr}T00:00:00`);
+  };
+
   const dateKey = formatDateKey(selectedDate);
   const recordKey = `${dateKey}_${activeMeal}`;
   const mealData = mealRecords[recordKey] || null;
   const favoriteInfo = mealData?.mkNum ? favoriteRecords[mealData.mkNum] : null;
-  const isFavorite = !!favoriteInfo;
-
+  const isFavorite =
+    !!favoriteInfo ||
+    mealData?.importedFavoriteMeal === true;
    
 
   const loadRecordedDates = async () => {
@@ -281,11 +316,11 @@ const getNutritionAnalysis = () => {
 
   // 디버깅용 삭제예정
   console.log(
-  "목표값 확인",
-  userTargets?.userDailyCarbs,
-  userTargets?.userDailyProtein,
-  userTargets?.userDailyFat
-  );
+    "목표값 확인",
+    userTargets?.userDailyCarbs,
+    userTargets?.userDailyProtein,
+    userTargets?.userDailyFat
+    );
   
   return {
     carb: {
@@ -294,6 +329,8 @@ const getNutritionAnalysis = () => {
         mealNutrition.carbs,
         userTargets?.userDailyCarbs
       ),
+      currentAmount: `${Math.round(mealNutrition.carbs)}g`,
+      targetAmount: `${Math.round((userTargets?.userDailyCarbs || 0) / 3)}g`,
     },
 
     protein: {
@@ -302,6 +339,8 @@ const getNutritionAnalysis = () => {
         mealNutrition.protein,
         userTargets?.userDailyProtein
       ),
+      currentAmount: `${Math.round(mealNutrition.protein)}g`,
+      targetAmount: `${Math.round((userTargets?.userDailyProtein || 0) / 3)}g`,
     },
 
     fat: {
@@ -310,16 +349,62 @@ const getNutritionAnalysis = () => {
         mealNutrition.fat,
         userTargets?.userDailyFat
       ),
+      currentAmount: `${Math.round(mealNutrition.fat)}g`,
+      targetAmount: `${Math.round((userTargets?.userDailyFat || 0) / 3)}g`,
     },
 
     sodium: {
+      ratio: Math.round(
+        (mealNutrition.sodium / (2000 / 3)) * 100
+      ),
       mealMg: Math.round(mealNutrition.sodium),
       todayMg: Math.round(todaySodium),
       percent: Math.round((todaySodium / 2000) * 100),
       status: getSodiumStatus(todaySodium),
-    }
+      currentAmount: `${Math.round(mealNutrition.sodium)}mg`,
+      targetAmount: `${Math.round(2000 / 3)}mg`,
+    },
   };
 };
+
+const getMealGrade = () => {
+  if (!mealData || !userTargets) return "-";
+
+  const mealNutrition = getMealNutrition(mealData);
+
+  const mealTargetKcal = Number(userTargets.userDailyKcal || 0) / 3;
+  const mealTargetCarbs = Number(userTargets.userDailyCarbs || 0) / 3;
+  const mealTargetProtein = Number(userTargets.userDailyProtein || 0) / 3;
+  const mealTargetFat = Number(userTargets.userDailyFat || 0) / 3;
+
+  if (!mealTargetKcal || mealData.totalKcal <= 0) return "-";
+
+  const kcalError =
+    Math.abs(mealTargetKcal - mealData.totalKcal) / mealTargetKcal * 100;
+
+  const carbsError =
+    Math.abs(mealTargetCarbs - mealNutrition.carbs) / Math.max(mealTargetCarbs, 1) * 100;
+
+  const proteinError =
+    Math.abs(mealTargetProtein - mealNutrition.protein) / Math.max(mealTargetProtein, 1) * 100;
+
+  const fatError =
+    Math.abs(mealTargetFat - mealNutrition.fat) / Math.max(mealTargetFat, 1) * 100;
+
+  const totalErrorRate =
+    kcalError * 0.4 +
+    carbsError * 0.2 +
+    proteinError * 0.2 +
+    fatError * 0.2;
+
+  if (totalErrorRate <= 15) return "A";
+  if (totalErrorRate <= 25) return "B";
+  if (totalErrorRate <= 35) return "C";
+  if (totalErrorRate <= 45) return "D";
+  return "F";
+};
+
+const mealGrade = mealData ? getMealGrade() : "-";
 
 const analysis = mealData ? getNutritionAnalysis() : null;
 
@@ -340,65 +425,175 @@ const analysis = mealData ? getNutritionAnalysis() : null;
   }, [mealData]);
 
   useEffect(() => {
-    const food = location.state?.selectedFood;
-    const mealType = location.state?.mealType;
+  const state = location.state;
 
-    if (!food || !mealType) return;
+  if (!state?.fromFavorite) return;
+  if (favoriteImportDoneRef.current) return;
 
-    if (favoriteAddDoneRef.current) return;
-    favoriteAddDoneRef.current = true;
+  favoriteImportDoneRef.current = true;
 
-    const addFavoriteFood = async () => {
-      setActiveMeal(mealType);
+  const {
+    favoriteType,
+    selectedFood,
+    selectedMeal,
+    selectedRecipe,
+    mealType,
+    date,
+  } = state;
 
-      const latestRecords = await loadMealsByDate(dateKey);
-      const key = `${dateKey}_${mealType}`;
+  if (!mealType) return;
 
-      setMealRecords((prev) => {
-        const baseRecord =
-          latestRecords[key] ||
-          prev[key] || {
-            mkMealType: mealType,
-            totalKcal: 0,
-            foods: [],
-            imageUrl: null,
-          };
+  const targetDate = parseDateFromState(date);
+  const targetDateKey = formatDateKey(targetDate);
+  const key = `${targetDateKey}_${mealType}`;
 
-        const newRecord = {
-          ...baseRecord,
-          totalKcal: Number(baseRecord.totalKcal || 0) + Number(food.kcal || 0),
-          foods: [
-            ...(baseRecord.foods || []),
-            {
-              id: food.foNum,
-              foNum: food.foNum,
-              name: food.name,
-              kcal: Number(food.kcal || 0),
-              portion: 1,
-              count: 1,
-              carbs: Number(food.carbs || 0),
-              protein: Number(food.protein || 0),
-              fat: Number(food.fat || 0),
-              sodium: Number(food.natrium || 0),
-            },
-          ],
-        };
+  setSelectedDate(targetDate);
+  setActiveMeal(mealType);
 
-        setModalInitialData(newRecord);
+  const importFavoriteToModal = async () => {
+    const latestRecords = await loadMealsByDate(targetDateKey);
+
+    const baseRecord =
+      latestRecords[key] || {
+        mkMealType: mealType,
+        totalKcal: 0,
+        foods: [],
+        imageUrl: null,
+      };
+
+    let importedFoods = [];
+    let importedImageUrl = baseRecord.imageUrl || null;
+    let importedFavoriteMeal = false;
+
+    // 음식 즐겨찾기
+    if (favoriteType === "food" && selectedFood) {
+      importedFoods = [
+        {
+          id: selectedFood.foNum,
+          foNum: selectedFood.foNum,
+          name: selectedFood.name,
+          kcal: Number(selectedFood.kcal || 0),
+          portion: 1,
+          count: 1,
+          carbs: Number(selectedFood.carbs || 0),
+          protein: Number(selectedFood.protein || 0),
+          fat: Number(selectedFood.fat || 0),
+          sodium: Number(selectedFood.natrium || 0),
+
+          // 모달 별 표시용
+          isFavorite: true,
+          favoriteType: "food",
+          sfNum: selectedFood.id,
+        },
+      ];
+    }
+
+    // 저장한 식단 즐겨찾기
+    if (favoriteType === "meal" && selectedMeal) {
+      const mealFoods = selectedMeal.foods || [];
+
+      importedFoods = mealFoods.map((food) => {
+        const portion = Number(
+          food.mdPortion ||
+          food.mfPortion ||
+          food.portion ||
+          food.count ||
+          1
+        );
+
+        const kcal = Number(
+          food.mdKcal ||
+          food.foKcal ||
+          food.kcal ||
+          0
+        );
 
         return {
-          ...prev,
-          [key]: newRecord,
+          id: food.foNum,
+          foNum: food.foNum,
+          name: food.foName || food.name,
+          kcal,
+          portion,
+          count: portion,
+          carbs: Number(food.foCarbs || food.carbs || 0),
+          protein: Number(food.foProtein || food.protein || 0),
+          fat: Number(food.foFat || food.fat || 0),
+          sodium: Number(food.foNatrium || food.natrium || 0),
+          image: food.foImage || null,
         };
       });
 
-      setTimeout(() => {
-        setIsRecordModalOpen(true);
-      }, 0);
+      importedImageUrl =
+        selectedMeal.mkImage
+          ? getImageUrl(selectedMeal.mkImage)
+          : baseRecord.imageUrl || null;
+
+      importedFavoriteMeal = true;
+    }
+
+    // 레시피 즐겨찾기
+    if (favoriteType === "recipe" && selectedRecipe) {
+      importedFoods = [
+        {
+          id: `recipe-${selectedRecipe.rcpNum}`,
+          rcpNum: selectedRecipe.rcpNum,
+          name: selectedRecipe.name,
+          kcal: Number(selectedRecipe.kcal || 0),
+          portion: 1,
+          count: 1,
+          carbs: Number(selectedRecipe.carbs || 0),
+          protein: Number(selectedRecipe.protein || 0),
+          fat: Number(selectedRecipe.fat || 0),
+          sodium: Number(selectedRecipe.natrium || 0),
+          image: selectedRecipe.image || null,
+
+          isRecipe: true,
+
+          isFavorite:
+            selectedRecipe.isFavorite === true,
+
+          favoriteType: "recipe",
+          rfNum: selectedRecipe.rfNum || selectedRecipe.id,
+        },
+      ];
+    }
+
+    const newRecord = {
+      ...baseRecord,
+      mkMealType: mealType,
+      totalKcal:
+        Number(baseRecord.totalKcal || 0) +
+        importedFoods.reduce(
+          (sum, food) =>
+            sum + Number(food.kcal || 0) * Number(food.count || 1),
+          0
+        ),
+      foods: [
+        ...(baseRecord.foods || []),
+        ...importedFoods,
+      ],
+      imageUrl: importedImageUrl,
+
+      // 저장한 식단에서 온 경우 하트 표시용
+      importedFavoriteMeal,
+      importedMfNum: selectedMeal?.mfNum || null,
+      importedFavoriteType: favoriteType,
     };
 
-    addFavoriteFood();
-  }, [location.state, dateKey]);
+    setMealRecords((prev) => ({
+      ...prev,
+      [key]: newRecord,
+    }));
+
+    setModalInitialData(newRecord);
+
+    setTimeout(() => {
+      setIsRecordModalOpen(true);
+    }, 0);
+  };
+
+  importFavoriteToModal();
+}, [location.state]);
   
 
   const dailyTotalKcal = Object.entries(mealRecords)
@@ -430,6 +625,38 @@ const analysis = mealData ? getNutritionAnalysis() : null;
 
   const handleSaveMeal = async (data) => {
     try {
+      // 레시피 즐겨찾기에서 가져온 경우는 food 테이블 음식이 아니라서
+      // 일반 /api/meal/record 말고 recipe-record로 저장
+      const recipeFood = data.foods.find((food) => food.isRecipe);
+
+      if (recipeFood) {
+        await axios.post("/api/meal/recipe-record", {
+          userNum,
+          mkMealType: data.mealType,
+          mkDietDate: dateKey,
+          mkUserMemo: recipeFood.aiReason || "",
+
+          rcpNum: recipeFood.rcpNum,
+          rcpName: recipeFood.name,
+          rcpImage: recipeFood.image || null,
+
+          rcpKcal: recipeFood.kcal || 0,
+          rcpCarbs: recipeFood.carbs || 0,
+          rcpProtein: recipeFood.protein || 0,
+          rcpFat: recipeFood.fat || 0,
+          rcpNatrium: recipeFood.sodium || 0,
+        });
+
+        await loadMealsByDate(dateKey);
+        await loadRecordedDates();
+
+        setIsRecordModalOpen(false);
+        setModalInitialData(null);
+        alert("레시피 식단 저장 완료!");
+        return;
+      }
+
+
       const foods = data.foods.map((food) => ({
         foNum: food.id,
         mdPortion: food.count,
@@ -546,6 +773,34 @@ const analysis = mealData ? getNutritionAnalysis() : null;
     } catch (err) {
       console.error("식단 즐겨찾기 처리 실패:", err);
       alert("즐겨찾기 처리 실패!");
+    }
+  };
+
+  const handleDeleteMeal = async () => {
+  if (!mealData?.mkNum) {
+    alert("삭제할 식단이 없어요!");
+    return;
+  }
+
+  const ok = window.confirm(`${activeMeal} 식단을 삭제할까요?`);
+    if (!ok) return;
+
+    try {
+      await axios.delete(`/api/meal/record?mkNum=${mealData.mkNum}`);
+
+      setMealRecords((prev) => {
+        const next = { ...prev };
+        delete next[recordKey];
+        return next;
+      });
+
+      await loadRecordedDates();
+      await loadMealsByDate(dateKey);
+
+      alert("식단이 삭제됐어요!");
+    } catch (err) {
+      console.error("식단 삭제 실패:", err);
+      alert("식단 삭제 실패!");
     }
   };
 
@@ -691,28 +946,38 @@ const analysis = mealData ? getNutritionAnalysis() : null;
 
         <div className="summary-box">
           <div className="summary-card">
-            <p>총 섭취 칼로리</p>
+            <p>{activeMeal} 섭취 칼로리</p>
             <h3>
               {dailyTotalKcal.toLocaleString()} <small>칼로리</small>
             </h3>
           </div>
 
           <div className="summary-card">
-            <p>영양소 균형</p>
-            <div className="grade-badge">{dailyTotalKcal > 0 ? "B+" : "-"}</div>
+           <p>{activeMeal} 영양 균형 등급</p>
+            <div className="grade-badge">
+              {mealGrade}
+            </div>
           </div>
         </div>
 
         <div className="meal-tabs">
-          {meals.map((meal) => (
-            <button
-              key={meal}
-              className={activeMeal === meal ? "active" : ""}
-              onClick={() => setActiveMeal(meal)}
-            >
-              {meal}
-            </button>
-          ))}
+          {meals.map((meal) => {
+            const hasMeal = !!mealRecords[`${dateKey}_${meal}`];
+
+            return (
+              <button
+                key={meal}
+                className={activeMeal === meal ? "active" : ""}
+                onClick={() => setActiveMeal(meal)}
+              >
+                <span>{meal}</span>
+
+                {hasMeal && (
+                  <div className={`meal-tab-dot ${meal}`} />
+                )}
+              </button>
+            );
+          })}
         </div>
 
         {!mealData ? (
@@ -729,7 +994,10 @@ const analysis = mealData ? getNutritionAnalysis() : null;
             </p>
           </div>
         ) : (
-          <div className="meal-content-card">
+          <div
+            className="meal-content-card clickable-meal-card"
+            onClick={() => setIsRecordModalOpen(true)}
+          >
             <button
               className={`meal-favorite-btn ${isFavorite ? "active" : ""}`}
               onClick={toggleFavorite}
@@ -738,10 +1006,7 @@ const analysis = mealData ? getNutritionAnalysis() : null;
             </button>
 
             <div className="meal-food-preview-card">
-              <div
-                className="meal-photo-box clickable"
-                onClick={() => setIsDetailModalOpen(true)}
-              >
+              <div className="meal-photo-box">
                 {mealData.imageUrl ? (
                   <img src={mealData.imageUrl} alt="식단 이미지" />
                 ) : (
@@ -776,6 +1041,13 @@ const analysis = mealData ? getNutritionAnalysis() : null;
 
             <div className="nutrition-area">
               <h4>AI 영양분석 ✨</h4>
+                <div className="nutrition-guide-row">
+                  <span>영양소</span>
+                  <span>섭취비율</span>
+                  <span>
+                    비율(%)
+                  </span>
+                </div>
 
               {analysis && (
                 <>
@@ -785,6 +1057,8 @@ const analysis = mealData ? getNutritionAnalysis() : null;
                     status={analysis.carb.status}
                     type="carb"
                     ratio={analysis.carb.ratio}
+                    currentAmount={analysis.carb.currentAmount}
+                    targetAmount={analysis.carb.targetAmount}
                   />
 
                   <NutrientBar
@@ -793,6 +1067,8 @@ const analysis = mealData ? getNutritionAnalysis() : null;
                     status={analysis.protein.status}
                     type="protein"
                     ratio={analysis.protein.ratio}
+                    currentAmount={analysis.protein.currentAmount}
+                    targetAmount={analysis.protein.targetAmount}
                   />
 
                   <NutrientBar
@@ -801,6 +1077,8 @@ const analysis = mealData ? getNutritionAnalysis() : null;
                     status={analysis.fat.status}
                     type="fat"
                     ratio={analysis.fat.ratio}
+                    currentAmount={analysis.fat.currentAmount}
+                    targetAmount={analysis.fat.targetAmount}
                   />
 
                   <NutrientBar
@@ -808,9 +1086,10 @@ const analysis = mealData ? getNutritionAnalysis() : null;
                     name="나트륨"
                     status={analysis.sodium.status}
                     type="sodium"
-                    valueText={`${analysis.sodium.mealMg}mg`}
+                    ratio={analysis.sodium.ratio}
+                    currentAmount={analysis.sodium.currentAmount}
+                    targetAmount={analysis.sodium.targetAmount}
                   />
-
                   <div className="sodium-total-box">
                     <span>
                       오늘 누적 {analysis.sodium.todayMg}/2000mg
@@ -828,7 +1107,9 @@ const analysis = mealData ? getNutritionAnalysis() : null;
                       />
                     </div>
 
-                    <b>{analysis.sodium.percent}%</b>
+                    <b>{analysis.sodium.percent}%
+                      
+                    </b>
                   </div>
                 </>
               )}
@@ -861,12 +1142,25 @@ const analysis = mealData ? getNutritionAnalysis() : null;
               </p>
             </div>
 
-            <button
-              className="record-submit-btn"
-              onClick={() => setIsRecordModalOpen(true)}
-            >
-              식단 수정하기
-            </button>
+           <div className="meal-action-row">
+              <button
+                className="record-submit-btn"
+                onClick={() => setIsRecordModalOpen(true)}
+              >
+                식단 수정하기
+              </button>
+
+              <button
+                type="button"
+                className="meal-delete-btn"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleDeleteMeal();
+                }}
+              >
+                <FiTrash2 />
+              </button>
+            </div>
           </div>
         )}
 
@@ -887,14 +1181,6 @@ const analysis = mealData ? getNutritionAnalysis() : null;
               setModalInitialData(null);
             }}
             onSave={handleSaveMeal}
-          />
-        )}
-
-        {isDetailModalOpen && mealData && (
-          <MealDetailModal
-            mealType={activeMeal}
-            mealData={mealData}
-            onClose={() => setIsDetailModalOpen(false)}
           />
         )}
       </div>

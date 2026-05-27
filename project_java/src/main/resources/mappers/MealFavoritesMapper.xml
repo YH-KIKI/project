@@ -5,45 +5,47 @@
 
 <mapper namespace="kr.hi.project.dao.MealFavoritesDao">
 
-    <select id="getMealFavorites"
-            resultType="kr.hi.project.dto.MealFavoritesDTO">
-
-        SELECT
-            mf.mf_num AS mfNum,
-            mf.user_num AS userNum,
-            mf.mk_num AS mkNum,
-            mf.mf_name AS mfName,
-            mf.mf_created_at AS mfCreatedAt,
-
-            ml.mk_image AS mkImage,
-            ml.mk_meal_type AS mkMealType,
-
-            IFNULL(SUM(md.md_kcal), 0) AS totalKcal,
-
-            GROUP_CONCAT(f.fo_name SEPARATOR ', ') AS foodListStr
-
-        FROM meal_favorites mf
-        JOIN meal_log ml
-            ON mf.mk_num = ml.mk_num
-        JOIN meal_detail md
-            ON ml.mk_num = md.mk_num
-        JOIN food f
-            ON md.fo_num = f.fo_num
-
-        WHERE mf.user_num = #{userNum}
-
-        GROUP BY
-            mf.mf_num,
-            mf.user_num,
-            mf.mk_num,
-            mf.mf_name,
-            mf.mf_created_at,
-            ml.mk_image,
-            ml.mk_meal_type
-
-        ORDER BY mf.mf_num DESC
-
-    </select>
+   <select id="getMealFavorites"
+        resultType="kr.hi.project.dto.MealFavoritesDTO">
+	
+	    SELECT
+	        mf.mf_num AS mfNum,
+	        mf.user_num AS userNum,
+	        mf.mk_num AS mkNum,
+	        mf.mf_name AS mfName,
+	        mf.mf_memo AS mfMemo,
+	        mf.mf_created_at AS mfCreatedAt,
+	
+	        ml.mk_image AS mkImage,
+	        ml.mk_meal_type AS mkMealType,
+	
+	        IFNULL(SUM(md.md_kcal), 0) AS totalKcal,
+	
+	        GROUP_CONCAT(f.fo_name SEPARATOR ', ') AS foodListStr
+	
+	    FROM meal_favorites mf
+	    JOIN meal_log ml
+	        ON mf.mk_num = ml.mk_num
+	    JOIN meal_detail md
+	        ON ml.mk_num = md.mk_num
+	    JOIN food f
+	        ON md.fo_num = f.fo_num
+	
+	    WHERE mf.user_num = #{userNum}
+	
+	    GROUP BY
+	        mf.mf_num,
+	        mf.user_num,
+	        mf.mk_num,
+	        mf.mf_name,
+	        mf.mf_memo,
+	        mf.mf_created_at,
+	        ml.mk_image,
+	        ml.mk_meal_type
+	
+	    ORDER BY mf.mf_num DESC
+	
+	</select>
 
     <select id="existsMealFavorite"
             resultType="int">
