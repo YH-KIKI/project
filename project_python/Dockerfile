@@ -17,11 +17,9 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 COPY requirements.txt .
 
-# 🌟 pip 환경 최신화 및 --user 옵션으로 /root/.local 에 패키지들 설치
-# (가장 마지막에 발생했던 packaging 모듈 에러를 방지하기 위해 강제 설치 추가)
-RUN pip install --no-cache-dir --upgrade pip setuptools wheel packaging && \
-    pip install --no-cache-dir --user -r requirements.txt && \
-    pip install --no-cache-dir --user packaging matplotlib ultralytics
+# --user 옵션으로 /root/.local 에 패키지들만 깔끔하게 설치
+RUN pip install --no-cache-dir --upgrade pip setuptools wheel && \
+    pip install --no-cache-dir --user -r requirements.txt
 
 # ---------------------------------------
 # 2단계: 실행 스테이지 (가볍고 깨끗한 최종 환경)
@@ -32,22 +30,18 @@ FROM python:3.10-slim
 WORKDIR /project_python
 
 # OpenCV, Mediapipe 실행에 꼭 필요한 '최소한의' 그래픽 라이브러리만 쏙쏙 설치
-# (100번 에러를 방지하기 위해 libgl1-mesa-glx 대신 최신 명칭인 libgl1 사용)
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    libgl1 \
+    libgl1-mesa-glx \
     libglib2.0-0 \
     libgomp1 \
     && rm -rf /var/lib/apt/lists/*
 
-# 1단계(builder)에서 설치 완료된 패키지 폴더(/root/.local)만 가져오기 (이게 경량화의 핵심!)
+# 🌟 1단계(builder)에서 설치 완료된 패키지 폴더(/root/.local)만 가져오기 (이게 경량화의 핵심!)
 COPY --from=builder /root/.local /root/.local
 
 # 파이썬이 복사해온 패키지들을 인식하도록 환경 변수 설정
 ENV PATH=/root/.local/bin:$PATH
 ENV PYTHONUSERBASE=/root/.local
-
-# 🌟 Ultralytics(YOLO) 쓰기 권한 경고 해결용 환경변수 추가
-ENV YOLO_CONFIG_DIR=/tmp/Ultralytics
 
 # 내 소스 코드 복사
 COPY . .
