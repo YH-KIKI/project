@@ -8,7 +8,7 @@ public class MealDetailDTO {
     private int mdKcal;       // 해당음식칼로리 (계산된 값)
     private int mdPortion;    // 중량(g)
     private int mkNum;        // 식단기록고유번호 (FK)
-    private int foNum;        // 음식고유번호 (FK)
+    private Integer foNum;        // 음식고유번호 (FK)
     
     
     
@@ -23,6 +23,16 @@ public class MealDetailDTO {
     private float foFat;
     private float foNatrium;
     private String mkImage;
+    
+ // 레시피 저장용
+    private Boolean isRecipe;
+    private Integer rcpNum;
+    private String rcpName;
+    private Integer rcpKcal;
+    private Integer rcpCarbs;
+    private Integer rcpProtein;
+    private Integer rcpFat;
+    private Integer rcpNatrium;
     
 
 }

@@ -547,11 +547,11 @@ const analysis = mealData ? getNutritionAnalysis() : null;
           sodium: Number(selectedRecipe.natrium || 0),
           image: selectedRecipe.image || null,
 
+          // 레시피는 실제 food 테이블 음식이 아니므로 표시용 구분
           isRecipe: true,
 
-          isFavorite:
-            selectedRecipe.isFavorite === true,
-
+          // 모달 별 표시용
+          isFavorite: true,
           favoriteType: "recipe",
           rfNum: selectedRecipe.rfNum || selectedRecipe.id,
         },
@@ -625,92 +625,94 @@ const analysis = mealData ? getNutritionAnalysis() : null;
 
   const handleSaveMeal = async (data) => {
     try {
-      // 레시피 즐겨찾기에서 가져온 경우는 food 테이블 음식이 아니라서
-      // 일반 /api/meal/record 말고 recipe-record로 저장
-      const recipeFood = data.foods.find((food) => food.isRecipe);
+      const isRecipeFood = (food) =>
+        food.isRecipe ||
+        food.rcpNum ||
+        food.recipeNum ||
+        String(food.id || "").startsWith("recipe-");
 
-      if (recipeFood) {
-        await axios.post("/api/meal/recipe-record", {
-          userNum,
-          mkMealType: data.mealType,
-          mkDietDate: dateKey,
-          mkUserMemo: recipeFood.aiReason || "",
+      const hasRecipe = data.foods.some(isRecipeFood);
+      const hasNormalFood = data.foods.some((food) => !isRecipeFood(food));
 
-          rcpNum: recipeFood.rcpNum,
-          rcpName: recipeFood.name,
-          rcpImage: recipeFood.image || null,
+   
+      // 일반 음식만 저장
+  const foods = data.foods.map((food) => {
+    const isRecipe =
+      food.isRecipe ||
+      food.rcpNum ||
+      food.recipeNum ||
+      String(food.id || "").startsWith("recipe-");
 
-          rcpKcal: recipeFood.kcal || 0,
-          rcpCarbs: recipeFood.carbs || 0,
-          rcpProtein: recipeFood.protein || 0,
-          rcpFat: recipeFood.fat || 0,
-          rcpNatrium: recipeFood.sodium || 0,
-        });
+    if (isRecipe) {
+      return {
+        isRecipe: true,
+        rcpNum:
+          food.rcpNum ||
+          food.recipeNum ||
+          Number(String(food.id || "").replace("recipe-", "")),
+        rcpName: food.name,
+        rcpKcal: Number(food.kcal || 0),
+        rcpCarbs: Number(food.carbs || 0),
+        rcpProtein: Number(food.protein || 0),
+        rcpFat: Number(food.fat || 0),
+        rcpNatrium: Number(food.sodium || 0),
+        mdPortion: Number(food.count || food.portion || 1),
+        mdKcal: Math.round(Number(food.kcal || 0) * Number(food.count || food.portion || 1)),
+      };
+    }
 
-        await loadMealsByDate(dateKey);
-        await loadRecordedDates();
+    return {
+      foNum: food.foNum || food.id,
+      mdPortion: Number(food.count || food.portion || 1),
+      mdKcal: Math.round(Number(food.kcal || 0) * Number(food.count || food.portion || 1)),
+    };
+  });
 
-        setIsRecordModalOpen(false);
-        setModalInitialData(null);
-        alert("레시피 식단 저장 완료!");
+      const invalidFoods = foods.filter(
+        (food) => !food.isRecipe && !food.foNum
+      );
+      if (invalidFoods.length > 0) {
+        console.log("foNum 없는 일반 음식:", invalidFoods);
+        alert("저장할 수 없는 음식이 있어요. 콘솔을 확인해주세요.");
         return;
       }
-
-
-      const foods = data.foods.map((food) => ({
-        foNum: food.id,
-        mdPortion: food.count,
-        mdKcal: Math.round(food.kcal * food.count),
-      }));
 
       const mealJson = {
         userNum,
         mkNum: mealData?.mkNum || null,
         mkMealType: data.mealType,
         mkDietDate: dateKey,
-        foods
+        foods,
       };
 
       const formData = new FormData();
 
       formData.append(
         "mealData",
-        new Blob(
-          [JSON.stringify(mealJson)],
-          { type: "application/json" }
-        )
+        new Blob([JSON.stringify(mealJson)], {
+          type: "application/json",
+        })
       );
 
-      if (data.mealImageFile) {
-        formData.append(
-          "mealImageFile",
-          data.mealImageFile
-        );
+      // 직접 업로드한 파일만 식단 이미지로 저장
+      if (data.mealImageFile instanceof File) {
+        formData.append("mealImageFile", data.mealImageFile);
       }
 
-      console.log("저장 data:", data);
-      console.log("mealImageFile:", data.mealImageFile);
+      console.log("저장 mealJson:", mealJson);
 
-      for (let pair of formData.entries()) {
-        console.log(pair[0], pair[1]);
-      }
+      await axios.post("/api/meal/record", formData);
 
-      const res = await axios.post(
-        "/api/meal/record",
-        formData
-      );
-
-      console.log("식단 저장 응답:", res.data);
-
-      // 저장 직후 mkNum 문제 방지용:
-      // 응답 믿지 말고 DB에서 해당 날짜 식단 다시 조회
       await loadMealsByDate(dateKey);
       await loadRecordedDates();
 
       setIsRecordModalOpen(false);
+      setModalInitialData(null);
+
       alert("식단 기록 저장 완료!");
     } catch (err) {
       console.error("식단 저장 실패:", err);
+      console.log("서버 응답:", err.response?.data);
       alert("식단 저장 실패!");
     }
   };
@@ -998,15 +1000,15 @@ const analysis = mealData ? getNutritionAnalysis() : null;
             className="meal-content-card clickable-meal-card"
             onClick={() => setIsRecordModalOpen(true)}
           >
-          <button
-            className={`meal-favorite-btn ${isFavorite ? "active" : ""}`}
-            onClick={(e) => {
-              e.stopPropagation();
-              toggleFavorite();
-            }}
-          >
-            <FiHeart />
-          </button>
+            <button
+              className={`meal-favorite-btn ${isFavorite ? "active" : ""}`}
+              onClick={(e) => {
+                e.stopPropagation();
+                toggleFavorite();
+              }}
+            >
+              <FiHeart />
+            </button>
 
             <div className="meal-food-preview-card">
               <div className="meal-photo-box">
