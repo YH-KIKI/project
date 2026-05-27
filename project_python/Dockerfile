@@ -31,7 +31,7 @@ WORKDIR /project_python
 
 # OpenCV, Mediapipe 실행에 꼭 필요한 '최소한의' 그래픽 라이브러리만 쏙쏙 설치
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    libgl1-mesa-glx \
+    libgl1 \
     libglib2.0-0 \
     libgomp1 \
     && rm -rf /var/lib/apt/lists/*
