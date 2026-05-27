@@ -126,9 +126,9 @@ const Evaluation = () => {
 
   const nutrientList = [
     { name: '에너지', val: mealResult.kcal || 0, goal: mealTarget.kcal, unit: 'kcal' },
-    { name: '탄수화물', val: mealResult.carbs, goal: mealTarget.carbs, unit: 'g' },
-    { name: '단백질', val: mealResult.protein, goal: mealTarget.protein, unit: 'g' },
-    { name: '지방', val: mealResult.fat, goal: mealTarget.fat, unit: 'g' },
+    { name: '탄수화물', val: (mealResult.carbs / 100), goal: mealTarget.carbs, unit: 'g' },
+    { name: '단백질', val: (mealResult.protein / 100), goal: mealTarget.protein, unit: 'g' },
+    { name: '지방', val: (mealResult.fat / 100), goal: mealTarget.fat, unit: 'g' },
   ];
 
   return (
