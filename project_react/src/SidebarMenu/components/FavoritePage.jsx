@@ -155,6 +155,22 @@ const FavoritePage = () => {
     }
   };
 
+  const openRecipeModal = async (recipe) => {
+    try {
+      const res = await axios.get(
+        `/api/fridge/recipe/steps?rcpNum=${recipe.rcpNum}`
+      );
+
+      setSelectedRecipe({
+        ...recipe,
+        steps: res.data,
+      });
+    } catch (err) {
+      console.error(err);
+      alert("레시피 정보를 불러오지 못했어요 😢");
+    }
+  };
+
   // 카드 클릭 시: 그냥 상세보기 모드
   const openMealFavoriteDetail = async (meal) => {
     try {
@@ -397,7 +413,11 @@ const FavoritePage = () => {
         state: {
           fromFavorite: true,
           favoriteType: "recipe",
-          selectedRecipe,
+
+          selectedRecipe: {
+            ...selectedRecipe,
+            isFavorite: true,
+          },
           mealType,
           date,
         },
@@ -425,7 +445,6 @@ const FavoritePage = () => {
       alert("저장할 음식 정보가 없어요!");
       return;
     }
-
     try {
       const convertedFoods = foods.map((food) => {
         const portion = Number(
@@ -707,7 +726,11 @@ const FavoritePage = () => {
           ) : (
             <div className="recipe-favorite-grid">
               {filteredRecipeFavorites.map((recipe) => (
-                <div className="recipe-fav-card" key={recipe.id}>
+                <div
+                  className="recipe-fav-card"
+                  key={recipe.id}
+                  onClick={() => openRecipeModal(recipe)}
+                >
                   <div className="recipe-fav-title-area">
                     <h3>{recipe.name}</h3>
                   </div>
@@ -755,14 +778,20 @@ const FavoritePage = () => {
                     <div className="food-card-actions">
                       <button
                         className="pink-btn"
-                        onClick={() => openRecipeLoadModal(recipe)}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          openRecipeLoadModal(recipe);
+                        }}
                       >
                         + 식단추가
                       </button>
 
                       <button
                         className="meal-delete-btn"
-                        onClick={() => deleteRecipeFavorite(recipe)}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          deleteRecipeFavorite(recipe);
+                        }}
                       >
                         <FiTrash2 />
                       </button>
@@ -985,6 +1014,105 @@ const FavoritePage = () => {
               showAlert={!selectedLoadMeal}
             />
         )}
+        {selectedRecipe && (
+        <div
+          className="recipe-modal-overlay"
+          onClick={() => setSelectedRecipe(null)}
+        >
+          <div
+            className="recipe-modal"
+            onClick={(e) => e.stopPropagation()}
+          >
+
+            <button
+              className="recipe-modal-close"
+              onClick={() => setSelectedRecipe(null)}
+            >
+              ✕
+            </button>
+            <img
+              className="recipe-modal-image"
+              src={selectedRecipe.image}
+              alt={selectedRecipe.name}
+            />
+            <div className="recipe-modal-header">
+              <div className="recipe-modal-title-wrap">
+                <div className="recipe-icon">🍮</div>
+
+                <h2>{selectedRecipe.name}</h2>
+              </div>
+            </div>
+
+            <p className="recipe-modal-desc">
+              {selectedRecipe.aiReason || selectedRecipe.way}
+            </p>
+
+            <div className="recipe-modal-tags">
+              {selectedRecipe.hashtags?.map((tag) => (
+                <span key={tag}>#{tag}</span>
+              ))}
+            </div>
+
+            <div className="recipe-modal-nutrients">
+              <div>
+                <span>🔥</span>
+                <b>칼로리</b>
+                <strong>{selectedRecipe.kcal} kcal</strong>
+              </div>
+
+              <div>
+                <span>🍞</span>
+                <b>탄수화물</b>
+                <strong>{selectedRecipe.carbs}g</strong>
+              </div>
+
+              <div>
+                <span>🥩</span>
+                <b>단백질</b>
+                <strong>{selectedRecipe.protein}g</strong>
+              </div>
+
+              <div>
+                <span>🥑</span>
+                <b>지방</b>
+                <strong>{selectedRecipe.fat}g</strong>
+              </div>
+
+              <div>
+                <span>🧂</span>
+                <b>나트륨</b>
+                <strong>{selectedRecipe.natrium}mg</strong>
+              </div>
+            </div>
+
+            <div className="recipe-modal-section">
+              <h4>🧺 사용 재료</h4>
+
+              <ul>
+                {selectedRecipe.parts
+                  ?.split(",")
+                  .map((item) => (
+                    <li key={item}>{item}</li>
+                  ))}
+              </ul>
+            </div>
+
+            <div className="recipe-modal-section">
+              <h4>👩‍🍳 조리 방법</h4>
+
+              <div className="recipe-step-list">
+                {selectedRecipe.steps
+                  ?.filter((step) => step?.stepText)
+                  .map((step) => (
+                    <p key={step.stepNum}>
+                      {step.stepText}
+                    </p>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

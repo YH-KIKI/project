@@ -547,11 +547,11 @@ const analysis = mealData ? getNutritionAnalysis() : null;
           sodium: Number(selectedRecipe.natrium || 0),
           image: selectedRecipe.image || null,
 
-          // 레시피는 실제 food 테이블 음식이 아니므로 표시용 구분
           isRecipe: true,
 
-          // 모달 별 표시용
-          isFavorite: true,
+          isFavorite:
+            selectedRecipe.isFavorite === true,
+
           favoriteType: "recipe",
           rfNum: selectedRecipe.rfNum || selectedRecipe.id,
         },

@@ -2,7 +2,6 @@ import axios from "axios";
 import React, { useEffect, useState } from "react";
 import { FiHeart } from "react-icons/fi";
 import { useNavigate } from "react-router-dom";
-import MealRecordModal from "./MealRecordModal";
 import MealTypeSelectModal from "./MealTypeSelectModal";
 import "./FridgeRecommendation.css";
 
@@ -64,12 +63,6 @@ const FridgeRecommendation = () => {
   const [favoriteRecipeNums, setFavoriteRecipeNums] = useState([]);
   const [mealAddRecipe, setMealAddRecipe] = useState(null);
   const [isMealTypeModalOpen, setIsMealTypeModalOpen] = useState(false);
-  const [selectedMealType, setSelectedMealType] = useState(null);
-  const [selectedDate, setSelectedDate] = useState(null);
-  const [isMealRecordModalOpen, setIsMealRecordModalOpen] = useState(false);
-
-
-    
 
   const ingredientSuggestions = `
   계란
@@ -335,12 +328,44 @@ const FridgeRecommendation = () => {
     setIsMealTypeModalOpen(false);
     setMealAddRecipe(null);
   };
-  const handleMealTypeSelect = ({ mealType, date }) => {
-    setSelectedMealType(mealType);
-    setSelectedDate(date);
 
-    setIsMealTypeModalOpen(false);
-    setIsMealRecordModalOpen(true);
+  const handleMealTypeSelect = ({ mealType, date }) => {
+    if (!mealType) {
+      alert("식사 타입을 선택해주세요!");
+      return;
+    }
+
+    const convertedRecipe = {
+      id: mealAddRecipe.rcpNum,
+      rcpNum: mealAddRecipe.rcpNum,
+      name: mealAddRecipe.rcpName,
+      image: mealAddRecipe.rcpImage,
+      way: mealAddRecipe.rcpWay,
+      type: mealAddRecipe.rcpType,
+      kcal: mealAddRecipe.rcpKcal || 0,
+      carbs: mealAddRecipe.rcpCarbs || 0,
+      protein: mealAddRecipe.rcpProtein || 0,
+      fat: mealAddRecipe.rcpFat || 0,
+      natrium: mealAddRecipe.rcpNatrium || 0,
+      parts: mealAddRecipe.rcpParts,
+      aiReason: mealAddRecipe.aiReason || mealAddRecipe.rcpWay || "",
+      hashtags: mealAddRecipe.hashtags || [],
+
+      isFavorite:
+        favoriteRecipeNums.includes(mealAddRecipe.rcpNum),
+    };
+
+    navigate("/record", {
+      state: {
+        fromFavorite: true,
+        favoriteType: "recipe",
+        selectedRecipe: convertedRecipe,
+        mealType,
+        date,
+      },
+    });
+
+    closeMealTypeModal();
   };
 
   useEffect(() => {
@@ -855,29 +880,14 @@ const FridgeRecommendation = () => {
       </div>
 
     )}
-    {isMealRecordModalOpen && mealAddRecipe && (
-      <MealRecordModal
-        mealType={selectedMealType}
-        selectedDate={selectedDate}
-        selectedRecipe={{
-          rcpNum: mealAddRecipe.rcpNum,
-          name: mealAddRecipe.rcpName,
-          kcal: mealAddRecipe.rcpKcal || 0,
-          carbs: mealAddRecipe.rcpCarbs || 0,
-          protein: mealAddRecipe.rcpProtein || 0,
-          fat: mealAddRecipe.rcpFat || 0,
-          natrium: mealAddRecipe.rcpNatrium || 0,
-          image: mealAddRecipe.rcpImage,
-          aiReason: mealAddRecipe.aiReason || mealAddRecipe.rcpWay || "",
-        }}
-        onClose={() => {
-          setIsMealRecordModalOpen(false);
-          setMealAddRecipe(null);
-          setSelectedMealType(null);
-          setSelectedDate(null);
-        }}
-      />
-    )}
+   {isMealTypeModalOpen && mealAddRecipe && (
+    <MealTypeSelectModal
+      title={`${mealAddRecipe.rcpName} 레시피를 어디에 추가할까요?`}
+      onSelect={handleMealTypeSelect}
+      onClose={closeMealTypeModal}
+      showAlert={true}
+    />
+  )}
     </div>
 
   );

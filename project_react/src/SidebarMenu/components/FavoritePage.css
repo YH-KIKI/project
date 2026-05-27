@@ -733,6 +733,11 @@
   text-align:left;
 }
 
+/* 레시피 모달 왼쪽 정렬 */
+.recipe-modal .recipe-step-list p {
+  text-align: left;
+}
+
 /* 반응형 */
 @media (max-width: 720px) {
   .favorite-tabs {

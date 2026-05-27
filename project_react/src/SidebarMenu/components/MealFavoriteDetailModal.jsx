@@ -68,6 +68,11 @@ function MealFavoriteDetailModal({
     0
   );
 
+  const totalSodium = foods.reduce(
+    (sum, food) => sum + Number(food.foNatrium || 0) * getFoodCount(food),
+    0
+  );
+
   const totalKcal =
     meal.totalKcal ||
     meal.mfKcal ||
@@ -200,6 +205,10 @@ function MealFavoriteDetailModal({
           <div>
             <span>지방</span>
             <strong>{totalFat.toFixed(1)}g</strong>
+          </div>
+          <div>
+            <span>나트륨</span>
+            <strong>{Math.round(totalSodium)}mg</strong>
           </div>
         </section>
 
