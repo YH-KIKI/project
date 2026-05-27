@@ -998,12 +998,15 @@ const analysis = mealData ? getNutritionAnalysis() : null;
             className="meal-content-card clickable-meal-card"
             onClick={() => setIsRecordModalOpen(true)}
           >
-            <button
-              className={`meal-favorite-btn ${isFavorite ? "active" : ""}`}
-              onClick={toggleFavorite}
-            >
-              <FiHeart />
-            </button>
+          <button
+            className={`meal-favorite-btn ${isFavorite ? "active" : ""}`}
+            onClick={(e) => {
+              e.stopPropagation();
+              toggleFavorite();
+            }}
+          >
+            <FiHeart />
+          </button>
 
             <div className="meal-food-preview-card">
               <div className="meal-photo-box">

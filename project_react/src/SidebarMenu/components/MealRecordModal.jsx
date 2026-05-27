@@ -933,7 +933,20 @@ function FoodRow({ food, isFavorite, onAdd, onFavorite, buttonText }) {
 
       <div className="mr-food-info">
         <strong>{food.name}</strong>
-        <span>{food.kcal} kcal</span>
+
+        <div className="mr-added-nutrients">
+          <div className="mr-added-nutrient-row">
+            <span>탄수화물 {Number(food.carbs || 0)}g</span>
+            <span>단백질 {Number(food.protein || 0)}g</span>
+          </div>
+
+          <div className="mr-added-nutrient-row">
+            <span>지방 {Number(food.fat || 0)}g</span>
+            <span>나트륨 {Number(food.sodium || 0)}mg</span>
+          </div>
+        </div>
+
+        <span>🔥 {food.kcal} kcal</span>
       </div>
 
       <button
