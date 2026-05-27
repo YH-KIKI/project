@@ -37,8 +37,17 @@ const getCroppedImg = async (imageSrc, pixelCrop) => {
 };
 
 const BodyCheck = () => {
-  // 로그인할 때 저장해둔 유저 번호를 꺼냄. (없으면 임시로 1번)
-  const userNum = Number(localStorage.getItem("userNum")) || 1;
+  let userNum = 1;
+  const userString = localStorage.getItem('user');
+  if (userString) {
+    try {
+      userNum = JSON.parse(userString).user_num; // 'user' 객체에서 3번을 확실하게 꺼냅니다!
+    } catch (e) {
+      console.error("유저 정보 파싱 에러:", e);
+    }
+  } else if (localStorage.getItem('userNum')) {
+    userNum = Number(localStorage.getItem('userNum')); // 혹시 모를 예전 방식 대비용
+  }
   const [activeTab, setActiveTab] = useState('album'); 
   
   const [albumRecords, setAlbumRecords] = useState([]);
@@ -47,6 +56,10 @@ const BodyCheck = () => {
   const [leftDate, setLeftDate] = useState('과거 날짜');
   const [rightPreview, setRightPreview] = useState(null);
   const [rightDate, setRightDate] = useState('오늘 날짜');
+
+  // AI 점수를 담을 State
+  const [leftScoreData, setLeftScoreData] = useState(null);
+  const [rightScoreData, setRightScoreData] = useState(null);
 
   const [internalAlbumTarget, setInternalAlbumTarget] = useState(null); 
   const cameraInputRef = useRef(null);
@@ -77,7 +90,6 @@ const BodyCheck = () => {
       const response = await axios.get(`${SERVER_URL}/api/bodycheck/list`, {
         params: { userNum: userNum } 
       });
-      // DB에서 가져온 데이터 형태: [{bcNum, bcImagePath, bcType, bcAiResult, bcDate}]
       setAlbumRecords(response.data); 
     } catch (err) {
       console.error("기록 로딩 실패:", err);
@@ -97,7 +109,6 @@ const BodyCheck = () => {
     if (window.confirm("정말로 이 기록을 삭제하시겠습니까?")) {
       try {
         await axios.delete(`${SERVER_URL}/api/bodycheck/${bcNum}`);
-        // 화면에서도 지우기
         setAlbumRecords(albumRecords.filter(record => record.bcNum !== bcNum));
         alert("삭제되었습니다. 🗑️");
       } catch (err) {
@@ -199,8 +210,19 @@ const BodyCheck = () => {
       }
       setRightPreview(finalImageUrl);
       setRightDate(formatDate(new Date()));
-      alert("등록 완료! 🚀");
-    } catch (error) {
+      
+      // 방금 갓 뽑아낸 오늘 AI 점수 저장하기
+      setRightScoreData(responseData.score_data || null);
+
+      if (responseData.score_data) {
+         alert(`[분석 완료] 종합 점수: ${responseData.score_data.total_score}점!\n결과는 아래 리포트에서 확인하세요! 🚀`);
+      } else if (type === 'outline') {
+         alert("바디라인 실루엣 추출이 완료되었습니다! 👤\n아래의 '사진 겹쳐서 차이점 보기' 버튼을 눌러보세요!");
+      } else {
+         alert("등록 완료! 🚀");
+      }
+
+    } catch (error) { 
       alert("서버 통신 실패");
     } finally {
       setIsLoading(false); 
@@ -208,30 +230,32 @@ const BodyCheck = () => {
     }
   };
 
- // 내부 앨범에서 선택할 때도 AI 팝업 띄우기
   const selectFromInternalAlbum = async (record) => {
     const fullImageUrl = `${SERVER_URL}${record.bcImagePath}`;
     
     if (internalAlbumTarget === 'left') {
-      // 전(Before) 사진은 AI 분석이 필요 없으므로 바로 화면에 띄움
       setLeftPreview(fullImageUrl);
       setLeftDate(record.bcDate);
       setInternalAlbumTarget(null);
       
+      try {
+        if (record.bcAiResult) {
+          const parsedResult = JSON.parse(record.bcAiResult);
+          setLeftScoreData(parsedResult.score_data || null);
+        } else {
+          setLeftScoreData(null);
+        }
+      } catch(e) { setLeftScoreData(null); }
+      
     } else if (internalAlbumTarget === 'right') {
-      // 후(After) 사진을 골랐을 때는 AI 팝업을 띄우기 위한 작업 시작!
       setInternalAlbumTarget(null);
-      setIsLoading(true); // 로딩 스피너 돌리기
+      setIsLoading(true); 
       
       try {
-        // 1. 서버에 있는 사진 주소(URL)를 가져와서 실제 파일(Blob) 형태로 다운로드
         const response = await fetch(fullImageUrl);
         const blob = await response.blob();
-        
-        // 2. 다운로드한 데이터를 AI가 읽을 수 있는 File 객체로 변환
         const file = new File([blob], "album_image.jpg", { type: blob.type || "image/jpeg" });
 
-        // 3. 변환된 파일을 대기열에 넣고 AI 팝업창 열기!
         setPendingFile(file);
         setShowAIPopup(true); 
       } catch (error) {
@@ -311,7 +335,6 @@ const BodyCheck = () => {
           <div className="ai-select-modal internal-album-modal">
             <h3>📁 내 눈바디 앨범</h3>
             <div className="mini-album-grid">
-              {/* 🌟 [수정 완료] DTO 필드명(bcNum, bcImagePath, bcDate) 적용 및 서버 URL 연동 */}
               {albumRecords.map(record => (
                 <div key={record.bcNum} className="mini-album-item" onClick={() => selectFromInternalAlbum(record)}>
                   <img src={`${SERVER_URL}${record.bcImagePath}`} alt="과거기록" />
@@ -361,9 +384,7 @@ const BodyCheck = () => {
             {/* --- 앨범 탭 --- */}
             {activeTab === 'album' && (
                <div className="bc-album-grid">
-                 {/* 👇 여기를 수정! 오늘의 눈바디 추가 슬롯 */}
                  <div className="bc-album-item">
-                   {/* 🌟 [높이 맞춤용] 눈에 보이지 않는 투명한 헤더를 추가해서 공간을 차지하게 만듭니다 */}
                    <div className="bc-item-header" style={{ visibility: 'hidden' }}>
                      <span className="bc-item-date">0000.00.00</span>
                      <button className="bc-delete-btn">🗑️ 삭제</button>
@@ -379,7 +400,6 @@ const BodyCheck = () => {
                    </div>
                  </div>
 
-                 {/* 🌟 [수정 완료] DB에서 가져온 기록들 반복 출력 (DTO 필드명 및 URL 연동) */}
                  {albumRecords.map((record) => (
                    <div key={record.bcNum} className="bc-album-item">
                      <div className="bc-item-header">
@@ -451,7 +471,6 @@ const BodyCheck = () => {
                       )}
                     </div>
                   </div>
-
                 </div>
                 
                 <div className="bc-compare-action">
@@ -464,6 +483,67 @@ const BodyCheck = () => {
                     ✨ 사진 겹쳐서 차이점 보기
                   </button>
                 </div>
+
+                {/* 🌟 AI 분석 리포트 UI (오른쪽 분석 점수가 있으면 무조건 출력!) */}
+                {rightScoreData && (
+                  <div className="bc-report-box">
+                    
+                    {/* 분기점: 실루엣(바디라인 비율) 결과인지, 뼈대(자세교정) 결과인지 판별 */}
+                    {rightScoreData.body_ratio ? (
+                      <>
+                        <h3 className="bc-report-title" style={{color: '#8c7ae6'}}>👤 바디라인 변화 리포트</h3>
+                        {leftScoreData && leftScoreData.body_ratio ? (
+                          <>
+                            <p className="bc-report-scores">
+                              과거 어깨 대비 허리 비율: <strong>{leftScoreData.body_ratio}%</strong> ➔ 오늘: <strong>{rightScoreData.body_ratio}%</strong>
+                            </p>
+                            {rightScoreData.body_ratio < leftScoreData.body_ratio ? (
+                               <p className="bc-report-result success" style={{color: '#8c7ae6'}}>🎉 대박! 허리/옆구리 라인이 무려 <span>{(leftScoreData.body_ratio - rightScoreData.body_ratio).toFixed(1)}%</span> 슬림해졌어요! 👗</p>
+                            ) : rightScoreData.body_ratio === leftScoreData.body_ratio ? (
+                               <p className="bc-report-result neutral">비율을 잘 유지하고 계시네요! 꾸준함이 생명입니다. 💪</p>
+                            ) : (
+                               <p className="bc-report-result danger">앗, 비율이 <span>{(rightScoreData.body_ratio - leftScoreData.body_ratio).toFixed(1)}%</span> 늘었어요. 식단과 운동을 다시 쪼여볼까요? 🔥</p>
+                            )}
+                          </>
+                        ) : (
+                          <p className="bc-report-scores" style={{ fontSize: '17px', color: '#333' }}>
+                            오늘의 어깨 대비 허리/골반 비율은 <strong>{rightScoreData.body_ratio}%</strong> 입니다!
+                          </p>
+                        )}
+                      </>
+                    ) : (
+                      <>
+                        <h3 className="bc-report-title">📊 AI 뼈대 교정 리포트</h3>
+                        {leftScoreData && leftScoreData.total_score ? (
+                          <>
+                            <p className="bc-report-scores">
+                              과거 종합 점수: <strong>{leftScoreData.total_score}점</strong> ➔ 오늘 종합 점수: <strong>{rightScoreData.total_score}점</strong>
+                            </p>
+                            {rightScoreData.total_score > leftScoreData.total_score ? (
+                               <p className="bc-report-result success">🎉 축하합니다! 자세가 <span>{(rightScoreData.total_score - leftScoreData.total_score).toFixed(1)}점</span> 개선되었어요!</p>
+                            ) : rightScoreData.total_score === leftScoreData.total_score ? (
+                               <p className="bc-report-result neutral">유지하는 것도 능력! 꾸준히 스트레칭에 신경 써볼까요? 💪</p>
+                            ) : (
+                               <p className="bc-report-result danger">앗, 자세가 <span>{(leftScoreData.total_score - rightScoreData.total_score).toFixed(1)}점</span> 떨어졌어요. 😭</p>
+                            )}
+                          </>
+                        ) : (
+                          <p className="bc-report-scores" style={{ fontSize: '17px', color: '#333' }}>
+                            오늘의 뼈대 균형 점수는 <strong>{rightScoreData.total_score}점</strong> 입니다!
+                          </p>
+                        )}
+                      </>
+                    )}
+
+                    {/* 맞춤형 스트레칭 / 피드백 문구 출력 */}
+                    <div style={{ marginTop: '15px', padding: '15px', backgroundColor: '#fff', borderRadius: '12px', border: '1px solid #ffe4e8' }}>
+                      <p className="feedback-text" style={{ whiteSpace: 'pre-line', lineHeight: '1.6', margin: 0, color: '#444', fontWeight: 'bold' }}>
+                        {rightScoreData.feedback}
+                      </p>
+                    </div>
+                  </div>
+                )}
+                
               </div>
             )}
           </div>

@@ -70,25 +70,22 @@ class FridgeRecommendRequest(BaseModel):
 async def ai_recommend(data: dict):
     try:
         user_num = data.get("userNum", 1)
-        # 스프링부트에서 1끼 분량으로 나눈 칼로리가 넘어오므로, 
-        # 하루 3끼 기준을 위해 원래 칼로리로 복구하거나 그대로 사용합니다. (여기선 그대로 사용)
         target_kcal = data.get("targetCalorie", 600) 
         carbs = data.get("carbs", 75)
         protein = data.get("protein", 45)
         fat = data.get("fat", 13)
         diet_type = data.get("type", "맞춤 식단")
+        
+        # 🌟 자바(스프링)가 보내준 챗봇 말투 받기! (없으면 '비즈니스' 기본값)
+        persona_mode = data.get("personaMode", "비즈니스") 
 
-        # 🌟 이제 반환값이 음식 1개가 아니라, 3개가 담긴 '리스트'입니다!
-        best_foods = ai_service.get_hybrid_diet_recommendation(
-            target_kcal, carbs, protein, fat, diet_type
+        # 🌟 5개 추출 함수로 파라미터 전부 전달!
+        best_foods = get_hybrid_diet_recommendation(
+            target_kcal, carbs, protein, fat, diet_type, persona_mode
         )
 
-        # 🌟 리스트 구조에 맞춰서 콘솔 출력(print) 방식도 예쁘게 변경해 줍니다.
-        print(f"📝 [Python] 3끼 오마카세 추천 완료! (유저: {user_num}, 목표: {diet_type})")
-        for food in best_foods:
-            print(f"🤖 [{food.get('meal_time', '식단')}] 추천 메뉴: {food.get('menu')}")
-
-        # 스프링부트가 받기 좋게 리스트를 통째로 리턴합니다! (이미 리스트이므로 [] 로 감쌀 필요 없음)
+        print(f"📝 [Python] 5가지 식단 추천 완료! (유저: {user_num}, 목표: {diet_type}, 말투: {persona_mode})")
+        
         return best_foods
 
     except Exception as e:
@@ -96,43 +93,60 @@ async def ai_recommend(data: dict):
         return []
 
 # ==========================================
-# 2. AI 눈바디 분석 엔드포인트 (기존)
+# 2-1. AI 눈바디 분석 엔드포인트 (자세 교정) 🌟 새로 추가됨 🌟
 # ==========================================
-@app.post("/api/ai/bodycheck")
-async def bodycheck_service(
-    file: UploadFile = File(...),
-    analyzeType: str = Form(...),
-    userNum: int = Form(...)
-):
-    print(f"📸 [Python] 눈바디 사진 도착! 타입: {analyzeType}, 유저: {userNum}")
-    
+@app.post("/api/ai/bodycam/pose")
+async def bodycam_pose_service(file: UploadFile = File(...)):
+    print(f"📸 [Python] 자세 분석(Pose) 요청 도착!")
     image_bytes = await file.read()
     
-    img_base64 = ""
-    score_data = None # 추가됨
+    result = analyze_pose(image_bytes)
     
-    if analyzeType == 'pose':
-        result = analyze_pose(image_bytes)
-        # 딕셔너리로 반환된 경우 분기 처리 추가
-        if isinstance(result, dict):
-            img_base64 = result["image_base64"]
-            score_data = result.get("score_data")
-        else:
-            img_base64 = result
-    elif analyzeType == 'outline':
-        img_base64 = extract_outline(image_bytes)
+    img_base64 = ""
+    score_data = None
+    
+    # 딕셔너리로 반환된 경우 분기 처리
+    if isinstance(result, dict):
+        img_base64 = result["image_base64"]
+        score_data = result.get("score_data")
+    else:
+        img_base64 = result
         
     return {
         "status": "success",
-        "analyzeType": analyzeType,
+        "analyzeType": "pose",
         "image_base64": img_base64,
-        "score_data": score_data # 추가됨
+        "score_data": score_data
     }
-
+# ==========================================
+# 2-2. AI 눈바디 분석 엔드포인트 (프라이빗 실루엣) 🌟 새로 추가됨 🌟
+# ==========================================
+@app.post("/api/ai/bodycam/outline")
+async def bodycam_outline_service(file: UploadFile = File(...)):
+    print(f"🕵️‍♂️ [Python] 실루엣(Outline) 및 비율 추출 요청 도착!")
+    image_bytes = await file.read()
+    
+    # 이제 실루엣 함수도 이미지와 점수를 딕셔너리로 반환합니다.
+    result = extract_outline(image_bytes)
+    
+    img_base64 = ""
+    score_data = None
+    
+    if isinstance(result, dict):
+        img_base64 = result["image_base64"]
+        score_data = result.get("score_data")
+    else:
+        img_base64 = result
+        
+    return {
+        "status": "success",
+        "analyzeType": "outline",
+        "image_base64": img_base64,
+        "score_data": score_data # 리액트로 비율 점수 토스!
+    }
 # ==========================================
 # 3. 사진 분석 테스트용 (기존 유지)
 # ==========================================
-@app.post("/detect")
 @app.post("/detect")
 async def detect_service(message: str = Form(...), file: UploadFile = File(...)):
     file_name = file.filename

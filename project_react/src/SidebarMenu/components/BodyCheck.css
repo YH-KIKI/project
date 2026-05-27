@@ -503,3 +503,76 @@
   background-color: #ffe4e8;
   transform: scale(1.05); 
 }
+/* =========================================
+   📊 AI 뼈대 교정 리포트 (비교 탭)
+========================================= */
+.bc-report-box {
+  margin-top: 30px;
+  padding: 25px;
+  background-color: #fff9fa;
+  border-radius: 16px;
+  border: 2px dashed #ffb6c1;
+  text-align: center;
+  animation: bcFadeIn 0.5s ease-in-out;
+}
+
+.bc-report-title {
+  color: #ff6b8b;
+  margin: 0 0 15px 0;
+  font-size: 20px;
+  font-weight: 800;
+}
+
+.bc-report-scores {
+  color: #555;
+  font-size: 15px;
+  margin-bottom: 12px;
+}
+
+.bc-report-scores strong {
+  color: #333;
+  font-size: 16px;
+}
+
+.bc-report-result {
+  font-size: 17px;
+  font-weight: bold;
+  margin: 0;
+  line-height: 1.4;
+}
+
+.bc-report-result.success {
+  color: #e84393;
+}
+
+.bc-report-result.success span {
+  font-size: 24px;
+  display: inline-block;
+  margin: 0 4px;
+}
+
+.bc-report-result.neutral {
+  color: #8c7ae6;
+}
+
+.bc-report-result.danger {
+  color: #d63031;
+}
+
+.bc-report-result.danger span {
+  font-size: 22px;
+  display: inline-block;
+  margin: 0 4px;
+}
+
+/* 리포트 등장 애니메이션 */
+@keyframes bcFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
