@@ -217,7 +217,23 @@ const FridgeRecommendation = () => {
       const res = await axios.post(
         "/api/fridge/recommend",
         {
-          ingredients
+          ingredients,
+          nutrition: {
+            targetKcal: summary?.targetKcal || 0,
+            currentKcal: summary?.currentKcal || 0,
+
+            targetCarbs: summary?.targetCarbs || 0,
+            currentCarbs: summary?.currentCarbs || 0,
+
+            targetProtein: summary?.targetProtein || 0,
+            currentProtein: summary?.currentProtein || 0,
+
+            targetFat: summary?.targetFat || 0,
+            currentFat: summary?.currentFat || 0,
+
+            targetNatrium: summary?.targetNatrium || 0,
+            currentNatrium: summary?.currentNatrium || 0,
+          }
         }
       );
 

@@ -11,5 +11,7 @@ public class FridgeRecommendRequestDTO {
     private List<String> ingredients;
     
     private List<FridgeRecipeDTO> recipes;
+    
+    private NutritionDTO nutrition;
 
 }
