@@ -3,28 +3,23 @@ import axios from 'axios';
 const API_BASE_URL = '/api/diet';
 
 // 1. AI 식단 추천 통신 함수 (모든 탭에서 진짜 데이터를 받아옵니다!)
-export const fetchAiRecommendations = async (tabName) => {
+export const fetchAiRecommendations = async (tabName, userNum) => { // userNum 파라미터 추가
   try {
     const response = await axios.get(`${API_BASE_URL}/recommend`, {
       params: {
-        userNum: 1, 
+        userNum: userNum, 
         type: tabName 
       },
       withCredentials: true 
     });
 
-    console.log(`🔥 [${tabName}] 탭 응답 성공! 데이터:`, response.data);
-    
-    // 🔥 1개만 자르던 하드코딩 껍데기를 지우고, 스프링이 준 5개 원본 배열을 통째로 리턴합니다!
+    console.log(`🔥 [${tabName}] 데이터 요청 (유저번호: ${userNum}):`, response.data);
     return response.data;
-
   } catch (error) {
-    console.error("🔥 통신 에러 발생:", error);
-    alert("식단 데이터를 가져오는데 실패했습니다.");
-    return []; 
+    console.error("🔥 통신 에러:", error);
+    throw error;
   }
 };
-
 // 2. 파이썬 서버로 사진 보내는 통신 함수
 export const testUploadImage = async (imageFile) => {
   const formData = new FormData();

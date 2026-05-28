@@ -45,12 +45,8 @@ except Exception as e:
 # ==========================================
 # 🌟 구글 Gemini AI 설정 (나만의 새 API 키 적용)
 # ==========================================
+load_dotenv(".env") 
 
-# 💡 만약 터미널을 껐다 켜도 환경변수 인식이 안 된다면, 
-# 아래 따옴표 안에 새로 발급받은 API 키를 직접 붙여넣으세요! (최후의 수단)
-load_dotenv("password.env") 
-
-# 불러온 변수들 중에서 GEMINI_API_KEY 값을 찾아서 변수에 쏙 넣습니다.
 GOOGLE_AI_API_KEY = os.getenv("GOOGLE_AI_API_KEY")
 
 if GOOGLE_AI_API_KEY:
@@ -58,7 +54,6 @@ if GOOGLE_AI_API_KEY:
         client = genai.Client(api_key=GOOGLE_AI_API_KEY)
         USE_GEMINI = True
         
-        # 🌟 내가 넣은 키가 맞는지 확인하기 위한 앞 10자리 출력 로직
         masked_key = GOOGLE_AI_API_KEY[:10] + "..." if len(GOOGLE_AI_API_KEY) > 10 else "인식오류"
         print(f"✅ [AI] 구글 Gemini 최신 SDK 연동 완료! (현재 사용중인 키: {masked_key})")
 
@@ -82,7 +77,6 @@ else:
 DB_HOST = os.getenv("DB_URL", "localhost")
 DB_PASS = os.getenv("DB_PASSWORD", "root")
 
-# 로컬(localhost)일 때는 root 계정, 실서버(AWS)일 때는 yummy 계정 사용
 if DB_HOST == "localhost":
     DB_USER = "root"
     DB_URL = f"mysql+pymysql://{DB_USER}:{DB_PASS}@{DB_HOST}:3306/yummy"
@@ -130,7 +124,7 @@ except Exception as e:
 
 
 # ==========================================
-# 식단 추천 로직 함수 (3끼 무작위 추출로 업그레이드!)
+# 식단 추천 로직 함수 (3끼 무작위 추출)
 # ==========================================
 
 def get_best_diets(
@@ -139,7 +133,7 @@ def get_best_diets(
     target_protein,
     target_fat,
     diet_type,
-    num_samples=15 # 🌟 상위 15개를 넉넉하게 뽑아옵니다
+    num_samples=15 
 ):
     if diet_type != "맞춤 식단":
         filtered_df = df_food[df_food['fo_type'] == diet_type]
@@ -151,7 +145,6 @@ def get_best_diets(
 
     temp_features = filtered_df[['fo_kcal', 'fo_carbs', 'fo_protein', 'fo_fat']]
     
-    # DB에 데이터가 부족할 경우를 대비한 안전장치
     n_neighbors = min(num_samples, len(filtered_df))
     if n_neighbors == 0:
         return []
@@ -166,7 +159,7 @@ def get_best_diets(
         results.append({
             "id": int(row['fo_num']),
             "menu": row['fo_name'],
-            "original_menu": row['fo_name'], # 제미나이에게 알려줄 원본 이름 보관
+            "original_menu": row['fo_name'], 
             "kcal": int(row['fo_kcal']),
             "carbs": int(row['fo_carbs']),
             "protein": int(row['fo_protein']),
@@ -178,61 +171,48 @@ def get_best_diets(
 
 
 # ==========================================
-# AI 하이브리드 식단 추천 (아침, 점심, 저녁 3끼 오마카세)
+# AI 하이브리드 식단 추천
 # ==========================================
-
 def get_hybrid_diet_recommendation(
     target_kcal,
     target_carbs,
     target_protein,
     target_fat,
-    diet_type
+    diet_type,
+    persona_mode="비즈니스"  
 ):
-    # 1. DB에서 영양소가 맞는 후보군 최대 15개 찾기
-    top_foods = get_best_diets(target_kcal, target_carbs, target_protein, target_fat, diet_type, num_samples=15)
+    top_foods = get_best_diets(target_kcal, target_carbs, target_protein, target_fat, diet_type, num_samples=20)
+    selected_foods = random.sample(top_foods, min(5, len(top_foods)))
+    roles = ["옵션 1", "옵션 2", "옵션 3", "옵션 4", "옵션 5"]
     
-    # 2. 그중에서 겹치지 않게 무작위로 3개 쏙쏙 뽑기
-    selected_foods = random.sample(top_foods, min(3, len(top_foods)))
-    roles = ["아침", "점심", "저녁"]
-    
-    # 기본 역할(태그) 부여
     for i, food in enumerate(selected_foods):
-        food["meal_time"] = roles[i] if i < len(roles) else "간식"
-        food["ai_comment"] = f"건강한 {food['meal_time']} 식단입니다." # AI 실패 시 땜빵용
+        food["meal_time"] = roles[i] if i < len(roles) else f"옵션 {i+1}"
+        food["ai_comment"] = "건강한 식단입니다."
+        food["main_ingredient"] = "기본" 
 
-    # 3. Gemini AI 호출 (3끼 한 방에 처리!)
     if USE_GEMINI and client and len(selected_foods) >= 1:
         try:
             prompt = f"""
-너는 냠냠플래닛의 센스있고 다정한 다이어트 전문 수석 셰프야.
-사용자가 '{diet_type}' 목표를 위해 하루 식단을 짜려고 해.
-내가 영양학적 계산을 통해 아래와 같이 메뉴를 골랐어.
+당신은 '{persona_mode}' 페르소나를 가진 냠냠플래닛의 수석 영양 코치입니다.
+사용자의 목표({diet_type})에 맞춰서 아래 5가지 메뉴를 무작위로 골랐습니다.
 
 [오늘의 선정 메뉴]
 """
             for food in selected_foods:
                 prompt += f"- {food['meal_time']}: {food['original_menu']} ({food['kcal']}kcal)\n"
 
-            prompt += """
-이 메뉴들을 바탕으로 하루 식단 구성을 평가하고, 각 메뉴별로 먹음직스러운 'AI 센스 네이밍(ai_name)'과 짧고 다정한 '추천 멘트(ai_comment, 1줄)'를 작성해줘.
+            prompt += f"""
+이 메뉴들을 바탕으로 각 메뉴별로 먹음직스러운 '메뉴명(menu)', '{persona_mode}' 말투의 '코멘트(ai_comment)', 그리고 이미지 매핑을 위한 '핵심 재료(main_ingredient)'를 작성해주세요.
 
-결과를 반드시 아래 JSON 배열 형식으로만 출력해:
+결과를 반드시 아래 JSON 배열 형식으로만 출력하세요 (5개 전부 작성):
 [
-  {
-    "meal_time": "아침",
-    "ai_name": "(원래 메뉴명을 더 맛있게 포장한 이름)",
-    "ai_comment": "(아침에 이 메뉴가 왜 좋은지 1줄 설명)"
-  },
-  {
-    "meal_time": "점심",
-    "ai_name": "(원래 메뉴명을 더 맛있게 포장한 이름)",
-    "ai_comment": "(점심에 이 메뉴가 왜 좋은지 1줄 설명)"
-  },
-  {
-    "meal_time": "저녁",
-    "ai_name": "(원래 메뉴명을 더 맛있게 포장한 이름)",
-    "ai_comment": "(저녁에 이 메뉴가 왜 좋은지 1줄 설명)"
-  }
+  {{
+    "meal_time": "옵션 1",
+    "menu": "(원래 메뉴명을 더 맛있게 포장한 이름)",
+    "main_ingredient": "(닭가슴살, 연어, 소고기, 돼지고기, 두부, 샐러드, 계란, 고구마 중 가장 가까운 식재료 단어 1개)",
+    "ai_comment": "({persona_mode} 말투로 작성된 1줄 추천 멘트)"
+  }},
+  ... (옵션 5까지 작성) ...
 ]
 """
             response = client.models.generate_content(
@@ -247,19 +227,18 @@ def get_hybrid_diet_recommendation(
             text = response.text.strip().replace("```json", "").replace("```", "")
             ai_data_list = json.loads(text)
 
-            # 4. 생성된 AI 데이터를 3개의 음식 데이터에 각각 덮어씌우기
             for ai_data in ai_data_list:
                 for food in selected_foods:
                     if food["meal_time"] == ai_data.get("meal_time"):
-                        food["menu"] = ai_data.get("ai_name", food["original_menu"])
+                        food["menu"] = ai_data.get("menu", food["original_menu"])
                         food["ai_comment"] = ai_data.get("ai_comment", food["ai_comment"])
+                        food["main_ingredient"] = ai_data.get("main_ingredient", "기본") 
 
-            print(f"🤖 [Gemini] 3끼 오마카세 작명 성공!")
+            print(f"🤖 [Gemini] 5가지 옵션 작명 및 재료 추출 성공!")
 
         except Exception as e:
-            print(f"⚠️ [Gemini] 3끼 호출 실패 (기본값으로 응답합니다): {e}")
+            print(f"⚠️ [Gemini] 5가지 호출 실패 (기본값으로 응답합니다): {e}")
 
-    # 리액트 화면에 예쁘게 띄우기 위해 "아침", "점심", "저녁" 글자를 태그 맨 앞에 추가
     for food in selected_foods:
         if food["meal_time"] not in food["tags"]:
             food["tags"] = [food["meal_time"]] + food["tags"]
@@ -269,18 +248,20 @@ def get_hybrid_diet_recommendation(
 # ==========================================
 # 두 좌표 사이의 기울기(각도)를 계산하는 함수
 # ==========================================
-
 def calculate_angle(p1, p2):
     dy = p2.y - p1.y
     dx = p2.x - p1.x
-    angle = math.degrees(math.atan2(dy, dx))
-    return abs(angle)
+    angle = abs(math.degrees(math.atan2(dy, dx)))
+    
+    if angle > 90:
+        angle = 180 - angle
+        
+    return angle
 
 
 # ==========================================
-# 눈바디 AI 함수 (뼈대 그리기 / 실루엣 따기)
+# 🦴 눈바디 AI 함수 1 (뼈대 자세 분석 및 Gemini 코칭)
 # ==========================================
-
 def analyze_pose(image_bytes):
     if not USE_MEDIAPIPE:
         print("⚠️ 자세 분석 기능을 건너뛰고 원본 이미지를 반환합니다.")
@@ -312,13 +293,41 @@ def analyze_pose(image_bytes):
         hip_score = max(0, 100 - (hip_angle * 3))
         total_score = (shoulder_score + hip_score) / 2
 
-        feedback = "훌륭합니다! 좌우 밸런스가 아주 좋습니다. 👏"
-        if shoulder_angle > 3 and hip_angle > 3:
-            feedback = "어깨와 골반이 모두 조금 틀어져 있습니다. 전신 교정 스트레칭이 필요해요! 🧘‍♀️"
-        elif shoulder_angle > 3:
-            feedback = "어깨 비대칭이 감지되었습니다. 한쪽으로 가방을 매거나 턱을 괴는 습관을 점검해보세요. 🎒"
-        elif hip_angle > 3:
-            feedback = "골반이 약간 틀어져 있습니다. 다리를 꼬고 앉는 습관을 피해주세요! 🪑"
+        # 1. 상태 판별 (방향 포함)
+        shoulder_status = "좌우 대칭이 완벽합니다"
+        if shoulder_angle > 3:
+            shoulder_status = "왼쪽 어깨가 올라감" if left_shoulder.y < right_shoulder.y else "오른쪽 어깨가 올라감"
+            
+        hip_status = "좌우 대칭이 완벽합니다"
+        if hip_angle > 3:
+            hip_status = "왼쪽 골반이 올라감" if left_hip.y < right_hip.y else "오른쪽 골반이 올라감"
+
+        # 🌟 2. 제미나이(Gemini)에게 동적 코칭 멘트 요청하기 🌟
+        feedback = ""
+        if USE_GEMINI and client:
+            prompt = f"""
+            당신은 다정하고 전문적인 체형 교정 AI 코치입니다.
+            현재 사용자의 뼈대 분석 결과입니다:
+            - 종합 자세 점수: {total_score:.1f}/100점
+            - 어깨 상태: {shoulder_status} (틀어짐: {shoulder_angle:.1f}도)
+            - 골반 상태: {hip_status} (틀어짐: {hip_angle:.1f}도)
+            
+            위 데이터를 바탕으로 사용자에게 공감과 칭찬을 건네고, 현재 틀어진 방향에 맞는 일상 생활의 습관 점검(예: 짝다리, 가방 매기 등)과 맞춤형 스트레칭 조언을 2~3줄로 다정하게 작성해주세요. 이모지를 섞어주세요.
+            (마크다운 기호 없이 순수 텍스트로만 출력해주세요.)
+            """
+            try:
+                response = client.models.generate_content(
+                    model="gemini-2.5-flash",
+                    contents=prompt,
+                    config=types.GenerateContentConfig(temperature=0.7)
+                )
+                feedback = response.text.strip()
+                print("🤖 [Gemini] 뼈대 자세 교정 피드백 생성 완료!")
+            except Exception as e:
+                print(f"⚠️ [Gemini] 뼈대 피드백 실패: {e}")
+                feedback = f"자세 점수는 {total_score:.1f}점입니다. 어깨: {shoulder_status}, 골반: {hip_status} 🏃‍♂️"
+        else:
+            feedback = f"자세 점수는 {total_score:.1f}점입니다. 어깨: {shoulder_status}, 골반: {hip_status} 🏃‍♂️"
 
         score_data = {
             "shoulder_score": round(shoulder_score, 1),
@@ -345,20 +354,81 @@ def analyze_pose(image_bytes):
     }
 
 
+# ==========================================
+# 👤 눈바디 AI 함수 2 (실루엣 바디라인 분석 및 Gemini 코칭)
+# ==========================================
 def extract_outline(image_bytes):
     nparr = np.frombuffer(image_bytes, np.uint8)
     img = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
+    
     gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
     blurred = cv2.GaussianBlur(gray, (5, 5), 0)
     edges = cv2.Canny(blurred, 50, 150)
     img_bgr = cv2.cvtColor(edges, cv2.COLOR_GRAY2BGR)
-    print("✅ [AI] 윤곽선(실루엣) 추출 완료!")
+    
+    score_data = None
+    
+    if USE_MEDIAPIPE:
+        img_rgb = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+        results = pose.process(img_rgb)
+        
+        if results.pose_landmarks:
+            landmarks = results.pose_landmarks.landmark
+            
+            l_shoulder = landmarks[mp_pose.PoseLandmark.LEFT_SHOULDER.value]
+            r_shoulder = landmarks[mp_pose.PoseLandmark.RIGHT_SHOULDER.value]
+            l_hip = landmarks[mp_pose.PoseLandmark.LEFT_HIP.value]
+            r_hip = landmarks[mp_pose.PoseLandmark.RIGHT_HIP.value]
+            
+            shoulder_width = math.sqrt((l_shoulder.x - r_shoulder.x)**2 + (l_shoulder.y - r_shoulder.y)**2)
+            hip_width = math.sqrt((l_hip.x - r_hip.x)**2 + (l_hip.y - r_hip.y)**2)
+            
+            if shoulder_width > 0:
+                body_ratio = round((hip_width / shoulder_width) * 100, 1)
+            else:
+                body_ratio = 100.0
+
+            # 🌟 2. 제미나이(Gemini)에게 바디라인(실루엣) 코칭 멘트 요청하기 🌟
+            feedback = ""
+            if USE_GEMINI and client:
+                prompt = f"""
+                당신은 다정하고 긍정적인 다이어트 AI 코치입니다.
+                사용자의 눈바디 실루엣 분석 결과, 어깨 너비 대비 허리/골반 너비 비율이 {body_ratio}% 로 측정되었습니다.
+                (참고: 90% 이상은 일자 체형, 80%대는 표준, 70% 이하는 모래시계/역삼각형 체형에 가깝습니다.)
+                
+                이 비율을 바탕으로, 현재 체형의 매력을 칭찬해주고, 허리 라인을 더 예쁘게 다듬기 위한 맞춤형 추천 운동(예: 코어, 유산소, 옆구리 스트레칭 등)이나 식단 팁을 2~3줄로 다정하게 조언해주세요. 이모지를 적절히 섞어주세요.
+                (마크다운 기호 없이 순수 텍스트로만 출력해주세요.)
+                """
+                try:
+                    response = client.models.generate_content(
+                        model="gemini-2.5-flash",
+                        contents=prompt,
+                        config=types.GenerateContentConfig(temperature=0.75)
+                    )
+                    feedback = response.text.strip()
+                    print("🤖 [Gemini] 실루엣 바디라인 피드백 생성 완료!")
+                except Exception as e:
+                    print(f"⚠️ [Gemini] 실루엣 피드백 실패: {e}")
+                    feedback = f"어깨 대비 허리 비율은 {body_ratio}% 입니다. 훌륭한 라인을 유지하고 계시네요! 👗"
+            else:
+                feedback = f"어깨 대비 허리 비율은 {body_ratio}% 입니다. 훌륭한 라인을 유지하고 계시네요! 👗"
+
+            score_data = {
+                "body_ratio": body_ratio,
+                "feedback": feedback,
+                "total_score": body_ratio
+            }
+            print(f"✅ [AI] 실루엣 및 바디 비율 분석 완료! (비율: {body_ratio}%)")
+
     _, buffer = cv2.imencode('.jpg', img_bgr)
-    return base64.b64encode(buffer).decode('utf-8')
+    return {
+        "image_base64": base64.b64encode(buffer).decode('utf-8'),
+        "score_data": score_data
+    }
 
 
 # ==========================================
-# 🌟 AI 3줄 요약 + 다이내믹 페르소나 피드백 생성 (Gemini)
+# 🌟 AI 3줄 요약 + 다이내믹 페르소나 피드백 생성 (식단용)
 # ==========================================
 
 def generate_daily_feedback(grade, current_kcal, target_kcal, carbs, protein, fat, sodium, persona_mode="다정"):

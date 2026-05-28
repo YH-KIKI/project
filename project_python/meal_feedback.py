@@ -1,6 +1,7 @@
 import os
 from google import genai
 
+USE_GEMINI = False  # 나중에 AI 쓰고 싶으면 True
 
 USE_GEMINI = False  # 나중에 AI 쓰고 싶으면 True
 
@@ -13,10 +14,7 @@ api_key = (
 # 테스트용으로 직접 넣고 싶으면 위 대신 아래 사용
 # api_key = ""
 
-if USE_GEMINI and api_key:
-    client = genai.Client(api_key=api_key)
-else:
-    client = None
+client = genai.Client(api_key=api_key)
 
 
 def generate_rule_feedback(meal_type, kcal, carbs, protein, fat, sodium):
@@ -27,6 +25,12 @@ def generate_rule_feedback(meal_type, kcal, carbs, protein, fat, sodium):
     sodium = float(sodium or 0)
 
     messages = []
+
+    if carbs < 30:
+        return f"{meal_type}은 탄수화물이 조금 부족해요! 밥이나 고구마를 곁들여보세요 🍚"
+
+    if carbs > 120:
+        return f"{meal_type}은 탄수화물이 많은 편이에요! 다음 끼니는 조금 가볍게 먹어봐요 🌾"
 
     if protein < 10:
         messages.append("단백질이 조금 부족해서 계란·두부·닭가슴살 같은 반찬을 더하면 좋아요")
@@ -109,6 +113,7 @@ def generate_meal_feedback(meal_type, kcal, carbs, protein, fat, sodium):
         return response.text.strip()
 
     except Exception as e:
+
         print("Gemini 오류:", e)
 
         return generate_rule_feedback(

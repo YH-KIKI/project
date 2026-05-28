@@ -238,10 +238,10 @@ public class MealRecordService {
 	                detail.setMdayNum(mdayNum);
 	                detail.setMdPortion(food.getMdPortion());
 	                detail.setMdKcal(food.getMdKcal());
-									// 재근추가 
-									detail.setFoCarbs(request.getAiCarbs());
-									detail.setFoProtein(request.getAiProtein());
-									detail.setFoFat(request.getAiFat());
+					// 재근추가 
+					detail.setFoCarbs(request.getAiCarbs());
+					detail.setFoProtein(request.getAiProtein());
+					detail.setFoFat(request.getAiFat());
 
 	                mealRecordDao.insertMealDetail(detail);
 	            }
