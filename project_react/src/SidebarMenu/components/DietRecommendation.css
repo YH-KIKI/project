@@ -51,7 +51,7 @@
   margin-bottom: 20px;
 }
 
-/* 🔥 핵심 수정: 높이 제한과 스크롤 완전 삭제, 세로로 쭉 쌓음 */
+/* 높이 제한과 스크롤 완전 삭제, 세로로 쭉 쌓음 */
 .diet-list { width: 100%; }
 .meal-grid {
   display: flex;
