@@ -21,7 +21,7 @@ const Mypage = () => {
   const apiUrl = process.env.REACT_APP_API_URL || `http://${currentHost}:8080`;
 
   const handlefavoriteClick = () => {
-    navigate('/favoritemeal');
+    navigate('/favorite');
   };
 
   const handleInformationClick = () => {
