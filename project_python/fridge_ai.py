@@ -10,8 +10,8 @@ client = None
 
 if not USE_DUMMY:
     client = genai.Client(
-        # api_key=os.getenv("GOOGLE_AI_API_KEY")
-        api_key="키"
+        api_key=os.getenv("GOOGLE_API_KEY")
+        # api_key=""
     )
 
 
@@ -114,7 +114,7 @@ def generate_ai_info(recipes, user_ingredients, nutrition=None):
 
     try:
         response = client.models.generate_content(
-            model="gemini-2.0-flash",
+            model="gemini-2.5-flash",
             contents=prompt,
             config={
                 "response_mime_type": "application/json"

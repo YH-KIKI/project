@@ -830,12 +830,14 @@ gap: 30px;
 
   color: #4b4242 !important;
   font-size: 13px !important;
-  line-height: 1.45 !important;
+  line-height: 1.5 !important;
   font-weight: 700 !important;
 
-  white-space: nowrap !important;
-  overflow: hidden !important;
-  text-overflow: ellipsis !important;
+  white-space: normal !important;
+  overflow: visible !important;
+  text-overflow: unset !important;
+
+  word-break: keep-all !important;
 }
 
 

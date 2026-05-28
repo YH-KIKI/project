@@ -4,14 +4,14 @@ from google import genai
 
 USE_GEMINI = False  # 나중에 AI 쓰고 싶으면 True
 
-# api_key = (
-#     os.getenv("GEMINI_API_KEY")
-#     or os.getenv("GOOGLE_AI_API_KEY")
-#     or os.getenv("GOOGLE_API_KEY")
-# )
+api_key = (
+    os.getenv("GEMINI_API_KEY")
+    or os.getenv("GOOGLE_AI_API_KEY")
+    or os.getenv("GOOGLE_API_KEY")
+)
 
 # 테스트용으로 직접 넣고 싶으면 위 대신 아래 사용
-api_key = "키"
+# api_key = ""
 
 if USE_GEMINI and api_key:
     client = genai.Client(api_key=api_key)
@@ -102,7 +102,7 @@ def generate_meal_feedback(meal_type, kcal, carbs, protein, fat, sodium):
 
     try:
         response = client.models.generate_content(
-            model="gemini-2.0-flash",
+            model="gemini-2.5-flash",
             contents=prompt
         )
 
