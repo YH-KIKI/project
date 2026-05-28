@@ -260,7 +260,7 @@ function MealFavoriteDetailModal({
           </button>
 
           <button type="button" className="meal-fav-load-btn" onClick={onLoad}>
-            {isSaveMode ? "이 식단 기록하기" : "식사 타입 선택 후 저장하기"}
+            {isSaveMode ? "이 식단 기록하기" : "식단 기록 저장하기"}
           </button>
         </div>
       </div>
