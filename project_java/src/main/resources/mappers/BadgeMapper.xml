@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="kr.hi.project.mapper.BadgeMapper">
+
+    <!-- 전체 뱃지 -->
+    <select id="getUserBadges"
+            parameterType="int"
+            resultType="kr.hi.project.dto.BadgeDTO">
+        SELECT
+            b.badge_id AS badgeId,
+            b.badge_name AS badgeName,
+            b.badge_category AS badgeCategory,
+            b.description AS description,
+            b.max_level AS maxLevel,
+
+            IFNULL(ub.level, 0) AS level,
+            IFNULL(ub.progress, 0) AS progress,
+            IFNULL(ub.equipped, 0) AS equipped,
+            ub.updated_at AS updatedAt,
+
+            bl.requirement_type AS requirementType,
+            bl.requirement_value AS requirementValue,
+            bl.title AS title
+        FROM badge b
+        LEFT JOIN user_badge ub
+            ON b.badge_id = ub.badge_id
+           AND ub.user_num = #{userNum}
+        LEFT JOIN badge_level bl
+            ON b.badge_id = bl.badge_id
+           AND bl.level = IFNULL(ub.level + 1, 1)
+        ORDER BY b.badge_category, b.badge_id
+    </select>
+
+
+    <!-- 대표 뱃지 -->
+    <select id="getEquippedBadge"
+            parameterType="int"
+            resultType="kr.hi.project.dto.BadgeDTO">
+        SELECT
+            b.badge_id AS badgeId,
+            b.badge_name AS badgeName,
+            b.badge_category AS badgeCategory,
+            b.description AS description,
+            ub.level AS level,
+            ub.equipped AS equipped
+        FROM user_badge ub
+        JOIN badge b ON ub.badge_id = b.badge_id
+        WHERE ub.user_num = #{userNum}
+          AND ub.equipped = 1
+    </select>
+
+
+    <!-- 초기 생성 -->
+    <insert id="insertUserBadgeInit"
+            parameterType="int">
+        INSERT INTO user_badge (user_num, badge_id, level, progress, equipped)
+        SELECT
+            #{userNum}, badge_id, 0, 0, 0
+        FROM badge
+    </insert>
+
+
+    <!-- 진행도 증가 -->
+    <update id="updateBadgeProgress">
+        UPDATE user_badge
+        SET progress = progress + #{value},
+            updated_at = NOW()
+        WHERE user_num = #{userNum}
+          AND badge_id = #{badgeId}
+    </update>
+
+
+    <!-- 레벨업 (수정된 부분: CDATA 추가) -->
+    <update id="levelUpBadge">
+        UPDATE user_badge
+        SET level = level + 1,
+            progress = 0,
+            updated_at = NOW()
+        WHERE user_num = #{userNum}
+          AND badge_id = #{badgeId}
+          AND level <![CDATA[ < ]]> #{maxLevel}
+    </update>
+
+
+    <!-- 대표 설정 -->
+    <update id="setEquippedBadge">
+        UPDATE user_badge
+        SET equipped = CASE
+            WHEN badge_id = #{badgeId} THEN 1
+            ELSE 0
+        END
+        WHERE user_num = #{userNum}
+    </update>
+
+
+    <!-- 조건 조회 -->
+    <select id="getBadgeCondition"
+            parameterType="map"
+            resultType="kr.hi.project.dto.BadgeDTO">
+        SELECT requirement_value AS requirementValue
+        FROM badge_level
+        WHERE badge_id = #{badgeId}
+          AND level = #{level}
+    </select>
+
+</mapper>

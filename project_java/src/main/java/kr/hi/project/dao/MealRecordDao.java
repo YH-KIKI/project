@@ -2,7 +2,9 @@ package kr.hi.project.dao;
 
 import java.util.List;
 
+import org.apache.ibatis.annotations.Insert;
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Options;
 import org.apache.ibatis.annotations.Param;
 
 import kr.hi.project.dto.FoodDTO;
@@ -64,5 +66,8 @@ public interface MealRecordDao {
 
 	void deleteMealLogsByMkNums(List<Integer> mkNums);
 	
-
+	// 재근추가: AI가 추천한 신규 음식 DB에 자동 등록 (XML 작업 필요 없음!)
+    @Insert("INSERT INTO food (fo_name, fo_base_gram, fo_kcal, fo_type) VALUES (#{foName}, #{foBaseGram}, #{foKcal}, #{foType})")
+    @Options(useGeneratedKeys = true, keyProperty = "foNum", keyColumn = "fo_num")
+    int insertNewFood(FoodDTO food);
 }

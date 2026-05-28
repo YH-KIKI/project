@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="kr.hi.project.mapper.ExpHistoryMapper">
+
+    <select id="findUserNumByUserId" parameterType="string" resultType="java.lang.Integer">
+        SELECT user_num 
+        FROM user 
+        WHERE user_id = #{userId}
+    </select>
+
+    <select id="getHistoryList" parameterType="map" resultType="kr.hi.project.dto.ExpHistoryDTO">
+        SELECT 
+            eh.eh_num AS id,
+            eh.eh_type_name AS type,
+            eh.eh_exp AS exp,
+            DATE_FORMAT(eh.eh_created_at, '%Y-%m-%d %H:%i') AS date,
+            eh.eh_current_lv AS currentLv,
+            eh.eh_is_level_up AS isLevelUp
+        FROM exp_history eh
+        JOIN `character` ch ON eh.ch_num = ch.ch_num
+        WHERE ch.user_num = #{userNum}
+        ORDER BY eh.eh_created_at DESC
+        LIMIT #{offset}, #{limit}
+    </select>
+
+    <select id="getTotalCount" parameterType="int" resultType="int">
+        SELECT COUNT(*)
+        FROM exp_history eh
+        JOIN `character` ch ON eh.ch_num = ch.ch_num
+        WHERE ch.user_num = #{userNum}
+    </select>
+
+    </mapper>

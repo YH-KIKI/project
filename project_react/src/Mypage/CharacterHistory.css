@@ -1,0 +1,208 @@
+/* 1. 히스토리 모달 전용 레이아웃 */
+.history-modal-min-height {
+    /* 내부 콘텐츠에 맞춰 유연하게 늘어나도록 min-height 조정 */
+    min-height: 550px;
+    display: flex;
+    flex-direction: column;
+}
+
+/* 2. 경험치 내역 리스트 컨테이너 */
+.history-list-container {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    /* 5개 카드가 충분히 들어갈 높이 설정 */
+    height: 420px;
+    /* 스크롤바를 완전히 숨기기 위해 overflow를 hidden으로 변경 (페이지네이션을 쓰기 때문) */
+    overflow: hidden;
+    /* 호버 시 카드가 위로 올라가도 잘리지 않도록 상단 패딩 충분히 부여 */
+    padding: 15px 10px 10px 10px;
+    margin-top: 5px;
+}
+
+/* 3. 개별 히스토리 카드 스타일 */
+.history-card {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 14px 18px;
+    background-color: #ffffff;
+    border: 1px solid #edf2f7;
+    border-radius: 12px;
+    transition: all 0.2s ease;
+    position: relative;
+    flex-shrink: 0;
+    /* 카드 너비가 부모에 꽉 차도록 설정 */
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.history-card:hover {
+    transform: translateY(-4px);
+    border-color: #ffcc00;
+    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
+    z-index: 10;
+}
+
+/* 4. 레벨업 전용 카드 스타일 */
+.level-up-card {
+    background: linear-gradient(to right, #fff9e6, #ffffff);
+    border: 1px solid #ffd700;
+}
+
+.level-up-badge {
+    background-color: #ffcc00;
+    color: #fff;
+    font-size: 10px;
+    padding: 3px 8px;
+    border-radius: 20px;
+    font-weight: 800;
+    animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+    0% {
+        transform: scale(1);
+    }
+
+    50% {
+        transform: scale(1.05);
+    }
+
+    100% {
+        transform: scale(1);
+    }
+}
+
+/* 5. 정보 영역 (타입, 레벨, 날짜) */
+.history-info-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.history-header-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.history-label {
+    font-weight: 700;
+    font-size: 15px;
+    color: #2d3436;
+}
+
+.history-current-lv {
+    font-size: 11px;
+    background-color: #f1f3f5;
+    color: #495057;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-weight: 600;
+}
+
+.history-timestamp {
+    font-size: 11px;
+    color: #a0aec0;
+}
+
+/* 6. 경험치 포인트 영역 */
+.history-point-group {
+    display: flex;
+    align-items: baseline;
+    color: #ff7675;
+    font-weight: 800;
+}
+
+.history-plus {
+    font-size: 13px;
+    margin-right: 2px;
+}
+
+.history-exp-val {
+    font-size: 18px;
+}
+
+.history-unit {
+    font-size: 10px;
+    margin-left: 2px;
+    color: #ffb8b8;
+}
+
+/* 7. 페이지네이션 버튼 디자인 */
+.history-pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+    margin-top: auto;
+    /* 하단에 고정 */
+    padding: 20px 0;
+}
+
+.page-num,
+.page-arrow {
+    border: 1px solid #edf2f7;
+    background-color: #fff;
+    color: #718096;
+    padding: 6px 12px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 500;
+    transition: all 0.2s;
+    min-width: 35px;
+}
+
+.page-num:hover:not(.active),
+.page-arrow:hover:not(:disabled) {
+    background-color: #fff9e6;
+    border-color: #ffcc00;
+    color: #ffcc00;
+}
+
+.page-num.active {
+    background-color: #ffcc00;
+    color: white;
+    border-color: #ffcc00;
+    font-weight: 700;
+    box-shadow: 0 2px 8px rgba(255, 204, 0, 0.3);
+}
+
+.page-arrow:disabled {
+    color: #e2e8f0;
+    cursor: not-allowed;
+    background-color: #f8fafc;
+}
+
+/* 8. 비어있는 상태 */
+.history-empty-state {
+    text-align: center;
+    padding: 80px 20px;
+    color: #999;
+}
+
+.empty-icon {
+    font-size: 48px;
+    margin-bottom: 15px;
+}
+
+.history-sub-text {
+    font-size: 12px;
+    margin-top: 8px;
+    color: #ccc;
+}
+
+/* 9. 스크롤바 숨기기 코드 (혹시 몰라 모든 브라우저 대응) */
+.history-list-container {
+    -ms-overflow-style: none;
+    /* IE and Edge */
+    scrollbar-width: none;
+    /* Firefox */
+}
+
+.history-list-container::-webkit-scrollbar {
+    display: none;
+    /* Chrome, Safari, Opera */
+}

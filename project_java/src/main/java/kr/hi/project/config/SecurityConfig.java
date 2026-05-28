@@ -1,37 +1,66 @@
 package kr.hi.project.config;
 
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
+import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import kr.hi.project.service.JwtService;
 
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
 
+    @Autowired
+    private JwtService jwtService;
+
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
-    
+
+    @Bean
+    public WebSecurityCustomizer webSecurityCustomizer() {
+        return (web) -> web.ignoring().requestMatchers(
+            "/uploads/**", "/images/**", "/static/**", "/favicon.ico", "/error"
+        );
+    }
+
+    @Bean
+    public JwtAuthenticationFilter jwtAuthenticationFilter() {
+        return new JwtAuthenticationFilter(jwtService);
+    }
+
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
-            .cors(cors -> cors.configurationSource(corsConfigurationSource())) 
-            .csrf(csrf -> csrf.disable()) 
+            .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+            .csrf(csrf -> csrf.disable())
+            .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers("/", 
-                        		 "/favicon.ico",
-                				 "/uploads/**", 
+                                 "/favicon.ico",
+                                 "/uploads/**", 
                                  "/images/**",  // [추가/재근] 캐릭터 이미지 등 정적 리소스 접근 허용
                                  "/error",    
                                  "/api/signup", 
@@ -51,14 +80,17 @@ public class SecurityConfig {
                                  "/api/report-fail",//[준성/추가] 음식사진인증실패
                                  "/api/ai/**",
                                  "/api/user/info",
-	                             "/api/record",
-	                             "/api/meal/**",
-	                             "/api/login/**", 
-	                             "/login/**",
-	                             "/kakao", 
-	                             "/api/login/kakao/register",
-	                             "/api/user/food/search",
-                                 "/api/fridge/**" //[연희//추가] 냉장고 정보
+                                 "/api/record",
+                                 "/api/meal/**",
+                                 "/api/login/**", 
+                                 "/login/**",
+                                 "/kakao", 
+                                 "/api/login/kakao/register",
+                                 "/api/user/food/search",
+                                 "/api/fridge/**", //[연희//추가] 냉장고 정보
+                                 "/api/history/**", // 🚀 [추가] 성장 히스토리 내역 조회 허용
+                                 "/api/auth/validate", //[준성/추가] 로그인버튼 위해 토큰검사하기
+                                 "/api/check-duplicate" //[준성/추가] 회원가입중복검사하기
                                  ).permitAll() 
                 // 유효한 토큰이 있어야 들어갈수있는 페이지
                 //.requestMatchers("/api/record").authenticated()
@@ -72,15 +104,49 @@ public class SecurityConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
         configuration.setAllowedOrigins(Arrays.asList(
-        		"http://localhost:3000",
-        		"http://54.116.167.5"
-        		)); 
+                "http://localhost:3000",
+                "http://54.116.167.5"
+                )); 
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type"));
         configuration.setAllowCredentials(true);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        // 🛠️ 에러 수정: config -> configuration 으로 변경하여 변수명 일치시킴
         source.registerCorsConfiguration("/**", configuration);
         return source;
+    }
+
+    public static class JwtAuthenticationFilter extends org.springframework.web.filter.OncePerRequestFilter {
+        private final JwtService jwtService;
+
+        public JwtAuthenticationFilter(JwtService jwtService) {
+            this.jwtService = jwtService;
+        }
+
+        @Override
+        protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
+                throws ServletException, IOException {
+
+            String authHeader = request.getHeader("Authorization");
+
+            if (authHeader != null && authHeader.startsWith("Bearer ")) {
+                String token = authHeader.substring(7);
+                try {
+                    String userId = jwtService.getUsernameFromToken(token);
+
+                    if (userId != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+                        UsernamePasswordAuthenticationToken auth =
+                            new UsernamePasswordAuthenticationToken(userId, null, new ArrayList<>());
+                        SecurityContextHolder.getContext().setAuthentication(auth);
+                    }
+
+                } catch (Exception e) {
+                    System.err.println("JWT 필터 검증 실패: " + e.getMessage());
+                }
+            }
+
+            filterChain.doFilter(request, response);
+        }
     }
 }

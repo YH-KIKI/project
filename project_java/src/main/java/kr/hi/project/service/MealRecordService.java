@@ -165,6 +165,39 @@ public class MealRecordService {
 	        mkNum = mealLog.getMkNum();
 	        request.setMkNum(mkNum);
 
+    //  // 5. 음식 상세 저장
+    //     if (request.getAiMenuName() != null) {
+            
+    //         String foodName = request.getAiMenuName();
+    //         FoodDTO food = mealRecordDao.findFoodByName(foodName);
+
+    //         // DB에 없는 음식이면 에러 띄우지 말고 즉시 신규 등록!
+    //         if (food == null) {
+    //             food = new FoodDTO();
+    //             food.setFoName(foodName);
+    //             food.setFoBaseGram(100);
+    //             food.setFoKcal(request.getAiKcal() != null ? request.getAiKcal().floatValue() : 0f);
+    //             food.setFoType("AI추천");
+    //             mealRecordDao.insertNewFood(food); 
+    //         }
+
+    //         MealDetailDTO detail = new MealDetailDTO();
+    //         detail.setMkNum(mkNum);
+    //         detail.setFoNum(food.getFoNum());
+    //         detail.setMdayNum(mdayNum);
+    //         detail.setMdPortion(100); 
+    //         detail.setMdKcal(request.getAiKcal() != null ? request.getAiKcal() : 0);
+    //         // 재근추가
+    //         detail.setFoCarbs(request.getAiCarbs());
+    //         detail.setFoProtein(request.getAiProtein());
+    //         detail.setFoFat(request.getAiFat());
+            
+    //         mealRecordDao.insertMealDetail(detail);
+
+    //     } 
+    //     else 
+	        
+    //     if (request.getFoods() != null && !request.getFoods().isEmpty()) {
 	        // 5. 음식 상세 저장
 	        if (request.getFoods() != null && !request.getFoods().isEmpty()) {
 
@@ -205,6 +238,10 @@ public class MealRecordService {
 	                detail.setMdayNum(mdayNum);
 	                detail.setMdPortion(food.getMdPortion());
 	                detail.setMdKcal(food.getMdKcal());
+									// 재근추가 
+									detail.setFoCarbs(request.getAiCarbs());
+									detail.setFoProtein(request.getAiProtein());
+									detail.setFoFat(request.getAiFat());
 
 	                mealRecordDao.insertMealDetail(detail);
 	            }

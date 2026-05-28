@@ -4,11 +4,15 @@
 
     <select id="getCharacterInfo" parameterType="int" resultType="kr.hi.project.dto.CharacterDTO">
         SELECT 
+            c.ch_num AS chNum,
             c.ch_level AS chLevel,
             c.ch_exp AS chExp,
-            c.user_num AS userNum, cg.cg_name AS cgName,
+            c.user_num AS userNum,
+            c.cg_num AS cgNum,
+            cg.cg_name AS cgName,
             cg.cg_img AS cgImg,
-            (SELECT MIN(he_exp) FROM highest_exp WHERE he_level > c.ch_level) AS nextLevelExp
+            (SELECT COALESCE(MAX(he_exp), 0) FROM highest_exp WHERE he_level &lt; c.ch_level) AS currentLevelExp,
+            (SELECT COALESCE(MIN(he_exp), 60000) FROM highest_exp WHERE he_level > c.ch_level) AS nextLevelExp
         FROM `character` c
         JOIN character_grow cg ON c.cg_num = cg.cg_num
         WHERE c.user_num = #{userNum}
@@ -19,5 +23,51 @@
         SET cg_num = #{type}
         WHERE user_num = #{userNum}
     </update>
+
+    <select id="getNextLevelRequiredExp" parameterType="int" resultType="Integer">
+        SELECT he_exp 
+        FROM highest_exp 
+        WHERE he_level > #{currentLevel} 
+        ORDER BY he_level ASC 
+        LIMIT 1
+    </select>
+
+    <update id="updateCharacterExpAndLevel" parameterType="map">
+        UPDATE `character`
+        SET ch_exp = #{chExp},
+            ch_level = #{chLevel},
+            cg_num = #{cgNum}
+        WHERE user_num = #{userNum}
+    </update>
+
+    <insert id="insertExpHistory" parameterType="map">
+        INSERT INTO exp_history (
+            eh_exp, 
+            eh_type_name, 
+            ch_num, 
+            ed_num,
+            eh_current_lv,
+            eh_is_level_up,
+            eh_created_at
+        )
+        SELECT 
+            #{exp}, 
+            #{source}, 
+            c.ch_num, 
+            (SELECT ed_num FROM exp_details WHERE ed_type = #{source} LIMIT 1),
+            c.ch_level,
+            #{isLevelUp},
+            NOW()
+        FROM `character` c
+        WHERE c.user_num = #{userNum}
+    </insert>
+
+    <select id="checkTodayExpHistory" parameterType="map" resultType="int">
+        SELECT COUNT(*) 
+        FROM exp_history eh
+        WHERE eh.ch_num = (SELECT ch_num FROM `character` WHERE user_num = #{userNum} LIMIT 1)
+          AND eh.eh_type_name = #{source}
+          AND DATE(eh.eh_created_at) = CURRENT_DATE()
+    </select>
 
 </mapper>

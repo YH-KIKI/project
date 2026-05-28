@@ -7,13 +7,14 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import kr.hi.project.service.DietService;
-import kr.hi.project.service.DietAnalysisService; // 🌟 추가됨
+import kr.hi.project.service.DietAnalysisService;
 import lombok.RequiredArgsConstructor;
 
 @RestController
@@ -22,7 +23,7 @@ import lombok.RequiredArgsConstructor;
 public class DietController {
 
     private final DietService dietService;
-    private final DietAnalysisService dietAnalysisService; // 🌟 이 변수가 선언되어야 @RequiredArgsConstructor가 주입해줍니다.
+    private final DietAnalysisService dietAnalysisService; 
 
     // 1. AI 식단 추천
     @GetMapping("/recommend")
@@ -43,9 +44,7 @@ public class DietController {
         return ResponseEntity.ok(pythonResult);
     }
     
-    
-     // 3. 통계(주간/월간) 차트 및 영양소 데이터 반환 API
-    
+    // 3. 통계(주간/월간) 차트 및 영양소 데이터 반환 API
     @GetMapping("/stats")
     public ResponseEntity<Map<String, Object>> getStats(
             @RequestParam(name = "userNum") Long userNum, 
@@ -55,4 +54,6 @@ public class DietController {
         Map<String, Object> response = dietAnalysisService.getStatsData(userNum, date, type);
         return ResponseEntity.ok(response);
     }
+
+
 }
