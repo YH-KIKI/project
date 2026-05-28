@@ -261,6 +261,32 @@ public class DietAnalysisService {
         nutrients.put("sodium", sumSodium / divideDays);
         result.put("nutrients", nutrients);
 
+        // 🌟 [추가됨] 유저 맞춤형 목표 영양소 계산 로직
+        Integer targetKcal = dietAnalysisDao.selectUserTargetKcal(userNum);
+        int safeTargetKcal = (targetKcal != null && targetKcal > 0) ? targetKcal : 1800;
+
+        String dietType = dietAnalysisDao.selectUserDietType(userNum);
+        if (dietType == null) dietType = "건강유지";
+
+        double carbRatio = 0.5, proteinRatio = 0.3, fatRatio = 0.2;
+        double calorieModifier = 1.0;
+
+        switch (dietType) {
+            case "다이어트": carbRatio = 0.4; proteinRatio = 0.4; fatRatio = 0.2; calorieModifier = 0.8; break;
+            case "근육증가": carbRatio = 0.5; proteinRatio = 0.3; fatRatio = 0.2; calorieModifier = 1.2; break;
+            case "저탄고지": carbRatio = 0.2; proteinRatio = 0.3; fatRatio = 0.5; break;
+            default: carbRatio = 0.5; proteinRatio = 0.3; fatRatio = 0.2; break;
+        }
+
+        int adjustedTargetKcal = (int) (safeTargetKcal * calorieModifier);
+        Map<String, Integer> targets = new HashMap<>();
+        targets.put("carbs", (int) Math.round((adjustedTargetKcal * carbRatio) / 4.0));
+        targets.put("protein", (int) Math.round((adjustedTargetKcal * proteinRatio) / 4.0));
+        targets.put("fat", (int) Math.round((adjustedTargetKcal * fatRatio) / 9.0));
+        targets.put("sodium", 2000); // 나트륨은 권장량 고정
+        
+        result.put("targets", targets); // 프론트엔드로 같이 넘겨줌!
+
         return result;
     }
 }

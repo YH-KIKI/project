@@ -39,6 +39,7 @@
 	        f.mf_name as mfName,
 	        l.mk_image as mkImage,
 	        l.mk_num as mkNum,
+	        l.mk_meal_type as mkMealType,
 	        IFNULL(SUM(d.md_kcal), 0) as TotalKcal,
 	        GROUP_CONCAT(fd.fo_name SEPARATOR ', ') as FoodListStr
 	
@@ -58,4 +59,25 @@
 	    GROUP BY f.mf_num
 	</select>
 
+	<delete id="deleteFavorite">
+		DELETE FROM meal_favorites WHERE mf_num = #{mfNum}
+	</delete>
+	
+	<select id="getDetailsByMkNum" resultType="map">
+	    SELECT f.fo_name, d.md_portion 
+	    FROM meal_detail d
+	    JOIN food f ON d.fo_num = f.fo_num
+	    WHERE d.mk_num = #{mkNum}
+	</select>
+	
+	<select id="getMealLogByMkNum" resultType="map">
+	    SELECT mk_image FROM meal_log WHERE mk_num = #{mkNum}
+	</select>
+	
+	<select id="findImageUrlByMkNum" resultType="string">
+	    SELECT mk_image 
+	    FROM meal_log 
+	    WHERE mk_num = #{mkNum}
+	</select>
+	
 </mapper>

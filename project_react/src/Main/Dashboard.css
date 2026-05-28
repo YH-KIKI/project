@@ -1,0 +1,130 @@
+/* ==============================================
+   🌟 오늘의 식단 기록 (아침, 점심, 저녁 카드) 공통 레이아웃
+   ============================================== */
+.meal-card {
+flex-direction: column;
+align-items: center;
+padding: 16px;
+gap: 10px;
+}
+.meal-card.flex-card {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  padding: 16px;
+}
+
+/* 1. 헤더 (아침/점심/저녁) */
+.meal-header-title {
+  display: flex;
+  align-items: center;
+  justify-content: center; /* 아이콘과 글자를 가로 중앙으로 정렬 */
+  gap: 6px;
+  font-size: 15px;
+  font-weight: bold;
+  color: #4A3B32;
+  margin-bottom: 12px;
+}
+
+/* 2. 음식 태그 및 이미지 묶음 박스 */
+.meal-tags-container {
+  flex: 1;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  justify-content: center; 
+  align-items: center;
+  align-content: center;
+  min-height: 80px; 
+}
+
+/* 3. [사진이 있을 때] 식단 이미지 래퍼 (액자 역할) */
+.meal-image-wrapper {
+  width: 100%;
+  height: 80px; /* 카드 크기에 맞게 사진 높이 고정 (필요시 조절 가능) */
+  border-radius: 12px;
+  overflow: hidden; /* 둥근 모서리 밖으로 삐져나가는 사진 깔끔하게 자르기 */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+}
+
+/* 식단 실제 업로드 이미지 */
+.meal-uploaded-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover; /* 사진 비율이 찌그러지지 않고 영역에 꽉 차게 덮음 */
+}
+
+/* [사진이 없을 때] 둥근 분홍색 음식 텍스트 태그 */
+.food-tag {
+  display: inline-block;
+  background-color: #FFF1F2;
+  color: #FF7B89;
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 600;
+  border: 1px solid #FFE4E6;
+  word-break: keep-all; /* 긴 단어가 중간에 끊기며 줄바꿈되는 현상 방지 */
+}
+
+/* [아무 기록도 없을 때] 나타나는 빈 박스 */
+.empty-meal-container {
+  flex: 1; /* 부모가 주는 공간을 100% 꽉 채우기 */
+  width: 100%;
+  min-height: 80px; /* 사진 크기(80px)와 똑같은 공간 확보 */
+  display: flex;
+  flex-direction: column;
+  align-items: center;     /* 가로 중앙 정렬 */
+  justify-content: center; /* 세로 중앙 정렬 (이게 핵심!) */
+  opacity: 0.4;
+  margin: 0;
+}
+
+.empty-meal-icon {
+  font-size: 20px;
+  margin-bottom: 4px;
+}
+
+.empty-meal-text {
+  font-size: 11px;
+  font-weight: bold;
+}
+
+/* 6. 하단 칼로리 (kcal) 영역 */
+.meal-kcal-container {
+  border-top: 1px dashed #EEE;
+  padding-top: 12px;
+  margin-top: 12px;
+  text-align: center;
+}
+
+.meal-kcal-text {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 800;
+  color: #333;
+}
+
+/* 7. 식단 기록 추가하기 (+) 카드 전용 */
+.add-meal-card-flex {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+}
+
+.add-meal-text {
+  margin-top: 8px;
+  font-weight: bold;
+  color: #FF8FA3;
+  text-align: center;
+}
+
+/* 클릭 가능한 마우스 포인터 공통 클래스 */
+.clickable {
+  cursor: pointer;
+}

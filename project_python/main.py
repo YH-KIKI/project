@@ -2,10 +2,16 @@
 from fastapi import FastAPI, UploadFile, File, Form
 from pydantic import BaseModel 
 from fastapi.middleware.cors import CORSMiddleware # 식단 피드백용
+from contextlib import asynccontextmanager
 
 # 눈바디 분석 함수(analyze_pose, extract_outline) 및 피드백 함수(generate_daily_feedback) 불러오기
 from schemas import UserInfo
-from ai_service import get_hybrid_diet_recommendation, analyze_pose, extract_outline, generate_daily_feedback
+from ai_service import (
+    get_hybrid_diet_recommendation, 
+    analyze_pose, 
+    extract_outline, 
+    generate_daily_feedback, 
+    initialize_ai_models)
 # 대빵 - 식단 피드백 함수 
 from meal_feedback import generate_meal_feedback
 from fridge_ai import generate_ai_info
@@ -18,7 +24,53 @@ from google.genai import types
 from Analyze import get_food_predictions, client, MODEL_NAME
 
 os.environ['KMP_DUPLICATE_LIB_OK'] = 'True'
-app = FastAPI()
+
+# ==========================================
+# 서버 구동 시 딱 한 번 실행되는 이벤트 추가!
+# ==========================================
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    print("🚀 FastAPI 서버 시작: AI 모델 및 DB 초기화를 1회 진행합니다.")
+    initialize_ai_models()
+    yield # 서버가 돌아가는 동안 대기하는 역할
+
+app = FastAPI(lifespan=lifespan)
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+class DietFeedbackRequest(BaseModel):
+    userNum: int
+    grade: str
+    currentKcal: int
+    targetKcal: int
+    carbs: int
+    protein: int
+    fat: int
+    sodium: int
+    personaMode: str = "다정"
+
+class MealFeedbackRequest(BaseModel):
+    mealType: str
+    kcal: int
+    carbs: float
+    protein: float
+    fat: float
+    sodium: float
+
+class FridgeRecipeItem(BaseModel):
+    rcpNum: int
+    rcpName: str
+    rcpParts: str
+
+class FridgeRecommendRequest(BaseModel):
+    ingredients: list[str]
+    recipes: list[FridgeRecipeItem]
 
 # 대빵 - 식단 피드백용 
 app.add_middleware(
