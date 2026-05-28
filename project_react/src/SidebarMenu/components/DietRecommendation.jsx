@@ -25,9 +25,41 @@ const DietRecommendation = () => {
   const [isLoading, setIsLoading] = useState(true); 
   const [error, setError] = useState(null); 
   
-  // 🌟 여기서 유저 번호를 아주 잘 꺼내왔습니다!
-  const userNum = Number(localStorage.getItem("userNum")) || 1;
-  
+  const [userNum, setUserNum] = useState(null); // 초기값을 null로 설정
+
+useEffect(() => {
+  const userString = localStorage.getItem('user');
+  if (userString) {
+    try {
+      const userObj = JSON.parse(userString);
+      setUserNum(userObj.user_num); 
+    } catch (e) {
+      console.error("유저 정보 파싱 에러:", e);
+      setUserNum(1); // 에러 시 기본값
+    }
+  } else {
+    setUserNum(1); // 로컬스토리지에 없으면 기본값
+  }
+  }, []); // 컴포넌트 마운트 시 딱 한 번만 실행
+
+  useEffect(() => {
+    // 🌟 핵심: userNum이 null이 아닐 때(준비되었을 때)만 API를 쏩니다!
+    if (userNum !== null) {
+      const loadDietData = async () => {
+        setIsLoading(true);
+        try {
+          const data = await fetchAiRecommendations(activeTab, userNum);
+          setRecommendations(data);
+        } catch (err) {
+          setError("데이터를 불러오지 못했습니다.");
+        } finally {
+          setIsLoading(false);
+        }
+      };
+      loadDietData();
+    }
+  }, [activeTab, userNum]); // 이제 userNum이 1에서 2로 바뀌어도 딱 한 번만 제대로 호출됩니다.
+    
   const [showMealModal, setShowMealModal] = useState(false);
   const [selectedDiet, setSelectedDiet] = useState(null);
   

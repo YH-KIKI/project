@@ -1,138 +1,233 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import GreetingBanner from './GreetingBanner'; 
 import robotFeedbackImg from '../images/로봇2.png'; 
+import './Dashboard.css'; 
 
 const Dashboard = () => {
-  // --- 파이썬 API 통신을 위한 상태 관리 ---
-  const [message, setMessage] = useState(''); 
-  const [file, setFile] = useState(null); 
-  const [str, setStr] = useState(''); 
+  const navigate = useNavigate(); 
 
-  const handleFileChange = (event) => {
-      setFile(event.target.files[0]); 
+  // --- 대시보드 데이터 상태 관리 ---
+  const [userInfo, setUserInfo] = useState({ name: '냠냠이', num: 1 });
+  const [dailyAnalysis, setDailyAnalysis] = useState({
+    currentKcal: 0,
+    targetKcal: 0,
+    grade: '-',
+    gradeMessage: '데이터를 분석 중입니다.',
+    earnedXp: 0,
+    aiFeedback: '식단을 기록하면 AI가 분석해 드려요!'
+  });
+  const [todayMeals, setTodayMeals] = useState({ 아침: null, 점심: null, 저녁: null });
+
+  const getTodayDateString = () => {
+    const today = new Date();
+    const year = today.getFullYear();
+    const month = String(today.getMonth() + 1).padStart(2, '0');
+    const day = String(today.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
   };
 
-  const sendData = async () => {
+  useEffect(() => {
+    const userString = localStorage.getItem('user');
+    let currentUserNum = 1;
+    let currentUserName = '냠냠이';
+    
+    if (userString) {
       try {
-          if (!file || !message) {
-              alert("메시지와 파일을 모두 입력해주세요.");
-              return;
-          }
-          const formData = new FormData();
-          formData.append('message', message);
-          formData.append('file', file);
-
-          console.log("1. [React] 스프링부트로 보낼 준비 완료 👇");
-          
-          const response = await axios.post('/api/detect/proxy', formData, {
-              headers: { 'Content-Type': 'multipart/form-data' }
-          });
-          
-          console.log("6. [React] 스프링부트로부터 최종 결과 수신 👇");
-          setStr(JSON.stringify(response.data, null, 2)); 
-
-      } catch (error) {
-          console.error("에러 발생:", error);
-          if (error.response) setStr(`서버 에러: ${error.response.status}`);
-          else if (error.request) setStr("서버에 연결할 수 없습니다.");
-          else setStr("요청 전송 중 에러가 발생했습니다.");
+        const userObj = JSON.parse(userString);
+        currentUserNum = userObj.user_num || 1;
+        currentUserName = userObj.user_name || userObj.user_id || '냠냠이'; 
+        setUserInfo({ name: currentUserName, num: currentUserNum });
+      } catch (e) {
+        console.error("유저 정보 파싱 에러:", e);
       }
+    }
+
+    const todayDate = getTodayDateString();
+
+    const fetchDailyAnalysis = async () => {
+      try {
+        const response = await axios.get('/api/diet/analyze/daily', {
+          params: { userNum: currentUserNum, date: todayDate, persona: '다정' }
+        });
+        if (response.data) {
+          setDailyAnalysis(response.data);
+        }
+      } catch (error) {
+        console.error("일일 분석 데이터를 불러오지 못했습니다.", error);
+      }
+    };
+
+    const fetchTodayMeals = async () => {
+      try {
+        const response = await axios.get('/api/meal/today', {
+          params: { userNum: currentUserNum, date: todayDate }
+        });
+        
+        if (response.data && response.data.length > 0) {
+          const meals = { 아침: null, 점심: null, 저녁: null };
+          
+          response.data.forEach(item => {
+            // 🌟 백엔드 콘솔에 찍히던 이미지 URL 캡처
+            const imgUrl = item.convertedImageUrl || item.mkImage || null;
+
+            if (meals[item.mkMealType] === null) {
+              meals[item.mkMealType] = { 
+                desc: item.foName, 
+                kcal: item.foKcal * (item.mdPortion || 1),
+                imageUrl: imgUrl // 🌟 이미지 주소 저장
+              };
+            } else {
+              meals[item.mkMealType].desc += `, ${item.foName}`;
+              meals[item.mkMealType].kcal += (item.foKcal * (item.mdPortion || 1));
+              
+              // 혹시 뒤에 합쳐지는 음식에 사진이 있다면 갱신
+              if (!meals[item.mkMealType].imageUrl && imgUrl) {
+                meals[item.mkMealType].imageUrl = imgUrl;
+              }
+            }
+          });
+          setTodayMeals(meals);
+        }
+      } catch (error) {
+        console.error("오늘의 식단 데이터를 불러오지 못했습니다.", error);
+      }
+    };
+
+    fetchDailyAnalysis();
+    fetchTodayMeals();
+  }, []);
+
+  const getScoreFromGrade = (grade) => {
+    switch(grade) {
+      case 'A': return 95;
+      case 'B': return 85;
+      case 'C': return 75;
+      case 'D': return 60;
+      case 'F': return 40;
+      default: return 0;
+    }
   };
 
   return (
-    /* 🌟 핵심 1: 이 전체를 감싸는 wrapper를 추가하여 간격을 벌립니다. */
     <div className="dashboard-wrapper">
-      <GreetingBanner userName="냠냠이" />
+      <GreetingBanner userName={userInfo.name} />
       
-      {/* 1. 상단 데이터 요약 카드 그리드 */}
       <div className="summary-cards-container">
         <div className="border-card summary-card">
           <span className="card-title">에너지 섭취</span>
-          <h3 className="card-value">1,350 <small>kcal</small></h3>
-          <span className="card-sub">목표 1,600 kcal</span>
+          <h3 className="card-value">{dailyAnalysis.currentKcal.toLocaleString()} <small>kcal</small></h3>
+          <span className="card-sub">목표 {dailyAnalysis.targetKcal.toLocaleString()} kcal</span>
         </div>
         <div className="border-card summary-card">
           <span className="card-title">영양 밸런스</span>
-          <h3 className="card-value text-green">Good!</h3>
-          <span className="card-sub">균형 잡힌 식단이에요!</span>
+          <h3 className={`card-value ${dailyAnalysis.grade === 'A' || dailyAnalysis.grade === 'B' ? 'text-green' : 'text-orange'}`}>
+            {dailyAnalysis.grade === '-' ? '기록 대기' : `${dailyAnalysis.grade} 등급`}
+          </h3>
+          <span className="card-sub">{dailyAnalysis.gradeMessage}</span>
         </div>
         <div className="border-card summary-card">
           <span className="card-title">오늘의 점수</span>
-          <h3 className="card-value">85 <small>점</small></h3>
-          <span className="card-sub">최고예요! 🥳</span>
+          <h3 className="card-value">{getScoreFromGrade(dailyAnalysis.grade)} <small>점</small></h3>
+          <span className="card-sub">경험치 +{dailyAnalysis.earnedXp} 획득!</span>
         </div>
       </div>
 
-      {/* 2. 오늘의 식단 기록 */}
       <div>
         <div className="section-header">
           <h2 className="section-title">오늘의 식단 기록</h2>
-          <span className="section-more">더보기 &gt;</span>
+          <span className="section-more clickable" onClick={() => navigate('/record')}>더보기 &gt;</span>
         </div>
 
         <div className="meal-records-container">
-          <div className="border-card meal-card">
-            <div className="meal-header"><span>☀️</span> 아침</div>
-            <div className="meal-image-placeholder"></div>
-            <p className="meal-desc">그릭요거트, 바나나, 아몬드, 삶은달걀</p>
-            <p className="meal-kcal">320 kcal</p>
-          </div>
-          <div className="border-card meal-card">
-            <div className="meal-header"><span>☀️</span> 점심</div>
-            <div className="meal-image-placeholder"></div>
-            <p className="meal-desc">현미밥, 닭가슴살, 샐러드, 김치</p>
-            <p className="meal-kcal">560 kcal</p>
-          </div>
-          <div className="border-card meal-card">
-            <div className="meal-header"><span>🌙</span> 저녁</div>
-            <div className="meal-image-placeholder"></div>
-            <p className="meal-desc">두부김치, 잡곡밥, 나물무침</p>
-            <p className="meal-kcal">470 kcal</p>
-          </div>
-          <div className="border-card add-meal-card">
+          {['아침', '점심', '저녁'].map((mealType) => {
+            const mealData = todayMeals[mealType];
+            const foodTags = mealData ? mealData.desc.split(',').map(item => item.trim()) : [];
+
+            return (
+              <div className="border-card meal-card flex-card" key={mealType}>
+                
+                <div className="meal-header-title">
+                  <span>{mealType === '저녁' ? '🌙' : '☀️'}</span> {mealType}
+                </div>
+                
+                <div className="meal-tags-container">
+                  {mealData ? (
+                    mealData.imageUrl ? (
+                      /* 🌟 1순위: 등록된 이미지가 있을 때 사진을 꽉 채워 렌더링 */
+                      <div className="meal-image-wrapper">
+                        <img src={mealData.imageUrl} alt={`${mealType} 식단`} className="meal-uploaded-image" />
+                      </div>
+                    ) : (
+                      /* 🌟 2순위: 이미지가 없고 텍스트 기록만 있을 때 기존 태그 렌더링 */
+                      foodTags.map((food, idx) => (
+                        <span key={idx} className="food-tag">
+                          {food}
+                        </span>
+                      ))
+                    )
+                  ) : (
+                    /* 🌟 3순위: 아예 아무런 기록도 없을 때 '기록 없음' 렌더링 */
+                    <div className="empty-meal-container">
+                      <span className="empty-meal-icon">🍽️</span>
+                      <span className="empty-meal-text">기록 없음</span>
+                    </div>
+                  )}
+                </div>
+
+                <div className="meal-kcal-container">
+                  <p className="meal-kcal-text">
+                    {mealData ? `${Math.round(mealData.kcal).toLocaleString()} kcal` : '0 kcal'}
+                  </p>
+                </div>
+
+              </div>
+            );
+          })}
+          
+          <div className="border-card add-meal-card add-meal-card-flex" onClick={() => navigate('/record')}>
             <div className="add-icon">+</div>
-            <p>식단 기록<br/>추가하기</p>
+            <p className="add-meal-text">식단 기록<br/>추가하기</p>
           </div>
         </div>
       </div>
 
-      {/* 3. 주요 기능 빠르게 */}
       <div>
         <div className="section-header">
           <h2 className="section-title">주요 기능 빠르게</h2>
         </div>
 
         <div className="quick-features-container">
-          <div className="border-card feature-item">
-            <div className="feature-icon bg-blue">🩵</div>
+          <div className="border-card feature-item clickable" onClick={() => navigate('/bodycheck')}>
+            <div className="feature-icon bg-blue">👤</div>
             <div className="feature-text">
-              <p className="feature-title">컨디션 로그</p>
-              <p className="feature-desc">오늘의 기분 기록</p>
+              <p className="feature-title">눈바디</p>
+              <p className="feature-desc">AI 체형 분석</p>
             </div>
           </div>
-          <div className="border-card feature-item">
+          <div className="border-card feature-item clickable" onClick={() => navigate('/favorite')}>
             <div className="feature-icon bg-orange">⭐️</div>
             <div className="feature-text">
               <p className="feature-title">즐겨찾기</p>
               <p className="feature-desc">좋아하는 식단</p>
             </div>
           </div>
-          <div className="border-card feature-item">
+          <div className="border-card feature-item clickable" onClick={() => navigate('/badge')}>
             <div className="feature-icon bg-yellow">🏅</div>
             <div className="feature-text">
               <p className="feature-title">배지 도감</p>
               <p className="feature-desc">획득한 배지 보기</p>
             </div>
           </div>
-          <div className="border-card feature-item">
+          <div className="border-card feature-item clickable" onClick={() => navigate('/recommend')}>
             <div className="feature-icon bg-lightblue">🎯</div>
             <div className="feature-text">
               <p className="feature-title">AI 식단 추천</p>
               <p className="feature-desc">맞춤 식단 받기</p>
             </div>
           </div>
-          <div className="border-card feature-item">
+          <div className="border-card feature-item clickable" onClick={() => navigate('/aiphoto')}>
             <div className="feature-icon bg-purple">📷</div>
             <div className="feature-text">
               <p className="feature-title">사진 인식</p>
@@ -142,36 +237,18 @@ const Dashboard = () => {
         </div>
       </div>
 
-      {/* 4. AI 한마디 피드백 */}
       <div className="border-card ai-feedback-container">
         <div className="ai-icon-wrapper">
           <img src={robotFeedbackImg} alt="AI 챗봇" style={{ width: '100%', height: '100%' }}/>
         </div>
         <div className="ai-text-content">
           <p className="ai-title">AI 한마디</p>
-          <p className="ai-message">
-            <strong>오늘 단백질 섭취가 좋아요! 💪</strong><br/>
-            내일은 채소를 조금 더 추가해보는 건 어떨까요? 🥦
+          <p className="ai-message" style={{ whiteSpace: 'pre-line' }}>
+            {dailyAnalysis.aiFeedback}
           </p>
         </div>
       </div>
-
-      {/* 🌟 핵심 2: API 연동 테스트 UI 레이아웃 세로 정렬로 완벽하게 복구 */}
-      <div className="border-card api-test-container">
-        <h3 style={{ margin: 0, color: '#333' }}>🛠️ 파이썬 API 연동 테스트</h3>
-        <div style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: '8px' }}>
-            <label style={{ fontSize: '14px', fontWeight: 'bold' }}>메시지: </label>
-            <input type="text" value={message} onChange={(e) => setMessage(e.target.value)} placeholder="파이썬으로 보낼 메시지" style={{ padding: '10px', borderRadius: '8px', border: '1px solid #ddd' }}/>
-        </div>
-        <div style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: '8px' }}>
-            <label style={{ fontSize: '14px', fontWeight: 'bold' }}>파일: </label>
-            <input type="file" onChange={handleFileChange} />
-        </div>
-        <button onClick={sendData} style={{ padding: '12px 20px', cursor: 'pointer', backgroundColor: '#FF8E9C', color: 'white', border: 'none', borderRadius: '10px', fontWeight: 'bold' }}>
-            서버로 전송하기
-        </button>
-        {str && <pre style={{ marginTop: '10px', backgroundColor: '#f4f4f4', padding: '12px', borderRadius: '8px', width: '100%', boxSizing: 'border-box', overflowX: 'auto', whiteSpace: 'pre-wrap' }}>✅ 결과: {str}</pre>}
-      </div>
+      
     </div>
   );
 };
