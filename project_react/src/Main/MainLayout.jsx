@@ -95,7 +95,7 @@ const MainLayout = () => {
             </div>
           </header>
           
-          {/* 🌟 핵심: 여기에 Dashboard나 DietRecommendation이 들어옵니다! */}
+          {/* 여기에 Dashboard나 DietRecommendation이 들어옵니다! */}
           <div className="content-area" style={{ paddingBottom: '40px' }}>
              <Outlet /> 
           </div>

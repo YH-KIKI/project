@@ -16,7 +16,7 @@ public class BodyCheckController {
 
     private final BodyCheckService bodyCheckService;
 
-    // 🌟 리턴 타입을 ResponseEntity<String> -> ResponseEntity<?> 로 변경
+    // 리턴 타입을 ResponseEntity<String> -> ResponseEntity<?> 로 변경
     @PostMapping("/analyze")
     public ResponseEntity<?> analyzeBodyCheck(
             @RequestParam("file") MultipartFile file,

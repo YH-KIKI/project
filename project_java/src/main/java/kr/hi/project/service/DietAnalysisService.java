@@ -140,7 +140,7 @@ public class DietAnalysisService {
             requestData.put("fat", fat);
             requestData.put("sodium", sodium);
             
-            // 🌟 리액트에서 컨트롤러를 거쳐 넘어온 '리모컨 신호(페르소나)'를 실어 보냅니다!
+            // 리액트에서 컨트롤러를 거쳐 넘어온 '리모컨 신호(페르소나)'를 실어 보냅니다
             requestData.put("personaMode", persona); 
 
             @SuppressWarnings("unchecked")
@@ -261,7 +261,7 @@ public class DietAnalysisService {
         nutrients.put("sodium", sumSodium / divideDays);
         result.put("nutrients", nutrients);
 
-        // 🌟 [추가됨] 유저 맞춤형 목표 영양소 계산 로직
+        // 유저 맞춤형 목표 영양소 계산 로직
         Integer targetKcal = dietAnalysisDao.selectUserTargetKcal(userNum);
         int safeTargetKcal = (targetKcal != null && targetKcal > 0) ? targetKcal : 1800;
 

@@ -48,7 +48,7 @@ export const saveDietRecord = async (payload) => {
   try {
     const formData = new FormData();
     
-    // 🌟 핵심: 스프링부트의 @RequestPart("mealData") 규격에 맞게 JSON을 Blob으로 감싸서 보냅니다!
+    // 핵심: 스프링부트의 @RequestPart("mealData") 규격에 맞게 JSON을 Blob으로 감싸서 보냅니다!
     formData.append("mealData", new Blob([JSON.stringify(payload)], {
       type: "application/json"
     }));

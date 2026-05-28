@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-// 🌟 스프링부트 서버 주소 설정 (.env 파일에 맞춰서 자동 적용됩니다)
+//  스프링부트 서버 주소 설정 (.env 파일에 맞춰서 자동 적용됩니다)
 const API_BASE_URL = process.env.REACT_APP_API_URL || '';
 
 /**
@@ -14,9 +14,9 @@ export const uploadBodyCheckImage = async (imageFile, analyzeType, userNum) => {
   try {
     const formData = new FormData();
     
-    // 🌟 스프링부트 컨트롤러의 @RequestParam 명칭과 완벽 매칭!
+    // 스프링부트 컨트롤러의 @RequestParam 명칭과 완벽 매칭!
     formData.append('file', imageFile);
-    formData.append('analyzeType', analyzeType); // 👈 이 부분이 'type'이 아니라 'analyzeType'이어야 합니다!
+    formData.append('analyzeType', analyzeType); //  이 부분이 'type'이 아니라 'analyzeType'이어야 합니다!
     formData.append('userNum', userNum);
 
     const response = await axios.post(`${API_BASE_URL}/api/bodycheck/analyze`, formData, {

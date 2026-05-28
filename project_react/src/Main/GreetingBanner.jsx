@@ -1,9 +1,7 @@
-// src/Main/GreetingBanner.jsx (위치 수정 완료 버전)
-
 import React from 'react';
 import './GreetingBanner.css';
 
-// 🌟 추가됨: src/images/ 폴더 안에 있는 배너 고양이 이미지를 불러옵니다.
+//  src/images/ 폴더 안에 있는 배너 고양이 이미지를 불러옵니다.
 import catChefBannerImg from '../images/냠냠이2.png';
 
 const GreetingBanner = ({ userName }) => {
@@ -20,7 +18,7 @@ const GreetingBanner = ({ userName }) => {
         </p>
       </div>
 
-      {/* ★ 수정됨: 와이어프레임 위치 1-2: 배너 우측 상단 고양이 이미지 ★ */}
+      {/* 와이어프레임 위치 1-2: 배너 우측 상단 고양이 이미지 ★ */}
       <div className="cat-chef-banner">
         <img src={catChefBannerImg} alt="배너 고양이" />
       </div>

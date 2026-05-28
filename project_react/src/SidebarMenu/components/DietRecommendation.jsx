@@ -43,7 +43,7 @@ useEffect(() => {
   }, []); // 컴포넌트 마운트 시 딱 한 번만 실행
 
   useEffect(() => {
-    // 🌟 핵심: userNum이 null이 아닐 때(준비되었을 때)만 API를 쏩니다!
+    //  핵심: userNum이 null이 아닐 때(준비되었을 때)만 API를 쏩니다!
     if (userNum !== null) {
       const loadDietData = async () => {
         setIsLoading(true);
@@ -58,7 +58,7 @@ useEffect(() => {
       };
       loadDietData();
     }
-  }, [activeTab, userNum]); // 이제 userNum이 1에서 2로 바뀌어도 딱 한 번만 제대로 호출됩니다.
+  }, [activeTab, userNum]);
     
   const [showMealModal, setShowMealModal] = useState(false);
   const [selectedDiet, setSelectedDiet] = useState(null);
@@ -82,7 +82,7 @@ useEffect(() => {
       setIsLoading(true); 
       setError(null);
       try {
-        // 🌟 수정된 핵심 부분: 괄호 안에 userNum을 넣어서 API로 쏴줍니다!
+        // 괄호 안에 userNum을 넣어서 API로 쏴줍니다!
         const data = await fetchAiRecommendations(activeTab, userNum); 
         setRecommendations(data); 
       } catch (err) {
@@ -92,7 +92,7 @@ useEffect(() => {
       }
     };
     loadDietData();
-  }, [activeTab, userNum]); // 🌟 리액트가 userNum을 인식하도록 괄호 안에도 추가!
+  }, [activeTab, userNum]); // 리액트가 userNum을 인식하도록 괄호 안에도 추가!
 
   const getOptionIcon = (index) => {
     const icons = ["🥇", "🥈", "🥉", "✨", "🌟"];
@@ -104,8 +104,7 @@ useEffect(() => {
     setShowMealModal(true);
   };
 
-  // 🌟 기존 식단을 보호하면서 새 음식만 '추가'해주는 함수
- // 🌟 기존 식단을 보호하면서 새 음식만 '추가'해주는 함수 (완벽 호환 버전)
+ // 기존 식단을 보호하면서 새 음식만 '추가'해주는 함수 
   const handleFinalRecord = async (mealType) => {
     
     // 1. 유저 번호 꺼내오기
@@ -121,7 +120,7 @@ useEffect(() => {
       }
     }
 
-    // 🌟 KST 타임존 보정 (오전 9시 이전 테스트 시 하루 전날로 저장되는 버그 완벽 방지)
+    // KST 타임존 보정 (오전 9시 이전 테스트 시 하루 전날로 저장되는 버그 완벽 방지)
     const getLocalToday = () => {
       const today = new Date();
       const year = today.getFullYear();
@@ -161,7 +160,7 @@ useEffect(() => {
         }
       ];
 
-      // 🌟 4. [핵심] 백엔드가 "덮어쓰기"하지 않도록 AI 전용 이름표(aiMenuName 등)를 모두 제거!
+      // 4. [핵심] 백엔드가 "덮어쓰기"하지 않도록 AI 전용 이름표(aiMenuName 등)를 모두 제거!
       // 일반 직접 입력 식단을 저장할 때와 100% 동일한 규격으로 보냅니다.
       const payload = {
         userNum: currentUserNum,
@@ -236,7 +235,7 @@ useEffect(() => {
                         {item.kcal || item.foKcal || 0} kcal
                       </div>
                       <div className="macro-pills">
-                        {/* 🌟 수정: 팀원 데이터(foCarbs)와 추천 식단 데이터(carbs)를 모두 체크 */}
+                        {/* 팀원 데이터(foCarbs)와 추천 식단 데이터(carbs)를 모두 체크 */}
                         <span className="pill">
                           탄 {item.carbs || item.foCarbs || 0}g
                         </span>
