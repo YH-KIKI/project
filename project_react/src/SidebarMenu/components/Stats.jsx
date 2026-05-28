@@ -16,6 +16,8 @@ const Stats = () => {
   
   const [chartData, setChartData] = useState([]);
   const [nutrients, setNutrients] = useState({ carbs: 0, protein: 0, fat: 0, sodium: 0 });
+  const [targets, setTargets] = useState({ carbs: 200, protein: 100, fat: 50, sodium: 2000 }); 
+  
   const [recordedDates, setRecordedDates] = useState([]); 
 
   useEffect(() => {
@@ -42,6 +44,10 @@ const Stats = () => {
         
         setChartData(response.data.chartData);
         setNutrients(response.data.nutrients);
+        
+        if (response.data.targets) {
+           setTargets(response.data.targets);
+        }
       } catch (err) {
         console.error("통계 데이터 로딩 실패:", err);
       }
@@ -52,7 +58,6 @@ const Stats = () => {
   const daysInMonth = new Date(selectedDate.getFullYear(), selectedDate.getMonth() + 1, 0).getDate();
   const divideDays = activeTab === '주간' ? 7 : daysInMonth;
 
-  // 🌟 데이터가 없는 경우를 0으로 강제 처리
   const processedChartData = chartData.map(d => ({ ...d, kcal: d.kcal || 0 }));
   const maxKcal = processedChartData.length > 0 ? Math.max(...processedChartData.map(d => d.kcal), 1) : 1;
 
@@ -64,8 +69,18 @@ const Stats = () => {
   const proteinPct = Math.round((nutrients.protein / totalMacros) * 100) || 0;
   const fatPct = Math.round((nutrients.fat / totalMacros) * 100) || 0;
 
+  // 달력 기준 몇 월, 몇 주차인지 계산하는 로직 추가
+  const targetMonth = selectedDate.getMonth() + 1;
+  // 해당 월의 1일이 무슨 요일인지 구함 (0: 일요일, 1: 월요일 ...)
+  const firstDayOfMonth = new Date(selectedDate.getFullYear(), selectedDate.getMonth(), 1).getDay();
+  // 현재 날짜를 기준으로 달력상 몇 번째 줄(주차)에 있는지 계산
+  const targetWeek = Math.ceil((selectedDate.getDate() + firstDayOfMonth) / 7);
+
+  // 타이틀 동적 생성 (예: "5월 4주차 주간 칼로리" 또는 "5월 월간 칼로리")
+  const datePrefix = activeTab === '주간' ? `[${targetMonth}월 ${targetWeek}주차]` : `[${targetMonth}월]`;
+  const chartTitle = activeTab === '주간' ? `${datePrefix} 주간 칼로리` : `${datePrefix} 월간 칼로리`;
+  
   const avgLabel = '일평균 섭취';
-  const chartTitle = activeTab === '주간' ? '주간 칼로리 추이' : '월간 칼로리 추이';
   const ratioTitle = activeTab === '주간' ? '(주간 평균 비율)' : '(월간 평균 비율)';
 
   return (
@@ -105,7 +120,6 @@ const Stats = () => {
             </div>
             <div className="bars-area">
               {processedChartData.map((data, index) => {
-                // 🌟 막대 높이 계산: 비율 기반 (최소 5% 보장)
                 const pct = (data.kcal / maxKcal) * 100;
                 const safeHeight = Math.max(pct, 5); 
                 
@@ -115,11 +129,10 @@ const Stats = () => {
                     <div className="bar-wrapper">
                       <div className="bar-tooltip">{data.kcal.toLocaleString()}kcal</div>
                       
-                      {/* 🌟 중요: !important를 인라인 스타일에 추가하여 CSS 파일보다 우선시함 */}
                       <div 
                         className="bar-fill" 
                         style={{ 
-                          height: `${safeHeight}% !important`,
+                          height: `${safeHeight}%`,
                           backgroundColor: data.kcal > 0 ? '#D3B8F8' : '#EEE'
                         }}
                       ></div>
@@ -166,12 +179,12 @@ const Stats = () => {
                   </div>
                   <div className="macro-values">
                     <span className="m-current">{nutrients.carbs}g</span>
-                    <span className="m-max">/ 200g</span>
+                    <span className="m-max">/ {targets.carbs}g</span>
                     <span className="m-pct carbs-txt">{carbsPct}%</span>
                   </div>
                 </div>
                 <div className="m-progress-bg">
-                  <div className="m-progress-fill carbs-bg" style={{ width: `${Math.min((nutrients.carbs/200)*100, 100)}%` }}></div>
+                  <div className="m-progress-fill carbs-bg" style={{ width: `${Math.min((nutrients.carbs/Math.max(targets.carbs, 1))*100, 100)}%` }}></div>
                 </div>
               </div>
 
@@ -183,12 +196,12 @@ const Stats = () => {
                   </div>
                   <div className="macro-values">
                     <span className="m-current">{nutrients.protein}g</span>
-                    <span className="m-max">/ 100g</span>
+                    <span className="m-max">/ {targets.protein}g</span>
                     <span className="m-pct protein-txt">{proteinPct}%</span>
                   </div>
                 </div>
                 <div className="m-progress-bg">
-                  <div className="m-progress-fill protein-bg" style={{ width: `${Math.min((nutrients.protein/100)*100, 100)}%` }}></div>
+                  <div className="m-progress-fill protein-bg" style={{ width: `${Math.min((nutrients.protein/Math.max(targets.protein, 1))*100, 100)}%` }}></div>
                 </div>
               </div>
 
@@ -200,12 +213,12 @@ const Stats = () => {
                   </div>
                   <div className="macro-values">
                     <span className="m-current">{nutrients.fat}g</span>
-                    <span className="m-max">/ 50g</span>
+                    <span className="m-max">/ {targets.fat}g</span>
                     <span className="m-pct fat-txt">{fatPct}%</span>
                   </div>
                 </div>
                 <div className="m-progress-bg">
-                  <div className="m-progress-fill fat-bg" style={{ width: `${Math.min((nutrients.fat/50)*100, 100)}%` }}></div>
+                  <div className="m-progress-fill fat-bg" style={{ width: `${Math.min((nutrients.fat/Math.max(targets.fat, 1))*100, 100)}%` }}></div>
                 </div>
               </div>
 
@@ -217,11 +230,11 @@ const Stats = () => {
                   </div>
                   <div className="macro-values">
                     <span className="m-current">{nutrients.sodium}mg</span>
-                    <span className="m-max">/ 2000mg</span>
+                    <span className="m-max">/ {targets.sodium}mg</span>
                   </div>
                 </div>
                 <div className="m-progress-bg">
-                  <div className="m-progress-fill sodium-bg" style={{ width: `${Math.min((nutrients.sodium/2000)*100, 100)}%` }}></div>
+                  <div className="m-progress-fill sodium-bg" style={{ width: `${Math.min((nutrients.sodium/Math.max(targets.sodium, 1))*100, 100)}%` }}></div>
                 </div>
               </div>
 
