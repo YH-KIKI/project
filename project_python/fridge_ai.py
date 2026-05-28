@@ -1,118 +1,123 @@
-import os
 import json
-
-from dotenv import load_dotenv
+import os
 from google import genai
-
-# =========================
-# 환경변수
-# =========================
-
-load_dotenv()
+from pydantic import BaseModel, Field
+from typing import List
 
 USE_DUMMY = True
 
-# =========================
-# Gemini Client
-# =========================
+client = None
 
-client = genai.Client(
-    api_key=os.getenv("GOOGLE_AI_API_KEY")
-)
+if not USE_DUMMY:
+    api_key = os.getenv("GOOGLE_API_KEY")
 
-# =========================
-# AI 추천 생성
-# =========================
+    if not api_key:
+        raise ValueError("GOOGLE_AI_API_KEY 환경변수 없음")
 
-def generate_ai_info(recipe, user_ingredients):
+    client = genai.Client(api_key=api_key)
 
-    # =================================
-    # 더미 테스트 모드
-    # =================================
+
+class RecipeRecommendation(BaseModel):
+    rcpNum: int = Field(description="레시피 번호")
+    reason: str = Field(description="추천 이유")
+    hashtags: List[str] = Field(description="해시태그 4개")
+
+
+class RecommendationResponse(BaseModel):
+    recommendations: List[RecipeRecommendation]
+
+
+def generate_ai_info(recipes, user_ingredients):
 
     if USE_DUMMY:
+        return make_fallback_result(recipes)
 
-        return {
-            "reason":
-                f"{recipe.rcpName} 만들기 딱 좋은 재료예요 😊",
+    recipe_contents = []
 
-            "hashtags": [
-                "간편식",
-                "집밥",
-                "추천메뉴",
-                "냉장고파먹기"
-            ]
-        }
+    for r in recipes:
+        recipe_contents.append(
+            f"- 번호:{r.rcpNum}, 이름:{r.rcpName}, 재료:{str(r.rcpParts)[:100]}"
+        )
 
-    # =================================
-    # Gemini 실제 호출
-    # =================================
+    recipe_string = "\n".join(recipe_contents)
 
     prompt = f"""
-너는 냠냠플래닛 AI 레시피 추천 시스템이야.
-
 사용자 재료:
 {", ".join(user_ingredients)}
 
-추천 레시피:
-{recipe.rcpName}
+레시피 목록:
+{recipe_string}
 
-레시피 재료:
-{recipe.rcpParts}
-
-해야할 일:
-1. 왜 이 레시피를 추천하는지 한 줄 설명
-2. 해시태그 4개 생성
-
-조건:
-- 40자 이내
-- 친근한 말투
-- 귀엽고 자연스럽게
-- 너무 AI같지 않게
-- JSON만 반환
-
-예시:
+반드시 아래 JSON 형식으로만 반환해.
 
 {{
-  "reason": "집에 있는 재료로 간단하게 만들 수 있어요 🥪",
-  "hashtags": [
-    "간편식",
-    "브런치",
-    "든든한끼",
-    "추천메뉴"
+  "recommendations": [
+    {{
+      "rcpNum": 1,
+      "reason": "추천 이유",
+      "hashtags": ["태그1", "태그2", "태그3", "태그4"]
+    }}
   ]
 }}
+
+조건:
+- 각 레시피마다 하나씩 생성
+- 추천 이유는 40자 이내
+- 해시태그는 정확히 4개
+- JSON 외 텍스트 금지
 """
 
     try:
-
         response = client.models.generate_content(
             model="gemini-2.5-flash",
-            contents=prompt
+            contents=prompt,
+            config={
+                "response_mime_type": "application/json"
+            }
         )
 
         text = response.text.strip()
+        text = text.replace("```json", "").replace("```", "").strip()
 
-        # markdown 제거
-        text = text.replace("```json", "")
-        text = text.replace("```", "")
+        parsed_data = json.loads(text)
 
-        parsed = json.loads(text)
+        if isinstance(parsed_data, list):
+            recommendations = parsed_data
+        else:
+            recommendations = parsed_data.get("recommendations", [])
 
-        return parsed
+        result = []
+
+        for item in recommendations:
+            result.append({
+                "rcpNum": item.get("rcpNum"),
+                "aiReason": item.get("reason", "추천 메뉴로 좋아요 😊"),
+                "hashtags": item.get(
+                    "hashtags",
+                    ["추천메뉴", "집밥", "간편식", "한끼"]
+                )
+            })
+
+        return result
 
     except Exception as e:
-
         print("Gemini 오류:", e)
+        return make_fallback_result(recipes)
 
-        return {
-            "reason":
-                "집에 있는 재료로 만들 수 있어요 😊",
 
+def make_fallback_result(recipes):
+    result = []
+
+    for r in recipes:
+        result.append({
+            "rcpNum": r.rcpNum,
+            "aiReason": f"{r.rcpName} 만들기 딱 좋아요 😊",
             "hashtags": [
                 "간편식",
                 "집밥",
                 "추천메뉴",
                 "한끼"
             ]
-        }
+        })
+
+    return result

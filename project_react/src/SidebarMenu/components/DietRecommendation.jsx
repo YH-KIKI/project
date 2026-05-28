@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import './DietRecommendation.css'; 
 import { fetchAiRecommendations, saveDietRecord } from '../api/dietApi'; 
+import axios from 'axios';
 
 const getIngredientEmoji = (ingredient) => {
   switch (ingredient) {
@@ -24,6 +25,9 @@ const DietRecommendation = () => {
   const [isLoading, setIsLoading] = useState(true); 
   const [error, setError] = useState(null); 
   
+  // 🌟 여기서 유저 번호를 아주 잘 꺼내왔습니다!
+  const userNum = Number(localStorage.getItem("userNum")) || 1;
+  
   const [showMealModal, setShowMealModal] = useState(false);
   const [selectedDiet, setSelectedDiet] = useState(null);
   
@@ -46,7 +50,8 @@ const DietRecommendation = () => {
       setIsLoading(true); 
       setError(null);
       try {
-        const data = await fetchAiRecommendations(activeTab); 
+        // 🌟 수정된 핵심 부분: 괄호 안에 userNum을 넣어서 API로 쏴줍니다!
+        const data = await fetchAiRecommendations(activeTab, userNum); 
         setRecommendations(data); 
       } catch (err) {
         setError("데이터를 불러오지 못했습니다. 잠시 후 다시 시도해주세요.");
@@ -55,7 +60,7 @@ const DietRecommendation = () => {
       }
     };
     loadDietData();
-  }, [activeTab]); 
+  }, [activeTab, userNum]); // 🌟 리액트가 userNum을 인식하도록 괄호 안에도 추가!
 
   const getOptionIcon = (index) => {
     const icons = ["🥇", "🥈", "🥉", "✨", "🌟"];
@@ -67,45 +72,82 @@ const DietRecommendation = () => {
     setShowMealModal(true);
   };
 
-  // MealRecordController 통신 규격에 완벽하게 맞춘 최종 기록 함수
-const handleFinalRecord = async (mealType) => {
+  // 🌟 기존 식단을 보호하면서 새 음식만 '추가'해주는 함수
+ // 🌟 기존 식단을 보호하면서 새 음식만 '추가'해주는 함수 (완벽 호환 버전)
+  const handleFinalRecord = async (mealType) => {
     
-    // 🌟 1. localStorage의 'user' 키에서 값을 꺼내옵니다.
+    // 1. 유저 번호 꺼내오기
     const userString = localStorage.getItem('user'); 
-    let userNum = 1; // 기본값
+    let currentUserNum = 1; 
 
     if (userString) {
       try {
-        const userObj = JSON.parse(userString); // JSON 문자열을 객체로 변환
-        userNum = userObj.user_num; // 여기서 3을 꺼내옵니다!
+        const userObj = JSON.parse(userString); 
+        currentUserNum = userObj.user_num; 
       } catch (e) {
         console.error("유저 정보 파싱 에러:", e);
       }
     }
 
-    // 🌟 2. 이제 userNum 변수에는 3이 담겨서 넘어갑니다!
-    const payload = {
-      userNum: userNum,
-      mkMealType: mealType,
-      mkDietDate: new Date().toISOString().split('T')[0],
-      mkUserMemo: "AI 추천 식단으로 간편하게 기록했어요! 🤖",
-      
-      // 🌟 핵심: 여기에 탄단지 정보를 추가해서 백엔드로 보내야 합니다!
-      aiMenuName: selectedDiet.menu,
-      aiKcal: selectedDiet.kcal,
-      aiCarbs: selectedDiet.carbs || selectedDiet.foCarbs || 0,
-      aiProtein: selectedDiet.protein || selectedDiet.foProtein || 0,
-      aiFat: selectedDiet.fat || selectedDiet.foFat || 0
+    // 🌟 KST 타임존 보정 (오전 9시 이전 테스트 시 하루 전날로 저장되는 버그 완벽 방지)
+    const getLocalToday = () => {
+      const today = new Date();
+      const year = today.getFullYear();
+      const month = String(today.getMonth() + 1).padStart(2, '0');
+      const day = String(today.getDate()).padStart(2, '0');
+      return `${year}-${month}-${day}`;
     };
-    
-    console.log(`🔥 [DB전송용] ${mealType} 식단 데이터:`, payload);
-    
+    const todayDateKey = getLocalToday();
+
     try {
+      // 2. 백엔드에서 오늘 해당 끼니의 '기존 식판' 가져오기
+      const response = await axios.get(`/api/meal/today?userNum=${currentUserNum}&date=${todayDateKey}`);
+
+      const existingFoods = [];
+      let existingMkNum = null;
+
+      if (response.data && response.data.length > 0) {
+        response.data.forEach(item => {
+          if (item.mkMealType === mealType) {
+            existingMkNum = item.mkNum; 
+            existingFoods.push({
+              foNum: item.foNum,
+              mdPortion: item.mdPortion || 1,
+              mdKcal: Math.round((item.foKcal || 0) * (item.mdPortion || 1)) // 백엔드 일반 저장 규격 맞춤
+            });
+          }
+        });
+      }
+
+      // 3. 기존 장바구니에 AI가 추천한 '새 음식' 추가
+      const combinedFoods = [
+        ...existingFoods,
+        {
+          foNum: selectedDiet.id,
+          mdPortion: 1, 
+          mdKcal: Math.round(selectedDiet.kcal || 0)
+        }
+      ];
+
+      // 🌟 4. [핵심] 백엔드가 "덮어쓰기"하지 않도록 AI 전용 이름표(aiMenuName 등)를 모두 제거!
+      // 일반 직접 입력 식단을 저장할 때와 100% 동일한 규격으로 보냅니다.
+      const payload = {
+        userNum: currentUserNum,
+        mkNum: existingMkNum, 
+        mkMealType: mealType,
+        mkDietDate: todayDateKey,
+        mkUserMemo: "AI 추천 식단이 추가되었어요! 🤖",
+        foods: combinedFoods 
+      };
+      
+      // 5. 최종 저장
       await saveDietRecord(payload);
-      alert(`[${selectedDiet.menu}] 식단이 ${mealType}으로 성공적으로 등록되었습니다!`);
+      alert(`[${selectedDiet.menu}] 식단이 ${mealType}에 성공적으로 추가되었습니다! 🍳`);
       setShowMealModal(false);
+
     } catch (error) {
-      alert("식단 기록에 실패했습니다. 서버를 확인해주세요.");
+      console.error("🔥 식단 추가 실패:", error);
+      alert("식단 추가에 실패했습니다. 서버를 확인해주세요.");
     }
   };
   return (
@@ -132,7 +174,7 @@ const handleFinalRecord = async (mealType) => {
           {isLoading ? (
             <div className="loading-state">
               <span className="spinner">🥗</span>
-              <p>AI 셰프가 오늘의 3끼 오마카세를 구성 중입니다...</p>
+              <p>AI 셰프가 오늘의 5가지 추천 식단을 구성 중입니다...</p>
             </div>
           ) : error ? (
             <div className="error-state">
@@ -186,7 +228,7 @@ const handleFinalRecord = async (mealType) => {
                         className="mini-record-btn"
                         onClick={() => openRecordModal(item)}
                       >
-                        기록하기
+                        이 식단으로 기록하기
                       </button>
                     </div>
                   </div>
@@ -213,7 +255,7 @@ const handleFinalRecord = async (mealType) => {
       )}
 
       <div className="info-footer">
-        <p>💡 탭을 클릭할 때마다 AI가 새로운 메뉴를 무작위로 구성합니다.</p>
+        <p>💡 탭을 클릭할 때마다 AI가 영양 목표에 맞는 5가지 옵션을 새롭게 제안합니다.</p>
       </div>
     </div>
   );

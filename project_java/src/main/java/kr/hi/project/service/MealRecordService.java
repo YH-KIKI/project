@@ -19,6 +19,7 @@ import kr.hi.project.dto.MealLogDTO;
 import kr.hi.project.dto.MealMonthDTO;
 import kr.hi.project.dto.MealRecordRequestDTO;
 import kr.hi.project.dto.MealWeekDTO;
+import kr.hi.project.dto.RecipeMealRecordRequestDTO;
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -164,87 +165,119 @@ public class MealRecordService {
 	        mkNum = mealLog.getMkNum();
 	        request.setMkNum(mkNum);
 
-     // 5. 음식 상세 저장
-        if (request.getAiMenuName() != null) {
+    //  // 5. 음식 상세 저장
+    //     if (request.getAiMenuName() != null) {
             
-            String foodName = request.getAiMenuName();
-            FoodDTO food = mealRecordDao.findFoodByName(foodName);
+    //         String foodName = request.getAiMenuName();
+    //         FoodDTO food = mealRecordDao.findFoodByName(foodName);
 
-            // DB에 없는 음식이면 에러 띄우지 말고 즉시 신규 등록!
-            if (food == null) {
-                food = new FoodDTO();
-                food.setFoName(foodName);
-                food.setFoBaseGram(100);
-                food.setFoKcal(request.getAiKcal() != null ? request.getAiKcal().floatValue() : 0f);
-                food.setFoType("AI추천");
-                mealRecordDao.insertNewFood(food); 
-            }
+    //         // DB에 없는 음식이면 에러 띄우지 말고 즉시 신규 등록!
+    //         if (food == null) {
+    //             food = new FoodDTO();
+    //             food.setFoName(foodName);
+    //             food.setFoBaseGram(100);
+    //             food.setFoKcal(request.getAiKcal() != null ? request.getAiKcal().floatValue() : 0f);
+    //             food.setFoType("AI추천");
+    //             mealRecordDao.insertNewFood(food); 
+    //         }
 
-            MealDetailDTO detail = new MealDetailDTO();
-            detail.setMkNum(mkNum);
-            detail.setFoNum(food.getFoNum());
-            detail.setMdayNum(mdayNum);
-            detail.setMdPortion(100); 
-            detail.setMdKcal(request.getAiKcal() != null ? request.getAiKcal() : 0);
-            // 재근추가
-            detail.setFoCarbs(request.getAiCarbs());
-            detail.setFoProtein(request.getAiProtein());
-            detail.setFoFat(request.getAiFat());
+    //         MealDetailDTO detail = new MealDetailDTO();
+    //         detail.setMkNum(mkNum);
+    //         detail.setFoNum(food.getFoNum());
+    //         detail.setMdayNum(mdayNum);
+    //         detail.setMdPortion(100); 
+    //         detail.setMdKcal(request.getAiKcal() != null ? request.getAiKcal() : 0);
+    //         // 재근추가
+    //         detail.setFoCarbs(request.getAiCarbs());
+    //         detail.setFoProtein(request.getAiProtein());
+    //         detail.setFoFat(request.getAiFat());
             
-            mealRecordDao.insertMealDetail(detail);
+    //         mealRecordDao.insertMealDetail(detail);
 
-        } 
-        else 
+    //     } 
+    //     else 
 	        
-        if (request.getFoods() != null && !request.getFoods().isEmpty()) {
+    //     if (request.getFoods() != null && !request.getFoods().isEmpty()) {
+	        // 5. 음식 상세 저장
+	        if (request.getFoods() != null && !request.getFoods().isEmpty()) {
 
-            // 새 방식: foods 배열 기반 저장
-            for (MealDetailDTO food : request.getFoods()) {
+	            for (MealDetailDTO food : request.getFoods()) {
 
-                MealDetailDTO detail = new MealDetailDTO();
-                detail.setMkNum(mkNum);
-                detail.setFoNum(food.getFoNum());
-                detail.setMdayNum(mdayNum);
+	                Integer foNum = food.getFoNum();
 
-                detail.setMdPortion(food.getMdPortion());
-                detail.setMdKcal(food.getMdKcal());
+	                // 레시피인 경우: food 테이블에 레시피용 food 생성/조회
+	                if (Boolean.TRUE.equals(food.getIsRecipe()) || food.getRcpNum() != null) {
 
-                mealRecordDao.insertMealDetail(detail);
-            }
+	                    FoodDTO recipeFood = mealRecordDao.findFoodByName(food.getRcpName());
 
-        } else if (request.getFoodDetails() != null && !request.getFoodDetails().isEmpty()) {
+	                    if (recipeFood == null) {
+	                        recipeFood = new FoodDTO();
 
-            // 기존 방식: 음식명 Map 기반 저장
-            for (String foodName : request.getFoodDetails().keySet()) {
+	                        recipeFood.setFoName(food.getRcpName());
+	                        recipeFood.setFoBaseGram(1);
+	                        recipeFood.setFoKcal(food.getRcpKcal());
+	                        recipeFood.setFoCarbs(food.getRcpCarbs());
+	                        recipeFood.setFoProtein(food.getRcpProtein());
+	                        recipeFood.setFoFat(food.getRcpFat());
+	                        recipeFood.setFoNatrium(food.getRcpNatrium());
+	                        recipeFood.setFoType("레시피");
 
-                int portion = request.getFoodDetails().get(foodName);
+	                        mealRecordDao.insertRecipeAsFood(recipeFood);
+	                    }
 
-                FoodDTO food = mealRecordDao.findFoodByName(foodName);
+	                    foNum = recipeFood.getFoNum();
+	                }
 
-                if (food == null) {
-                    throw new RuntimeException("존재하지 않는 음식입니다: " + foodName);
-                }
+	                if (foNum == null) {
+	                    throw new RuntimeException("foNum이 없는 음식/레시피가 있습니다.");
+	                }
 
-                int calculatedKcal = Math.round(
-                        food.getFoKcal() * portion / food.getFoBaseGram()
-                );
+	                MealDetailDTO detail = new MealDetailDTO();
+	                detail.setMkNum(mkNum);
+	                detail.setFoNum(foNum);
+	                detail.setMdayNum(mdayNum);
+	                detail.setMdPortion(food.getMdPortion());
+	                detail.setMdKcal(food.getMdKcal());
+					// 재근추가 
+					detail.setFoCarbs(request.getAiCarbs());
+					detail.setFoProtein(request.getAiProtein());
+					detail.setFoFat(request.getAiFat());
 
-                MealDetailDTO detail = new MealDetailDTO();
-                detail.setMkNum(mkNum);
-                detail.setFoNum(food.getFoNum());
-                detail.setMdayNum(mdayNum);
-                detail.setMdPortion(portion);
-                detail.setMdKcal(calculatedKcal);
+	                mealRecordDao.insertMealDetail(detail);
+	            }
 
-                mealRecordDao.insertMealDetail(detail);
-            }
+	        } else if (request.getFoodDetails() != null && !request.getFoodDetails().isEmpty()) {
 
-        } else {
-            throw new RuntimeException("저장할 음식 정보가 없습니다.");
-        }
+	            for (String foodName : request.getFoodDetails().keySet()) {
 
-        // 6. 하루 총 칼로리 업데이트
-        mealRecordDao.updateDailyKcal(mdayNum);
+	                int portion = request.getFoodDetails().get(foodName);
+
+	                FoodDTO food = mealRecordDao.findFoodByName(foodName);
+
+	                if (food == null) {
+	                    throw new RuntimeException("존재하지 않는 음식입니다: " + foodName);
+	                }
+
+	                int calculatedKcal = Math.round(
+	                    food.getFoKcal() * portion / food.getFoBaseGram()
+	                );
+
+	                MealDetailDTO detail = new MealDetailDTO();
+	                detail.setMkNum(mkNum);
+	                detail.setFoNum(food.getFoNum());
+	                detail.setMdayNum(mdayNum);
+	                detail.setMdPortion(portion);
+	                detail.setMdKcal(calculatedKcal);
+
+	                mealRecordDao.insertMealDetail(detail);
+	            }
+
+	        } else {
+	            throw new RuntimeException("저장할 음식 정보가 없습니다.");
+	        }
+
+	        // 6. 하루 총 칼로리 업데이트
+	        mealRecordDao.updateDailyKcal(mdayNum);
     }
     
     public List<MealDetailDTO> getTodayMealRecord(int userNum, String date) {
@@ -255,6 +288,123 @@ public class MealRecordService {
 	public List<String> getRecordedDates(int userNum) {
 		 return mealRecordDao.findRecordedDates(userNum);
 	}
-    
+
+	@Transactional
+	public void saveRecipeMealRecord(RecipeMealRecordRequestDTO request) {
+
+	    int userNum = request.getUserNum();
+
+	    LocalDate selectedDate = request.getMkDietDate();
+
+	    int year = selectedDate.getYear();
+	    int month = selectedDate.getMonthValue();
+	    int day = selectedDate.getDayOfMonth();
+
+	    int week = selectedDate.get(
+	        ChronoField.ALIGNED_WEEK_OF_MONTH
+	    );
+
+	    // 1. 월간 기록 확인/생성
+	    Integer mmNum = mealRecordDao.findMonthNum(userNum, year, month);
+
+	    if (mmNum == null) {
+	        MealMonthDTO monthDTO = new MealMonthDTO();
+	        monthDTO.setUserNum(userNum);
+	        monthDTO.setMmYear(year);
+	        monthDTO.setMmMonth(month);
+
+	        mealRecordDao.insertMonth(monthDTO);
+	        mmNum = monthDTO.getMmNum();
+	    }
+
+	    // 2. 주간 기록 확인/생성
+	    Integer mwNum = mealRecordDao.findWeekNum(mmNum, year, month, week);
+
+	    if (mwNum == null) {
+	        MealWeekDTO weekDTO = new MealWeekDTO();
+	        weekDTO.setMmNum(mmNum);
+	        weekDTO.setMwYear(year);
+	        weekDTO.setMwMonth(month);
+	        weekDTO.setMwWeek(week);
+
+	        mealRecordDao.insertWeek(weekDTO);
+	        mwNum = weekDTO.getMwNum();
+	    }
+
+	    // 3. 일간 기록 확인/생성
+	    Integer mdayNum = mealRecordDao.findDayNum(mwNum, day);
+
+	    if (mdayNum == null) {
+	        MealDayDTO dayDTO = new MealDayDTO();
+	        dayDTO.setMwNum(mwNum);
+	        dayDTO.setMdDay(day);
+	        dayDTO.setMdayKcal(0);
+
+	        mealRecordDao.insertDay(dayDTO);
+	        mdayNum = dayDTO.getMdayNum();
+	    }
+
+	    // 4. 같은 날짜 + 같은 식사타입 기존 기록 삭제
+	    List<Integer> oldMkNums = mealRecordDao.findMealLogNumsForUpdate(
+	        userNum,
+	        request.getMkMealType(),
+	        mdayNum
+	    );
+
+	    if (oldMkNums != null && !oldMkNums.isEmpty()) {
+	        mealRecordDao.deleteMealDetailsByMkNums(oldMkNums);
+	        mealRecordDao.deleteMealLogsByMkNums(oldMkNums);
+	    }
+
+	    // 5. meal_log 저장
+	    MealLogDTO mealLog = new MealLogDTO();
+	    mealLog.setUserNum(userNum);
+	    mealLog.setMkMealType(request.getMkMealType());
+	    mealLog.setMkImage(request.getRcpImage());
+	    mealLog.setMkUserMemo(request.getMkUserMemo());
+	    mealLog.setMkDietDate(request.getMkDietDate());
+
+	    mealRecordDao.insertMealLog(mealLog);
+
+	    int mkNum = mealLog.getMkNum();
+
+	    // 6. 레시피를 food 테이블에서 찾고, 없으면 food로 저장
+	    FoodDTO food = mealRecordDao.findFoodByName(request.getRcpName());
+
+	    if (food == null) {
+	        food = new FoodDTO();
+
+	        food.setFoName(request.getRcpName());
+	        food.setFoBaseGram(1);
+	        food.setFoKcal(request.getRcpKcal());
+	        food.setFoCarbs(request.getRcpCarbs());
+	        food.setFoProtein(request.getRcpProtein());
+	        food.setFoFat(request.getRcpFat());
+	        food.setFoNatrium(request.getRcpNatrium());
+	        food.setFoType("레시피");
+
+	        mealRecordDao.insertRecipeAsFood(food);
+	    }
+
+	    // 7. meal_detail 저장
+	    MealDetailDTO detail = new MealDetailDTO();
+	    detail.setMkNum(mkNum);
+	    detail.setFoNum(food.getFoNum());
+	    detail.setMdayNum(mdayNum);
+	    detail.setMdPortion(1);
+	    detail.setMdKcal(request.getRcpKcal());
+
+	    mealRecordDao.insertMealDetail(detail);
+
+	    // 8. 하루 총 칼로리 업데이트
+	    mealRecordDao.updateDailyKcal(mdayNum);
+	}
+	
+	@Transactional
+	public void deleteMealRecord(int mkNum) {
+		 mealRecordDao.deleteMealDetails(mkNum);
+		 mealRecordDao.deleteMealLog(mkNum);
+		
+	}
     
 }

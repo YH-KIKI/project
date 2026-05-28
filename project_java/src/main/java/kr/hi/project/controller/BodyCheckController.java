@@ -7,6 +7,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/bodycheck")
@@ -15,29 +16,28 @@ public class BodyCheckController {
 
     private final BodyCheckService bodyCheckService;
 
-    // 눈바디 저장 및 AI 분석
+    // 🌟 리턴 타입을 ResponseEntity<String> -> ResponseEntity<?> 로 변경
     @PostMapping("/analyze")
-    public ResponseEntity<String> analyzeBodyCheck(
+    public ResponseEntity<?> analyzeBodyCheck(
             @RequestParam("file") MultipartFile file,
             @RequestParam("analyzeType") String analyzeType,
             @RequestParam("userNum") Long userNum) {
         try {
-            String result = bodyCheckService.analyzeAndSave(file, analyzeType, userNum);
+            // 서비스에서 Map 객체를 받아서 그대로 리턴 (리액트는 response.data 로 쉽게 사용 가능)
+            Map<String, Object> result = bodyCheckService.analyzeAndSave(file, analyzeType, userNum);
             return ResponseEntity.ok(result);
         } catch (Exception e) {
             e.printStackTrace();
-            return ResponseEntity.internalServerError().body("서버 오류 발생");
+            return ResponseEntity.internalServerError().body(Map.of("error", "서버 오류 발생"));
         }
     }
 
-    // 눈바디 목록 불러오기
     @GetMapping("/list")
     public ResponseEntity<List<BodyCamDTO>> getBodyCheckList(@RequestParam("userNum") Long userNum) {
         List<BodyCamDTO> list = bodyCheckService.getBodyCheckList(userNum);
         return ResponseEntity.ok(list);
     }
     
- // 눈바디 삭제 API
     @DeleteMapping("/{bcNum}")
     public ResponseEntity<String> deleteBodyCheck(@PathVariable("bcNum") int bcNum) {
         try {

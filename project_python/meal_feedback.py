@@ -1,21 +1,22 @@
 import os
 from google import genai
-from dotenv import load_dotenv
-
-load_dotenv()
 
 USE_GEMINI = False  # 나중에 AI 쓰고 싶으면 True
 
-api_key = (
-    os.getenv("GEMINI_API_KEY")
-    or os.getenv("GOOGLE_AI_API_KEY")
-    or os.getenv("GOOGLE_API_KEY")
-)
+client = None
 
-if USE_GEMINI and api_key:
+if USE_GEMINI:
+
+    api_key = (
+        os.getenv("GEMINI_API_KEY")
+        or os.getenv("GOOGLE_AI_API_KEY")
+        or os.getenv("GOOGLE_API_KEY")
+    )
+
+    if not api_key:
+        raise ValueError("Gemini API KEY 없음")
+
     client = genai.Client(api_key=api_key)
-else:
-    client = None
 
 
 def generate_rule_feedback(meal_type, kcal, carbs, protein, fat, sodium):
@@ -25,6 +26,12 @@ def generate_rule_feedback(meal_type, kcal, carbs, protein, fat, sodium):
 
     if kcal > 900:
         return f"{meal_type}은 든든하게 드셨어요! 다음 끼니는 조금 가볍게 조절해봐요 🌿"
+
+    if carbs < 30:
+        return f"{meal_type}은 탄수화물이 조금 부족해요! 밥이나 고구마를 곁들여보세요 🍚"
+
+    if carbs > 120:
+        return f"{meal_type}은 탄수화물이 많은 편이에요! 다음 끼니는 조금 가볍게 먹어봐요 🌾"
 
     if protein < 10:
         return f"{meal_type}은 단백질이 조금 부족해요! 계란이나 두부를 곁들여보세요 🥚"
@@ -75,9 +82,10 @@ def generate_meal_feedback(meal_type, kcal, carbs, protein, fat, sodium):
             contents=prompt
         )
 
-        return response.text
+        return response.text.strip()
 
     except Exception as e:
+
         print("Gemini 오류:", e)
 
         return generate_rule_feedback(

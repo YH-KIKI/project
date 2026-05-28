@@ -48,6 +48,35 @@
         LIMIT 1
 
     </select>
+    
+    <!-- 레시피를 food처럼 저장 -->
+	<insert id="insertRecipeAsFood"
+	        parameterType="kr.hi.project.dto.FoodDTO"
+	        useGeneratedKeys="true"
+	        keyProperty="foNum">
+	
+	    INSERT INTO food (
+	        fo_name,
+	        fo_base_gram,
+	        fo_kcal,
+	        fo_carbs,
+	        fo_protein,
+	        fo_fat,
+	        fo_natrium,
+	        fo_type
+	    )
+	    VALUES (
+	        #{foName},
+	        1,
+	        #{foKcal},
+	        #{foCarbs},
+	        #{foProtein},
+	        #{foFat},
+	        #{foNatrium},
+	        '레시피'
+	    )
+	
+	</insert>
 
 
     <!-- meal_detail 저장 -->
@@ -208,6 +237,7 @@
 	    DELETE FROM meal_detail
 	    WHERE mk_num = #{mkNum}
 	</delete>
+	
 	<delete id="deleteMealLog">
 	    DELETE FROM meal_log
 	    WHERE mk_num = #{mkNum}

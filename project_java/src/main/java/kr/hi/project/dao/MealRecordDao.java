@@ -20,6 +20,9 @@ public interface MealRecordDao {
     int insertMealLog(MealLogDTO mealLog);
 
     FoodDTO findFoodByName(@Param("foName") String foName);
+    
+	//레시피 등록을 위한 가짜 food 필드만들기
+	void insertRecipeAsFood(FoodDTO food);
 
     int insertMealDetail(MealDetailDTO detail);
 

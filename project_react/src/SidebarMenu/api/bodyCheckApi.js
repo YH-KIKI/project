@@ -1,24 +1,32 @@
 import axios from 'axios';
 
-// 스프링부트 주소 (포트 8080)
-const API_BASE_URL = `${process.env.REACT_APP_API_URL}/api/bodycheck`;
+// 🌟 스프링부트 서버 주소 설정 (.env 파일에 맞춰서 자동 적용됩니다)
+const API_BASE_URL = process.env.REACT_APP_API_URL || '';
 
-// 스프링부트로 눈바디 사진과 분석 타입을 쏘는 함수
+/**
+ * 눈바디 이미지를 스프링 부트 서버로 전송하고 AI 분석 결과를 받아오는 통신 함수
+ * @param {File} imageFile - 크롭 및 변환이 완료된 이미지 파일
+ * @param {string} analyzeType - 분석 타입 ('원본', 'pose', 'outline')
+ * @param {number} userNum - 현재 로그인한 유저의 번호
+ * @returns {Promise<Object>} - 백엔드(파이썬)에서 처리된 결과 데이터 { image_base64, score_data }
+ */
 export const uploadBodyCheckImage = async (imageFile, analyzeType, userNum) => {
-  const formData = new FormData();
-  formData.append('file', imageFile); 
-  formData.append('analyzeType', analyzeType); 
-  formData.append('userNum', userNum); // 이제 고정된 1이 아니라, 컴포넌트에서 넘겨준 진짜 번호를 씁니다!
-
   try {
-    const response = await axios.post(`${API_BASE_URL}/analyze`, formData, {
+    const formData = new FormData();
+    
+    // 🌟 스프링부트 컨트롤러의 @RequestParam 명칭과 완벽 매칭!
+    formData.append('file', imageFile);
+    formData.append('analyzeType', analyzeType); // 👈 이 부분이 'type'이 아니라 'analyzeType'이어야 합니다!
+    formData.append('userNum', userNum);
+
+    const response = await axios.post(`${API_BASE_URL}/api/bodycheck/analyze`, formData, {
       headers: { 'Content-Type': 'multipart/form-data' },
-      withCredentials: true
+      withCredentials: true,
     });
-    // 파이썬을 거쳐 스프링부트가 넘겨준 결과 데이터 반환
+
     return response.data;
-  } catch (error) { 
-    console.error("🔥 눈바디 업로드 통신 에러:", error); 
+  } catch (error) {
+    console.error("통신 실패:", error);
     throw error;
   }
 };

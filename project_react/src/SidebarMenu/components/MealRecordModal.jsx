@@ -20,6 +20,9 @@ function MealRecordModal({
   const [favoriteMeals, setFavoriteMeals] = useState([]);
   const [searchResults, setSearchResults] = useState([]);
   const [selectedMeal, setSelectedMeal] = useState(null);
+  //자동완성
+  const [suggestions, setSuggestions] = useState([]);
+  const [showSuggestions, setShowSuggestions] = useState(false);
 
   const user = JSON.parse(
     localStorage.getItem("user")
@@ -97,8 +100,14 @@ function MealRecordModal({
     carbs: Number(food.carbs ?? food.foCarbs ?? 0),
     protein: Number(food.protein ?? food.foProtein ?? 0),
     fat: Number(food.fat ?? food.foFat ?? 0),
+    sodium: Number(food.sodium ?? food.natrium ?? food.foNatrium ?? 0),
     image: foodImage(food.image || food.foImage),
     count: food.count || food.portion || food.mdPortion || food.mfPortion || 1,
+    isFavorite:
+      food.isFavorite || favorites.includes(food.id || food.foNum),
+    favoriteType: food.favoriteType || null,
+    sfNum: food.sfNum || null,
+    rfNum: food.rfNum || null,
   });
 
   const normalizeInitialFoods = () => {
@@ -122,6 +131,11 @@ function MealRecordModal({
 
   const [foods, setFoods] = useState(normalizeInitialFoods);
 
+  useEffect(() => {
+    if (!userNum) return;
+    loadSingleFoodFavorites();
+  }, [userNum]);
+
   const toFoodItem = (food) => ({
     uid: makeUid(),
     id: food.foNum,
@@ -130,8 +144,12 @@ function MealRecordModal({
     carbs: food.foCarbs,
     protein: food.foProtein,
     fat: food.foFat,
+    sodium: food.foNatrium,
     image: foodImage(food.foImage),
     count: 1,
+    isFavorite:
+      food.isFavorite ||
+      favorites.includes(food.foNum),
   });
 
   const total = useMemo(() => {
@@ -141,9 +159,10 @@ function MealRecordModal({
         acc.carbs += Number(food.carbs || 0) * Number(food.count || 1);
         acc.protein += Number(food.protein || 0) * Number(food.count || 1);
         acc.fat += Number(food.fat || 0) * Number(food.count || 1);
+        acc.sodium += Number(food.sodium || food.natrium || 0) * Number(food.count || 1);
         return acc;
-      },
-      { kcal: 0, carbs: 0, protein: 0, fat: 0 }
+        },
+      { kcal: 0, carbs: 0, protein: 0, fat: 0, sodium: 0 }
     );
 
     return {
@@ -151,6 +170,7 @@ function MealRecordModal({
       carbs: Number(result.carbs.toFixed(1)),
       protein: Number(result.protein.toFixed(1)),
       fat: Number(result.fat.toFixed(1)),
+      sodium: Math.round(result.sodium),
     };
   }, [foods]);
 
@@ -191,6 +211,31 @@ function MealRecordModal({
     setFoods([]);
   };
 
+  useEffect(() => {
+    const text = keyword.trim();
+
+    if (text.length < 1) {
+      setSuggestions([]);
+      setShowSuggestions(false);
+      return;
+    }
+
+    const timer = setTimeout(async () => {
+      try {
+        const res = await axios.get(
+          `/api/food/search?keyword=${encodeURIComponent(text)}`
+        );
+
+        setSuggestions(res.data.slice(0, 20));
+        setShowSuggestions(true);
+      } catch (err) {
+        console.error("자동완성 실패:", err);
+      }
+    }, 250);
+
+    return () => clearTimeout(timer);
+  }, [keyword]);
+
   const searchFood = async () => {
     if (keyword.trim() === "") {
       alert("음식명을 입력하세요!");
@@ -213,18 +258,33 @@ function MealRecordModal({
   };
 
   const addFood = (food) => {
+    const nextFood = {
+      ...food,
+      isFavorite: food.isFavorite || favorites.includes(food.id),
+    };
+
     setFoods((prev) => {
-      const exists = prev.find((item) => item.id === food.id);
+      const exists = prev.find((item) => item.id === nextFood.id);
 
       if (exists) {
         return prev.map((item) =>
-          item.id === food.id ? { ...item, count: item.count + 1 } : item
+          item.id === nextFood.id
+            ? {
+                ...item,
+                count: item.count + 1,
+                isFavorite: item.isFavorite || favorites.includes(item.id),
+              }
+            : item
         );
       }
 
       return [
         ...prev,
-        { ...food, uid: food.uid || makeUid(), count: food.count || 1 },
+        {
+          ...nextFood,
+          uid: nextFood.uid || makeUid(),
+          count: nextFood.count || 1,
+        },
       ];
     });
   };
@@ -329,8 +389,10 @@ function MealRecordModal({
         carbs: food.foCarbs || 0,
         protein: food.foProtein || 0,
         fat: food.foFat || 0,
+        sodium: food.foNatrium || 0,
         image: food.foImage,
         count: food.count || food.mdPortion || food.mfPortion || 1,
+        isFavorite: favorites.includes(food.foNum),
       })
     );
 
@@ -478,6 +540,25 @@ function MealRecordModal({
                 value={keyword}
                 onChange={(e) => setKeyword(e.target.value)}
               />
+              {showSuggestions && suggestions.length > 0 && (
+                <div className="food-suggestion-box">
+                  {suggestions.map((food) => (
+                    <button
+                      type="button"
+                      key={food.foNum}
+                      className="food-suggestion-item"
+                      onClick={() => {
+                        setKeyword(food.foName);
+                        setSearchResults([food]);
+                        setShowSuggestions(false);
+                        setTab("search");
+                      }}
+                    >
+                      {food.foName}
+                    </button>
+                  ))}
+                </div>
+              )}
               <button type="submit">검색</button>
             </form>
 
@@ -651,7 +732,20 @@ function MealRecordModal({
 
                   <div className="mr-added-info">
                     <strong>{food.name}</strong>
-                    <span>{food.kcal} kcal</span>
+
+                    <div className="mr-added-nutrients">
+                      <div className="mr-added-nutrient-row">
+                        <span>탄수화물 {Number(food.carbs || 0)}g</span>
+                        <span>단백질 {Number(food.protein || 0)}g</span>
+                      </div>
+
+                      <div className="mr-added-nutrient-row">
+                        <span>지방 {Number(food.fat || 0)}g</span>
+                        <span>나트륨 {Number(food.sodium || 0)}mg</span>
+                      </div>
+                    </div>
+
+                    <span>🔥 {food.kcal} kcal</span>
                   </div>
 
                   <div className="food-count">
@@ -671,17 +765,14 @@ function MealRecordModal({
                       +
                     </button>
                   </div>
-
                   <button
                     type="button"
                     className={`mr-star-btn ${
-                      favorites.includes(food.id) ? "active" : ""
+                      food.isFavorite || favorites.includes(food.id) ? "active" : ""
                     }`}
-                    onClick={() => addSingleFoodFavorite(food.id)}
                   >
                     ★
                   </button>
-
                   <button
                     type="button"
                     className="mr-trash-btn"
@@ -717,6 +808,10 @@ function MealRecordModal({
           <div>
             <span>지방</span>
             <strong>{total.fat}g</strong>
+          </div>
+          <div>
+            <span>나트륨</span>
+            <strong>{total.sodium}mg</strong>
           </div>
         </section>
 
@@ -863,12 +958,27 @@ function FoodRow({ food, isFavorite, onAdd, onFavorite, buttonText }) {
 
       <div className="mr-food-info">
         <strong>{food.name}</strong>
-        <span>{food.kcal} kcal</span>
+
+        <div className="mr-added-nutrients">
+          <div className="mr-added-nutrient-row">
+            <span>탄수화물 {Number(food.carbs || 0)}g</span>
+            <span>단백질 {Number(food.protein || 0)}g</span>
+          </div>
+
+          <div className="mr-added-nutrient-row">
+            <span>지방 {Number(food.fat || 0)}g</span>
+            <span>나트륨 {Number(food.sodium || 0)}mg</span>
+          </div>
+        </div>
+
+        <span>🔥 {food.kcal} kcal</span>
       </div>
 
       <button
         type="button"
-        className={`mr-star-btn ${isFavorite ? "active" : ""}`}
+        className={`mr-star-btn ${
+          isFavorite || food.isFavorite ? "active" : ""
+        }`}
         onClick={onFavorite}
       >
         ★
