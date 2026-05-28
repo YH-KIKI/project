@@ -121,12 +121,24 @@ function MealFavoriteDetailModal({
           <div>
             {isEditingName ? (
               <div className="meal-fav-name-edit">
-                <input
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  maxLength={50}
-                  placeholder="식단 이름"
-                />
+                <div className="meal-fav-name-input-wrap">
+                  <input
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    maxLength={50}
+                    placeholder="식단 이름"
+                  />
+
+                  {name && (
+                    <button
+                      type="button"
+                      className="meal-fav-name-clear-btn"
+                      onClick={() => setName("")}
+                    >
+                      <FiX />
+                    </button>
+                  )}
+                </div>
 
                 <button type="button" onClick={saveName}>
                   저장

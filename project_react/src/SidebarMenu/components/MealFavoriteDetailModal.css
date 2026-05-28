@@ -464,6 +464,63 @@
   background: #eadada;
   color: #4d3f3f;
 }
+/* input 삭제 버튼 */
+.meal-fav-name-input-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.meal-fav-name-input-wrap input {
+  padding-right: 34px;
+}
+
+.meal-fav-name-input-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.meal-fav-name-input-wrap input {
+  padding-right: 36px;
+}
+
+.meal-fav-name-edit .meal-fav-name-clear-btn {
+  position: absolute;
+  right: 8px;
+
+  width: 22px;
+  height: 22px;
+  min-width: 22px;
+
+  padding: 0;
+  margin: 0;
+
+  border: 1px solid #ff6b8a;
+  border-radius: 6px;
+  background: #fff;
+
+  color: #ff6b8a;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  cursor: pointer;
+
+  font-size: 0;
+  line-height: 1;
+}
+
+.meal-fav-name-edit .meal-fav-name-clear-btn svg {
+  width: 12px;
+  height: 12px;
+  stroke-width: 3;
+}
+
+.meal-fav-name-edit .meal-fav-name-clear-btn:hover {
+  background: #ff6b8a;
+}
 
 .meal-fav-detail-modal {
   text-align: left;
