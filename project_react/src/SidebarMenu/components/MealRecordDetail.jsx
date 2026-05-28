@@ -600,6 +600,8 @@ const analysis = mealData ? getNutritionAnalysis() : null;
     .filter(([key]) => key.startsWith(dateKey))
     .reduce((sum, [, record]) => sum + record.totalKcal, 0);
 
+  const activeMealKcal = mealData?.totalKcal || 0;
+
   const moveDate = (amount) => {
     const next = new Date(selectedDate);
     next.setDate(next.getDate() + amount);
@@ -950,7 +952,7 @@ const analysis = mealData ? getNutritionAnalysis() : null;
           <div className="summary-card">
             <p>{activeMeal} 섭취 칼로리</p>
             <h3>
-              {dailyTotalKcal.toLocaleString()} <small>칼로리</small>
+              {activeMealKcal.toLocaleString()} <small>칼로리</small>
             </h3>
           </div>
 
