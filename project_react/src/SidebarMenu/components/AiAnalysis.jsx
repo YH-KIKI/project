@@ -22,7 +22,7 @@ const AiAnalysis = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   
-  // 🌟 1. 현재 선택된 코치(페르소나) 상태 추가
+  // 1. 현재 선택된 코치(페르소나) 상태 추가
   const [persona, setPersona] = useState("다정");
 
   useEffect(() => {
@@ -43,7 +43,7 @@ const AiAnalysis = () => {
         setLoading(true);
         const formattedDate = format(selectedDate, 'yyyy-MM-dd');
         
-        // 🌟 2. params에 persona를 포함하여 스프링부트로 전송
+        // 2. params에 persona를 포함하여 스프링부트로 전송
         const response = await axios.get(`/api/diet/analyze/daily`, {
           params: { userNum, date: formattedDate, persona }
         });
@@ -57,14 +57,14 @@ const AiAnalysis = () => {
       }
     };
     fetchAnalysisData();
-  }, [userNum, selectedDate, persona]); // 🌟 3. persona가 바뀔 때마다 즉시 새 피드백 요청
+  }, [userNum, selectedDate, persona]); // 3. persona가 바뀔 때마다 즉시 새 피드백 요청
 
   const calculateWidth = (current, target) => {
     if (!target || target === 0) return '0%';
     return `${Math.min((current / target) * 100, 100)}%`;
   };
 
-  // 🌟 4. 페르소나에 맞춰 하단 피드백 타이틀을 동적으로 변경하는 함수
+  // 4. 페르소나에 맞춰 하단 피드백 타이틀을 동적으로 변경하는 함수
   const getCoachName = () => {
     switch(persona) {
       case "팩폭": return "호랑이 코치";
@@ -80,7 +80,7 @@ const AiAnalysis = () => {
         <h2>AI 분석 요약</h2>
         <div className="header-controls" style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
           
-          {/* 🌟 5. AI 코치 선택 드롭다운 UI 추가 */}
+          {/* 5. AI 코치 선택 드롭다운 UI 추가 */}
           <div className="persona-selector">
             <select 
               value={persona} 
@@ -150,7 +150,7 @@ const AiAnalysis = () => {
           <div className="grade-section">
             <div className="grade-circle">{analysisData.grade}</div>
             <div className="grade-text">
-              {/* 🌟 6. 하드코딩 문구 제거, 제미나이가 만든 1줄 타이틀 적용 */}
+              {/* 6. 하드코딩 문구 제거, 제미나이가 만든 1줄 타이틀 적용 */}
               <strong>{analysisData.gradeMessage}</strong>
               <p>획득한 경험치: {analysisData.earnedXp} XP</p>
             </div>
@@ -200,7 +200,7 @@ const AiAnalysis = () => {
               <div className="roro-icon-wrap">
                 <img src={roroIcon} alt="AI Coach" className="roro-icon-img" />
               </div>
-              {/* 🌟 7. 선택한 코치에 맞게 이름이 변하는 타이틀 */}
+              {/* 7. 선택한 코치에 맞게 이름이 변하는 타이틀 */}
               <strong>{getCoachName()}의 맞춤 피드백</strong>
             </div>
             <div className="feedback-message-list">
