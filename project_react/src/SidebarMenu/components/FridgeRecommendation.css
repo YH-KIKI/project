@@ -712,6 +712,24 @@
   color: #4f4040;
 }
 
+/* 냠냠이 추천 한마디 */
+.recipe-ai-label {
+  display: inline-flex;
+  align-items: center;
+
+  margin-bottom: 6px;
+  padding: 5px 11px;
+
+  border-radius: 999px;
+
+  background: #fff1f5;
+
+  color: #ff6b8a;
+
+  font-size: 12px;
+  font-weight: 800;
+}
+
 /* 태그 */
 
 .recipe-tags {

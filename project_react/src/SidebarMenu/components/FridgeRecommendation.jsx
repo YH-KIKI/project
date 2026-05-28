@@ -657,6 +657,9 @@ const FridgeRecommendation = () => {
                   />
 
                   <div className="recipe-middle-right">
+                    <div className="recipe-ai-label">
+                      🐱 냠냠이 AI 한마디!
+                    </div>
                     <p className="recipe-desc">
                       {recipe.aiReason || recipe.rcpWay}
                     </p>
