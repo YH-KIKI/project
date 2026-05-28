@@ -36,5 +36,5 @@ public class DietAnalysisController {
         return ResponseEntity.ok(dietAnalysisService.getRecordedDates(userNum));
     }
 
-    // ❌ /stats 주소는 DietController에 이미 존재하므로 여기서 삭제하여 충돌을 방지합니다!
+ 
 }
