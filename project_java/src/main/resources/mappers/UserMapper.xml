@@ -111,10 +111,10 @@
 	    SELECT 
 	        IFNULL(SUM(md.md_kcal), 0) AS totalKcal,
 	        
-	        IFNULL(ROUND(SUM(f.fo_carbs * md.md_portion), 1), 0) AS totalCarbs,
-	        IFNULL(ROUND(SUM(f.fo_protein * md.md_portion), 1), 0) AS totalProtein,
-	        IFNULL(ROUND(SUM(f.fo_fat * md.md_portion), 1), 0) AS totalFat,
-	        IFNULL(ROUND(SUM(f.fo_natrium * md.md_portion), 1), 0) AS totalNatrium
+	        IFNULL(ROUND(SUM(f.fo_carbs * md.md_portion)/100, 1), 0) AS totalCarbs,
+	        IFNULL(ROUND(SUM(f.fo_protein * md.md_portion)/100, 1), 0) AS totalProtein,
+	        IFNULL(ROUND(SUM(f.fo_fat * md.md_portion)/100, 1), 0) AS totalFat,
+	        IFNULL(ROUND(SUM(f.fo_natrium * md.md_portion)/100, 1), 0) AS totalNatrium
 	        
 	    FROM meal_detail md
 	    JOIN food f ON md.fo_num = f.fo_num

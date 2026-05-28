@@ -6,6 +6,7 @@ from datetime import datetime
 import re
 import codecs
 import platform
+from torchvision.models import ResNet18_Weights
 
 if platform.system() == "Windows":
     BASE_DIR = r'C:/project_uploads/relearn'
@@ -53,7 +54,7 @@ def train_update():
     new_scanned_classes = image_datasets.classes
     print(f"🔍 이번에 탐지된 신상 음식 폴더 목록: {new_scanned_classes}")
 
-    model = models.resnet18(pretrained=True)
+    model = models.resnet18(weights=ResNet18_Weights.IMAGENET1K_V1)
     num_ftrs = model.fc.in_features
 
     final_class_names = []
