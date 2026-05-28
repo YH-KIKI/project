@@ -572,7 +572,7 @@ const FavoritePage = () => {
             {filteredFoodFavorites.map((food) => (
               <div className="food-card" key={food.id}>
                 <div className="food-title-area">
-                  <h3>{food.name}</h3>
+                  <h3>🥘{food.name}</h3>
                 </div>
 
                 <div className="nutrition-grid">
@@ -737,7 +737,7 @@ const FavoritePage = () => {
                   onClick={() => openRecipeModal(recipe)}
                 >
                   <div className="recipe-fav-title-area">
-                    <h3>{recipe.name}</h3>
+                    <h3>👩‍🍳 {recipe.name}</h3>
                   </div>
 
                   <div className="recipe-fav-image-wrap">
