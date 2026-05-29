@@ -105,7 +105,7 @@ const Stats = () => {
       <div className="stats-card">
         <div className="stats-tab-menu">
           <button className={`stats-tab-button ${activeTab === '주간' ? 'active' : ''}`} onClick={() => setActiveTab('주간')}>주간</button>
-          <button className={`stats-tab-button ${activeTab === '월간' ? 'active' : ''}`} onClick={() => setActiveTab('월간')}>월간</button>
+          <button className={`stats-tab-button ${activeTab === '월간' ? 'active' : ''}`} onClick={() => setActiveTab('월간')}>월</button>
         </div>
 
         <div className="chart-section">

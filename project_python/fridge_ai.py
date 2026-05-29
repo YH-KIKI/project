@@ -10,7 +10,7 @@ client = None
 
 if not USE_DUMMY:
     client = genai.Client(
-        api_key=os.getenv("GOOGLE_API_KEY")
+        api_key=os.getenv("GOOGLE_AI_API_KEY")
         # api_key=""
     )
 
