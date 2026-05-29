@@ -21,7 +21,7 @@ COPY requirements.txt .
 # (가장 마지막에 발생했던 packaging 모듈 에러를 방지하기 위해 강제 설치 추가)
 RUN pip install --no-cache-dir --upgrade pip setuptools wheel packaging && \
     pip install --no-cache-dir --user -r requirements.txt && \
-    pip install --no-cache-dir --user packaging matplotlib ultralytics
+    pip install --no-cache-dir --user packaging matplotlib ultralytics mediapipe
 
 # ---------------------------------------
 # 2단계: 실행 스테이지 (가볍고 깨끗한 최종 환경)
@@ -34,10 +34,9 @@ WORKDIR /project_python
 # OpenCV, Mediapipe 실행에 꼭 필요한 '최소한의' 그래픽 라이브러리만 쏙쏙 설치
 # (100번 에러를 방지하기 위해 libgl1-mesa-glx 대신 최신 명칭인 libgl1 사용)
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    libgl1 \
-    libglib2.0-0 \
     libgomp1 \
     && rm -rf /var/lib/apt/lists/*
+
 
 # 1단계(builder)에서 설치 완료된 패키지 폴더(/root/.local)만 가져오기 (이게 경량화의 핵심!)
 COPY --from=builder /root/.local /root/.local
