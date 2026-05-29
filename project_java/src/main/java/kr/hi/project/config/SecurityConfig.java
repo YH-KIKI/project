@@ -16,7 +16,6 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
@@ -103,16 +102,22 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
+        
+        // 🌟 [수정 포인트 1] 발표 시연용 로컬 IP 추가!
         configuration.setAllowedOrigins(Arrays.asList(
                 "http://localhost:3000",
-                "http://54.116.167.5"
+                "http://54.116.167.5",
+                "http://192.168.0.55:3000" // 👈 추가됨
                 )); 
+        
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
-        configuration.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type"));
+        
+        // 🌟 [수정 포인트 2] 브라우저 프리플라이트(OPTIONS) 에러 방지를 위해 헤더 전체 허용
+        configuration.setAllowedHeaders(Arrays.asList("*")); // 👈 변경됨
+        
         configuration.setAllowCredentials(true);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        // 🛠️ 에러 수정: config -> configuration 으로 변경하여 변수명 일치시킴
         source.registerCorsConfiguration("/**", configuration);
         return source;
     }

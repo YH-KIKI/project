@@ -4,7 +4,7 @@ from sqlalchemy import create_engine
 from dotenv import load_dotenv
 
 # 1. .env 파일 로드 (비밀번호 읽어오기)
-load_dotenv('password.env')
+load_dotenv('.env')
 db_pass = os.getenv('MY_DB_PASS')
 
 if not db_pass:
