@@ -24,7 +24,7 @@ const FavoritePage = () => {
     return `${SERVER_URL}${path}`;
   };
 
-  const [activeTab, setActiveTab] = useState("food");
+  const [activeTab, setActiveTab] = useState("meal");
   const [isFoodModalOpen, setIsFoodModalOpen] = useState(false);
   const [isMealModalOpen, setIsMealModalOpen] = useState(false);
   const [mealFilter, setMealFilter] = useState("전체");
@@ -536,17 +536,17 @@ const FavoritePage = () => {
 
       <div className="favorite-tabs">
         <button
-          className={activeTab === "food" ? "active" : ""}
-          onClick={() => setActiveTab("food")}
-        >
-          ⭐ 음식 즐겨찾기
-        </button>
-
-        <button
           className={activeTab === "meal" ? "active" : ""}
           onClick={() => setActiveTab("meal")}
         >
           📋 저장한 식단
+        </button>
+        
+        <button
+          className={activeTab === "food" ? "active" : ""}
+          onClick={() => setActiveTab("food")}
+        >
+          ⭐ 음식 즐겨찾기
         </button>
 
         <button
@@ -572,7 +572,7 @@ const FavoritePage = () => {
             {filteredFoodFavorites.map((food) => (
               <div className="food-card" key={food.id}>
                 <div className="food-title-area">
-                  <h3>{food.name}</h3>
+                  <h3>🥘{food.name}</h3>
                 </div>
 
                 <div className="nutrition-grid">
@@ -737,7 +737,7 @@ const FavoritePage = () => {
                   onClick={() => openRecipeModal(recipe)}
                 >
                   <div className="recipe-fav-title-area">
-                    <h3>{recipe.name}</h3>
+                    <h3>👩‍🍳 {recipe.name}</h3>
                   </div>
 
                   <div className="recipe-fav-image-wrap">

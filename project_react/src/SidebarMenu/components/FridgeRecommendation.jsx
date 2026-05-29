@@ -63,6 +63,7 @@ const FridgeRecommendation = () => {
   const [favoriteRecipeNums, setFavoriteRecipeNums] = useState([]);
   const [mealAddRecipe, setMealAddRecipe] = useState(null);
   const [isMealTypeModalOpen, setIsMealTypeModalOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   const ingredientSuggestions = `
   계란
@@ -205,29 +206,35 @@ const FridgeRecommendation = () => {
   const handleRecommend = async () => {
 
     if (ingredients.length === 0) {
-
       alert("재료를 1개 이상 추가해주세요.");
-
       return;
     }
 
     try {
 
+      setIsLoading(true);
+
       const res = await axios.post(
         "/api/fridge/recommend",
         {
-          ingredients
+          ingredients,
+          nutrition: {
+            targetKcal: summary?.targetKcal || 0,
+            currentKcal: summary?.currentKcal || 0,
+
+            targetCarbs: summary?.targetCarbs || 0,
+            currentCarbs: summary?.currentCarbs || 0,
+
+            targetProtein: summary?.targetProtein || 0,
+            currentProtein: summary?.currentProtein || 0,
+
+            targetFat: summary?.targetFat || 0,
+            currentFat: summary?.currentFat || 0,
+
+            targetNatrium: summary?.targetNatrium || 0,
+            currentNatrium: summary?.currentNatrium || 0,
+          }
         }
-      );
-
-      console.log(
-        "냉장고 추천 결과:",
-        res.data
-      );
-
-      console.log(
-        "recipes:",
-        res.data.recipes
       );
 
       setRecipes(
@@ -238,14 +245,14 @@ const FridgeRecommendation = () => {
 
     } catch (err) {
 
-      console.error(
-        "냉장고 추천 실패:",
-        err
-      );
+      console.error(err);
 
-      alert(
-        "추천 요청에 실패했어요 😢"
-      );
+      alert("추천 요청에 실패했어요 😢");
+
+    } finally {
+
+      setIsLoading(false);
+
     }
   };
 
@@ -559,17 +566,39 @@ const FridgeRecommendation = () => {
               <b>추천 요청</b>
             </div>
 
-            <div className="recommend-action">
-              <button onClick={handleRecommend}>
-                ✨ 이 재료로 AI 추천받기
-              </button>
-              <p>ⓘ 재료가 1개 이상 있어야 추천이 가능해요!</p>
-            </div>
-          </div>
-        </div>
+      <div className="recommend-action">
+        <button
+          onClick={handleRecommend}
+          disabled={isLoading}
+          className={isLoading ? "loading" : ""}
+        >
+          {isLoading
+            ? "🤖 냠냠이가 레시피 찾는 중..."
+            : "✨ 이 재료로 AI 추천받기"}
+        </button>
+
+        <p>ⓘ 재료가 1개 이상 있어야 추천이 가능해요!</p>
+      </div>
+
+      </div>
+      </div>
       </section>
 
-      {!isRecommended ? (
+      {isLoading ? (
+        <section className="loading-section">
+          <div className="loading-box">
+            <div className="loading-emoji">🤖</div>
+            <h3>냠냠이가 레시피 찾는 중...</h3>
+            <p>잠시만 기다려주세요 🍳</p>
+
+            <div className="loading-dots">
+              <span></span>
+              <span></span>
+              <span></span>
+            </div>
+          </div>
+        </section>
+      ) : !isRecommended ? (
         <section className="empty-recipe-section">
           <h3>AI 레시피 추천</h3>
 
@@ -584,137 +613,102 @@ const FridgeRecommendation = () => {
           </div>
         </section>
       ) : (
-       <section className="recipe-section">
-        <div className="recipe-header">
-          <div>
-            <h3>✨ AI 레시피 추천 결과</h3>
-            <p>
-              보유 재료를 활용해 만들 수 있는 추천 메뉴예요!
-            </p>
-          </div>
-        </div>
-
-        <div className="recipe-list">
-          {recipes.map((recipe) => (
-
-            <div
-              className="recipe-card-v2"
-              key={recipe.rcpNum}
-            >
-
-              {/* 상단 */}
-              <div className="recipe-card-top">
-
-                <div className="recipe-title-wrap">
-
-                  <div className="recipe-icon">
-                    🍮
-                  </div>
-
-                  <h4>
-                    {recipe.rcpName}
-                  </h4>
-                  <button
-                    className={
-                      favoriteRecipeNums.includes(recipe.rcpNum)
-                        ? "recipe-favorite-btn active"
-                        : "recipe-favorite-btn"
-                    }
-                    onClick={() => toggleRecipeFavorite(recipe)}
-                  >
-                    <FiHeart />
-                  </button>
-
-                </div>
-
-                <button 
-                  className="recipe-detail-btn"
-                  onClick={() => openRecipeModal(recipe)}
-                >
-                  레시피 보기 →
-                </button>
-
-              </div>
-
-              {/* 중단 */}
-              <div className="recipe-middle">
-
-                <img
-                  src={getImageUrl(recipe.rcpImage)}
-                  alt={recipe.rcpName}
-                />
-
-                <div className="recipe-middle-right">
-
-                  <p className="recipe-desc">
-                    {recipe.aiReason || recipe.rcpWay}
-                  </p>
-
-                  <div className="recipe-tags">
-
-                {recipe.hashtags?.map((tag) => (
-
-                  <span key={tag}>
-                    #{tag}
-                  </span>
-
-                ))}
-                  </div>
-
-                </div>
-
-              </div>
-
-              {/* 하단 영양소 */}
-              <div className="recipe-nutrient-bar">
-
-                <div className="nutrient-item">
-
-                  <span className="nutrient-icon">
-                    🔥
-                  </span>
-
-                  <strong>
-                    {recipe.rcpKcal} kcal
-                  </strong>
-
-                  <p>예상 칼로리</p>
-
-                </div>
-
-                <div className="nutrient-item">
-                  <span>🍞</span>
-                  <b>탄수화물</b>
-                  <strong>{recipe.rcpCarbs}g</strong>
-                </div>
-
-                <div className="nutrient-item">
-                  <span>🥩</span>
-                  <b>단백질</b>
-                  <strong>{recipe.rcpProtein}g</strong>
-                </div>
-
-                <div className="nutrient-item">
-                  <span>🥑</span>
-                  <b>지방</b>
-                  <strong>{recipe.rcpFat}g</strong>
-                </div>
-
-                <div className="nutrient-item">
-                  <span>🧂</span>
-                  <b>나트륨</b>
-                  <strong>{recipe.rcpNatrium}mg</strong>
-                </div>
-
-              </div>
-
+        <section className="recipe-section">
+          <div className="recipe-header">
+            <div>
+              <h3>✨ AI 레시피 추천 결과</h3>
+              <p>보유 재료를 활용해 만들 수 있는 추천 메뉴예요!</p>
             </div>
+          </div>
 
-          ))}
+          <div className="recipe-list">
+            {recipes.map((recipe) => (
+              <div className="recipe-card-v2" key={recipe.rcpNum}>
+                <div className="recipe-card-top">
+                  <div className="recipe-title-wrap">
+                    <div className="recipe-icon">🍮</div>
 
-        </div>
-      </section>
+                    <h4>{recipe.rcpName}</h4>
+
+                    <button
+                      className={
+                        favoriteRecipeNums.includes(recipe.rcpNum)
+                          ? "recipe-favorite-btn active"
+                          : "recipe-favorite-btn"
+                      }
+                      onClick={() => toggleRecipeFavorite(recipe)}
+                    >
+                      <FiHeart />
+                    </button>
+                  </div>
+
+                  <button
+                    className="recipe-detail-btn"
+                    onClick={() => openRecipeModal(recipe)}
+                  >
+                    레시피 보기 →
+                  </button>
+                </div>
+
+                <div className="recipe-middle">
+                  <img
+                    src={getImageUrl(recipe.rcpImage)}
+                    alt={recipe.rcpName}
+                  />
+
+                  <div className="recipe-middle-right">
+                    <div className="recipe-ai-label">
+                      🐱 냠냠이 AI 한마디!
+                    </div>
+                    <p className="recipe-desc">
+                      {recipe.aiReason || recipe.rcpWay}
+                    </p>
+
+                    <div className="recipe-tags">
+                      {recipe.hashtags?.map((tag) => (
+                        <span key={tag}>#{tag}</span>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+
+                <div className="recipe-nutrient-bar">
+                  <div className="nutrient-item">
+                    <span className="nutrient-icon">🔥</span>
+                    <strong>{recipe.rcpKcal} kcal</strong>
+                    <p>예상 칼로리</p>
+                  </div>
+
+                  <div className="nutrient-item">
+                    <span>🍞</span>
+                    <b>탄수화물</b>
+                    <strong>{recipe.rcpCarbs}g</strong>
+                  </div>
+
+                  <div className="nutrient-item">
+                    <span>🥩</span>
+                    <b>단백질</b>
+                    <strong>{recipe.rcpProtein}g</strong>
+                  </div>
+
+                  <div className="nutrient-item">
+                    <span>🥑</span>
+                    <b>지방</b>
+                    <strong>{recipe.rcpFat}g</strong>
+                  </div>
+
+                  <div className="nutrient-item">
+                    <span>🧂</span>
+                    <b>나트륨</b>
+                    <strong>{recipe.rcpNatrium}mg</strong>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
       )}
+ 
       {/* 모달 */}
       {selectedRecipe && (
       <div

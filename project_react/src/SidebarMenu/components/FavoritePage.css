@@ -17,19 +17,19 @@
 
 /* 상단 */
 .favorite-header {
-  text-align: center;
-  margin-bottom: 22px;
+  text-align: left;
+  margin-bottom: 40px;
 }
 
 .favorite-header h2 {
   margin: 0;
-  font-size: 26px;
+  font-size: 22px;
   font-weight: 800;
   line-height: 1.25;
 }
 
 .favorite-header p {
-  margin: 8px 0 0;
+  margin: 4px 0 0;
   font-size: 14px;
   font-weight: 500;
   color: #6f6262;
@@ -120,8 +120,8 @@
 
 .food-title-area h3 {
   margin: 0;
-  font-size: 17px;
-  font-weight: 800;
+  font-size: 16px;
+  font-weight: 700;
   line-height: 1.3;
   text-align: left;
   color: #2f2424;
@@ -469,8 +469,8 @@
 
 .recipe-fav-title-area h3 {
   margin: 0;
-  font-size: 17px;
-  font-weight: 800;
+  font-size: 16px;
+  font-weight: 700;
   line-height: 1.3;
   text-align: left;
   color: #2f2424;

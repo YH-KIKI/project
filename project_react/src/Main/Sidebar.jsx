@@ -32,9 +32,8 @@ const Sidebar = ({ userName }) => {
       ],
     },
     { name: '눈바디', icon: '📷', path: '/bodycheck' },
-    { name: '마이페이지', icon: '👤', path: '/mypage' },
     { name: '커뮤니티', icon: '💬', active: false, path: '/community' },//게시판 메뉴 추가했다리
-    { name: '식단즐찾(삭제예정)', icon: '👤', path: '/favorite' },
+    { name: '마이페이지', icon: '👤', path: '/mypage' },
   ];
 
   const handleParentClick = (menuName) => {

@@ -17,4 +17,10 @@ public interface FavoriteDao {
 
     void addFavorite(@Param("userNum") int userNum, @Param("mkNum") int mkNum);
 
+	void deleteFavorite(@Param("mfNum") int mfNum);
+
+	List<Map<String, Object>> getDetailsByMkNum(@Param("mkNum") int oldMkNum);
+
+	String findImageUrlByMkNum(@Param("mkNum") int oldMkNum);
+
 }

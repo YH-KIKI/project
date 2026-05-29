@@ -51,4 +51,28 @@ public class FavoriteController {
         favoriteService.addFavorite(userNum, mkNum);
         return ResponseEntity.ok("즐겨찾기 추가 성공!");
     }
+    
+    @PostMapping("/favorites/delete")
+    public ResponseEntity<?> deleteFavorite(@RequestBody Map<String, Object> params) {
+        int mfNum = Integer.parseInt(params.get("mfNum").toString());
+        favoriteService.deleteFavorite(mfNum);
+        return ResponseEntity.ok("즐겨찾기 삭제 성공!");
+    }
+    
+ // JSON 말고 그냥 주소 뒤에 붙여서 받아보자
+    @PostMapping("/copy")
+    public ResponseEntity<?> copyFavorite(@RequestParam("userNum") int userNum,
+                                          @RequestParam("oldMkNum") int oldMkNum,
+                                          @RequestParam("newMealType") String newMealType) {
+    	try {
+            favoriteService.copyFavoriteToMeal(userNum, oldMkNum, newMealType);
+            return ResponseEntity.ok("식단 복사 완료!");
+        } catch (RuntimeException e) {
+            // [중요] 여기 e.getMessage()가 "이미 오늘의 아침 식단이..." 입니다.
+            // 이걸 그대로 프론트로 보내야 합니다.
+            return ResponseEntity.status(400).body(e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body("서버 오류가 발생했습니다.");
+        }
+    }
 }
