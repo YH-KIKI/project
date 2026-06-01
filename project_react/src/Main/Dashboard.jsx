@@ -69,14 +69,14 @@ const Dashboard = () => {
           const meals = { 아침: null, 점심: null, 저녁: null };
           
           response.data.forEach(item => {
-            // 🌟 백엔드 콘솔에 찍히던 이미지 URL 캡처
+            // 백엔드 콘솔에 찍히던 이미지 URL 캡처
             const imgUrl = item.convertedImageUrl || item.mkImage || null;
 
             if (meals[item.mkMealType] === null) {
               meals[item.mkMealType] = { 
                 desc: item.foName, 
                 kcal: item.foKcal * (item.mdPortion || 1),
-                imageUrl: imgUrl // 🌟 이미지 주소 저장
+                imageUrl: imgUrl // 이미지 주소 저장
               };
             } else {
               meals[item.mkMealType].desc += `, ${item.foName}`;
@@ -155,12 +155,12 @@ const Dashboard = () => {
                 <div className="meal-tags-container">
                   {mealData ? (
                     mealData.imageUrl ? (
-                      /* 🌟 1순위: 등록된 이미지가 있을 때 사진을 꽉 채워 렌더링 */
+                      /* 1순위: 등록된 이미지가 있을 때 사진을 꽉 채워 렌더링 */
                       <div className="meal-image-wrapper">
                         <img src={mealData.imageUrl} alt={`${mealType} 식단`} className="meal-uploaded-image" />
                       </div>
                     ) : (
-                      /* 🌟 2순위: 이미지가 없고 텍스트 기록만 있을 때 기존 태그 렌더링 */
+                      /* 2순위: 이미지가 없고 텍스트 기록만 있을 때 기존 태그 렌더링 */
                       foodTags.map((food, idx) => (
                         <span key={idx} className="food-tag">
                           {food}
@@ -168,7 +168,7 @@ const Dashboard = () => {
                       ))
                     )
                   ) : (
-                    /* 🌟 3순위: 아예 아무런 기록도 없을 때 '기록 없음' 렌더링 */
+                    /* 3순위: 아예 아무런 기록도 없을 때 '기록 없음' 렌더링 */
                     <div className="empty-meal-container">
                       <span className="empty-meal-icon">🍽️</span>
                       <span className="empty-meal-text">기록 없음</span>

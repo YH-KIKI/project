@@ -100,9 +100,11 @@ const LoginPage = () => {
       if (rememberMe) {
         // 받은 토큰을 브라우저에 저장
         localStorage.setItem('login_token', token);
+        localStorage.setItem('refresh_token', refreshToken);
       } else {
         // 브라우저 끄면 바로 삭제!
         sessionStorage.setItem('login_token', token);
+        sessionStorage.setItem('refresh_token', refreshToken);
       }
 
       // [준성] refreshToken 추가

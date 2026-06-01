@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import './Sidebar.css';
-// 🌟 1. 중복된 import를 하나로 깔끔하게 합쳤습니다.
 import { useNavigate, Link, useLocation } from 'react-router-dom';
 
 import catChefSidebarImg from '../images/냠냠이1.png';
@@ -8,7 +7,7 @@ import robotWinkSidebarImg from '../images/로봇1.png';
 
 const Sidebar = ({ userName }) => {
   const location = useLocation();
-  // 🌟 2. 페이지 이동을 위한 navigate 함수를 다시 살려냈습니다!
+  //  2. 페이지 이동을 위한 navigate 함수를 다시 살려냈습니다!
   const navigate = useNavigate(); 
 
   const [openMenu, setOpenMenu] = useState(null);
@@ -71,7 +70,7 @@ const Sidebar = ({ userName }) => {
                     if (hasChildren) {
                       handleParentClick(menu.name);
                     } else {
-                      // 🌟 이제 여기서 에러 없이 정상적으로 페이지가 이동됩니다.
+                      //  이제 여기서 에러 없이 정상적으로 페이지가 이동됩니다.
                       navigate(menu.path); 
                     }
                   }}
@@ -108,7 +107,7 @@ const Sidebar = ({ userName }) => {
       </nav>
 
      <div className="sidebar-footer">
-        {/* 🌟 1. 로봇과 말풍선을 함께 감싸는 새로운 묶음 박스를 만듭니다 */}
+        {/* 1. 로봇과 말풍선을 함께 감싸는 새로운 묶음 박스를 만듭니다 */}
         <div className="sidebar-bot-group">
           
           {/* 말풍선 */}
@@ -116,7 +115,7 @@ const Sidebar = ({ userName }) => {
             오늘도<br />건강한 한 끼<br />함께해요! 💚
           </div>
           
-          {/* 🌟 2. 밖에서 방황하던 로봇을 이 그룹 안, 말풍선 바로 밑으로 데려옵니다 */}
+          {/* 2. 밖에서 방황하던 로봇을 이 그룹 안, 말풍선 바로 밑으로 데려옵니다 */}
           <div className="sidebar-robot-wink">
             <img src={robotWinkSidebarImg} alt="메뉴 하단 윙크 로봇" />
           </div>

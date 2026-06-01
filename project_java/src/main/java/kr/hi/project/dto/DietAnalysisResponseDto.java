@@ -13,7 +13,7 @@ public class DietAnalysisResponseDto {
     private String grade;
     private String gradeMessage;
     
-    // 2. 🌟 칼로리 데이터 (현재 섭취량 / 동적 목표량)
+    // 2. 칼로리 데이터 (현재 섭취량 / 동적 목표량)
     private int currentKcal;
     private int targetKcal; 
     
@@ -26,7 +26,7 @@ public class DietAnalysisResponseDto {
     private int currentFat;
     private int currentSodium;
     
-    // 5. 🌟 유저 맞춤형 목표 탄단지 + 나트륨 데이터 (새로 추가된 부분!)
+    // 5. 유저 맞춤형 목표 탄단지 + 나트륨 데이터 
     private int targetCarbs;
     private int targetProtein;
     private int targetFat;

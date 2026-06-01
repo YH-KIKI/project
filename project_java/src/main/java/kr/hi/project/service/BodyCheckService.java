@@ -37,7 +37,7 @@ public class BodyCheckService {
     @Value("${AI_SERVER_URL:http://localhost:8000}")
     private String pythonBaseUrl;
 
-    // 🌟 리턴 타입을 String -> Map<String, Object>로 변경! (리액트가 읽기 편하게)
+    // 리턴 타입을 String -> Map<String, Object>로 변경
     public Map<String, Object> analyzeAndSave(MultipartFile file, String analyzeType, Long userNum) throws Exception {
         File uploadDir = new File(UPLOAD_DIR);
         if (!uploadDir.exists()) uploadDir.mkdirs();
@@ -54,7 +54,7 @@ public class BodyCheckService {
         
         // 원본이 아닌 AI 분석(pose, outline)일 때 파이썬 호출
         if (!"원본".equals(analyzeType)) {
-            // 🌟 파이썬의 나누어진 주소로 정확히 타겟팅!
+            // 파이썬의 나누어진 주소로 정확히 타겟팅!
             String targetUrl = pythonBaseUrl + "/api/ai/bodycam/" + analyzeType; 
             
             HttpHeaders headers = new HttpHeaders();
@@ -88,7 +88,7 @@ public class BodyCheckService {
         dto.setUserNum(userNum.intValue());
         bodyCamDao.insertBodyCamRecord(dto);
 
-        return resultMap; // 🌟 리액트로 Map(JSON 객체) 반환!
+        return resultMap; // 리액트로 Map(JSON 객체) 반환!
     }
 
     public List<BodyCamDTO> getBodyCheckList(Long userNum) {

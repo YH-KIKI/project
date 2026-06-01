@@ -5,12 +5,12 @@ import { uploadBodyCheckImage } from '../api/bodyCheckApi';
 import Cropper from 'react-easy-crop';
 
 // ==========================================
-// 🌟 스프링부트 서버 주소 설정 (이미지 렌더링에 필수)
+// 스프링부트 서버 주소 설정 (이미지 렌더링에 필수)
 // ==========================================
 const SERVER_URL = process.env.REACT_APP_API_URL;
 
 // ==========================================
-// ✂️ [도우미 함수] 선택한 영역만큼 사진을 잘라주는 함수
+// [도우미 함수] 선택한 영역만큼 사진을 잘라주는 함수
 // ==========================================
 const createImage = (url) =>
   new Promise((resolve, reject) => {
@@ -41,7 +41,7 @@ const BodyCheck = () => {
   const userString = localStorage.getItem('user');
   if (userString) {
     try {
-      userNum = JSON.parse(userString).user_num; // 'user' 객체에서 3번을 확실하게 꺼냅니다!
+      userNum = JSON.parse(userString).user_num; // 'user' 객체에서 3번을 확실하게 꺼냄
     } catch (e) {
       console.error("유저 정보 파싱 에러:", e);
     }
@@ -484,7 +484,7 @@ const BodyCheck = () => {
                   </button>
                 </div>
 
-                {/* 🌟 AI 분석 리포트 UI (오른쪽 분석 점수가 있으면 무조건 출력!) */}
+                {/* AI 분석 리포트 UI (오른쪽 분석 점수가 있으면 무조건 출력!) */}
                 {rightScoreData && (
                   <div className="bc-report-box">
                     
